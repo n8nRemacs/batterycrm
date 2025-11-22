@@ -1,0 +1,11 @@
+{
+  "table_name": "deal_types",
+  "columns": [
+    "id",
+    "name",
+    "is_repair",
+    "is_active",
+    "created_at"
+  ],
+  "row_count": 1
+}

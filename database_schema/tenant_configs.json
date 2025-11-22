@@ -1,0 +1,11 @@
+{
+  "table_name": "tenant_configs",
+  "columns": [
+    "id",
+    "tenant_id",
+    "key",
+    "value",
+    "created_at"
+  ],
+  "row_count": 1
+}

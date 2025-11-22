@@ -1,0 +1,16 @@
+{
+  "table_name": "operator_appeal_status",
+  "columns": [
+    "id",
+    "tenant_id",
+    "appeal_id",
+    "operator_id",
+    "status",
+    "telegram_message_id",
+    "taken_at",
+    "completed_at",
+    "created_at",
+    "updated_at"
+  ],
+  "row_count": 1
+}

@@ -1,0 +1,12 @@
+{
+  "table_name": "repair_types",
+  "columns": [
+    "id",
+    "name",
+    "description",
+    "is_active",
+    "created_at",
+    "tenant_id"
+  ],
+  "row_count": 1
+}

@@ -1,0 +1,15 @@
+{
+  "table_name": "operator_actions",
+  "columns": [
+    "id",
+    "operator_telegram_id",
+    "operator_id",
+    "action_type",
+    "details",
+    "created_at",
+    "context_appeal_id",
+    "tenant_id",
+    "action_source"
+  ],
+  "row_count": 1
+}
