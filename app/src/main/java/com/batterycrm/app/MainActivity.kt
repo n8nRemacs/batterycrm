@@ -8,7 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -27,8 +27,11 @@ import com.batterycrm.app.adapters.AppealsAdapter
 import com.batterycrm.app.api.ApiResponse
 import com.batterycrm.app.api.RetrofitClient
 import com.batterycrm.app.api.UpdateSettingsRequest
+import com.batterycrm.app.callrecording.CallRecordingPreferences
+import com.batterycrm.app.callrecording.CallRecordingService
 import com.batterycrm.app.viewmodel.AppealsViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -41,12 +44,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var logoutButton: Button
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var appealsRecyclerView: RecyclerView
-    private lateinit var settingsContainer: LinearLayout
+    private lateinit var settingsContainer: ScrollView
     private lateinit var headerTitle: TextView
     private lateinit var aiModeRadioGroup: RadioGroup
     private lateinit var radioAutomatic: RadioButton
     private lateinit var radioSemiAutomatic: RadioButton
     private lateinit var saveSettingsButton: Button
+
+    // Call recording
+    private lateinit var switchCallRecording: SwitchMaterial
+    private lateinit var callRecordingStatusText: TextView
+    private lateinit var callRecordingDescription: TextView
+    private lateinit var callRecordingPreferences: CallRecordingPreferences
 
     companion object {
         const val PREF_AI_MODE = "ai_mode"
@@ -66,6 +75,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val callRecordingPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if (allGranted) {
+            enableCallRecording()
+        } else {
+            switchCallRecording.isChecked = false
+            Toast.makeText(this, "Для записи звонков необходимы разрешения", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -81,6 +102,12 @@ class MainActivity : AppCompatActivity() {
         radioSemiAutomatic = findViewById(R.id.radioSemiAutomatic)
         saveSettingsButton = findViewById(R.id.saveSettingsButton)
 
+        // Call recording UI
+        callRecordingPreferences = CallRecordingPreferences(this)
+        switchCallRecording = findViewById(R.id.switchCallRecording)
+        callRecordingStatusText = findViewById(R.id.callRecordingStatusText)
+        callRecordingDescription = findViewById(R.id.callRecordingDescription)
+
         appealsAdapter = AppealsAdapter { appeal ->
             openAppealDetail(appeal.id)
         }
@@ -94,6 +121,7 @@ class MainActivity : AppCompatActivity() {
 
         setupBottomNavigation()
         setupAiModeSettings()
+        setupCallRecordingSettings()
         setupObservers()
         requestNotificationPermissionIfNeeded()
         handleNotificationIntent(intent)
@@ -134,6 +162,7 @@ class MainActivity : AppCompatActivity() {
         headerTitle.text = "Настройки"
         appealsRecyclerView.visibility = View.GONE
         settingsContainer.visibility = View.VISIBLE
+        updateCallRecordingUI()
     }
 
     private fun setupAiModeSettings() {
@@ -334,5 +363,84 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToLogin() {
         startActivity(Intent(this, LoginActivity::class.java))
         finish()
+    }
+
+    // Call Recording Methods
+    private fun setupCallRecordingSettings() {
+        switchCallRecording.isChecked = callRecordingPreferences.isRecordingEnabled
+        updateCallRecordingUI()
+
+        switchCallRecording.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                requestCallRecordingPermissions()
+            } else {
+                disableCallRecording()
+            }
+        }
+    }
+
+    private fun updateCallRecordingUI() {
+        val isEnabled = callRecordingPreferences.isRecordingEnabled
+        switchCallRecording.isChecked = isEnabled
+
+        if (isEnabled) {
+            callRecordingStatusText.text = "Запись включена"
+            callRecordingDescription.text = "Звонки записываются и отправляются на сервер"
+            callRecordingStatusText.setTextColor(ContextCompat.getColor(this, R.color.green_status))
+        } else {
+            callRecordingStatusText.text = "Запись выключена"
+            callRecordingDescription.text = "Нажмите для включения записи"
+            callRecordingStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.black))
+        }
+    }
+
+    private fun requestCallRecordingPermissions() {
+        val permissions = mutableListOf(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_CALL_LOG
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.READ_PHONE_NUMBERS)
+        }
+
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (permissionsToRequest.isEmpty()) {
+            enableCallRecording()
+        } else {
+            callRecordingPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    private fun enableCallRecording() {
+        callRecordingPreferences.isRecordingEnabled = true
+        updateCallRecordingUI()
+
+        val intent = Intent(this, CallRecordingService::class.java).apply {
+            action = CallRecordingService.ACTION_START_SERVICE
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+
+        Toast.makeText(this, "Запись звонков включена", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun disableCallRecording() {
+        callRecordingPreferences.isRecordingEnabled = false
+        updateCallRecordingUI()
+
+        val intent = Intent(this, CallRecordingService::class.java).apply {
+            action = CallRecordingService.ACTION_STOP_SERVICE
+        }
+        startService(intent)
+
+        Toast.makeText(this, "Запись звонков выключена", Toast.LENGTH_SHORT).show()
     }
 }
