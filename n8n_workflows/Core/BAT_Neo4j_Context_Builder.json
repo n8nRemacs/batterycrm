@@ -1,7 +1,7 @@
 {
   "id": "gF8hYMVuCRqCkw83",
   "name": "BAT Neo4j Context Builder",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -118,8 +118,8 @@
       "id": "13d0cd60-ba3a-4a32-8a60-f7afc308b683",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -146,8 +146,8 @@
       "id": "d62e16d0-be99-4430-9ae3-a3714aee1ecb",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -174,8 +174,8 @@
       "id": "c6c6a0de-e2af-4a50-9f6d-5572f71fe263",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -426,6 +426,6 @@
       "name": "Core"
     }
   ],
-  "updatedAt": "2025-12-02T11:25:59.000Z",
+  "updatedAt": "2025-12-03T12:00:37.000Z",
   "createdAt": "2025-12-02T11:25:59.896Z"
 }

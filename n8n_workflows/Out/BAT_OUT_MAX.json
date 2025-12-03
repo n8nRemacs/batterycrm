@@ -5,67 +5,48 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "out-max",
-        "responseMode": "lastNode",
-        "options": {}
-      },
-      "id": "b5eccb66-bbfb-41fe-ba98-31f66854c9a9",
-      "name": "Webhook Trigger",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1.1,
-      "position": [
-        0,
-        0
-      ],
-      "webhookId": "out-max-webhook"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "={{ $env.MAX_API_URL }}/messages/send",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"chat_id\": \"{{ $json.out_message.external_chat_id }}\",\n  \"text\": \"{{ $json.out_message.message_text }}\"\n}",
         "options": {}
       },
-      "id": "5669ef3b-a305-42a8-861d-ffd98f959b7b",
+      "id": "fd0bd49d-305e-49b0-8a0b-01e03358a242",
       "name": "Send MAX Message",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        224,
-        0
+        -192,
+        -144
       ]
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json;\n\nif (response.error) {\n  console.error('MAX API Error:', response.error);\n}\n\nconst inMessage = $('Webhook Trigger').first().json;\n\nreturn {\n  ...inMessage,\n  max_response: response,\n  message_id: response.message_id || response.id || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
+        "jsCode": "const response = $input.first().json;\n\nif (response.error) {\n  console.error('MAX API Error:', response.error);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\nreturn {\n  ...inMessage,\n  max_response: response,\n  message_id: response.message_id || response.id || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
       },
-      "id": "791db9ed-4d9c-496f-9725-b577522fe925",
+      "id": "1953fc4e-2088-435e-bc47-b31b88ada171",
       "name": "Process MAX Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        0
+        32,
+        -144
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'max',\n  (SELECT id FROM channels WHERE code = 'max' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
+        "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'max',\n  (SELECT id FROM channels WHERE code = 'max' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
         "options": {}
       },
-      "id": "ad630384-4905-4d9c-afb3-d1e3fb5fc666",
+      "id": "42cb764c-8b83-4cdc-81b8-c0a88c500bed",
       "name": "Save Message History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        672,
-        0
+        256,
+        -144
       ],
       "credentials": {
         "postgres": {
@@ -75,34 +56,19 @@
       }
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { \\\"success\\\": true, \\\"message_id\\\": $json.message_id, \\\"channel\\\": \\\"max\\\" } }}",
-        "options": {}
-      },
-      "id": "1af49beb-3953-426e-a9ed-f9dff0ecf46d",
-      "name": "Respond Success",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        880,
-        0
-      ]
-    },
-    {
       "parameters": {},
-      "id": "ca913bd8-a360-4b23-ac39-72edc8d8f9e0",
+      "id": "66ba802e-bca5-479e-9fd4-f93439da1928",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        160
+        -416,
+        -144
       ]
     }
   ],
   "connections": {
-    "Webhook Trigger": {
+    "Execute Workflow Trigger": {
       "main": [
         [
           {
@@ -134,28 +100,6 @@
           }
         ]
       ]
-    },
-    "Save Message History": {
-      "main": [
-        [
-          {
-            "node": "Respond Success",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Workflow Trigger": {
-      "main": [
-        [
-          {
-            "node": "Send MAX Message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -175,6 +119,6 @@
       "name": "Out"
     }
   ],
-  "updatedAt": "2025-11-23T04:04:10.000Z",
+  "updatedAt": "2025-12-03T13:20:59.000Z",
   "createdAt": "2025-10-14T07:11:40.500Z"
 }

@@ -1,365 +1,305 @@
 {
   "id": "gtm1CfLF557Ta40P",
   "name": "BAT Neo4j CRUD",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "neo4j/crud",
         "responseMode": "responseNode",
-        "options": {
-          "allowedOrigins": "*"
-        }
+        "options": {}
       },
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1024,
+        -736,
         -464
       ],
       "webhookId": "neo4j-crud",
-      "id": "e4e41d5b-3379-49cf-b955-37b455851665"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Whitelist допустимых типов узлов и рёбер (защита от Cypher-инъекции)\nconst ALLOWED_NODE_TYPES = [\n  'Client', 'Device', 'Problem', 'ProblemType',\n  'Touchpoint', 'Channel', 'Vertical', 'Fingerprint'\n];\n\nconst ALLOWED_EDGE_TYPES = [\n  'OWNS', 'HAS_PROBLEM', 'OF_TYPE', 'SOCIAL', 'REFERRED',\n  'HAS_CHANNEL', 'IDENTIFIED_BY', 'CUSTOMER_OF', 'FROM', 'TO',\n  'ABOUT_DEVICE', 'ABOUT_PROBLEM', 'REFERS_TO', 'VIA_CHANNEL', 'IN_VERTICAL'\n];\n\nconst ALLOWED_OPERATIONS = [\n  'create', 'read', 'update', 'delete', 'create_edge', 'delete_edge'\n];\n\nconst body = $json.body || {};\nconst operation = body.operation || 'read';\nconst nodeType = body.nodeType || 'Client';\nconst nodeId = body.nodeId || null;\nconst properties = body.properties || {};\nconst edgeType = body.edgeType || null;\nconst fromId = body.fromId || null;\nconst toId = body.toId || null;\nconst edgeProperties = body.edgeProperties || {};\n\n// Валидация операции\nif (!ALLOWED_OPERATIONS.includes(operation)) {\n  throw new Error(`Invalid operation: ${operation}. Allowed: ${ALLOWED_OPERATIONS.join(', ')}`);\n}\n\n// Валидация nodeType для операций с узлами\nif (['create', 'read', 'update', 'delete'].includes(operation)) {\n  if (!ALLOWED_NODE_TYPES.includes(nodeType)) {\n    throw new Error(`Invalid nodeType: ${nodeType}. Allowed: ${ALLOWED_NODE_TYPES.join(', ')}`);\n  }\n}\n\n// Валидация edgeType для операций с рёбрами\nif (['create_edge', 'delete_edge'].includes(operation)) {\n  if (!edgeType || !ALLOWED_EDGE_TYPES.includes(edgeType)) {\n    throw new Error(`Invalid edgeType: ${edgeType}. Allowed: ${ALLOWED_EDGE_TYPES.join(', ')}`);\n  }\n  if (!fromId || !toId) {\n    throw new Error('fromId and toId are required for edge operations');\n  }\n}\n\n// Валидация nodeId для операций update/delete\nif (['update', 'delete'].includes(operation) && !nodeId) {\n  throw new Error('nodeId is required for update/delete operations');\n}\n\n// Санитизация ключей properties (только буквы, цифры, подчёркивания)\nconst sanitizedProperties = {};\nfor (const [key, value] of Object.entries(properties)) {\n  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {\n    throw new Error(`Invalid property key: ${key}. Only alphanumeric and underscore allowed.`);\n  }\n  sanitizedProperties[key] = value;\n}\n\nconst sanitizedEdgeProperties = {};\nfor (const [key, value] of Object.entries(edgeProperties)) {\n  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {\n    throw new Error(`Invalid edge property key: ${key}. Only alphanumeric and underscore allowed.`);\n  }\n  sanitizedEdgeProperties[key] = value;\n}\n\nreturn {\n  operation,\n  nodeType,\n  nodeId,\n  properties: sanitizedProperties,\n  edgeType,\n  fromId,\n  toId,\n  edgeProperties: sanitizedEdgeProperties,\n  _validation: 'passed'\n};"
-      },
-      "name": "Parse & Validate Request",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -784,
-        -464
-      ],
-      "id": "bd3c930e-c1bf-4f31-821a-c13a3f918f79"
+      "id": "89468832-c9b2-4248-be9b-9b0016ea4de8"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.operation }}",
-              "value2": "create"
+              "leftValue": "={{ $json.body.operation }}",
+              "rightValue": "create",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "83c5c318-8dc4-45fe-b3d1-d8ebf87dd3c7"
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
       "name": "Is Create?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
-        -544,
+        -512,
         -464
       ],
-      "id": "235147f2-5eb6-4a73-8339-ce2d0804bd38"
+      "id": "96326909-d847-44ea-a09b-b63e2ee46861"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.operation }}",
-              "value2": "read"
+              "leftValue": "={{ $json.body.operation }}",
+              "rightValue": "read",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "870af248-5fbc-4a82-aaad-dab64a36ae4c"
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
       "name": "Is Read?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
-        -544,
+        -512,
         -256
       ],
-      "id": "2b84126b-111f-41f3-b8f1-d229e87349e3"
+      "id": "ef4a216a-7159-449c-b930-bd60bca6dfce"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.operation }}",
-              "value2": "update"
+              "leftValue": "={{ $json.body.operation }}",
+              "rightValue": "update",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "962f9f57-9309-4347-a180-74e27d2f5207"
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
       "name": "Is Update?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
-        -544,
+        -512,
         -64
       ],
-      "id": "59dfe4d2-37f1-4f79-aa6f-03106bffb963"
+      "id": "bf9653eb-64db-4ed0-932a-e5b1956bf306"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.operation }}",
-              "value2": "delete"
+              "leftValue": "={{ $json.body.operation }}",
+              "rightValue": "delete",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "bdd6f39e-08b2-4dd2-855a-a8abb66902d1"
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
       "name": "Is Delete?",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
-        -544,
+        -512,
         144
       ],
-      "id": "494979b2-5d6f-42fe-81ad-8d5842cf0692"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.operation }}",
-              "value2": "create_edge"
-            }
-          ]
-        }
-      },
-      "name": "Is Create Edge?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -544,
-        336
-      ],
-      "id": "f255681a-870d-4e41-9faf-4c01638573eb"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.operation }}",
-              "value2": "delete_edge"
-            }
-          ]
-        }
-      },
-      "name": "Is Delete Edge?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -544,
-        528
-      ],
-      "id": "22e84b66-8d89-4637-ab61-321110d47113"
+      "id": "1e1b4b5b-ef70-468c-bd5b-7bf737b90565"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
+        "url": "http://45.144.177.128:7474/db/neo4j/tx/commit",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBasicAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ \n  const nodeType = $json.nodeType;\n  const props = $json.properties;\n  const propsStr = Object.entries(props).map(([k,v]) => `${k}: $${k}`).join(', ');\n  \n  JSON.stringify({\n    statements: [{\n      statement: `CREATE (n:${nodeType} {id: $id${propsStr ? ', ' + propsStr : ''}}) RETURN n`,\n      parameters: { id: $json.nodeId || crypto.randomUUID(), ...props }\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
+        "jsonBody": "={{ JSON.stringify({ statements: [{ statement: \"MERGE (n:\" + $('Webhook').item.json.body.nodeType + \" {id: $id}) SET n += $props RETURN n\", parameters: { id: $('Webhook').item.json.body.nodeId, props: $('Webhook').item.json.body.properties || {} } }] }) }}",
+        "options": {}
       },
-      "name": "Neo4j Create Node",
+      "name": "Neo4j Create",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
+      "typeVersion": 4.2,
       "position": [
-        -224,
-        -464
+        -240,
+        -560
       ],
-      "id": "91372668-2f6c-4791-a1e8-358d56b9c68f",
+      "id": "b48790a6-4ba2-49d1-b992-c9a08156f5e2",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
+        "url": "http://45.144.177.128:7474/db/neo4j/tx/commit",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBasicAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ \n  const nodeType = $json.nodeType;\n  const nodeId = $json.nodeId;\n  \n  JSON.stringify({\n    statements: [{\n      statement: nodeId \n        ? `MATCH (n:${nodeType} {id: $id}) RETURN n`\n        : `MATCH (n:${nodeType}) RETURN n LIMIT 100`,\n      parameters: nodeId ? { id: nodeId } : {}\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
+        "jsonBody": "={{ (function() { var nodeId = $('Webhook').item.json.body.nodeId; var nodeType = $('Webhook').item.json.body.nodeType; if (nodeId) { return JSON.stringify({ statements: [{ statement: 'MATCH (n:' + nodeType + ' {id: $id}) RETURN n', parameters: { id: nodeId } }] }); } else { return JSON.stringify({ statements: [{ statement: 'MATCH (n:' + nodeType + ') RETURN n LIMIT 100', parameters: {} }] }); } })() }}",
+        "options": {}
       },
-      "name": "Neo4j Read Node",
+      "name": "Neo4j Read",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
+      "typeVersion": 4.2,
       "position": [
-        -224,
-        -256
+        -240,
+        -368
       ],
-      "id": "7dff3625-95f7-412a-b285-ac1b7b928dce",
+      "id": "e23d472b-4ce0-4a35-bb4c-191912735de0",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
+        "url": "http://45.144.177.128:7474/db/neo4j/tx/commit",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBasicAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ \n  const nodeType = $json.nodeType;\n  const nodeId = $json.nodeId;\n  const props = $json.properties;\n  const setStr = Object.entries(props).map(([k,v]) => `n.${k} = $${k}`).join(', ');\n  \n  JSON.stringify({\n    statements: [{\n      statement: `MATCH (n:${nodeType} {id: $id}) SET ${setStr} RETURN n`,\n      parameters: { id: nodeId, ...props }\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
+        "jsonBody": "={{ JSON.stringify({ statements: [{ statement: \"MATCH (n:\" + $('Webhook').item.json.body.nodeType + \" {id: $id}) SET n += $props RETURN n\", parameters: { id: $('Webhook').item.json.body.nodeId, props: $('Webhook').item.json.body.properties || {} } }] }) }}",
+        "options": {}
       },
-      "name": "Neo4j Update Node",
+      "name": "Neo4j Update",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
+      "typeVersion": 4.2,
       "position": [
-        -224,
-        -64
+        -240,
+        -160
       ],
-      "id": "b332c7d5-4d63-43d6-a35d-888f76bea243",
+      "id": "a3f59877-5e59-424b-9761-999a57aaad06",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
+        "url": "http://45.144.177.128:7474/db/neo4j/tx/commit",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpBasicAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ \n  const nodeType = $json.nodeType;\n  const nodeId = $json.nodeId;\n  \n  JSON.stringify({\n    statements: [{\n      statement: `MATCH (n:${nodeType} {id: $id}) DETACH DELETE n RETURN count(n) as deleted`,\n      parameters: { id: nodeId }\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
+        "jsonBody": "={{ JSON.stringify({ statements: [{ statement: \"MATCH (n:\" + $('Webhook').item.json.body.nodeType + \" {id: $id}) DETACH DELETE n RETURN count(*) as deleted\", parameters: { id: $('Webhook').item.json.body.nodeId } }] }) }}",
+        "options": {}
       },
-      "name": "Neo4j Delete Node",
+      "name": "Neo4j Delete",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
+      "typeVersion": 4.2,
       "position": [
-        -224,
-        144
+        -240,
+        48
       ],
-      "id": "23b04d61-187a-4da9-942e-76e362ad3ec8",
+      "id": "4cb8d906-777b-454a-8143-39e316691b07",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBasicAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ \n  const edgeType = $json.edgeType;\n  const fromId = $json.fromId;\n  const toId = $json.toId;\n  const props = $json.edgeProperties;\n  const propsStr = Object.keys(props).length > 0 \n    ? '{' + Object.entries(props).map(([k,v]) => `${k}: $${k}`).join(', ') + '}'\n    : '';\n  \n  JSON.stringify({\n    statements: [{\n      statement: `MATCH (a {id: $fromId}), (b {id: $toId}) CREATE (a)-[r:${edgeType} ${propsStr}]->(b) RETURN r`,\n      parameters: { fromId, toId, ...props }\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
-      },
-      "name": "Neo4j Create Edge",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        -224,
-        336
-      ],
-      "id": "f5801bbb-ff9c-4149-ae0d-9628c5dcf4db",
-      "credentials": {
-        "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://45.144.177.128:7474/db/neo4j/tx/commit",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBasicAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ \n  const edgeType = $json.edgeType;\n  const fromId = $json.fromId;\n  const toId = $json.toId;\n  \n  JSON.stringify({\n    statements: [{\n      statement: `MATCH (a {id: $fromId})-[r:${edgeType}]->(b {id: $toId}) DELETE r RETURN count(r) as deleted`,\n      parameters: { fromId, toId }\n    }]\n  })\n}}",
-        "options": {
-          "allowUnauthorizedCerts": true
-        }
-      },
-      "name": "Neo4j Delete Edge",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        -224,
-        528
-      ],
-      "id": "36402d81-88e2-4a9f-b76d-37eea1fb51f7",
-      "credentials": {
-        "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const result = $json;\n\n// Проверка на ошибки Neo4j\nif (result.errors && result.errors.length > 0) {\n  const errorMessages = result.errors.map(e => e.message).join('; ');\n  return {\n    success: false,\n    error: errorMessages,\n    data: []\n  };\n}\n\nconst data = result.results?.[0]?.data || [];\nconst nodes = data.map(d => d.row?.[0] || d);\n\nreturn {\n  success: true,\n  count: nodes.length,\n  data: nodes\n};"
+        "jsCode": "const result = $input.first().json;\n\nif (result.errors && result.errors.length > 0) {\n  return {\n    success: false,\n    error: result.errors.map(e => e.message).join('; '),\n    data: []\n  };\n}\n\nconst data = result.results && result.results[0] && result.results[0].data ? result.results[0].data : [];\nconst nodes = data.map(d => d.row ? d.row[0] : d);\n\nreturn {\n  success: true,\n  count: nodes.length,\n  data: nodes\n};"
       },
       "name": "Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        -64
+        48,
+        -256
       ],
-      "id": "36da42c4-ae29-4919-a8fb-cd813014e31c"
+      "id": "b9681ab1-098e-4049-b6c7-25dbe04db713"
     },
     {
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ $json }}",
-        "options": {
-          "responseCode": "={{ $json.success ? 200 : 400 }}",
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Access-Control-Allow-Origin",
-                "value": "*"
-              }
-            ]
-          }
-        }
+        "options": {}
       },
       "name": "Respond",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
-        288,
-        -64
+        272,
+        -256
       ],
-      "id": "5e701a2d-c8ab-4d06-87d3-38dec437babc"
+      "id": "d01f535d-a977-4e29-ad46-d347b3e2b5ec"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: \"Unknown operation. Use: create, read, update, delete\" } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        352
+      ],
+      "id": "52a446ec-2252-4843-a522-052d4e4cb05f"
     }
   ],
   "connections": {
@@ -367,43 +307,7 @@
       "main": [
         [
           {
-            "node": "Parse & Validate Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse & Validate Request": {
-      "main": [
-        [
-          {
             "node": "Is Create?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Is Read?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Is Update?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Is Delete?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Is Create Edge?",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Is Delete Edge?",
             "type": "main",
             "index": 0
           }
@@ -414,7 +318,14 @@
       "main": [
         [
           {
-            "node": "Neo4j Create Node",
+            "node": "Neo4j Create",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Read?",
             "type": "main",
             "index": 0
           }
@@ -425,7 +336,14 @@
       "main": [
         [
           {
-            "node": "Neo4j Read Node",
+            "node": "Neo4j Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Update?",
             "type": "main",
             "index": 0
           }
@@ -436,7 +354,14 @@
       "main": [
         [
           {
-            "node": "Neo4j Update Node",
+            "node": "Neo4j Update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Delete?",
             "type": "main",
             "index": 0
           }
@@ -447,36 +372,21 @@
       "main": [
         [
           {
-            "node": "Neo4j Delete Node",
+            "node": "Neo4j Delete",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Is Create Edge?": {
-      "main": [
+        ],
         [
           {
-            "node": "Neo4j Create Edge",
+            "node": "Respond Error",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Is Delete Edge?": {
-      "main": [
-        [
-          {
-            "node": "Neo4j Delete Edge",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Neo4j Create Node": {
+    "Neo4j Create": {
       "main": [
         [
           {
@@ -487,7 +397,7 @@
         ]
       ]
     },
-    "Neo4j Read Node": {
+    "Neo4j Read": {
       "main": [
         [
           {
@@ -498,7 +408,7 @@
         ]
       ]
     },
-    "Neo4j Update Node": {
+    "Neo4j Update": {
       "main": [
         [
           {
@@ -509,29 +419,7 @@
         ]
       ]
     },
-    "Neo4j Delete Node": {
-      "main": [
-        [
-          {
-            "node": "Format Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Neo4j Create Edge": {
-      "main": [
-        [
-          {
-            "node": "Format Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Neo4j Delete Edge": {
+    "Neo4j Delete": {
       "main": [
         [
           {
@@ -571,6 +459,6 @@
       "name": "Core"
     }
   ],
-  "updatedAt": "2025-12-03T10:31:05.000Z",
+  "updatedAt": "2025-12-03T12:57:37.000Z",
   "createdAt": "2025-12-02T11:26:35.948Z"
 }

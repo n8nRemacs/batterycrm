@@ -21,24 +21,35 @@ def main():
     workflows = data.get('data', [])
     print(f"Total workflows: {len(workflows)}")
 
-    battcrm_workflows = []
+    # Сохраняем workflows с тегом BattCRM (в любой позиции)
+    all_workflows = []
     for w in workflows:
         tags = [t['name'] for t in w.get('tags', [])]
-        if 'BattCRM' in tags:
-            other_tags = [t for t in tags if t != 'BattCRM']
-            section = other_tags[0] if other_tags else 'Unknown'
-            battcrm_workflows.append({
-                'id': w['id'],
-                'name': w['name'],
-                'section': section,
-                'active': w.get('active', False),
-                'data': w
-            })
+        # Проверяем наличие BattCRM в любой позиции
+        if 'BattCRM' not in tags:
+            continue
+        # Пропускаем архивные workflows
+        if w.get('isArchived', False):
+            continue
+        # Определяем секцию по тегам (приоритет: API, Core, In, Out, Tool, TaskWork)
+        section = 'Other'
+        for tag in tags:
+            if tag in TAG_TO_FOLDER:
+                section = tag
+                break
+        all_workflows.append({
+            'id': w['id'],
+            'name': w['name'],
+            'section': section,
+            'active': w.get('active', False),
+            'tags': tags,
+            'data': w
+        })
 
-    print(f"BattCRM workflows: {len(battcrm_workflows)}")
+    print(f"BattCRM workflows to save: {len(all_workflows)}")
 
     by_section = {}
-    for w in battcrm_workflows:
+    for w in all_workflows:
         section = w['section']
         if section not in by_section:
             by_section[section] = []
@@ -53,7 +64,7 @@ def main():
             print(f"  {status} {w['name']}")
 
     print("\n=== Saving files ===")
-    for w in battcrm_workflows:
+    for w in all_workflows:
         section = w['section']
         folder = TAG_TO_FOLDER.get(section, section)
         folder_path = os.path.join(OUTPUT_DIR, folder)
@@ -80,7 +91,7 @@ def main():
 
         print(f"  {folder}/{filename}")
 
-    print(f"\nDone! Saved {len(battcrm_workflows)} workflows")
+    print(f"\nDone! Saved {len(all_workflows)} workflows")
 
 if __name__ == '__main__':
     main()

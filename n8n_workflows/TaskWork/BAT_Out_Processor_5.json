@@ -1,5 +1,7 @@
 {
-  "name": "BAT Out Processor",
+  "id": "tO857oIFAEa45mBa",
+  "name": "BAT Out Processor 5",
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -12,24 +14,29 @@
           ]
         }
       },
-      "id": "schedule-trigger",
+      "id": "9bf3d1b2-abdd-4a92-9033-2420f334f69d",
       "name": "Every 3 Seconds",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [0, 0]
+      "position": [
+        -1312,
+        192
+      ]
     },
     {
       "parameters": {
         "operation": "pop",
         "list": "queue:outgoing",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message",
+      "id": "eb7290a6-7c4c-4791-af05-cdc84ba637ac",
       "name": "Pop Outgoing Message",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [220, 0],
+      "position": [
+        -1088,
+        192
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -43,7 +50,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "loose",
+            "typeValidation": "strict",
             "version": 2
           },
           "conditions": [
@@ -53,7 +60,8 @@
               "rightValue": "",
               "operator": {
                 "type": "string",
-                "operation": "notEmpty"
+                "operation": "notEmpty",
+                "singleValue": true
               }
             }
           ],
@@ -61,21 +69,27 @@
         },
         "options": {}
       },
-      "id": "has-message",
+      "id": "1ab49ba2-0bd0-47c9-9991-f997319452f6",
       "name": "Has Message?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [440, 0]
+      "position": [
+        -864,
+        192
+      ]
     },
     {
       "parameters": {
         "jsCode": "const msgStr = $json.value;\nlet msg;\n\ntry {\n  msg = JSON.parse(msgStr);\n} catch (e) {\n  return { error: 'Failed to parse message', raw: msgStr };\n}\n\n// Ожидаемая структура:\n// {\n//   channel: 'avito' | 'whatsapp' | 'vk' | 'max' | 'telegram',\n//   external_chat_id: '...',\n//   message_text: '...',\n//   appeal_id: '...',\n//   tenant_id: '...',\n//   ... другие поля\n// }\n\nreturn {\n  channel: msg.channel,\n  out_message: msg\n};"
       },
-      "id": "parse-message",
+      "id": "8ce7d8ed-00db-421e-b66c-36232808b7da",
       "name": "Parse Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, -100]
+      "position": [
+        -656,
+        96
+      ]
     },
     {
       "parameters": {
@@ -83,17 +97,19 @@
           "string": [
             {
               "value1": "={{ $json.channel }}",
-              "operation": "equals",
               "value2": "avito"
             }
           ]
         }
       },
-      "id": "is-avito",
+      "id": "cfb0ce66-4b31-4bb7-8e74-55fb05ff9d3e",
       "name": "Avito?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [880, -100]
+      "position": [
+        -432,
+        96
+      ]
     },
     {
       "parameters": {
@@ -101,17 +117,19 @@
           "string": [
             {
               "value1": "={{ $json.channel }}",
-              "operation": "equals",
               "value2": "whatsapp"
             }
           ]
         }
       },
-      "id": "is-whatsapp",
+      "id": "0ff62b71-cf50-456d-8469-2a7897d43180",
       "name": "WhatsApp?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [1100, 0]
+      "position": [
+        -208,
+        192
+      ]
     },
     {
       "parameters": {
@@ -119,17 +137,19 @@
           "string": [
             {
               "value1": "={{ $json.channel }}",
-              "operation": "equals",
               "value2": "vk"
             }
           ]
         }
       },
-      "id": "is-vk",
+      "id": "2a8d9720-cb92-4799-b5d2-095316cc59ec",
       "name": "VK?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [1320, 100]
+      "position": [
+        16,
+        288
+      ]
     },
     {
       "parameters": {
@@ -137,17 +157,19 @@
           "string": [
             {
               "value1": "={{ $json.channel }}",
-              "operation": "equals",
               "value2": "max"
             }
           ]
         }
       },
-      "id": "is-max",
+      "id": "1ca2a9b7-c7c8-4fd5-8d6d-3d6ac1a6358e",
       "name": "MAX?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [1540, 200]
+      "position": [
+        240,
+        384
+      ]
     },
     {
       "parameters": {
@@ -155,82 +177,102 @@
           "string": [
             {
               "value1": "={{ $json.channel }}",
-              "operation": "equals",
               "value2": "telegram"
             }
           ]
         }
       },
-      "id": "is-telegram",
+      "id": "e7427de8-d20f-450c-b566-6cd612718bc1",
       "name": "Telegram?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [1760, 300]
+      "position": [
+        464,
+        496
+      ]
     },
     {
       "parameters": {
         "workflowId": "ktU66Uf8f654kHvk",
         "options": {}
       },
-      "id": "call-out-avito",
+      "id": "065a00fd-ecdf-415c-9503-d429ecbb6f36",
       "name": "Call OUT Avito",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1100, -200]
+      "position": [
+        -208,
+        -16
+      ]
     },
     {
       "parameters": {
         "workflowId": "YOs2tLdOlJAqY17o",
         "options": {}
       },
-      "id": "call-out-whatsapp",
+      "id": "a89b2c78-f534-4ed9-9e70-ce57a995c5f6",
       "name": "Call OUT WhatsApp",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1320, -100]
+      "position": [
+        16,
+        96
+      ]
     },
     {
       "parameters": {
         "workflowId": "3qluqpU6q269XuVK",
         "options": {}
       },
-      "id": "call-out-vk",
+      "id": "19d0a1e8-2af4-4787-b72d-894776210b52",
       "name": "Call OUT VK",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1540, 0]
+      "position": [
+        240,
+        192
+      ]
     },
     {
       "parameters": {
         "workflowId": "RBGRJXr4o68VBJ6X",
         "options": {}
       },
-      "id": "call-out-max",
+      "id": "f3e1aa7a-c809-4dda-912c-98ee7a5713ee",
       "name": "Call OUT MAX",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1760, 100]
+      "position": [
+        464,
+        288
+      ]
     },
     {
       "parameters": {
         "workflowId": "OUT_TELEGRAM_WORKFLOW_ID",
         "options": {}
       },
-      "id": "call-out-telegram",
+      "id": "8ba62b18-eb2c-4d6d-8118-5bddc62085d3",
       "name": "Call OUT Telegram",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1980, 200]
+      "position": [
+        672,
+        384
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Неизвестный канал - логируем ошибку\nconst data = $json;\nconsole.error('Unknown channel:', data.channel);\n\nreturn {\n  error: 'Unknown channel',\n  channel: data.channel,\n  message: data.out_message\n};"
       },
-      "id": "unknown-channel",
+      "id": "e060865e-7b44-4ed1-97d7-28d2824bcc67",
       "name": "Unknown Channel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1980, 400]
+      "position": [
+        672,
+        592
+      ]
     }
   ],
   "connections": {
@@ -264,8 +306,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Parse Message": {
@@ -375,10 +416,18 @@
   },
   "tags": [
     {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "id": "8zD9sDD78ytgu5T2",
       "name": "BattCRM"
     },
     {
-      "name": "Core"
+      "updatedAt": "2025-11-25T13:52:16.776Z",
+      "createdAt": "2025-11-25T13:52:16.776Z",
+      "id": "KZWHB14qNi4HvGro",
+      "name": "TaskWork"
     }
-  ]
+  ],
+  "updatedAt": "2025-12-03T13:11:42.000Z",
+  "createdAt": "2025-12-03T13:09:43.378Z"
 }

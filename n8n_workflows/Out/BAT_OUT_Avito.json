@@ -4,16 +4,14 @@
   "active": false,
   "nodes": [
     {
-      "parameters": {
-        "jsCode": "const data = $input.first().json;\n\n// Проверяем что текст сообщения не пустой\nif (!data.out_message?.message_text || data.out_message.message_text.trim() === '') {\n  throw new Error('Message text is empty');\n}\n\n// Экранируем кавычки и переносы строк для JSON\nconst escapedText = data.out_message.message_text\n  .replace(/\\\\/g, '\\\\\\\\')\n  .replace(/\"/g, '\\\\\"')\n  .replace(/\\n/g, '\\\\n')\n  .replace(/\\r/g, '\\\\r')\n  .replace(/\\t/g, '\\\\t');\n\nreturn {\n  ...data,\n  escaped_message_text: escapedText\n};"
-      },
-      "id": "5d93a356-1c93-4b0b-9943-f416bb1268e9",
-      "name": "Prepare Message",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "parameters": {},
+      "id": "e018fdc8-eed3-453a-a48e-a5b181d20940",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
       "position": [
-        1424,
-        416
+        -864,
+        -160
       ]
     },
     {
@@ -22,13 +20,13 @@
         "key": "avito_access_token",
         "options": {}
       },
-      "id": "16eb496a-c6e1-4160-af24-22e819d580d7",
-      "name": "Get Access Token1",
+      "id": "2d5cdb61-e487-445e-b46c-ffb42e165834",
+      "name": "Get Access Token",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        256,
-        432
+        -640,
+        -160
       ],
       "credentials": {
         "redis": {
@@ -48,21 +46,19 @@
           ]
         }
       },
-      "id": "c207cf45-f988-4100-ac09-65921ee0371c",
-      "name": "Token Exists?1",
+      "id": "7c6dd411-2bb9-4aff-8c3b-85b7445d8b70",
+      "name": "Token Exists?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        480,
-        432
+        -416,
+        -160
       ]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://api.avito.ru/token",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBasicAuth",
         "sendBody": true,
         "contentType": "form-urlencoded",
         "bodyParameters": {
@@ -75,20 +71,14 @@
         },
         "options": {}
       },
-      "id": "ed191d3f-efb3-47f7-8ff2-0eda0a272ad4",
-      "name": "Refresh Token1",
+      "id": "5f8e468e-bb70-48b1-9a69-0283b4421b0c",
+      "name": "Refresh Token",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        704,
-        544
-      ],
-      "credentials": {
-        "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
-        }
-      }
+        -192,
+        -48
+      ]
     },
     {
       "parameters": {
@@ -98,13 +88,13 @@
         "expire": true,
         "ttl": 86400
       },
-      "id": "701be0f0-9c11-4366-85d1-04276fc4668b",
-      "name": "Save New Token1",
+      "id": "ff80ee2e-1689-4575-8e5e-b97a2418fcd8",
+      "name": "Save New Token",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        912,
-        544
+        16,
+        -48
       ],
       "credentials": {
         "redis": {
@@ -115,15 +105,28 @@
     },
     {
       "parameters": {
-        "jsCode": "const inMessage = $('Webhook Trigger2').first().json;\nconst tokenData = $input.first().json;\n\nconst accessToken = tokenData.value || tokenData.access_token;\n\nif (!accessToken) {\n  throw new Error('Avito access token is empty. Run Token Refresher first.');\n}\n\nreturn {\n  ...inMessage,\n  access_token: accessToken\n};"
+        "jsCode": "const inMessage = $('Execute Workflow Trigger').first().json;\nconst tokenData = $input.first().json;\n\nconst accessToken = tokenData.value || tokenData.access_token;\n\nif (!accessToken) {\n  throw new Error('Avito access token is empty. Run Token Refresher first.');\n}\n\nreturn {\n  ...inMessage,\n  access_token: accessToken\n};"
       },
-      "id": "fa96faec-b168-4f0e-88e5-a2e7eaa610d6",
-      "name": "Merge Token1",
+      "id": "011b68e5-7ae6-4419-b122-2d78c3a3db0f",
+      "name": "Merge Token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1168,
-        432
+        240,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nif (!data.out_message?.message_text || data.out_message.message_text.trim() === '') {\n  throw new Error('Message text is empty');\n}\n\nconst escapedText = data.out_message.message_text\n  .replace(/\\\\/g, '\\\\\\\\')\n  .replace(/\"/g, '\\\\\"')\n  .replace(/\\n/g, '\\\\n')\n  .replace(/\\r/g, '\\\\r')\n  .replace(/\\t/g, '\\\\t');\n\nreturn {\n  ...data,\n  escaped_message_text: escapedText\n};"
+      },
+      "id": "4088467a-7b0b-48d6-be87-c9373458c8bf",
+      "name": "Prepare Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        -160
       ]
     },
     {
@@ -148,41 +151,41 @@
         "jsonBody": "={\n  \"message\": {\n    \"type\": \"text\",\n    \"text\": \"{{ $json.escaped_message_text }}\"\n  }\n}",
         "options": {}
       },
-      "id": "c33f0f14-5de8-4fd0-9cf3-8db6fa84e726",
-      "name": "Send Avito Message2",
+      "id": "6cefb654-b087-42b4-9f1d-47a6aab7cc92",
+      "name": "Send Avito Message",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        1648,
-        416
+        688,
+        -160
       ]
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json;\n\nif (!response.ok && response.error) {\n  throw new Error(`Avito API Error: ${JSON.stringify(response.error)}`);\n}\n\nconst inMessage = $('Merge Token1').first().json;\n\nreturn {\n  ...inMessage,\n  avito_response: response,\n  message_id: response.id || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
+        "jsCode": "const response = $input.first().json;\n\nif (!response.ok && response.error) {\n  throw new Error(`Avito API Error: ${JSON.stringify(response.error)}`);\n}\n\nconst inMessage = $('Merge Token').first().json;\n\nreturn {\n  ...inMessage,\n  avito_response: response,\n  message_id: response.id || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
       },
-      "id": "2d0e5054-b299-4a4e-928b-e27b53c1a8ae",
-      "name": "Process Avito Response1",
+      "id": "814172a8-8436-42c9-879d-2acf0041b701",
+      "name": "Process Avito Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1872,
-        416
+        896,
+        -160
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'avito',\n  (SELECT id FROM channels WHERE code = 'avito' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
+        "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'avito',\n  (SELECT id FROM channels WHERE code = 'avito' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
         "options": {}
       },
-      "id": "6cda359d-cb9e-4989-a311-073ac49919a8",
-      "name": "Save Message History2",
+      "id": "a91449a9-1c4b-4532-8212-5ab74480176e",
+      "name": "Save Message History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        2080,
-        416
+        1120,
+        -160
       ],
       "credentials": {
         "postgres": {
@@ -190,98 +193,72 @@
           "name": "Postgres account"
         }
       }
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { \\\"success\\\": true, \\\"message_id\\\": $json.message_id, \\\"channel\\\": \\\"avito\\\" } }}",
-        "options": {}
-      },
-      "id": "3bcc6790-3926-49d3-acea-5f5abf639f23",
-      "name": "Respond Success2",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        2304,
-        416
-      ]
-    },
-    {
-      "parameters": {},
-      "id": "800c3e5e-a1f4-4c24-ac65-9965bdc573cc",
-      "name": "Execute Workflow Trigger",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1,
-      "position": [
-        32,
-        432
-      ]
     }
   ],
   "connections": {
-    "Prepare Message": {
+    "Execute Workflow Trigger": {
       "main": [
         [
           {
-            "node": "Send Avito Message2",
+            "node": "Get Access Token",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Access Token1": {
+    "Get Access Token": {
       "main": [
         [
           {
-            "node": "Token Exists?1",
+            "node": "Token Exists?",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Token Exists?1": {
+    "Token Exists?": {
       "main": [
         [
           {
-            "node": "Merge Token1",
+            "node": "Merge Token",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Refresh Token1",
+            "node": "Refresh Token",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Refresh Token1": {
+    "Refresh Token": {
       "main": [
         [
           {
-            "node": "Save New Token1",
+            "node": "Save New Token",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save New Token1": {
+    "Save New Token": {
       "main": [
         [
           {
-            "node": "Merge Token1",
+            "node": "Merge Token",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Merge Token1": {
+    "Merge Token": {
       "main": [
         [
           {
@@ -292,44 +269,33 @@
         ]
       ]
     },
-    "Send Avito Message2": {
+    "Prepare Message": {
       "main": [
         [
           {
-            "node": "Process Avito Response1",
+            "node": "Send Avito Message",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Process Avito Response1": {
+    "Send Avito Message": {
       "main": [
         [
           {
-            "node": "Save Message History2",
+            "node": "Process Avito Response",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save Message History2": {
+    "Process Avito Response": {
       "main": [
         [
           {
-            "node": "Respond Success2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Workflow Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get Access Token1",
+            "node": "Save Message History",
             "type": "main",
             "index": 0
           }
@@ -354,6 +320,6 @@
       "name": "Out"
     }
   ],
-  "updatedAt": "2025-11-23T04:04:49.000Z",
+  "updatedAt": "2025-12-03T13:21:29.000Z",
   "createdAt": "2025-10-14T06:45:42.563Z"
 }

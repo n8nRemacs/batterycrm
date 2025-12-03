@@ -1,7 +1,7 @@
 {
   "id": "Jqu7d7yWOjyxm80x",
   "name": "BAT Neo4j Sync",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -118,8 +118,8 @@
       "id": "9a0087c8-20ad-4882-838d-639a10a7472b",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -146,8 +146,8 @@
       "id": "0096fae2-f617-4f1a-8bfd-3bbed304ed4a",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -174,8 +174,8 @@
       "id": "23744793-6865-4698-85f2-620a9fac1a66",
       "credentials": {
         "httpBasicAuth": {
-          "id": "MEWcju2TVKNQ3u4p",
-          "name": "Avito API"
+          "id": "bkJBnz7p38fXY4AN",
+          "name": "Neo4j"
         }
       }
     },
@@ -346,6 +346,6 @@
       "name": "Core"
     }
   ],
-  "updatedAt": "2025-12-03T10:32:06.000Z",
+  "updatedAt": "2025-12-03T12:01:11.000Z",
   "createdAt": "2025-12-03T10:31:30.219Z"
 }

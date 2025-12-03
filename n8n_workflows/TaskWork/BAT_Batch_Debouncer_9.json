@@ -1,0 +1,544 @@
+{
+  "id": "YbYkLbRcQkwHEQcp",
+  "name": "BAT Batch Debouncer 9",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "dbc886fa-3d62-4f4e-a285-5c55ee776ca9",
+      "name": "Every 10 Seconds",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1552,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "queue:debounce:pending",
+        "options": {}
+      },
+      "id": "614745f4-6559-4151-841b-90d17752c8eb",
+      "name": "Pop Batch Job",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        352
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-job",
+              "leftValue": "={{ $json.value }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6dfa10b2-f3b6-46c3-9d41-ebb273433517",
+      "name": "Has Job?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1104,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим задание из очереди\nconst jobStr = $json.value;\nlet job;\n\ntry {\n  job = JSON.parse(jobStr);\n} catch (e) {\n  return { error: 'Failed to parse job', raw: jobStr };\n}\n\nreturn {\n  batch_key: job.batch_key,\n  channel: job.channel,\n  external_chat_id: job.external_chat_id,\n  queue_key: job.queue_key || `queue:batch:${job.batch_key}`,\n  lock_key: job.lock_key || `lock:batch:${job.batch_key}`,\n  last_seen_key: job.last_seen_key || `last_seen:${job.batch_key}`,\n  debounce_seconds: job.debounce_seconds || 20,\n  max_wait_seconds: job.max_wait_seconds || 300,\n  start_time: job.start_time || new Date().toISOString(),\n  worker_id: 9\n};"
+      },
+      "id": "fa79a5bf-c0ba-4402-af1f-36603b8a7f8b",
+      "name": "Parse Job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.last_seen_key }}",
+        "options": {}
+      },
+      "id": "14233d66-1d0c-49c4-be77-3b2a17d1b5de",
+      "name": "Get Last Seen",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        240
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lastSeenStr = $json.value;\nconst job = $('Parse Job').first().json;\nconst debounceMs = job.debounce_seconds * 1000;\nconst maxWaitMs = job.max_wait_seconds * 1000;\nconst startTime = new Date(job.start_time).getTime();\nconst now = Date.now();\n\nlet lastSeenTime = 0;\nif (lastSeenStr) {\n  lastSeenTime = new Date(lastSeenStr).getTime();\n}\n\nconst silenceDuration = now - lastSeenTime;\nconst totalWaitDuration = now - startTime;\n\n// Условия для сбора батча:\n// 1. Тишина >= debounce_seconds\n// 2. ИЛИ общее время ожидания >= max_wait_seconds\nconst silenceReached = silenceDuration >= debounceMs;\nconst maxWaitReached = totalWaitDuration >= maxWaitMs;\nconst readyToProcess = silenceReached || maxWaitReached;\n\nreturn {\n  ...job,\n  last_seen: lastSeenStr,\n  last_seen_time: lastSeenTime,\n  silence_duration_ms: silenceDuration,\n  total_wait_duration_ms: totalWaitDuration,\n  silence_reached: silenceReached,\n  max_wait_reached: maxWaitReached,\n  ready_to_process: readyToProcess,\n  reason: maxWaitReached ? 'max_wait_timeout' : (silenceReached ? 'silence_reached' : 'still_active')\n};"
+      },
+      "id": "4b057352-8a57-450f-9e5c-cd2a77a7074f",
+      "name": "Check Silence Duration",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ready-check",
+              "leftValue": "={{ $json.ready_to_process }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "07aaea03-0262-4b1c-b466-ba8977053ce9",
+      "name": "Ready to Process?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Не готов - возвращаем в очередь для повторной обработки\nconst job = $json;\n\nreturn {\n  job_json: JSON.stringify({\n    batch_key: job.batch_key,\n    channel: job.channel,\n    external_chat_id: job.external_chat_id,\n    queue_key: job.queue_key,\n    lock_key: job.lock_key,\n    last_seen_key: job.last_seen_key,\n    debounce_seconds: job.debounce_seconds,\n    max_wait_seconds: job.max_wait_seconds,\n    start_time: job.start_time\n  })\n};"
+      },
+      "id": "5d1b7b38-a626-43eb-bf6c-c8e902ed28c0",
+      "name": "Prepare Requeue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "queue:debounce:pending",
+        "messageData": "={{ $json.job_json }}",
+        "tail": true
+      },
+      "id": "ea2fefa0-6d27-4211-989e-a30c7f2a0232",
+      "name": "Requeue Job",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        224,
+        352
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "lRange"
+      },
+      "id": "a341be55-e6ad-4065-baae-3f4f88d5cd58",
+      "name": "Get Batch Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const queueData = $json.value;\nconst job = $('Check Silence Duration').first().json;\n\nlet messages = [];\n\nif (queueData) {\n  if (Array.isArray(queueData)) {\n    for (const item of queueData) {\n      try {\n        const parsed = typeof item === 'string' ? JSON.parse(item) : item;\n        messages.push(parsed);\n      } catch (e) {\n        console.error('Failed to parse:', item);\n      }\n    }\n  } else if (typeof queueData === 'string') {\n    const parts = queueData.includes('|||SEPARATOR|||') \n      ? queueData.split('|||SEPARATOR|||')\n      : [queueData];\n    \n    for (const part of parts) {\n      if (part.trim()) {\n        try {\n          messages.push(JSON.parse(part));\n        } catch (e) {\n          console.error('Failed to parse part:', part);\n        }\n      }\n    }\n  }\n}\n\nif (messages.length === 0) {\n  return {\n    empty: true,\n    batch_key: job.batch_key,\n    queue_key: job.queue_key,\n    lock_key: job.lock_key\n  };\n}\n\n// Сортируем по timestamp\nconst toTs = (m) => {\n  const t = m.timestamp ? Date.parse(m.timestamp) : NaN;\n  return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;\n};\nmessages.sort((a, b) => toTs(a) - toTs(b));\n\n// Собираем тексты\nconst texts = messages\n  .map(m => m.media?.voice_transcribed_text\n    ? `[Голосовое]: ${m.media.voice_transcribed_text}`\n    : (m.text || ''))\n  .filter(t => t.trim());\n\nconst combinedText = texts.join('\\n\\n');\nconst base = messages[0];\nconst lastWithRaw = [...messages].reverse().find(m => m?.meta?.raw);\n\nreturn {\n  empty: false,\n  batch_key: job.batch_key,\n  queue_key: job.queue_key,\n  lock_key: job.lock_key,\n  channel: base.channel,\n  external_user_id: base.external_user_id,\n  external_chat_id: base.external_chat_id,\n  text: combinedText,\n  timestamp: base.timestamp,\n  client_phone: base.client_phone,\n  client_name: base.client_name,\n  client_email: base.client_email,\n  tenant_id: base.tenant_id,\n  media: base.media,\n  meta: {\n    ...base.meta,\n    ...(lastWithRaw?.meta?.raw ? { raw: lastWithRaw.meta.raw } : {}),\n    batched: true,\n    batch_size: messages.length,\n    batch_wait_time: job.debounce_seconds,\n    batch_reason: job.reason,\n    worker_id: job.worker_id,\n    original_messages: messages.map(m => ({\n      timestamp: m.timestamp,\n      type: m.meta?.original_media_type || 'text',\n      text_length: (m.text || '').length\n    })),\n    combined_at: new Date().toISOString()\n  },\n  prefilled_data: base.prefilled_data\n};"
+      },
+      "id": "fcc0afa6-e4fb-498f-af03-79c02d38bdfa",
+      "name": "Combine Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "empty-check",
+              "leftValue": "={{ $json.empty }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bd9aee80-ef43-418b-a61c-c349320e89ca",
+      "name": "Is Batch Empty?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.queue_key }}"
+      },
+      "id": "40249b3b-3fc1-4c41-a998-fbd05483cf03",
+      "name": "Delete Queue (Empty)",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        656,
+        48
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.lock_key }}"
+      },
+      "id": "5f5a12ef-de5d-4bcb-adc1-c09ec6039433",
+      "name": "Release Lock (Empty)",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        880,
+        48
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.queue_key }}"
+      },
+      "id": "c3b1d8b9-1462-4734-9e1d-a1a6886716be",
+      "name": "Delete Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        656,
+        240
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.lock_key }}"
+      },
+      "id": "4099d3c7-8fcd-44e8-92d1-b06cd8a107c0",
+      "name": "Release Lock",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        880,
+        240
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": "OUjTFzd7k4tdoAjh",
+        "options": {}
+      },
+      "id": "ba8a1a9c-2772-4a09-984b-7bdfec3b2a1f",
+      "name": "Client Resolver",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Every 10 Seconds": {
+      "main": [
+        [
+          {
+            "node": "Pop Batch Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pop Batch Job": {
+      "main": [
+        [
+          {
+            "node": "Has Job?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Job?": {
+      "main": [
+        [
+          {
+            "node": "Parse Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Job": {
+      "main": [
+        [
+          {
+            "node": "Get Last Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last Seen": {
+      "main": [
+        [
+          {
+            "node": "Check Silence Duration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Silence Duration": {
+      "main": [
+        [
+          {
+            "node": "Ready to Process?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready to Process?": {
+      "main": [
+        [
+          {
+            "node": "Get Batch Queue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Requeue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Requeue": {
+      "main": [
+        [
+          {
+            "node": "Requeue Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Batch Queue": {
+      "main": [
+        [
+          {
+            "node": "Combine Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Messages": {
+      "main": [
+        [
+          {
+            "node": "Is Batch Empty?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Batch Empty?": {
+      "main": [
+        [
+          {
+            "node": "Delete Queue (Empty)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Queue (Empty)": {
+      "main": [
+        [
+          {
+            "node": "Release Lock (Empty)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Queue": {
+      "main": [
+        [
+          {
+            "node": "Release Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Lock": {
+      "main": [
+        [
+          {
+            "node": "Client Resolver",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "id": "8zD9sDD78ytgu5T2",
+      "name": "BattCRM"
+    },
+    {
+      "updatedAt": "2025-11-25T13:52:16.776Z",
+      "createdAt": "2025-11-25T13:52:16.776Z",
+      "id": "KZWHB14qNi4HvGro",
+      "name": "TaskWork"
+    }
+  ],
+  "updatedAt": "2025-12-03T13:12:09.000Z",
+  "createdAt": "2025-12-03T12:13:23.080Z"
+}

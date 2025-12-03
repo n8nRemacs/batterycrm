@@ -1,5 +1,7 @@
 {
+  "id": "H5TGQpitLQjVzr6d",
   "name": "BAT Queue Processor",
+  "active": true,
   "nodes": [
     {
       "parameters": {
@@ -12,11 +14,14 @@
           ]
         }
       },
-      "id": "schedule-trigger",
+      "id": "544eb2b8-4927-4cb4-9eb7-2511559c403e",
       "name": "Every 5 Seconds",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [0, 0]
+      "position": [
+        -2496,
+        160
+      ]
     },
     {
       "parameters": {
@@ -24,11 +29,14 @@
         "key": "queue:processor:lock",
         "options": {}
       },
-      "id": "check-processor-lock",
+      "id": "73eb82e2-22a6-4aa6-89ee-a14dcc946dc6",
       "name": "Check Processor Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [220, 0],
+      "position": [
+        -2272,
+        160
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -61,25 +69,30 @@
         },
         "options": {}
       },
-      "id": "is-processor-free",
+      "id": "996da6cc-7c2d-427c-962e-4582c592fd13",
       "name": "Is Processor Free?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [440, 0]
+      "position": [
+        -2048,
+        160
+      ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "queue:processor:lock",
         "value": "processing",
-        "expire": true,
-        "ttl": 60
+        "expire": true
       },
-      "id": "acquire-processor-lock",
+      "id": "e55f6bd4-458a-4d02-880a-6eb93c77013d",
       "name": "Acquire Processor Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [660, -100],
+      "position": [
+        -1840,
+        160
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -91,24 +104,29 @@
       "parameters": {
         "jsCode": "return { ready: true, timestamp: new Date().toISOString() };"
       },
-      "id": "prepare-fetch",
+      "id": "32c8fa0f-b7c6-4dd4-b778-424a0ac5887a",
       "name": "Prepare Fetch",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [880, -100]
+      "position": [
+        -1616,
+        160
+      ]
     },
     {
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-1",
+      "id": "ba8752f0-53d7-4870-b96b-6561c40b3a67",
       "name": "Pop Message 1",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, -400],
+      "position": [
+        -1392,
+        -320
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -120,14 +138,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-2",
+      "id": "88728424-5ec1-48d6-942e-3ede95f4a0c9",
       "name": "Pop Message 2",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, -300],
+      "position": [
+        -1392,
+        -192
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -139,14 +159,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-3",
+      "id": "3c147c4b-3c39-43a0-9ac9-53260dfbb179",
       "name": "Pop Message 3",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, -200],
+      "position": [
+        -1392,
+        -64
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -158,14 +180,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-4",
+      "id": "229efa95-e931-4652-a36b-c2a04162dfd2",
       "name": "Pop Message 4",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, -100],
+      "position": [
+        -1392,
+        64
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -177,14 +201,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-5",
+      "id": "f2122d98-7c14-48f9-a2a3-17ecee6b6216",
       "name": "Pop Message 5",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 0],
+      "position": [
+        -1392,
+        160
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -196,14 +222,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-6",
+      "id": "a2264ac4-e7c6-407b-9b3d-5ee5a9c53af1",
       "name": "Pop Message 6",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 100],
+      "position": [
+        -1392,
+        272
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -215,14 +243,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-7",
+      "id": "8cb65a0b-47d2-4bcb-a907-b677fa1b606f",
       "name": "Pop Message 7",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 200],
+      "position": [
+        -1392,
+        368
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -234,14 +264,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-8",
+      "id": "4d343312-ac24-4be5-84e2-3350eace7c39",
       "name": "Pop Message 8",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 300],
+      "position": [
+        -1392,
+        464
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -253,14 +285,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-9",
+      "id": "2138f922-21c2-4c58-92bd-7bdc6cc5550f",
       "name": "Pop Message 9",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 400],
+      "position": [
+        -1392,
+        560
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -272,14 +306,16 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
-        "tail": false,
         "options": {}
       },
-      "id": "pop-message-10",
+      "id": "174122b3-7bfb-42c7-a841-4ae39c29c23f",
       "name": "Pop Message 10",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1100, 500],
+      "position": [
+        -1392,
+        688
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -291,11 +327,14 @@
       "parameters": {
         "jsCode": "const allItems = $input.all();\nconst messages = [];\n\nfor (const item of allItems) {\n  const val = item.json?.value;\n  if (val && val !== null && val !== 'null' && val !== '') {\n    try {\n      const parsed = typeof val === 'string' ? JSON.parse(val) : val;\n      messages.push(parsed);\n    } catch (e) {\n      console.error('Failed to parse message:', val, e);\n    }\n  }\n}\n\nif (messages.length === 0) {\n  return { empty: true, count: 0 };\n}\n\n// Группируем по batch_key (channel:external_chat_id)\nconst groups = {};\nfor (const msg of messages) {\n  const batchKey = `${msg.channel}:${msg.external_chat_id}`;\n  if (!groups[batchKey]) {\n    groups[batchKey] = [];\n  }\n  groups[batchKey].push(msg);\n}\n\nreturn {\n  empty: false,\n  count: messages.length,\n  groups: groups,\n  group_keys: Object.keys(groups)\n};"
       },
-      "id": "collect-and-group",
+      "id": "1aecd5bd-4a72-4239-b1d3-c642265ee78a",
       "name": "Collect and Group Messages",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, 0]
+      "position": [
+        -1168,
+        160
+      ]
     },
     {
       "parameters": {
@@ -321,22 +360,28 @@
         },
         "options": {}
       },
-      "id": "is-queue-empty",
+      "id": "c80f3c40-438f-4c01-9210-c1fb8af4913a",
       "name": "Is Queue Empty?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1540, 0]
+      "position": [
+        -944,
+        160
+      ]
     },
     {
       "parameters": {
         "operation": "delete",
         "key": "queue:processor:lock"
       },
-      "id": "release-lock-empty",
+      "id": "41524a53-1cfe-421b-9b2d-f4baa7d594e1",
       "name": "Release Lock (Empty)",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1760, -100],
+      "position": [
+        -720,
+        64
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -348,22 +393,27 @@
       "parameters": {
         "jsCode": "// Разворачиваем группы в отдельные items для обработки\nconst groups = $json.groups;\nconst groupKeys = $json.group_keys;\n\nconst items = groupKeys.map(key => {\n  const messages = groups[key];\n  const [channel, ...chatParts] = key.split(':');\n  const chatId = chatParts.join(':');\n  \n  return {\n    json: {\n      batch_key: key,\n      channel: channel,\n      external_chat_id: chatId,\n      messages: messages,\n      message_count: messages.length,\n      queue_key: `queue:batch:${key}`,\n      lock_key: `lock:batch:${key}`,\n      last_seen_key: `last_seen:${key}`\n    }\n  };\n});\n\nreturn items;"
       },
-      "id": "split-to-batches",
+      "id": "16bbac9b-fb7a-4de5-885c-83eba2c498b4",
       "name": "Split to Batch Items",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 100]
+      "position": [
+        -720,
+        272
+      ]
     },
     {
       "parameters": {
-        "batchSize": 1,
         "options": {}
       },
-      "id": "loop-batches",
+      "id": "e0465536-23a8-4656-a1d9-2cdd9cb1f6b2",
       "name": "Loop Over Batches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [1980, 100]
+      "position": [
+        -448,
+        272
+      ]
     },
     {
       "parameters": {
@@ -371,11 +421,14 @@
         "key": "={{ $json.lock_key }}",
         "options": {}
       },
-      "id": "check-batch-lock",
+      "id": "99f7354c-e56c-42d6-b0a7-84fff3806462",
       "name": "Check Batch Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [2200, 100],
+      "position": [
+        -208,
+        16
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -387,11 +440,14 @@
       "parameters": {
         "jsCode": "const item = $('Loop Over Batches').first().json;\nconst lockValue = $json.value;\n\nconst hasLock = lockValue && lockValue !== '' && lockValue !== null;\n\nreturn {\n  ...item,\n  has_lock: hasLock,\n  lock_value: lockValue\n};"
       },
-      "id": "prepare-batch-decision",
+      "id": "2c4f3f78-4e49-4f7e-8e8c-d02e68b51658",
       "name": "Prepare Batch Decision",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2420, 100]
+      "position": [
+        0,
+        64
+      ]
     },
     {
       "parameters": {
@@ -417,21 +473,27 @@
         },
         "options": {}
       },
-      "id": "has-batch-lock",
+      "id": "f0e9d2aa-e211-40b5-a4fc-b57f7af94b76",
       "name": "Has Batch Lock?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [2640, 100]
+      "position": [
+        176,
+        64
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Lock уже есть - просто добавляем сообщения в per-chat очередь\nconst item = $json;\nconst messagesToPush = item.messages.map(m => JSON.stringify(m));\n\nreturn {\n  queue_key: item.queue_key,\n  last_seen_key: item.last_seen_key,\n  messages_json: messagesToPush,\n  batch_key: item.batch_key,\n  action: 'queued_to_existing'\n};"
       },
-      "id": "prepare-queue-push",
+      "id": "9ab824d3-616e-4636-a306-8267a2a5c626",
       "name": "Prepare Queue Push",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2860, 0]
+      "position": [
+        400,
+        64
+      ]
     },
     {
       "parameters": {
@@ -440,11 +502,14 @@
         "messageData": "={{ $json.messages_json[0] }}",
         "tail": true
       },
-      "id": "push-to-batch-queue",
+      "id": "ee243ddd-81f0-4c71-8348-fdb4c7c902ca",
       "name": "Push to Batch Queue",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3080, 0],
+      "position": [
+        656,
+        64
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -458,11 +523,14 @@
         "key": "={{ $('Prepare Queue Push').item.json.last_seen_key }}",
         "value": "={{ new Date().toISOString() }}"
       },
-      "id": "update-last-seen-existing",
+      "id": "7e21badc-a2a0-4ef9-a1bb-89382eed33fb",
       "name": "Update Last Seen (Existing)",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3300, 0],
+      "position": [
+        896,
+        64
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -478,11 +546,14 @@
         "expire": true,
         "ttl": 300
       },
-      "id": "acquire-batch-lock",
+      "id": "500ddadc-c563-498b-92fc-9440fe36aac9",
       "name": "Acquire Batch Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [2860, 200],
+      "position": [
+        368,
+        368
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -494,11 +565,14 @@
       "parameters": {
         "jsCode": "// Новый батч - готовим данные для очереди и debouncer job\nconst item = $('Prepare Batch Decision').first().json;\nconst messagesToPush = item.messages.map(m => JSON.stringify(m));\n\n// Создаём job для debouncer worker\nconst debounceJob = JSON.stringify({\n  batch_key: item.batch_key,\n  channel: item.channel,\n  external_chat_id: item.external_chat_id,\n  queue_key: item.queue_key,\n  lock_key: item.lock_key,\n  last_seen_key: item.last_seen_key,\n  debounce_seconds: 20,\n  max_wait_seconds: 300,\n  start_time: new Date().toISOString()\n});\n\nreturn {\n  queue_key: item.queue_key,\n  lock_key: item.lock_key,\n  last_seen_key: item.last_seen_key,\n  batch_key: item.batch_key,\n  messages_json: messagesToPush,\n  message_count: item.message_count,\n  debounce_job: debounceJob,\n  action: 'new_batch_started'\n};"
       },
-      "id": "prepare-new-batch",
+      "id": "98307e88-2f90-42ab-9dbc-5776c1418b02",
       "name": "Prepare New Batch",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3080, 200]
+      "position": [
+        592,
+        368
+      ]
     },
     {
       "parameters": {
@@ -507,11 +581,14 @@
         "messageData": "={{ $json.messages_json[0] }}",
         "tail": true
       },
-      "id": "push-new-batch",
+      "id": "4f43e53b-fa36-43e7-b832-02a65729f266",
       "name": "Push New Batch Messages",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3300, 200],
+      "position": [
+        816,
+        368
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -525,11 +602,14 @@
         "key": "={{ $('Prepare New Batch').item.json.last_seen_key }}",
         "value": "={{ new Date().toISOString() }}"
       },
-      "id": "set-last-seen-new",
+      "id": "7f7aa70a-8c8a-4b54-bd60-c529e0ea37a4",
       "name": "Set Last Seen (New)",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3520, 200],
+      "position": [
+        1040,
+        368
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -544,11 +624,14 @@
         "messageData": "={{ $('Prepare New Batch').item.json.debounce_job }}",
         "tail": true
       },
-      "id": "push-debounce-job",
+      "id": "dea729d7-00a0-49d0-a474-8344e9b53d2f",
       "name": "Push Debounce Job",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3740, 200],
+      "position": [
+        1248,
+        368
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -561,11 +644,14 @@
         "operation": "delete",
         "key": "queue:processor:lock"
       },
-      "id": "release-processor-lock",
+      "id": "07df0910-0cbd-4b0f-889d-1c4afeaa3b56",
       "name": "Release Processor Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [3960, 100],
+      "position": [
+        -176,
+        288
+      ],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -605,8 +691,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Acquire Processor Lock": {
@@ -978,10 +1063,18 @@
   },
   "tags": [
     {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "id": "8zD9sDD78ytgu5T2",
       "name": "BattCRM"
     },
     {
-      "name": "Core"
+      "updatedAt": "2025-11-25T13:52:16.776Z",
+      "createdAt": "2025-11-25T13:52:16.776Z",
+      "id": "KZWHB14qNi4HvGro",
+      "name": "TaskWork"
     }
-  ]
+  ],
+  "updatedAt": "2025-12-03T13:24:31.000Z",
+  "createdAt": "2025-12-03T11:53:41.247Z"
 }
