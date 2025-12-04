@@ -1,5 +1,16 @@
 # START API - Eldoleado Channels Integration
 
+## ПЕРВЫМ ДЕЛОМ — Синхронизация
+
+```bash
+cd "C:/Users/User/Documents/Eldoleado"
+git pull
+```
+
+**Без этого можешь работать с устаревшей версией!**
+
+---
+
 ## Дата и время последнего обновления
 **3 декабря 2025, 18:35 (UTC+4)**
 
