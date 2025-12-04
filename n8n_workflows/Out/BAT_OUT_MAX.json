@@ -4,6 +4,17 @@
   "active": false,
   "nodes": [
     {
+      "parameters": {},
+      "id": "a71503cc-25c1-400a-81f8-94e7331e68c7",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        16
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "={{ $env.MAX_API_URL }}/messages/send",
@@ -12,26 +23,26 @@
         "jsonBody": "={\n  \"chat_id\": \"{{ $json.out_message.external_chat_id }}\",\n  \"text\": \"{{ $json.out_message.message_text }}\"\n}",
         "options": {}
       },
-      "id": "fd0bd49d-305e-49b0-8a0b-01e03358a242",
+      "id": "332b966b-a89f-4d90-a203-ccc4d62ec9b2",
       "name": "Send MAX Message",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        -192,
-        -144
+        0,
+        16
       ]
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json;\n\nif (response.error) {\n  console.error('MAX API Error:', response.error);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\nreturn {\n  ...inMessage,\n  max_response: response,\n  message_id: response.message_id || response.id || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
+        "jsCode": "const response = $input.first().json;\n\nif (response.error) {\n  console.error('MAX API Error:', response.error);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\n// Определяем тип touchpoint\nconst actionSource = inMessage.out_message?.action_source || '';\nconst touchpointDirection = (actionSource === 'promo' || actionSource === 'greeting' || actionSource === 'broadcast') ? 'promo' : 'outbound';\n\nreturn {\n  ...inMessage,\n  max_response: response,\n  message_id: response.message_id || response.id || Date.now().toString(),\n  sent_at: new Date().toISOString(),\n  touchpoint_direction: touchpointDirection\n};"
       },
-      "id": "1953fc4e-2088-435e-bc47-b31b88ada171",
+      "id": "e0ef6423-d19d-4706-8ca8-b35fd7180f59",
       "name": "Process MAX Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        32,
-        -144
+        224,
+        16
       ]
     },
     {
@@ -40,13 +51,13 @@
         "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'max',\n  (SELECT id FROM channels WHERE code = 'max' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
         "options": {}
       },
-      "id": "42cb764c-8b83-4cdc-81b8-c0a88c500bed",
+      "id": "c7f02af3-8f38-455b-84f7-ac8124c722be",
       "name": "Save Message History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        256,
-        -144
+        448,
+        16
       ],
       "credentials": {
         "postgres": {
@@ -56,14 +67,23 @@
       }
     },
     {
-      "parameters": {},
-      "id": "66ba802e-bca5-479e-9fd4-f93439da1928",
-      "name": "Execute Workflow Trigger",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1,
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.n8nsrv.ru/webhook/neo4j/touchpoint/register",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  client_id: $('Process MAX Response').item.json.out_message.client_id,\n  appeal_id: $('Process MAX Response').item.json.out_message.appeal_id,\n  channel: 'max',\n  direction: $('Process MAX Response').item.json.touchpoint_direction,\n  type: 'message',\n  tenant_id: $('Process MAX Response').item.json.out_message.tenant_id,\n  creates_entity: false\n}) }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "30f3276e-0e45-4c04-9738-f4f3dab53f85",
+      "name": "Register Touchpoint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
       "position": [
-        -416,
-        -144
+        672,
+        16
       ]
     }
   ],
@@ -100,6 +120,17 @@
           }
         ]
       ]
+    },
+    "Save Message History": {
+      "main": [
+        [
+          {
+            "node": "Register Touchpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -119,6 +150,6 @@
       "name": "Out"
     }
   ],
-  "updatedAt": "2025-12-03T13:20:59.000Z",
+  "updatedAt": "2025-12-03T18:00:53.000Z",
   "createdAt": "2025-10-14T07:11:40.500Z"
 }

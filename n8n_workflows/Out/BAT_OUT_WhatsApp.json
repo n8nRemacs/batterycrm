@@ -4,6 +4,17 @@
   "active": false,
   "nodes": [
     {
+      "parameters": {},
+      "id": "51e468de-1b4f-4803-8b11-35ce03dfc607",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        16
+      ]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "https://wappi.pro/api/sync/message/send",
@@ -12,26 +23,26 @@
         "jsonBody": "={\n  \"chatId\": \"{{ $json.out_message.external_chat_id }}\",\n  \"text\": \"{{ $json.out_message.message_text }}\"\n}",
         "options": {}
       },
-      "id": "e6105e16-4425-4544-8b1b-1cdb7c7dc5b2",
+      "id": "d1f26b25-bd03-4887-9b29-c0381527e403",
       "name": "Send WhatsApp Message",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        -64,
-        0
+        -160,
+        16
       ]
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.first().json;\n\nif (!response.sent) {\n  console.error('WhatsApp send failed:', response);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\nreturn {\n  ...inMessage,\n  whatsapp_response: response,\n  message_id: response.messageId || Date.now().toString(),\n  sent_at: new Date().toISOString()\n};"
+        "jsCode": "const response = $input.first().json;\n\nif (!response.sent) {\n  console.error('WhatsApp send failed:', response);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\n// Определяем тип touchpoint\nconst actionSource = inMessage.out_message?.action_source || '';\nconst touchpointDirection = (actionSource === 'promo' || actionSource === 'greeting' || actionSource === 'broadcast') ? 'promo' : 'outbound';\n\nreturn {\n  ...inMessage,\n  whatsapp_response: response,\n  message_id: response.messageId || Date.now().toString(),\n  sent_at: new Date().toISOString(),\n  touchpoint_direction: touchpointDirection\n};"
       },
-      "id": "9afa9714-f9dc-4481-869b-a573ae546f17",
+      "id": "c7623091-c36b-4843-b74c-868f80d77a11",
       "name": "Process WhatsApp Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        160,
-        0
+        64,
+        16
       ]
     },
     {
@@ -40,13 +51,13 @@
         "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'whatsapp',\n  (SELECT id FROM channels WHERE code = 'whatsapp' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
         "options": {}
       },
-      "id": "1984b91d-dbf3-4a0f-a800-e3d344daa442",
+      "id": "e25d32ee-5c20-4669-8cf1-e7cec3556b74",
       "name": "Save Message History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        384,
-        0
+        288,
+        16
       ],
       "credentials": {
         "postgres": {
@@ -56,14 +67,23 @@
       }
     },
     {
-      "parameters": {},
-      "id": "388efee2-c3c7-480b-aabf-1afe3f446bf4",
-      "name": "Execute Workflow Trigger",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1,
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.n8nsrv.ru/webhook/neo4j/touchpoint/register",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  client_id: $('Process WhatsApp Response').item.json.out_message.client_id,\n  appeal_id: $('Process WhatsApp Response').item.json.out_message.appeal_id,\n  channel: 'whatsapp',\n  direction: $('Process WhatsApp Response').item.json.touchpoint_direction,\n  type: 'message',\n  tenant_id: $('Process WhatsApp Response').item.json.out_message.tenant_id,\n  creates_entity: false\n}) }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "1eab701a-c893-47f3-bedc-656e21c17a4a",
+      "name": "Register Touchpoint",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
       "position": [
-        -288,
-        0
+        512,
+        16
       ]
     }
   ],
@@ -100,6 +120,17 @@
           }
         ]
       ]
+    },
+    "Save Message History": {
+      "main": [
+        [
+          {
+            "node": "Register Touchpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -119,6 +150,6 @@
       "name": "Out"
     }
   ],
-  "updatedAt": "2025-12-03T13:23:00.000Z",
+  "updatedAt": "2025-12-03T18:02:00.000Z",
   "createdAt": "2025-10-14T06:46:15.597Z"
 }
