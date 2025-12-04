@@ -5,13 +5,13 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "a0d67898-5410-4cc0-9793-9c4d145f5224",
+      "id": "7395dd47-4a41-4ec2-9580-724811246fd8",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
       "position": [
-        -2336,
-        -304
+        -1744,
+        -368
       ]
     },
     {
@@ -20,13 +20,13 @@
         "query": "SELECT \n  a.*,\n  b.name as brand_name,\n  m.name as model_name,\n  c.phone as client_phone,\n  c.name as client_name,\n  COALESCE(\n    (SELECT json_agg(json_build_object(\n      'timestamp', mh.created_at,\n      'is_client', CASE WHEN mh.message_type = 'client' THEN true ELSE false END,\n      'text', mh.message_text\n    ) ORDER BY mh.created_at ASC)\n    FROM messages_history mh \n    WHERE mh.appeal_id = a.id),\n    '[]'::json\n  ) as messages,\n  COALESCE(\n    (SELECT json_agg(json_build_object(\n      'id', ad.id,\n      'device_index', ad.device_index,\n      'brand_id', ad.brand_id,\n      'brand_name', db.name,\n      'model_id', ad.model_id,\n      'model_name', dm.name,\n      'repairs', (SELECT json_agg(json_build_object(\n        'id', ar.id,\n        'category_id', ar.repair_category_id,\n        'category_name', rc.name\n      )) FROM appeal_repairs ar LEFT JOIN repair_categories rc ON rc.id = ar.repair_category_id WHERE ar.appeal_device_id = ad.id)\n    ) ORDER BY ad.device_index)\n    FROM appeal_devices ad\n    LEFT JOIN brands db ON db.id = ad.brand_id\n    LEFT JOIN models dm ON dm.id = ad.model_id\n    WHERE ad.appeal_id = a.id),\n    '[]'::json\n  ) as devices\nFROM appeals a\nLEFT JOIN brands b ON b.id = a.brand_id AND b.tenant_id = a.tenant_id\nLEFT JOIN models m ON m.id = a.model_id AND m.tenant_id = a.tenant_id\nLEFT JOIN clients c ON c.id = a.client_id AND c.tenant_id = a.tenant_id\nWHERE a.id = '{{ $json.appeal.id }}'::uuid\n  AND a.tenant_id = '{{ $json.tenant_id }}'::uuid;",
         "options": {}
       },
-      "id": "50019610-d965-49a5-a2f9-4d6354a98a2f",
+      "id": "d0a039a3-c02d-403d-af15-0b0ea17f9506",
       "name": "Load Appeal & Devices",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        -2128,
-        -304
+        -1536,
+        -368
       ],
       "credentials": {
         "postgres": {
@@ -41,13 +41,13 @@
         "query": "SELECT\n  field_name,\n  is_required,\n  collection_order,\n  tool_name as extraction_prompt\nFROM context_fields_config\nWHERE tenant_id = '{{ $json.tenant_id }}'::uuid\n  AND (deal_type_id IS NULL)\n  AND is_active = true\nORDER BY collection_order ASC;",
         "options": {}
       },
-      "id": "2e961b81-e79d-47b0-8340-c08ca681384b",
+      "id": "81ad5c77-d7d8-4969-91c4-7882ebc7eac2",
       "name": "Load Fields Config",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        -1904,
-        -304
+        -1312,
+        -368
       ],
       "credentials": {
         "postgres": {
@@ -58,15 +58,15 @@
     },
     {
       "parameters": {
-        "jsCode": "  const triggerData = $('Execute Workflow Trigger').first().json;\n  const appealData = $('Load Appeal & Devices').first().json;\n  const fieldsConfig = $('Load Fields Config').all().map(i => i.json);\n\n  // История диалога\n  let conversationHistory = '';\n  const messages = appealData.messages || [];\n\n  if (messages.length > 0) {\n    conversationHistory = messages.map(msg => {\n      const time = new Date(msg.timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});\n      const sender = msg.is_client ? 'Клиент' : 'Бот';\n      return `[${time}] ${sender}: ${msg.text}`;\n    }).join('\\n');\n  } else {\n    conversationHistory = 'Первое сообщение в диалоге';\n  }\n  conversationHistory += `\\n\\n[НОВОЕ] Клиент: ${triggerData.text}`;\n\n  // Данные об устройствах\n  const devices = appealData.devices || [];\n  const hasDevices = devices.length > 0;\n  const activeDevice = hasDevices ? devices[devices.length - 1] : null;\n\n  // Проверяем первый контакт по количеству сообщений от клиента\n  const clientMessages = messages.filter(msg => msg.is_client === true);\n  const isFirstContact = clientMessages.length === 0;\n\n  const appealStage = appealData.stage || 'Первичный контакт';\n  const operationMode = appealData.operation_mode || 'assist';\n\n  // Определяем что заполнено и что не хватает\n  const currentState = {\n    brand: activeDevice?.brand_name || appealData.brand_name || null,\n    brand_id: activeDevice?.brand_id || appealData.brand_id || null,\n    model: activeDevice?.model_name || appealData.model_name || null,\n    model_id: activeDevice?.model_id || appealData.model_id || null,\n    repairs: activeDevice?.repairs || [],\n    stage: appealStage\n  };\n\n  // Проверка заполненности по конфигу\n  const requiredFields = fieldsConfig.filter(f => f.is_required);\n  const missing = [];\n\n  for (const field of requiredFields) {\n    switch (field.field_name) {\n      case 'brand':\n        if (!currentState.brand_id) missing.push('бренд');\n        break;\n      case 'model':\n        if (!currentState.model_id) missing.push('модель');\n        break;\n      case 'repair_category':\n        if (!currentState.repairs?.length) missing.push('тип ремонта');\n        break;\n    }\n  }\n\n  if (fieldsConfig.length === 0) {\n    if (!currentState.brand_id) missing.push('бренд');\n    if (!currentState.model_id) missing.push('модель');\n    if (!currentState.repairs?.length) missing.push('тип ремонта');\n  }\n\n  const completionPercentage = requiredFields.length > 0\n    ? Math.round((requiredFields.length - missing.length) / requiredFields.length * 100)\n    : (3 - missing.length) / 3 * 100;\n\n  return {\n    ...triggerData,\n    appeal_id: appealData.id,\n    appeal: appealData,\n    tenant_id: triggerData.tenant_id,\n    message: triggerData.text,\n    message_history: messages,\n    conversation_history: conversationHistory,\n    devices: devices,\n    device_count: devices.length,\n    active_device: activeDevice,\n    current_state: currentState,\n    fields_config: fieldsConfig,\n    missing_fields: missing,\n    missing_fields_str: missing.join(', ') || 'всё заполнено',\n    completion_percentage: completionPercentage,\n    is_complete: missing.length === 0,\n    appeal_stage: appealStage,\n    is_first_contact: isFirstContact,\n    operation_mode: operationMode,\n    channel: triggerData.channel || 'telegram',\n    client_name: appealData.client_name || triggerData.client?.name || 'Клиент',\n    external_chat_id: triggerData.external_chat_id\n  };\n"
+        "jsCode": "// Prepare context with device disambiguation\nconst devices = $input.first().json.devices || [];\nconst appeal = $input.first().json.appeal;\nconst history = $input.first().json.history || [];\n\n// Group devices by brand+model\nconst groups = {};\ndevices.forEach(d => {\n  const key = `${d.brand_name || ''} ${d.model_name || ''}`.trim();\n  if (!groups[key]) groups[key] = [];\n  groups[key].push(d);\n});\n\n// Check if disambiguation needed - multiple devices of same type\nlet needsDisambiguation = false;\nlet disambiguationInfo = '';\n\nfor (const [model, devs] of Object.entries(groups)) {\n  if (devs.length > 1) {\n    // Multiple same devices - check if we can distinguish by repairs\n    const withRepairs = devs.filter(d => d.repairs && d.repairs.length > 0);\n    const withoutRepairs = devs.filter(d => !d.repairs || d.repairs.length === 0);\n    \n    if (withoutRepairs.length > 1) {\n      // Multiple same devices without distinct repairs\n      needsDisambiguation = true;\n      disambiguationInfo += `Несколько ${model} (${devs.length} шт). `;\n    }\n  }\n}\n\n// Build device list for context\nconst deviceList = devices.map((d, i) => {\n  const repairs = d.repairs?.map(r => r.repair_type).join(', ') || 'нет ремонтов';\n  return `#${i}: ${d.brand_name || '?'} ${d.model_name || '?'} - ${repairs}`;\n}).join('\n');\n\nreturn {\n  json: {\n    appeal,\n    devices,\n    deviceList,\n    history,\n    needsDisambiguation,\n    disambiguationInfo,\n    deviceCount: devices.length\n  }\n};"
       },
-      "id": "13192c78-f94e-42e1-9e2a-1797b2c9e58d",
+      "id": "25e513a0-42ce-4d16-99f5-abcae92f5376",
       "name": "Prepare Context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1680,
-        -304
+        -1088,
+        -368
       ]
     },
     {
@@ -95,13 +95,13 @@
         "looseTypeValidation": true,
         "options": {}
       },
-      "id": "1db104ed-a232-40ae-99fb-53379871d05d",
+      "id": "199f2d62-3217-458c-ae4d-1b886f53d521",
       "name": "Needs Extraction?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1456,
-        -304
+        -864,
+        -368
       ]
     },
     {
@@ -115,39 +115,39 @@
         },
         "options": {}
       },
-      "id": "b585369b-aea1-4210-9542-8ed6c99b2a81",
+      "id": "b0f42e2a-51f2-4765-8e32-3c7187d917c3",
       "name": "Call Task Dispatcher",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.1,
       "position": [
-        -1248,
-        -400
+        -656,
+        -464
       ]
     },
     {
       "parameters": {
         "jsCode": "// Skip extraction - all data already collected\nconst context = $input.item.json;\n\nreturn {\n  action: 'skip_extraction',\n  appeal_id: context.appeal_id,\n  tenant_id: context.tenant_id,\n  extracted_data: {\n    brand: context.current_state.brand,\n    brand_id: context.current_state.brand_id,\n    model: context.current_state.model,\n    model_id: context.current_state.model_id,\n    repair_category: context.current_state.repairs?.[0]?.category_name,\n    repair_category_id: context.current_state.repairs?.[0]?.category_id\n  },\n  total_tasks: 0,\n  completed: 0,\n  elapsed_ms: 0\n};"
       },
-      "id": "819b6c8d-5c1a-453d-84aa-f63101c8131a",
+      "id": "2cb98360-1b66-4ffa-84af-69f00510cb12",
       "name": "Skip Extraction",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1248,
-        -208
+        -656,
+        -272
       ]
     },
     {
       "parameters": {
-        "jsCode": "const context = $('Prepare Context').first().json;\n  const dispatcherResult = $input.first().json;\n\n  const extracted = dispatcherResult.extracted_data || {};\n\n  // Данные из БД + извлечённые\n  const brand = extracted.brand || context.current_state.brand || null;\n  const brandId = extracted.brand_id || context.current_state.brand_id;\n  const model = extracted.model || context.current_state.model || null;\n  const modelId = extracted.model_id || context.current_state.model_id;\n  const repair = extracted.repair_category || context.current_state.repairs?.[0]?.category_name || null;\n  const repairId = extracted.repair_category_id || context.current_state.repairs?.[0]?.category_id;\n\n  // Формируем что известно\n  let deviceInfo = [];\n  if (brand) deviceInfo.push(`Бренд: ${brand}`);\n  if (model) deviceInfo.push(`Модель: ${model}`);\n  if (repair) deviceInfo.push(`Ремонт: ${repair}`);\n  const knownStr = deviceInfo.length > 0 ? deviceInfo.join(', ') : 'Данных пока нет';\n\n  // Что не хватает\n  const missing = [];\n  if (!brandId && !brand) missing.push('бренд');\n  if (!modelId && !model) missing.push('модель');\n  if (!repairId && !repair) missing.push('тип ремонта');\n  const missingStr = missing.length > 0 ? missing.join(', ') : 'всё собрано';\n\n  // Ограничиваем историю последними 7 сообщениями\n  const messages = context.message_history || [];\n  const recentMessages = messages.slice(-7);\n\n  const clientMessages = messages.filter(msg => msg.is_client === true);\n  const isFirstContact = clientMessages.length === 0;\n\n  // Форматируем историю\n  let conversationHistory = '';\n  if (recentMessages.length > 0) {\n    conversationHistory = recentMessages.map(msg => {\n      const time = new Date(msg.timestamp).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});\n      const sender = msg.is_client ? 'Клиент' : 'Бот';\n      return `[${time}] ${sender}: ${msg.text}`;\n    }).join('\\n');\n  } else {\n    conversationHistory = '(первое сообщение)';\n  }\n\n  // Добавляем новое сообщение\n  conversationHistory += `\\n\\n[НОВОЕ] Клиент: ${context.text}`;\n\n  // Приветствие только если реально первый контакт\n  let greeting = '';\n  if (isFirstContact) {\n    greeting = 'ВАЖНО: Это первый контакт с клиентом. Начни с приветствия!\\n\\n';\n  }\n\n  const chatInput = `${greeting}СОБРАНО ПО ЗАЯВКЕ:\n  ${knownStr}\n\n  НЕ ХВАТАЕТ:\n  ${missingStr}\n\n  ПОСЛЕДНИЕ СООБЩЕНИЯ:\n  ${conversationHistory}\n\n  ${missing.length > 0 ? 'ЗАДАЧА: Вежливо уточни недостающее: ' + missingStr : 'ЗАДАЧА: Подтверди данные и предложи рассчитать стоимость.'}\n\n  Ответь коротко (1-2 предложения).`;\n\n  const completionPercentage = Math.round((3 - missing.length) / 3 * 100);\n\n  return {\n    ...context,\n    dispatcher_result: dispatcherResult,\n    extracted_data: {\n      brand: brand,\n      brand_id: brandId,\n      model: model,\n      model_id: modelId,\n      repair_category: repair,\n      repair_category_id: repairId\n    },\n    missing_fields: missing,\n    missing_fields_str: missingStr,\n    completion_percentage: completionPercentage,\n    is_complete: missing.length === 0,\n    is_first_contact: isFirstContact,\n    chatInput: chatInput,\n    sessionId: context.appeal_id\n  };"
+        "jsCode": "// Build AI context string\nconst data = $input.first().json;\nconst { appeal, devices, deviceList, history, needsDisambiguation, disambiguationInfo } = data;\n\nlet context = '';\n\n// If need to clarify which device - focus on MODEL and REPAIRS\nif (needsDisambiguation) {\n  context += `⚠️ УТОЧНИ УСТРОЙСТВО: ${disambiguationInfo}Спроси клиента какое именно устройство обсуждаем (по модели или проблеме).\n\n`;\n}\n\n// Appeal info\ncontext += `Заявка #${appeal.id}\n`;\ncontext += `Канал: ${appeal.channel}\n`;\nif (appeal.conversation_context) context += `Контекст: ${appeal.conversation_context}\n`;\n\n// Devices\ncontext += `\nУстройства клиента:\n${deviceList}\n`;\n\n// Recent history\nif (history.length > 0) {\n  const recent = history.slice(-5);\n  context += `\nИстория (последние ${recent.length}):\n`;\n  recent.forEach(h => {\n    context += `[${h.direction}] ${h.message_text?.substring(0, 100)}...\n`;\n  });\n}\n\nreturn { json: { context, ...data } };"
       },
-      "id": "66416666-711d-4d6d-93a1-b0ae34a6b3bf",
+      "id": "85179652-dc2c-436d-97e1-21a7c8b147ac",
       "name": "Build AI Context",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -592,
-        -304
+        0,
+        -368
       ]
     },
     {
@@ -158,13 +158,13 @@
           "systemMessage": "Ты — дружелюбный ассистент сервисного центра по ремонту телефонов.\n\nПРАВИЛА:\n1. Будь кратким и по делу (2-3 предложения максимум)\n2. НЕ используй markdown\n3. Говори естественным разговорным языком\n4. Если что-то не хватает - вежливо попроси уточнить\n5. Если всё заполнено - предложи рассчитать стоимость\n6. НЕ повторяй всю информацию - только подтверди ключевое\n\nПРИМЕРЫ ОТВЕТОВ:\n- \"Понял, ремонт iPhone 12 Pro. Что именно нужно починить?\"\n- \"Замена дисплея на iPhone 14, запчасть наша. Сейчас рассчитаю стоимость.\"\n- \"Здравствуйте! Чем могу помочь?\"\n- \"Это второй телефон к заявке или замена первого?\""
         }
       },
-      "id": "64f1d086-e385-49d6-9ffc-312062f17dd7",
+      "id": "ce3bbf7e-6c62-45c9-be76-280cf0fae2f4",
       "name": "AI Response Generator",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        -368,
-        -304
+        224,
+        -368
       ]
     },
     {
@@ -174,13 +174,13 @@
           "temperature": 0.7
         }
       },
-      "id": "00218086-7cf7-4a2b-8f20-d9f54e906762",
+      "id": "a07d0942-b34c-4f02-9aab-10462211d78b",
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
       "position": [
-        -448,
-        -80
+        144,
+        -144
       ],
       "credentials": {
         "openAiApi": {
@@ -193,13 +193,13 @@
       "parameters": {
         "jsCode": "// ПРАВКА для узла \"Prepare Response\" в BAT AI Appeal Router (Flhmu33l0ZhZhr90)\r\n// Добавлено: operation_mode для ветвления автомат/полуавтомат\r\n\r\nconst context = $('Build AI Context').first().json;\r\nconst aiResponse = $input.first().json;\r\n\r\nconst responseText = aiResponse.output || aiResponse.text || 'Здравствуйте! Чем могу помочь?';\r\n\r\n// Определяем следующее действие\r\nlet nextAction = 'continue';\r\nif (context.is_complete) {\r\n  nextAction = 'calculate_cost';\r\n} else if (context.missing_fields.length > 0) {\r\n  nextAction = 'wait_clarification';\r\n}\r\n\r\n// Определяем маршрут для обновления БД\r\nlet route = 'minimal';\r\nif (context.extracted_data.brand_id && context.extracted_data.model_id && context.extracted_data.repair_category_id) {\r\n  route = 'full';\r\n} else if (context.extracted_data.brand_id || context.extracted_data.model_id) {\r\n  route = 'partial';\r\n}\r\n\r\n// ДОБАВЛЕНО: Режим работы AI (auto = сразу клиенту, assist = на одобрение оператору)\r\nconst operationMode = context.operation_mode || 'assist';\r\n\r\nreturn {\r\n  appeal_id: context.appeal_id,\r\n  tenant_id: context.tenant_id,\r\n  channel: context.channel,\r\n  external_chat_id: context.external_chat_id,\r\n  client_name: context.client_name,\r\n  response_text: responseText,\r\n  next_action: nextAction,\r\n  route: route,\r\n  extracted_data: context.extracted_data,\r\n  completion_percentage: context.completion_percentage,\r\n  dispatcher_result: context.dispatcher_result,\r\n  devices: context.devices,\r\n  device_count: context.device_count,\r\n\r\n  // ДОБАВЛЕНО: Режим работы\r\n  operation_mode: operationMode,\r\n\r\n  // Для Operator Notifier\r\n  approval_data: {\r\n    channel: context.channel,\r\n    external_chat_id: context.external_chat_id,\r\n    appeal_id: context.appeal_id,\r\n    client_name: context.client_name,\r\n    response_text: responseText,\r\n    next_action: nextAction,\r\n    appeal: context.appeal,\r\n    client: context.client || {},\r\n    extracted_data: context.extracted_data,\r\n    operation_mode: operationMode,\r\n    completeness: {\r\n      percentage: context.completion_percentage,\r\n      missing: context.missing_fields\r\n    }\r\n  }\r\n};\r\n"
       },
-      "id": "73af9dba-6019-4664-a190-65f3a6c9fcf2",
+      "id": "fba14d9f-a91b-4b3c-a6a8-4cff7d75472c",
       "name": "Prepare Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        48,
-        -304
+        640,
+        -368
       ]
     },
     {
@@ -273,13 +273,13 @@
         },
         "options": {}
       },
-      "id": "f4b6bae2-38c7-4c61-831e-6163614b37ea",
+      "id": "97ddc83b-6c95-4b46-a8ac-f1e13836ae54",
       "name": "Route by Completeness",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        384,
-        -320
+        976,
+        -384
       ]
     },
     {
@@ -288,13 +288,13 @@
         "query": "-- Full update: appeal_devices + appeal_repairs\nWITH device_upsert AS (\n  INSERT INTO appeal_devices (appeal_id, device_index, brand_id, model_id)\n  VALUES (\n    '{{ $json.appeal_id }}'::uuid,\n    COALESCE((SELECT MAX(device_index) + 1 FROM appeal_devices WHERE appeal_id = '{{ $json.appeal_id }}'::uuid), 0),\n    {{ $json.extracted_data.brand_id ? \"'\" + $json.extracted_data.brand_id + \"'::uuid\" : 'NULL' }},\n    {{ $json.extracted_data.model_id ? \"'\" + $json.extracted_data.model_id + \"'::uuid\" : 'NULL' }}\n  )\n  ON CONFLICT (appeal_id, device_index) \n  DO UPDATE SET \n    brand_id = COALESCE(EXCLUDED.brand_id, appeal_devices.brand_id),\n    model_id = COALESCE(EXCLUDED.model_id, appeal_devices.model_id),\n    updated_at = NOW()\n  RETURNING id\n)\nINSERT INTO appeal_repairs (appeal_device_id, repair_category_id)\nSELECT \n  (SELECT id FROM device_upsert),\n  {{ $json.extracted_data.repair_category_id ? \"'\" + $json.extracted_data.repair_category_id + \"'::uuid\" : 'NULL' }}\nWHERE {{ $json.extracted_data.repair_category_id ? 'true' : 'false' }};\n\nUPDATE appeals \nSET \n  updated_at = NOW(),\n  stage = 'Расчёт стоимости',\n  context_completion_percentage = {{ $json.completion_percentage }}\nWHERE id = '{{ $json.appeal_id }}'::uuid;",
         "options": {}
       },
-      "id": "e24f2775-ed8b-4afb-81ed-fd0f6f968d97",
+      "id": "7e5f8ef5-457a-4e55-acf9-a3c192e60821",
       "name": "Update Full Data",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        608,
-        -480
+        1200,
+        -544
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -310,13 +310,13 @@
         "query": "  WITH device_upsert AS (\n    INSERT INTO appeal_devices (appeal_id, tenant_id, device_index, brand_id, model_id)\n    VALUES (\n      '{{ $json.appeal_id }}'::uuid,\n      '{{ $json.tenant_id }}'::uuid,\n      COALESCE((SELECT MAX(device_index) + 1 FROM appeal_devices WHERE appeal_id = '{{ $json.appeal_id }}'::uuid), 0),\n      {{ $json.extracted_data.brand_id ? \"'\" + $json.extracted_data.brand_id + \"'::uuid\" : 'NULL' }},\n      {{ $json.extracted_data.model_id ? \"'\" + $json.extracted_data.model_id + \"'::uuid\" : 'NULL' }}\n    )\n    ON CONFLICT (appeal_id, device_index)\n    DO UPDATE SET\n      brand_id = COALESCE(EXCLUDED.brand_id, appeal_devices.brand_id),\n      model_id = COALESCE(EXCLUDED.model_id, appeal_devices.model_id),\n      updated_at = NOW()\n    RETURNING id\n  )\n  SELECT id FROM device_upsert;\n\n  UPDATE appeals\n  SET\n    updated_at = NOW(),\n    context_completion_percentage = {{ $json.completion_percentage }}\n  WHERE id = '{{ $json.appeal_id }}'::uuid;\n",
         "options": {}
       },
-      "id": "a0628b7d-95e2-4658-83a4-6cb1ea854bbb",
+      "id": "026c3462-9dd6-445f-833e-753b1ea1cf7c",
       "name": "Update Partial Data",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        608,
-        -304
+        1200,
+        -368
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -332,13 +332,13 @@
         "query": "-- Minimal update: just timestamp and stage\nUPDATE appeals \nSET \n  updated_at = NOW(),\n  stage = COALESCE(stage, 'Сбор информации'),\n  context_completion_percentage = {{ $json.completion_percentage }}\nWHERE id = '{{ $json.appeal_id }}'::uuid;",
         "options": {}
       },
-      "id": "5e96e5a9-1785-406e-9535-558447b44905",
+      "id": "68538cda-0f30-47aa-818d-7342dfe47824",
       "name": "Update Minimal",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        608,
-        -128
+        1200,
+        -192
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -354,13 +354,13 @@
         "query": "INSERT INTO messages_history (tenant_id, appeal_id, message_type, message_text, channel)\n  VALUES (\n    '{{ $('Prepare Context').item.json.tenant_id }}'::uuid,\n    '{{ $('Prepare Response').item.json.appeal_id }}'::uuid,\n    'agent',\n    '{{ $('Prepare Response').item.json.response_text.replace(/'/g, \"''\") }}',\n    '{{ $('Prepare Response').item.json.channel }}'\n  );",
         "options": {}
       },
-      "id": "e8549dae-9dab-454e-8b7a-6185979facc2",
+      "id": "46c16542-81ec-4617-83fc-49dc878b7842",
       "name": "Save Response",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        1504,
-        -304
+        2096,
+        -368
       ],
       "credentials": {
         "postgres": {
@@ -374,13 +374,13 @@
         "workflowId": "GUeLgLcNnawYfpf9",
         "options": {}
       },
-      "id": "7f51871d-380d-4e71-bc29-f28cf4637575",
+      "id": "3c3c79df-4fde-4775-a73d-98915dc77a36",
       "name": "Call Operator Notifier",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
       "position": [
-        2400,
-        -192
+        2992,
+        -256
       ]
     },
     {
@@ -389,13 +389,13 @@
         "responseBody": "={{ {\n  \"success\": true,\n  \"appeal_id\": $('Prepare Response').item.json.appeal_id,\n  \"response_text\": $('Prepare Response').item.json.response_text,\n  \"next_action\": $('Prepare Response').item.json.next_action,\n  \"completion_percentage\": $('Prepare Response').item.json.completion_percentage,\n  \"tasks_completed\": $('Prepare Response').item.json.dispatcher_result?.completed || 0\n} }}",
         "options": {}
       },
-      "id": "f94a4294-cd5d-43de-92f5-abb293eb5272",
+      "id": "130ca9e9-3cba-44a4-9b4b-274256962f6c",
       "name": "Return Result",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        2624,
-        -208
+        3216,
+        -272
       ]
     },
     {
@@ -405,10 +405,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -944,
-        -304
+        -352,
+        -368
       ],
-      "id": "51000434-2676-4ab2-88f0-494e228c738d",
+      "id": "8c4aab8b-f812-490f-9ac7-d25f7c11b6db",
       "name": "Merge Results"
     },
     {
@@ -418,10 +418,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1232,
-        -304
+        1824,
+        -368
       ],
-      "id": "7c414cb1-21f3-4c3c-a233-55897771d195",
+      "id": "38596493-c688-4428-b0c5-7f0a32578e05",
       "name": "Merge After Update"
     },
     {
@@ -431,10 +431,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
-        -288
+        2592,
+        -352
       ],
-      "id": "6ea3aea5-219d-43cc-9186-7311aad17b6c",
+      "id": "36694054-87be-4c73-9b2f-82f681624893",
       "name": "Prepare Notifier Data"
     },
     {
@@ -489,26 +489,26 @@
           "fallbackOutput": "extra"
         }
       },
-      "id": "23b0b7ee-e5ee-4311-9246-743069f21bb7",
+      "id": "0e200228-5efc-44c2-9e5a-6258abe376b8",
       "name": "Route By Mode",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        1728,
-        -304
+        2320,
+        -368
       ]
     },
     {
       "parameters": {
         "jsCode": "// Код для нового узла \"Prepare Auto Send\" в BAT AI Appeal Router\r\n// Подготовка данных для вызова Client Response Sender в автоматическом режиме\r\n\r\nconst data = $input.first().json;\r\nconst context = $('Prepare Context').first().json;\r\nconst appeal = context.appeal || {};\r\n\r\nconsole.log('=== PREPARE AUTO SEND ===');\r\nconsole.log('Appeal ID:', data.appeal_id);\r\nconsole.log('Response text:', data.response_text);\r\nconsole.log('Channel:', data.channel);\r\n\r\n// Получаем client_id из загруженных данных\r\nconst clientId = appeal.client_id || context.client?.id;\r\n\r\nif (!clientId) {\r\n  console.error('❌ No client_id found!');\r\n  console.error('Context:', JSON.stringify(context, null, 2));\r\n  throw new Error('client_id not found in appeal data');\r\n}\r\n\r\n// Формируем данные для Client Response Sender\r\nreturn {\r\n  // Обязательные поля\r\n  appeal_id: data.appeal_id,\r\n  client_id: clientId,\r\n  response_to_send: data.response_text,\r\n  channel: data.channel || 'telegram',\r\n\r\n  // Опциональные\r\n  response_type: 'text',\r\n  operator_action: 'auto_response',\r\n  operator_name: 'ИИ-агент',\r\n\r\n  // Для Telegram\r\n  client_telegram_id: data.external_chat_id || context.external_chat_id,\r\n\r\n  // Метаданные\r\n  source_workflow: 'BAT AI Appeal Router (auto)',\r\n\r\n  // Пробрасываем для следующих нод\r\n  extracted_data: data.extracted_data,\r\n  completion_percentage: data.completion_percentage,\r\n  approval_data: data.approval_data,\r\n  operation_mode: data.operation_mode,\r\n  client_name: data.client_name\r\n};\r\n"
       },
-      "id": "e8a30b2c-2c28-4015-8bdd-dd96c7d5aafd",
+      "id": "db075af7-43b3-4b0f-a9c2-c4edc759b945",
       "name": "Prepare Auto Send",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2112,
-        -544
+        2704,
+        -608
       ]
     },
     {
@@ -516,26 +516,26 @@
         "workflowId": "Gxd1gIKgk8HxuOya",
         "options": {}
       },
-      "id": "46d9eba6-5a0d-481d-9674-e2fdbeedf0b3",
+      "id": "8b1d0f02-088d-46cc-9dbb-8c928e65db9f",
       "name": "Call Client Response Sender",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
       "position": [
-        2368,
-        -544
+        2960,
+        -608
       ]
     },
     {
       "parameters": {
         "jsCode": "// Код для нового узла \"Prepare Auto Notify\" в BAT AI Appeal Router\r\n// Подготовка уведомления для оператора (автоматический режим)\r\n// Ответ уже отправлен клиенту, оператор получает информацию\r\n\r\nconst data = $input.first().json;\r\n\r\nconst clientName = data.client_name || data.approval_data?.client_name || 'Неизвестно';\r\nconst channel = data.channel || data.approval_data?.channel || 'telegram';\r\nconst responseText = data.response_text || data.approval_data?.response_text || '';\r\nconst appealId = data.appeal_id || data.approval_data?.appeal_id || '';\r\nconst extractedData = data.extracted_data || data.approval_data?.extracted_data || {};\r\nconst completeness = data.approval_data?.completeness || { percentage: 0, missing: [] };\r\n\r\n// Формируем текст уведомления\r\nconst lines = [];\r\nlines.push('✅ <b>Автоответ отправлен</b>\\n');\r\n\r\nlines.push(`<b>👤 Клиент:</b> ${clientName}`);\r\nlines.push(`<b>💬 Канал:</b> ${channel}`);\r\n\r\nif (extractedData.brand) lines.push(`<b>📱 Бренд:</b> ${extractedData.brand}`);\r\nif (extractedData.model) lines.push(`<b>📱 Модель:</b> ${extractedData.model}`);\r\nif (extractedData.repair_category) lines.push(`<b>🔧 Ремонт:</b> ${extractedData.repair_category}`);\r\n\r\nlines.push('');\r\nlines.push(`<b>📊 Заполнено:</b> ${completeness.percentage}%`);\r\nif (completeness.missing && completeness.missing.length > 0) {\r\n  lines.push(`<b>❓ Не хватает:</b> ${completeness.missing.join(', ')}`);\r\n}\r\n\r\nlines.push('');\r\nlines.push('<b>🤖 Отправленный ответ:</b>');\r\nlines.push(`\"${responseText}\"`);\r\n\r\nlines.push('');\r\nlines.push(`<code>${appealId}</code>`);\r\n\r\nreturn {\r\n  ...data,\r\n  auto_sent: true,\r\n  operator_notification: {\r\n    text: lines.join('\\n'),\r\n    short_text: `✅ Автоответ: ${clientName}`,\r\n    appeal_id: appealId,\r\n    client_name: clientName,\r\n    channel: channel,\r\n    external_chat_id: data.external_chat_id,\r\n    parse_mode: 'HTML',\r\n    disable_web_page_preview: true,\r\n    original_response_text: responseText\r\n  }\r\n};\r\n"
       },
-      "id": "6e242c03-f91c-49f2-9728-e72a2286ac70",
+      "id": "57d2c6bd-3747-4506-82d5-beb99cc3472d",
       "name": "Prepare Auto Notify",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2704,
-        -544
+        3296,
+        -608
       ]
     }
   ],
@@ -859,6 +859,6 @@
       "name": "Core"
     }
   ],
-  "updatedAt": "2025-12-01T13:52:13.000Z",
+  "updatedAt": "2025-12-04T13:14:47.000Z",
   "createdAt": "2025-11-25T14:24:10.715Z"
 }
