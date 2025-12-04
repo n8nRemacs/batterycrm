@@ -53,7 +53,9 @@
       "Bash(set:*)",
       "Bash(sshpass:*)",
       "Bash(tar:*)",
-      "Bash(scp:*)"
+      "Bash(scp:*)",
+      "Bash(git rebase:*)",
+      "Bash(GIT_EDITOR=true git rebase:*)"
     ],
     "deny": [],
     "ask": []

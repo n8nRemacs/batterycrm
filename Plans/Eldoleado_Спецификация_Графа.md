@@ -309,6 +309,7 @@ fingerprints (
 | OF_TYPE | Problem → ProblemType | — | Поломка относится к типу |
 | SOCIAL | Client → Client | type, label | Социальная связь (семья/друг/коллега) |
 | REFERRED | Client → Client | date, source | Кто кого привёл (реферал) |
+| MERGED_INTO | Client → Client | merged_at, reason, merged_by | Объединение дубликатов клиентов |
 | HAS_CHANNEL | Client → Channel | verified, primary | У клиента есть канал связи |
 | IDENTIFIED_BY | Client → Fingerprint | — | Клиент идентифицирован по fingerprint |
 | CUSTOMER_OF | Client → Vertical | since, last_active, status | Клиент является клиентом вертикали |
@@ -319,6 +320,7 @@ fingerprints (
 | REFERS_TO | Touchpoint → Touchpoint | type | Ссылка на предыдущее сообщение |
 | VIA_CHANNEL | Touchpoint → Channel | — | Через какой канал произошло касание |
 | IN_VERTICAL | Touchpoint → Vertical | — | В рамках какой вертикали |
+| ENRICHED_VIA | Client → Channel | route, tracking_code, converted_at | Канал получен через enrichment |
 
 ---
 
@@ -365,6 +367,29 @@ fingerprints (
 }]->(Client)
 ```
 Реферальная связь. Детали (бонусы, статусы) — в SQL таблице `referrals`.
+
+**MERGED_INTO (Client → Client)**
+```cypher
+(MergedClient)-[:MERGED_INTO {
+  merged_at: datetime,
+  reason: "same_phone",      -- same_phone/same_whatsapp/manual/ai_detected
+  merged_by: "operator_id"   -- UUID оператора или "system"
+}]->(MasterClient)
+```
+Объединение дубликатов клиентов. Направление: от объединённого к главному.
+Детали хранятся в SQL таблице `client_merges`.
+
+**Логика merge:**
+1. Все связи MergedClient переносятся на MasterClient
+2. MergedClient помечается неактивным (is_active: false)
+3. Ребро MERGED_INTO сохраняет историю для аудита
+4. Touchpoints остаются привязаны к оригинальному клиенту (для точности истории)
+
+**Запрос: найти все merge для клиента**
+```cypher
+MATCH (merged:Client)-[:MERGED_INTO*]->(master:Client {id: $clientId})
+RETURN merged, master
+```
 
 **HAS_CHANNEL (Client → Channel)**
 ```cypher
@@ -436,6 +461,18 @@ fingerprints (
 ```
 В рамках какой вертикали. Для фильтрации по уровням видимости.
 
+**ENRICHED_VIA (Client → Channel)**
+```cypher
+(Client)-[:ENRICHED_VIA {
+  route: "phone_to_telegram",    -- код маршрута enrichment
+  tracking_code: "enr_abc123",   -- уникальный tracking код
+  converted_at: datetime         -- когда произошла конверсия
+}]->(Channel)
+```
+Канал был получен через систему enrichment. Отличается от обычного HAS_CHANNEL тем,
+что фиксирует факт целенаправленного получения идентификатора через "приманку".
+Позволяет отслеживать эффективность enrichment маршрутов.
+
 ---
 
 ## 5. Метаданные для вертикалей
@@ -473,49 +510,222 @@ vertical_edge_settings (
 
 ---
 
-## 6. Граф обогащения профиля
+## 6. Channel Enrichment (Обогащение профиля)
 
 ### Концепция
 
-Задача системы — провести клиента от анонимного касания до полного профиля.
+Задача системы — получить максимум уникальных идентификаторов клиента через целевые действия.
 
-### Таблица путей обогащения
+**Ключевой принцип:** идентификаторы группируются в **классы эквивалентности**. Нет смысла получать WhatsApp, если уже есть телефон — это один класс. Но Telegram, VK, Yandex — это новые классы.
+
+### 6.1. Классы идентификаторов
 
 ```sql
-enrichment_paths (
+identifier_classes (
   id UUID PRIMARY KEY,
-  from_channel_type TEXT,      -- "avito", "fingerprint", "whatsapp"
-  to_channel_type TEXT,        -- "whatsapp", "telegram", "phone"
-  mechanism TEXT,              -- "Напишите в WhatsApp: +7..."
-  conversion_rate DECIMAL,     -- 0.30 (30%)
-  gives_identifier TEXT[],     -- ["phone", "name"]
-  vertical_type TEXT,
-  enabled BOOLEAN DEFAULT true,
-  priority INTEGER,
-  created_at TIMESTAMP
+  code TEXT UNIQUE NOT NULL,       -- "phone", "telegram", "vk", "yandex", "fingerprint", "email", "avito"
+  name TEXT NOT NULL,              -- "Телефон", "Telegram", "ВКонтакте"
+  description TEXT,
+  priority INTEGER DEFAULT 0,      -- приоритет класса для связи (phone=100, telegram=90, ...)
+  created_at TIMESTAMP DEFAULT now()
+)
+
+-- Какие каналы входят в класс
+identifier_class_members (
+  id UUID PRIMARY KEY,
+  class_id UUID REFERENCES identifier_classes(id),
+  channel_type TEXT NOT NULL,      -- "phone", "whatsapp", "max", "telegram", "vk", ...
+  extracts_identifier TEXT,        -- какой ID извлекаем: "phone_number", "telegram_id", "vk_id"
+  UNIQUE(class_id, channel_type)
 )
 ```
 
-### Карта переходов
+**Пример данных:**
+| Класс | Члены класса | ID который извлекаем |
+|-------|--------------|----------------------|
+| phone | phone, whatsapp, max | phone_number |
+| telegram | telegram | telegram_id |
+| vk | vk | vk_id |
+| yandex | yandex_maps, yandex_services | yandex_id |
+| fingerprint | website | fingerprint_hash |
+| email | email | email |
+| avito | avito | avito_user_id |
 
-| Из | В | Механизм | Конверсия | Даёт |
-|----|---|----------|-----------|------|
-| avito | whatsapp | "Напишите в WhatsApp для быстрого ответа" | 35% | phone, name |
-| avito | call | Клиент сам звонит | 25% | phone |
-| whatsapp | fingerprint | Ссылка на полезный контент | 50% | fingerprint |
-| whatsapp | telegram | "В Telegram эксклюзивные акции" | 15% | tg_id |
-| whatsapp | vk | "Наши работы в группе VK" | 12% | vk_id |
-| fingerprint | phone | Лид-форма на сайте | 10% | phone, email |
-| retargeting | fingerprint | Клик по баннеру | 2% | fingerprint |
-| telegram | phone | Кнопка "Поделиться контактом" | 25% | phone |
-| visit | any | Анкета, разговор | 60% | любые данные |
+### 6.2. Маршруты обогащения
 
-### Логика работы
+```sql
+enrichment_routes (
+  id UUID PRIMARY KEY,
+  from_class_id UUID REFERENCES identifier_classes(id),  -- откуда идём
+  to_class_id UUID REFERENCES identifier_classes(id),    -- куда хотим попасть
 
-1. **Оценка профиля:** какие каналы есть, каких нет
-2. **Выбор действия:** по приоритету и конверсии
-3. **Предложение:** система подсказывает оператору или автоматически
-4. **Фиксация:** при переходе создаётся Touchpoint с типом "enrichment"
+  -- Условия применимости
+  requires_channel TEXT,           -- из какого канала можно предложить (NULL = любой)
+
+  -- Параметры
+  priority INTEGER DEFAULT 0,      -- приоритет маршрута (выше = предлагать раньше)
+  conversion_rate DECIMAL,         -- ожидаемая конверсия (0.0-1.0)
+  cooldown_hours INTEGER DEFAULT 168,  -- не предлагать повторно N часов (неделя)
+
+  -- Метаданные для генерации
+  action_type TEXT NOT NULL,       -- "link", "button", "request", "qr", "verbal"
+  action_template_id UUID,         -- ссылка на шаблон действия
+
+  enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT now()
+)
+```
+
+### 6.3. Шаблоны действий (приманки)
+
+```sql
+enrichment_action_templates (
+  id UUID PRIMARY KEY,
+  route_id UUID REFERENCES enrichment_routes(id),
+
+  name TEXT NOT NULL,              -- "Скидка за подписку TG"
+  action_type TEXT NOT NULL,       -- "link", "button", "request", "qr", "verbal"
+
+  -- Контент (зависит от типа)
+  message_template TEXT,           -- "Подпишитесь на наш Telegram {{tg_link}} — там эксклюзивные акции!"
+  button_text TEXT,                -- "Перейти в Telegram"
+  link_template TEXT,              -- "https://t.me/{{bot_username}}?start={{tracking_code}}"
+  qr_data_template TEXT,           -- данные для QR
+
+  -- Бонус/мотивация
+  incentive_type TEXT,             -- "discount", "bonus", "priority", "exclusive", "none"
+  incentive_value TEXT,            -- "5%", "100 руб", "быстрый ответ"
+
+  -- Метрики
+  times_shown INTEGER DEFAULT 0,
+  times_converted INTEGER DEFAULT 0,
+
+  vertical_type TEXT,              -- NULL = для всех вертикалей
+  enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT now()
+)
+```
+
+### 6.4. Tracking (отслеживание переходов)
+
+```sql
+enrichment_tracking_codes (
+  id UUID PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,       -- "enr_abc123" — уникальный код для клиента
+
+  client_id UUID NOT NULL,
+  route_id UUID REFERENCES enrichment_routes(id),
+  template_id UUID REFERENCES enrichment_action_templates(id),
+  touchpoint_id UUID,              -- touchpoint где предложили
+
+  -- Статус
+  status TEXT DEFAULT 'pending',   -- "pending", "clicked", "converted", "expired"
+
+  -- Результат
+  result_identifier TEXT,          -- полученный ID (telegram_id, vk_id, ...)
+  result_channel_type TEXT,        -- тип канала результата
+
+  -- Временные метки
+  created_at TIMESTAMP DEFAULT now(),
+  clicked_at TIMESTAMP,
+  converted_at TIMESTAMP,
+  expires_at TIMESTAMP             -- когда код истекает
+)
+```
+
+### 6.5. История enrichment клиента
+
+```sql
+client_enrichment_history (
+  id UUID PRIMARY KEY,
+  client_id UUID NOT NULL,
+
+  -- Что предлагали
+  route_id UUID REFERENCES enrichment_routes(id),
+  template_id UUID REFERENCES enrichment_action_templates(id),
+
+  -- Результат
+  outcome TEXT NOT NULL,           -- "shown", "clicked", "converted", "declined", "ignored"
+
+  -- Контекст
+  from_channel TEXT,               -- из какого канала предложили
+  touchpoint_id UUID,              -- в каком touchpoint
+
+  created_at TIMESTAMP DEFAULT now()
+)
+```
+
+### 6.6. Карта маршрутов
+
+| Из класса | В класс | Действие | Приманка | Конверсия |
+|-----------|---------|----------|----------|-----------|
+| avito | phone | request | "Позвоните для консультации" | 25% |
+| avito | telegram | link | "В TG отвечаем быстрее" | 15% |
+| avito | fingerprint | link | "Каталог на сайте" | 30% |
+| phone | telegram | link | "Подпишитесь на TG — акции" | 10% |
+| phone | vk | link | "Вступите в VK — скидка 5%" | 8% |
+| phone | yandex | request | "Оставьте отзыв — бонус" | 5% |
+| phone | fingerprint | link | "Трекинг заказа на сайте" | 40% |
+| telegram | phone | button | "Поделиться контактом" | 25% |
+| telegram | vk | link | "Наши работы в VK" | 12% |
+| telegram | yandex | request | "Оцените нас на Яндекс.Картах" | 5% |
+| vk | telegram | link | "Быстрая связь в TG" | 15% |
+| vk | phone | request | "Позвоните для записи" | 20% |
+| fingerprint | phone | form | "Лид-форма" | 10% |
+| fingerprint | telegram | widget | "Написать в TG" | 8% |
+
+### 6.7. Как технически получить ID
+
+| Канал | Механизм получения ID |
+|-------|----------------------|
+| **Telegram** | Клиент пишет боту → `message.from.id` |
+| **VK** | Вступление в группу / сообщение → `from_id` через VK API |
+| **Yandex** | OAuth при отзыве ИЛИ парсинг профиля отзыва |
+| **Fingerprint** | FingerprintJS на сайте |
+| **Phone** | Caller ID / форма / кнопка "Поделиться контактом" в TG |
+| **Email** | Форма подписки / заказа |
+
+### 6.8. Логика работы системы
+
+```
+1. Клиент пишет из канала X
+   ↓
+2. Определяем класс канала X
+   ↓
+3. Проверяем какие классы уже есть у клиента
+   ↓
+4. Находим маршруты из X в недостающие классы
+   ↓
+5. Фильтруем по cooldown (не предлагали недавно)
+   ↓
+6. Сортируем по priority * conversion_rate
+   ↓
+7. Выбираем лучший маршрут
+   ↓
+8. Генерируем tracking_code
+   ↓
+9. Вставляем приманку в ответ (или показываем оператору)
+   ↓
+10. При переходе — фиксируем результат
+```
+
+### 6.9. Интеграция с Neo4j
+
+**В графе:**
+```cypher
+// Ребро ENRICHED_VIA для истории
+(Client)-[:ENRICHED_VIA {
+  route: "phone_to_telegram",
+  tracking_code: "enr_abc123",
+  converted_at: datetime
+}]->(Channel)
+```
+
+**Запрос: какие классы есть у клиента**
+```cypher
+MATCH (c:Client {id: $clientId})-[:HAS_CHANNEL]->(ch:Channel)
+RETURN DISTINCT ch.type as channel_type
+```
 
 ---
 

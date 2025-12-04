@@ -1,7 +1,7 @@
 # START - Контекст для продолжения работы
 
 ## Дата и время последнего обновления
-**4 декабря 2025, 17:25 (UTC+4)**
+**4 декабря 2025, 17:30 (UTC+4)**
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### Что готово:
 
-1. **Knowledge Base система (НОВОЕ)**
+1. **Knowledge Base система**
    - 294 компонента в project_components
    - 206 relations в component_relations
    - 1080 workflow nodes в 92 workflows
@@ -33,7 +33,6 @@
 
 5. **GitHub синхронизация**
    - Репозиторий: https://github.com/n8nRemacs/Eldoleado
-   - Коммит: c4eaebe (58 files, +12966 lines)
 
 6. **Neo4j граф**
    - Neo4j на `45.144.177.128:7474`
@@ -43,11 +42,26 @@
    - Синхронизированы в KB
    - Теги: BattCRM + раздел (API, Core, In, Out, Tool, TaskWork)
 
+8. **Система Touchpoints**
+   - 4 типа касаний: `inbound`, `outbound`, `promo`, `mutual`
+   - Автоматическое определение `mutual` по парам
+
+9. **Client Merge (СПРОЕКТИРОВАНО)**
+   - Таблица `client_merges` в PostgreSQL
+   - Ребро `MERGED_INTO` в Neo4j
+   - Логика объединения дубликатов клиентов
+
+10. **Channel Enrichment (СПРОЕКТИРОВАНО)**
+    - Классы идентификаторов (phone, telegram, vk, yandex, fingerprint, email, avito)
+    - Маршруты обогащения профилей
+    - Tracking система для отслеживания конверсий
+    - Ребро `ENRICHED_VIA` в Neo4j
+
 ---
 
 ## Knowledge Base Quick Commands
 
-\`\`\`bash
+```bash
 # Полная синхронизация (n8n + KB + docs)
 python scripts/full_sync.py
 
@@ -59,13 +73,13 @@ python scripts/update_flow_docs.py --all
 
 # Трассировка потока
 python scripts/trace_flow.py "keyword"
-\`\`\`
+```
 
 ---
 
 ## Структура проекта
 
-\`\`\`
+```
 Eldoleado/
 ├── app/                    # Android приложение
 ├── n8n_workflows/          # Все n8n workflows (синхронизированы)
@@ -75,11 +89,14 @@ Eldoleado/
 │   ├── migrations/         # SQL миграции (017 последняя)
 │   └── neo4j/              # Cypher скрипты
 ├── docs/flows/             # Автогенерируемая документация (22 docs)
+├── Plans/                  # Планы и спецификации
+│   ├── Eldoleado_Спецификация_Графа.md
+│   └── Eldoleado full.md
 ├── scripts/                # KB и автоматизация
 ├── CLAUDE.md               # Инструкции для AI
 ├── KNOWLEDGE_BASE.md       # Автогенерируемая карта проекта
 └── Start.md                # Этот файл
-\`\`\`
+```
 
 ---
 
@@ -95,6 +112,81 @@ Eldoleado/
 
 ---
 
+## Channel Enrichment (Обогащение профиля)
+
+### Концепция
+Получение новых идентификаторов клиента через целевые действия ("приманки").
+
+### Классы идентификаторов (группы эквивалентности)
+
+| Класс | Члены | Что получаем |
+|-------|-------|--------------|
+| phone | phone, whatsapp, max | phone_number |
+| telegram | telegram | telegram_id |
+| vk | vk | vk_id |
+| yandex | yandex_maps | yandex_id |
+| fingerprint | website | fp_hash |
+| email | email | email |
+| avito | avito | avito_user_id |
+
+**Принцип:** Нет смысла получать WhatsApp, если есть телефон — это один класс. Но TG, VK, Yandex — новые классы.
+
+### Ключевые маршруты
+
+| Откуда → Куда | Приманка | Конверсия |
+|---------------|----------|-----------|
+| phone → telegram | "Подпишитесь на TG — акции" | 10% |
+| phone → vk | "Вступите в VK — скидка 5%" | 8% |
+| phone → yandex | "Оставьте отзыв — бонус" | 5% |
+| telegram → phone | Кнопка "Поделиться контактом" | 25% |
+| avito → telegram | "В TG отвечаем быстрее" | 15% |
+
+### Таблицы БД (спроектированы)
+- `identifier_classes` — классы идентификаторов
+- `identifier_class_members` — члены классов
+- `enrichment_routes` — маршруты обогащения
+- `enrichment_action_templates` — шаблоны приманок
+- `enrichment_tracking_codes` — tracking коды
+- `client_enrichment_history` — история
+
+---
+
+## Система Touchpoints (касаний)
+
+### Типы касаний:
+
+| Тип | Направление | Ожидаем ответ? | Участвует в mutual |
+|-----|-------------|----------------|-------------------|
+| `inbound` | Клиент → Нам | Да (отвечаем) | Да |
+| `outbound` | Мы → Клиент | Да | Да |
+| `promo` | Мы → Клиент | Нет | Только с creates_entity |
+| `mutual` | Двусторонний | - | Результат |
+
+### Логика:
+- `inbound` + есть `outbound` за период → `mutual`
+- `inbound` + `promo` + `creates_entity=true` → `mutual`
+- `promo` → всегда `promo` (mutual вычисляется при inbound)
+
+---
+
+## Client Merge (Объединение клиентов)
+
+### Таблица client_merges
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| master_client_id | UUID | Главный клиент |
+| merged_client_id | UUID | Объединённый (деактивируется) |
+| merge_reason | TEXT | same_phone, same_whatsapp, manual, ai_detected |
+| merged_by | VARCHAR | ID оператора или "system" |
+
+### Логика:
+1. Все заявки merged_client переносятся на master_client
+2. merged_client помечается неактивным
+3. В Neo4j создаётся ребро `MERGED_INTO`
+
+---
+
 ## Серверы
 
 | Сервер | IP/URL | Назначение |
@@ -107,10 +199,49 @@ Eldoleado/
 
 ## Database Connection
 
-\`\`\`
+```
 PostgreSQL: postgresql://supabase_admin:Mi31415926pS@185.221.214.83:6544/postgres
 Neo4j: bolt://neo4j:Mi31415926pS@45.144.177.128:7687
-\`\`\`
+```
+
+---
+
+## Neo4j CRUD API
+
+**Endpoint:** `POST https://n8n.n8nsrv.ru/webhook/neo4j/crud`
+
+```bash
+# CREATE
+curl -X POST "https://n8n.n8nsrv.ru/webhook/neo4j/crud" \
+  -H "Content-Type: application/json" \
+  -d '{"operation": "create", "nodeType": "Client", "nodeId": "id-123", "properties": {"name": "Test"}}'
+
+# READ / UPDATE / DELETE — аналогично
+```
+
+---
+
+## Neo4j ключевые рёбра
+
+| Ребро | От → К | Описание |
+|-------|--------|----------|
+| OWNS | Client → Device | Владение устройством |
+| HAS_PROBLEM | Device → Problem | Поломка |
+| SOCIAL | Client → Client | Семья/друзья |
+| REFERRED | Client → Client | Реферал |
+| MERGED_INTO | Client → Client | Объединение дубликатов |
+| HAS_CHANNEL | Client → Channel | Канал связи |
+| ENRICHED_VIA | Client → Channel | Канал через enrichment |
+| FROM/TO | Touchpoint → Client | Направление касания |
+
+---
+
+## Документация
+
+- `Plans/Eldoleado_Спецификация_Графа.md` — полная спецификация графа (вершины, рёбра, enrichment)
+- `Plans/Eldoleado full.md` — база знаний проекта (бизнес-логика, workflows, БД)
+- `CLAUDE.md` — инструкции для AI
+- `KNOWLEDGE_BASE.md` — автогенерируемая карта проекта
 
 ---
 
@@ -118,7 +249,8 @@ Neo4j: bolt://neo4j:Mi31415926pS@45.144.177.128:7687
 
 1. **Android CRUD UI** - интерфейс для devices/repairs
 2. **Context switching** - AI переключается между устройствами
-3. **Тестирование disambiguation** - в реальных диалогах
+3. **Создать SQL миграции для enrichment таблиц**
+4. **Создать n8n workflow для enrichment**
 
 ---
 
