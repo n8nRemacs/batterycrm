@@ -1,0 +1,40 @@
+name: Sync Knowledge Base
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'n8n_workflows/**'
+      - 'app/**'
+      - 'supabase/migrations/**'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install psycopg2-binary requests
+
+      - name: Run KB Sync
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+        run: |
+          python scripts/full_sync.py --quick
+
+      - name: Commit updated docs
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add KNOWLEDGE_BASE.md docs/flows/
+          git diff --staged --quiet || git commit -m "Auto-update Knowledge Base [skip ci]"
+          git push
