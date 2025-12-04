@@ -34,86 +34,62 @@ git add -A && git commit -m "Session update: краткое описание" &&
 
 ---
 
-## Последняя сессия: 3 декабря 2025, 21:30 (UTC+4)
+## Последняя сессия: 4 декабря 2025, 22:15 (UTC+4)
 
 ## Что сделано в этой сессии
 
-### 1. Система Touchpoints (касаний) — ГОТОВО
-Реализована полная система отслеживания касаний с клиентами:
+### Мультиконтекст Backend — ГОТОВО
 
-**4 типа касаний:**
-- `inbound` — клиент пишет нам
-- `outbound` — мы отвечаем (ждём продолжения)
-- `promo` — рассылка/поздравление (не ждём ответа)
-- `mutual` — диалог состоялся (вычисляется автоматически)
+1. **GET API для devices/repairs** (`API_Android_Appeal_Detail.json`)
+   - SQL загружает `appeal_devices` с вложенными `appeal_repairs`
+   - Добавлены поля: `conversation_focus`, `last_mentioned_device_id`, `last_mentioned_repair_id`
+   - Формат ответа: `devices[]` с `repairs[]` внутри
 
-**Логика mutual:**
-- `inbound` + `outbound` за период (30 дней) → `mutual`
-- `inbound` + `promo` + создаются сущности (appeal, device) → `mutual`
-- `inbound` + `promo` без сущностей (просто "спасибо") → остаётся `inbound`
+2. **Conversation focus auto-update** (`BAT_AI_Appeal_Router.json`)
+   - "Prepare Context" определяет текущий фокус диалога
+   - Все UPDATE ноды сохраняют conversation_focus
+   - Метка "← В ФОКУСЕ" в контексте AI
 
-### 2. Созданные workflows
+3. **Disambiguation Handler** (`BAT_Disambiguation_Handler.json`)
+   - Паттерны: порядковые номера (первый/второй), владелец (мой/сына/жены), проблема (экран/батарея)
+   - Если не распознано — формирует уточняющий вопрос с нумерованным списком
 
-Все в папке `workflows_to_import/`:
+4. **Touchpoints регистрация в роутере**
+   - Нода "Register Touchpoint (Outbound)" после Save Response
+   - Вызывает `/webhook/neo4j/touchpoint/register`
+   - `continueOnFail: true` — не блокирует поток
 
-| Файл | Описание |
-|------|----------|
-| `BAT_Neo4j_Touchpoint_Register.json` | Регистрация touchpoints с авто-mutual |
-| `BAT_Appeal_Manager_v2.json` | Appeal Manager с touchpoints (inbound) |
-| `BAT_OUT_Telegram_v2.json` | OUT Telegram с touchpoints |
-| `BAT_OUT_WhatsApp_v2.json` | OUT WhatsApp с touchpoints |
-| `BAT_OUT_VK_v2.json` | OUT VK с touchpoints |
-| `BAT_OUT_Avito_v2.json` | OUT Avito с touchpoints |
-| `BAT_OUT_MAX_v2.json` | OUT MAX с touchpoints |
+---
 
-### 3. API Touchpoint Register
+## Файлы для импорта в n8n
 
-**Endpoint:** `POST https://n8n.n8nsrv.ru/webhook/neo4j/touchpoint/register`
-
-```json
-{
-  "client_id": "uuid",
-  "appeal_id": "uuid",
-  "channel": "telegram|whatsapp|vk|avito|max",
-  "direction": "inbound|outbound|promo",
-  "type": "message|call|visit",
-  "tenant_id": "uuid",
-  "creates_entity": true|false,
-  "mutual_period_days": 30
-}
+```
+workflows_to_import/
+├── modified/
+│   └── BAT_AI_Appeal_Router.json  ← заменить существующий
+└── new/
+    └── BAT_Disambiguation_Handler.json  ← новый workflow
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "touchpoint_id": "uuid",
-  "requested_direction": "inbound",
-  "final_direction": "mutual",
-  "was_upgraded_to_mutual": true,
-  "creates_entity": true
-}
-```
+Также обновлён: `n8n_workflows/API/API_Android_Appeal_Detail.json`
 
 ---
 
 ## Что НЕ сделано (на завтра)
 
-1. **Механика объединения клиентов**
-   - Когда два клиента оказываются одним человеком
-   - Merge в Neo4j и PostgreSQL
-   - UI для оператора
+1. **Импортировать workflows в n8n**
+   - BAT_AI_Appeal_Router.json — заменить
+   - BAT_Disambiguation_Handler.json — создать новый
 
-2. **Соц.инжиниринг для enrichment**
-   - Как получать дополнительные контакты
-   - Telegram → телефон
-   - WhatsApp → имя
-   - Скрипты для операторов
+2. **Android UI для мультиконтекста**
+   - Список устройств в appeal detail
+   - Добавление/редактирование устройств
+   - Переключение фокуса
 
-3. **Импорт workflows в n8n**
-   - Загрузить все v2 workflows
-   - Заменить старые OUT на новые
-   - Активировать Touchpoint Register
+3. **Тестирование полного цикла**
+   - Клиент пишет про 2 устройства
+   - AI определяет фокус
+   - Disambiguation при неоднозначности
 
 ---
 

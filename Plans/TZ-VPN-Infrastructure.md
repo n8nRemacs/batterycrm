@@ -255,5 +255,170 @@
 
 ---
 
-**Дата:** Декабрь 2024  
-**Версия:** 1.1
+## 9. Статус реализации
+
+### 9.1. Выполнено
+
+| Компонент | Статус | Детали |
+|-----------|--------|--------|
+| WireGuard на FI | ✅ Готово | 10.0.0.1/24, порт 51820/UDP |
+| WireGuard на RU | ✅ Готово | 10.0.0.2/24, туннель до FI |
+| Marzban | ✅ Готово | Панель управления на RU |
+| Nginx + SSL | ✅ Готово | Reverse proxy для Marzban |
+| Xray routing | ✅ Готово | Split tunneling через wg0 |
+
+### 9.2. Данные для доступа
+
+- **Панель управления Marzban:** https://45.144.177.128 (самоподписанный сертификат)
+- **Логин:** admin
+- **Пароль:** Admin123VPN!
+
+### 9.3. WireGuard ключи (для справки)
+
+**FI Server (Exit node):**
+- Public Key: `NkyrHg+iS2U1U+7n2Fpky9ue79khXNtOZ1EoR5ZWGlM=`
+- IP в туннеле: 10.0.0.1
+
+**RU Server (Entry node):**
+- Public Key: `rUFL4LLAipj1UvP5yKJOi6h4vSJ8pliLij9OPUMIYzA=`
+- IP в туннеле: 10.0.0.2
+
+---
+
+## 10. Инструкции по настройке клиентов
+
+### 10.1. Получение конфигурации
+
+1. Откройте панель управления: https://45.144.177.128
+2. Войдите с логином `admin` и паролем `Admin123VPN!`
+3. Создайте нового пользователя в разделе Users
+4. Скачайте конфигурацию или отсканируйте QR-код
+
+### 10.2. Windows
+
+**Вариант 1: v2rayN (рекомендуется)**
+1. Скачайте [v2rayN](https://github.com/2dust/v2rayN/releases) (последняя версия)
+2. Распакуйте архив в удобную папку
+3. Запустите `v2rayN.exe`
+4. В панели Marzban скопируйте ссылку подписки
+5. В v2rayN: Subscriptions → Add subscription → Вставьте ссылку
+6. Нажмите Update subscription
+7. Выберите сервер и нажмите "Activate"
+
+**Вариант 2: Nekoray**
+1. Скачайте [Nekoray](https://github.com/MatsuriDayo/nekoray/releases)
+2. Распакуйте и запустите
+3. Добавьте ссылку подписки: Server → New profile from clipboard
+4. Подключитесь к серверу
+
+### 10.3. macOS
+
+**Вариант 1: V2Box (App Store)**
+1. Установите [V2Box](https://apps.apple.com/app/v2box-v2ray-client/id6446814690) из App Store
+2. Откройте приложение
+3. Нажмите "+" → "Import from clipboard"
+4. В панели Marzban скопируйте ссылку и вставьте в V2Box
+5. Подключитесь к серверу
+
+**Вариант 2: Shadowrocket (платный)**
+1. Установите Shadowrocket из App Store (~$3)
+2. Добавьте ссылку подписки
+3. Включите VPN
+
+### 10.4. iOS / iPadOS
+
+**Вариант 1: Shadowrocket (рекомендуется, ~$3)**
+1. Установите [Shadowrocket](https://apps.apple.com/app/shadowrocket/id932747118) из App Store
+2. Откройте приложение
+3. Нажмите "+" в правом верхнем углу
+4. Выберите "Type" → "Subscribe"
+5. Вставьте ссылку подписки из панели Marzban
+6. Нажмите "Done"
+7. Выберите сервер и включите переключатель VPN
+
+**Вариант 2: V2Box (бесплатно)**
+1. Установите [V2Box](https://apps.apple.com/app/v2box-v2ray-client/id6446814690)
+2. Отсканируйте QR-код из панели Marzban
+3. Подключитесь
+
+**Вариант 3: Streisand (бесплатно)**
+1. Установите [Streisand](https://apps.apple.com/app/streisand/id6450534064)
+2. Импортируйте конфигурацию через QR-код или ссылку
+
+### 10.5. Android
+
+**Вариант 1: v2rayNG (рекомендуется)**
+1. Установите [v2rayNG](https://play.google.com/store/apps/details?id=com.v2ray.ang) из Google Play
+2. Откройте приложение
+3. Нажмите "+" → "Import config from clipboard" или "Scan QR code"
+4. Вставьте ссылку из панели Marzban или отсканируйте QR
+5. Нажмите на сервер для подключения
+6. Подтвердите разрешение VPN
+
+**Вариант 2: NekoBox**
+1. Скачайте [NekoBox](https://github.com/MatsuriDayo/NekoBoxForAndroid/releases) с GitHub
+2. Установите APK
+3. Импортируйте конфигурацию через ссылку или QR-код
+
+### 10.6. Ubuntu / Linux
+
+**Вариант 1: Nekoray (GUI)**
+1. Скачайте [Nekoray](https://github.com/MatsuriDayo/nekoray/releases) для Linux
+2. Распакуйте и запустите
+3. Добавьте конфигурацию через ссылку подписки
+4. Подключитесь
+
+**Вариант 2: v2rayA (веб-интерфейс)**
+```bash
+# Установка
+curl -Ls https://raw.githubusercontent.com/v2rayA/v2rayA-installer/main/installer.sh | sudo bash
+
+# Запуск
+sudo systemctl start v2raya
+
+# Откройте http://localhost:2017 и добавьте ссылку подписки
+```
+
+**Вариант 3: Xray напрямую (для продвинутых)**
+```bash
+# Установка Xray
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+
+# Скопируйте конфиг из панели Marzban в /usr/local/etc/xray/config.json
+# Запустите
+sudo systemctl start xray
+```
+
+---
+
+## 11. Проверка работы VPN
+
+После подключения проверьте:
+
+1. **IP-адрес:** Откройте https://ifconfig.me — должен показать `217.145.79.27` (Финляндия)
+2. **YouTube:** Откройте youtube.com — должен работать без ограничений
+3. **Telegram:** Должен работать без прокси
+4. **Российские сайты:** Yandex, VK, Госуслуги — должны открываться напрямую (быстро)
+
+---
+
+## 12. Устранение неполадок
+
+### Не подключается к VPN
+- Проверьте, что ссылка подписки актуальна
+- Попробуйте другой протокол (VLESS, VMess, Shadowsocks)
+- Проверьте интернет-соединение
+
+### Медленное соединение
+- Попробуйте другой сервер/порт
+- Проверьте загрузку процессора на устройстве
+- Используйте протокол с меньшими накладными расходами (Shadowsocks)
+
+### Не работают российские сайты
+- Отключите VPN для проверки
+- Проверьте правила маршрутизации в панели
+
+---
+
+**Дата:** Декабрь 2024
+**Версия:** 2.0 (реализовано)
