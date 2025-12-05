@@ -1,6 +1,6 @@
 # ELDOLEADO KNOWLEDGE BASE
 
-*Auto-generated: 2025-12-04 17:59:39*
+*Auto-generated: 2025-12-05 14:57:06*
 
 ---
 
@@ -8,34 +8,34 @@
 
 | Component Type | Count |
 |----------------|-------|
-| workflow | 96 |
-| doc | 94 |
+| workflow | 98 |
+| doc | 96 |
 | table | 37 |
 | script | 30 |
 | android_class | 12 |
-| mcp_server | 8 |
+| mcp_server | 9 |
 | android_activity | 3 |
+| android_adapter | 3 |
 | android_api | 3 |
-| android_repository | 2 |
-| android_adapter | 2 |
-| android_entity | 2 |
 | android_viewmodel | 2 |
+| android_entity | 2 |
 | android_dao | 2 |
+| android_repository | 2 |
 | android_api_service | 1 |
 | android_fcm | 1 |
-| **TOTAL** | **295** |
+| **TOTAL** | **301** |
 
 | Relation Type | Count |
 |---------------|-------|
-| uses | 80 |
-| calls | 67 |
-| reads_from | 38 |
+| uses | 81 |
+| calls | 69 |
+| reads_from | 39 |
 | references | 28 |
 | depends_on | 5 |
 
 ---
 
-## Workflows (96)
+## Workflows (98)
 
 ### API
 
@@ -45,7 +45,7 @@
 
 - **File:** `n8n_workflows\API\API_Android_Appeal_Detail.json`
 - **Tech:** json
-- **Webhook:** `api/operator/appeals/:id`
+- **Webhook:** `api/android/appeals/:id`
 - **Tags:** API, BattCRM
 
 #### API_Android_Appeals_List
@@ -284,6 +284,14 @@
 
 ### Core
 
+#### BAT AI Appeal Router
+
+*n8n workflow in Core*
+
+- **File:** `n8n_workflows\Core\BAT_AI_Appeal_Router.json`
+- **Tech:** json
+- **Tags:** BattCRM, Core
+
 #### BAT Appeal Manager
 
 *n8n workflow in Core*
@@ -443,14 +451,6 @@
 - **Tech:** json
 - **Tags:** BattCRM, Core
 
-#### BAT_Tenant_Resolver
-
-*n8n workflow in Core*
-
-- **File:** `n8n_workflows\Core\BAT_Tenant_Resolver.json`
-- **Tech:** json
-- **Tags:** BattCRM, Core
-
 #### BAT Universal Batcher
 
 *n8n workflow in Core*
@@ -458,6 +458,16 @@
 - **File:** `n8n_workflows\Core\BAT_Universal_Batcher.json`
 - **Tech:** json
 - **Tags:** BattCRM, Core
+
+### Import
+
+#### StCRM OUT.Telegram (Adapter)
+
+*n8n workflow in Import*
+
+- **File:** `n8n_workflows\StCRM_OUT_Telegram_Adapter.json`
+- **Tech:** json
+- **Webhook:** `out-telegram`
 
 ### In
 
@@ -497,14 +507,6 @@
 - **Webhook:** `phone`
 - **Tags:** BattCRM, In
 
-#### BAT IN Telegram
-
-*n8n workflow in In*
-
-- **File:** `n8n_workflows\In\BAT_IN_Telegram.json`
-- **Tech:** json
-- **Tags:** BattCRM, In
-
 #### BAT IN VK
 
 *n8n workflow in In*
@@ -538,14 +540,6 @@
 *n8n workflow in Out*
 
 - **File:** `n8n_workflows\Out\BAT_OUT_MAX.json`
-- **Tech:** json
-- **Tags:** BattCRM, Out
-
-#### BAT OUT Telegram
-
-*n8n workflow in Out*
-
-- **File:** `n8n_workflows\Out\BAT_OUT_Telegram.json`
 - **Tech:** json
 - **Tags:** BattCRM, Out
 
@@ -843,13 +837,40 @@
 - **Tech:** json
 - **Webhook:** `api/android/appeals/:id`
 
-#### BAT AI Appeal Router
+#### BAT_Tenant_Resolver
 
 *n8n workflow in modified*
 
-- **File:** `workflows_to_import\modified\BAT_AI_Appeal_Router_v2_disambiguation.json`
+- **File:** `workflows_to_import\modified\BAT_Tenant_Resolver_fixed.json`
 - **Tech:** json
 - **Tags:** BattCRM, Core
+
+### new
+
+#### BAT Disambiguation Handler
+
+*n8n workflow in new*
+
+- **File:** `workflows_to_import\new\BAT_Disambiguation_Handler.json`
+- **Tech:** json
+- **Tags:** BattCRM, Core
+
+#### BAT IN Telegram
+
+*n8n workflow in new*
+
+- **File:** `workflows_to_import\new\BAT_IN_Telegram.json`
+- **Tech:** json
+- **Webhook:** `telegram-in`
+- **Tags:** BattCRM, In
+
+#### BAT OUT Telegram
+
+*n8n workflow in new*
+
+- **File:** `workflows_to_import\new\BAT_OUT_Telegram.json`
+- **Tech:** json
+- **Tags:** BattCRM, Out
 
 ---
 
@@ -1170,7 +1191,7 @@
 
 ---
 
-## Mcp Servers (8)
+## Mcp Servers (9)
 
 #### MCP_AVITO
 
@@ -1205,6 +1226,13 @@
 *MCP server for MAX-WAPPI integration*
 
 - **File:** `MCP\mcp-max-wappi`
+- **Tech:** python
+
+#### MCP_TELEGRAM
+
+*MCP server for TELEGRAM integration*
+
+- **File:** `MCP\mcp-telegram`
 - **Tech:** python
 
 #### MCP_VK
@@ -1444,7 +1472,7 @@
 
 ---
 
-## Docs (94)
+## Docs (96)
 
 ### Android_Changes_To_Apply
 
@@ -1506,6 +1534,13 @@
 - **File:** `Plans\MVP_Стратегия_Интеграции.md`
 - **Tech:** markdown
 
+#### TZ-VPN-Infrastructure
+
+*Техническое задание*
+
+- **File:** `Plans\TZ-VPN-Infrastructure.md`
+- **Tech:** markdown
+
 #### Архитектура_AI_Системы
 
 *AI Система Eldoleado — Архитектура и Workflow*
@@ -1553,6 +1588,13 @@
 *Ideas - Идеи развития BatteryCRM после MVP*
 
 - **File:** `Plans\Идеи.md`
+- **Tech:** markdown
+
+#### Инструкция VPN
+
+*Инструкция по подключению к VPN*
+
+- **File:** `Plans\Инструкция VPN.md`
 - **Tech:** markdown
 
 #### Миграция_на_Python_Архитектура
@@ -2132,9 +2174,10 @@
 
 ---
 
-## Android Adapters (2)
+## Android Adapters (3)
 
 - **AppealsAdapter** - None
+- **DevicesAdapter** - None
 - **MessagesAdapter** - None
 
 ---
@@ -2192,7 +2235,7 @@
 
 ## Component Relations
 
-### Calls (67)
+### Calls (69)
 
 - `workflow:API_Android_Appeal_Detail` → `workflow:Tool - Build Appeal Meta`
 - `workflow:API_Android_Appeal_Detail_v2` → `workflow:Tool - Build Appeal Meta`
@@ -2200,9 +2243,11 @@
 - `workflow:API_Operator_Appeal_Detail` → `workflow:Tool - Build Appeal Meta`
 - `workflow:API_Operator_Normalize` → `workflow:BAT Operator Response Handler 3 - Text Voice Normalize`
 - `android_api_service:ApiService` → `workflow:API_Operator_Appeals_List`
-- `android_api_service:ApiService` → `workflow:API_Android_Send_Promo`
+- `android_api_service:ApiService` → `workflow:API_Android_Send_Response`
 - `android_api_service:ApiService` → `workflow:API_Android_Appeals_List`
+- `android_api_service:ApiService` → `workflow:API_Android_Send_Promo`
 - `workflow:BAT AI Appeal Router` → `workflow:BAT Operator Notifier`
+- `workflow:BAT AI Appeal Router` → `workflow:BAT Neo4j Touchpoint Register`
 - `workflow:BAT AI Appeal Router` → `workflow:BAT AI Task Dispatcher`
 - `workflow:BAT Appeal Manager` → `workflow:BAT Neo4j Touchpoint Register`
 - `workflow:BAT Batch Debouncer` → `workflow:BAT Client Resolver`
@@ -2230,21 +2275,19 @@
 - `workflow:BAT Operator Response Handler 1 - Main Router` → `workflow:BAT Client Response Sender`
 - `workflow:BAT OUT Avito` → `workflow:BAT Neo4j Touchpoint Register`
 - `workflow:BAT OUT MAX` → `workflow:BAT Neo4j Touchpoint Register`
-- `workflow:BAT Out Processor 1` → `workflow:BAT OUT Avito`
-- `workflow:BAT Out Processor 1` → `workflow:BAT OUT WhatsApp`
-- `workflow:BAT Out Processor 1` → `workflow:BAT OUT VK`
 - `workflow:BAT Out Processor 1` → `workflow:BAT OUT MAX`
-- `workflow:BAT Out Processor 2` → `workflow:BAT OUT Avito`
+- `workflow:BAT Out Processor 1` → `workflow:BAT OUT WhatsApp`
+- `workflow:BAT Out Processor 1` → `workflow:BAT OUT Avito`
+- `workflow:BAT Out Processor 1` → `workflow:BAT OUT VK`
 - `workflow:BAT Out Processor 2` → `workflow:BAT OUT WhatsApp`
-- `workflow:BAT Out Processor 2` → `workflow:BAT OUT MAX`
+- `workflow:BAT Out Processor 2` → `workflow:BAT OUT Avito`
 - `workflow:BAT Out Processor 2` → `workflow:BAT OUT VK`
-- `workflow:BAT Out Processor 3` → `workflow:BAT OUT MAX`
+- `workflow:BAT Out Processor 2` → `workflow:BAT OUT MAX`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT WhatsApp`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT Avito`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT VK`
-- `workflow:BAT Out Processor 4` → `workflow:BAT OUT WhatsApp`
-- `workflow:BAT Out Processor 4` → `workflow:BAT OUT Avito`
-- *...and 17 more*
+- `workflow:BAT Out Processor 3` → `workflow:BAT OUT MAX`
+- *...and 19 more*
 
 ### Depends On (5)
 
@@ -2254,7 +2297,7 @@
 - `android_fcm:EldoleadoMessagingService` → `android_repository:FCMRepository`
 - `android_activity:LoginActivity` → `android_repository:FCMRepository`
 
-### Reads From (38)
+### Reads From (39)
 
 - `workflow:API_Android_Appeal_Detail` → `table:repair_categories`
 - `workflow:API_Android_Appeal_Detail` → `table:issue_types`
@@ -2266,19 +2309,19 @@
 - `workflow:API_Android_Manage_Devices` → `table:appeal_devices`
 - `workflow:API_Android_Manage_Repairs` → `table:appeal_repairs`
 - `workflow:API_Android_Manage_Repairs` → `table:appeal_devices`
-- `workflow:API_Android_Repair_Create` → `table:appeal_devices`
 - `workflow:API_Android_Repair_Create` → `table:appeal_repairs`
+- `workflow:API_Android_Repair_Create` → `table:appeal_devices`
 - `workflow:API_Android_Repair_Delete` → `table:appeal_repairs`
 - `workflow:API_Android_Repair_Update` → `table:appeal_repairs`
 - `workflow:BAT AI Appeal Router` → `table:context_fields_config`
-- `workflow:BAT AI Appeal Router` → `table:repair_categories`
-- `workflow:BAT AI Appeal Router` → `table:appeal_devices`
 - `workflow:BAT AI Appeal Router` → `table:appeal_repairs`
-- `workflow:BAT AI Task Dispatcher` → `table:repair_categories`
+- `workflow:BAT AI Appeal Router` → `table:appeal_devices`
+- `workflow:BAT AI Appeal Router` → `table:repair_categories`
 - `workflow:BAT AI Task Dispatcher` → `table:ai_extraction_tasks`
-- `workflow:BAT AI Task Dispatcher` → `table:ai_entity_configs`
 - `workflow:BAT AI Task Dispatcher` → `table:appeal_repairs`
+- `workflow:BAT AI Task Dispatcher` → `table:ai_entity_configs`
 - `workflow:BAT AI Task Dispatcher` → `table:appeal_devices`
+- `workflow:BAT AI Task Dispatcher` → `table:repair_categories`
 - `workflow:BAT AI Universal Worker` → `table:ai_extraction_tasks`
 - `workflow:BAT AI Universal Worker 1` → `table:ai_extraction_tasks`
 - `workflow:BAT AI Universal Worker 2` → `table:ai_extraction_tasks`
@@ -2288,23 +2331,24 @@
 - `workflow:BAT AI Universal Worker 6` → `table:ai_extraction_tasks`
 - `workflow:BAT AI Universal Worker 7` → `table:ai_extraction_tasks`
 - `workflow:BAT Client Resolver` → `table:client_merges`
-- `workflow:BAT Fingerprint Tracker` → `table:short_links`
+- `workflow:BAT Disambiguation Handler` → `table:appeal_devices`
+- `workflow:BAT Fingerprint Tracker` → `table:fingerprint_visits`
 - `workflow:BAT Fingerprint Tracker` → `table:client_fingerprints`
 - `workflow:BAT Fingerprint Tracker` → `table:fingerprints`
-- `workflow:BAT Fingerprint Tracker` → `table:fingerprint_visits`
+- `workflow:BAT Fingerprint Tracker` → `table:short_links`
 - `workflow:BAT Neo4j Touchpoint Register` → `table:touchpoints`
 - `workflow:BAT Short Link Manager` → `table:short_links`
 
 ### References (28)
 
-- `table:ab_test_results` → `table:creatives`
 - `table:ab_test_results` → `table:fingerprints`
+- `table:ab_test_results` → `table:creatives`
 - `table:ab_test_results` → `table:ab_tests`
 - `table:ai_extraction_results` → `table:ai_extraction_tasks`
 - `table:ai_extraction_tasks` → `table:ai_entity_configs`
-- `table:appeal_repairs` → `table:appeal_devices`
 - `table:appeal_repairs` → `table:repair_categories`
 - `table:appeal_repairs` → `table:issue_types`
+- `table:appeal_repairs` → `table:appeal_devices`
 - `table:appeal_stage_transitions` → `table:appeal_stages`
 - `table:client_contacts` → `table:contacts`
 - `table:client_fingerprints` → `table:fingerprints`
@@ -2318,67 +2362,67 @@
 - `table:issue_types` → `table:repair_categories`
 - `table:price_list_items` → `table:price_lists`
 - `table:price_mappings` → `table:price_list_items`
-- `table:price_mappings` → `table:repair_categories`
 - `table:price_mappings` → `table:issue_types`
+- `table:price_mappings` → `table:repair_categories`
 - `table:promo_history` → `table:promo_triggers`
 - `table:promo_history` → `table:promo_materials`
 - `table:promo_triggers` → `table:promo_materials`
 - `table:touchpoints` → `table:appeal_repairs`
 - `table:touchpoints` → `table:appeal_devices`
 
-### Uses (80)
+### Uses (81)
 
 - `android_api_service:ApiService` → `android_class:Message`
-- `android_class:AppDatabase` → `android_dao:AppealDao`
 - `android_class:AppDatabase` → `android_entity:MessageEntity`
 - `android_class:AppDatabase` → `android_entity:AppealEntity`
 - `android_class:AppDatabase` → `android_dao:MessageDao`
+- `android_class:AppDatabase` → `android_dao:AppealDao`
 - `android_dao:AppealDao` → `android_entity:AppealEntity`
+- `android_activity:AppealDetailActivity` → `android_viewmodel:AppealDetailViewModel`
 - `android_activity:AppealDetailActivity` → `android_class:EldoleadoApplication`
 - `android_activity:AppealDetailActivity` → `android_adapter:MessagesAdapter`
 - `android_activity:AppealDetailActivity` → `android_api:RetrofitClient`
 - `android_activity:AppealDetailActivity` → `android_class:Message`
-- `android_activity:AppealDetailActivity` → `android_class:AppealUpdateEvent`
-- `android_activity:AppealDetailActivity` → `android_class:AppealInfoBottomSheet`
-- `android_activity:AppealDetailActivity` → `android_viewmodel:AppealDetailViewModel`
-- `android_activity:AppealDetailActivity` → `android_entity:AppealEntity`
-- `android_activity:AppealDetailActivity` → `android_entity:MessageEntity`
-- `android_activity:AppealDetailActivity` → `android_activity:MainActivity`
 - `android_activity:AppealDetailActivity` → `android_class:SessionManager`
-- `android_viewmodel:AppealDetailViewModel` → `android_class:Message`
-- `android_viewmodel:AppealDetailViewModel` → `android_entity:MessageEntity`
+- `android_activity:AppealDetailActivity` → `android_activity:MainActivity`
+- `android_activity:AppealDetailActivity` → `android_class:AppealInfoBottomSheet`
+- `android_activity:AppealDetailActivity` → `android_entity:MessageEntity`
+- `android_activity:AppealDetailActivity` → `android_entity:AppealEntity`
+- `android_activity:AppealDetailActivity` → `android_class:AppealUpdateEvent`
+- `android_activity:AppealDetailActivity` → `android_adapter:DevicesAdapter`
 - `android_viewmodel:AppealDetailViewModel` → `android_entity:AppealEntity`
+- `android_viewmodel:AppealDetailViewModel` → `android_entity:MessageEntity`
+- `android_viewmodel:AppealDetailViewModel` → `android_class:Message`
 - `android_class:AppealInfoBottomSheet` → `android_entity:AppealEntity`
 - `android_adapter:AppealsAdapter` → `android_entity:AppealEntity`
-- `android_repository:AppealsRepository` → `android_class:Message`
-- `android_repository:AppealsRepository` → `android_api_service:ApiService`
-- `android_repository:AppealsRepository` → `android_entity:AppealEntity`
-- `android_repository:AppealsRepository` → `android_dao:MessageDao`
-- `android_repository:AppealsRepository` → `android_dao:AppealDao`
 - `android_repository:AppealsRepository` → `android_entity:MessageEntity`
+- `android_repository:AppealsRepository` → `android_entity:AppealEntity`
+- `android_repository:AppealsRepository` → `android_api_service:ApiService`
+- `android_repository:AppealsRepository` → `android_class:Message`
+- `android_repository:AppealsRepository` → `android_dao:AppealDao`
+- `android_repository:AppealsRepository` → `android_dao:MessageDao`
 - `android_viewmodel:AppealsViewModel` → `android_class:Message`
 - `android_viewmodel:AppealsViewModel` → `android_entity:AppealEntity`
 - `android_api:AuthInterceptor` → `android_class:SessionManager`
-- `android_class:BootReceiver` → `android_class:CallRecordingPreferences`
 - `android_class:BootReceiver` → `android_class:CallRecordingService`
-- `android_class:CallReceiver` → `android_class:CallRecordingPreferences`
+- `android_class:BootReceiver` → `android_class:CallRecordingPreferences`
 - `android_class:CallReceiver` → `android_class:CallRecordingService`
-- `android_class:CallRecordingService` → `android_activity:MainActivity`
+- `android_class:CallReceiver` → `android_class:CallRecordingPreferences`
 - `android_class:CallRecordingService` → `android_class:CallRecordingPreferences`
+- `android_class:CallRecordingService` → `android_activity:MainActivity`
 - `android_class:CallRecordingService` → `android_class:CallUploadWorker`
-- `android_class:CallUploadWorker` → `android_class:Message`
 - `android_class:CallUploadWorker` → `android_class:CallRecordingPreferences`
+- `android_class:CallUploadWorker` → `android_class:Message`
 - `android_class:DataCleanupWorker` → `android_class:EldoleadoApplication`
+- `android_class:EldoleadoApplication` → `android_api:RetrofitClient`
+- `android_class:EldoleadoApplication` → `android_api_service:ApiService`
 - `android_class:EldoleadoApplication` → `android_dao:AppealDao`
+- `android_class:EldoleadoApplication` → `android_dao:MessageDao`
 - `android_class:EldoleadoApplication` → `android_class:AppDatabase`
 - `android_class:EldoleadoApplication` → `android_class:DataCleanupWorker`
-- `android_class:EldoleadoApplication` → `android_api:RetrofitClient`
-- `android_class:EldoleadoApplication` → `android_dao:MessageDao`
-- `android_class:EldoleadoApplication` → `android_api_service:ApiService`
-- `android_fcm:EldoleadoMessagingService` → `android_class:Message`
-- `android_fcm:EldoleadoMessagingService` → `android_api:RetrofitClient`
-- `android_fcm:EldoleadoMessagingService` → `android_api_service:ApiService`
-- *...and 30 more*
+- `android_fcm:EldoleadoMessagingService` → `android_class:AppealUpdateEvent`
+- `android_fcm:EldoleadoMessagingService` → `android_activity:MainActivity`
+- *...and 31 more*
 
 ---
 
@@ -2386,23 +2430,23 @@
 
 | Date | Type | Component | Description |
 |------|------|-----------|-------------|
+| 2025-12-05 10:57 | created | StCRM OUT.Telegram (Adapter) | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-05 10:57 | created | MCP_TELEGRAM | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-05 08:49 | created | BAT Disambiguation Handler | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-05 08:49 | created | DevicesAdapter | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-05 08:49 | created | TZ-VPN-Infrastructure | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-05 08:49 | created | Инструкция VPN | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 13:59 | created | BAT Neo4j Touchpoint Register | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 12:36 | created | API_Android_Appeal_Detail_v2 | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 12:36 | created | touchpoints | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:25 | created | full_sync | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:25 | created | sync_kb | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:25 | created | webhook_sync_handler | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_logout | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_normalize | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_reject | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_repair_create | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_repair_delete | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_repair_update | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | action_send_promo | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | action_send_response | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | action_take_appeal | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | channel_avito | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | channel_form | Auto-discovered by populate_knowledge_base.py... |
-| 2025-12-04 11:04 | created | action_appeals_list | Auto-discovered by populate_knowledge_base.py... |
+| 2025-12-04 11:04 | created | channel_max | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | channel_phone | Auto-discovered by populate_knowledge_base.py... |
 | 2025-12-04 11:04 | created | channel_telegram | Auto-discovered by populate_knowledge_base.py... |
