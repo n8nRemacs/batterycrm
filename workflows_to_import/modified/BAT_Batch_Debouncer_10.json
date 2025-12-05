@@ -195,10 +195,7 @@
     },
     {
       "parameters": {
-        "operation": "lRange",
-        "key": "={{ $('Parse Job').item.json.queue_key }}",
-        "propertyName": "value",
-        "options": {}
+        "operation": "lRange"
       },
       "id": "d30b1399-2a43-41ab-baf5-df89cd69b300",
       "name": "Get Batch Queue",

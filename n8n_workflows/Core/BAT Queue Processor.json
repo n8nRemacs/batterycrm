@@ -114,6 +114,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "88b8c7f1-46f9-4235-b4da-98bce7229b5d",
@@ -135,6 +136,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "2149c6c3-2845-45a4-a920-bd35a4e18b9d",
@@ -156,6 +158,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "7e6761f4-de3d-4de4-a7ff-0831be198998",
@@ -177,6 +180,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "3cd159f2-7d8f-438b-922e-894f42b80b0f",
@@ -198,6 +202,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "83be41eb-cb34-4a86-8436-39a3c42cb94b",
@@ -219,6 +224,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "23e700aa-fbee-4509-903d-ead1959923cc",
@@ -240,6 +246,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "e0f95e80-ecf9-443e-bacc-6f81217aae84",
@@ -261,6 +268,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "204d1742-17df-4d3c-981d-9d4935e89995",
@@ -282,6 +290,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "c9f3e56c-9642-46a3-98cf-805639327cf6",
@@ -303,6 +312,7 @@
       "parameters": {
         "operation": "pop",
         "list": "queue:incoming",
+        "propertyName": "value",
         "options": {}
       },
       "id": "b61cd7f6-bb24-47bd-8d21-48cdc91ad177",

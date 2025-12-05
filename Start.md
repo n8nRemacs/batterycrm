@@ -14,46 +14,40 @@ git pull
 ---
 
 ## Дата и время последнего обновления
-**4 декабря 2025, 22:15 (UTC+4)**
+**5 декабря 2025, 17:30 (UTC+4)**
 
 ---
 
-## Что сделано в этой сессии (04.12.2025)
+## Что сделано в этой сессии (05.12.2025)
 
-### Мультиконтекст Backend — ГОТОВО
+### Telegram Flow Debug — В ПРОЦЕССЕ
 
-1. **GET API для devices/repairs** (`API_Android_Appeal_Detail.json`)
-   - SQL загружает `appeal_devices` с вложенными `appeal_repairs`
-   - Добавлены поля: `conversation_focus`, `last_mentioned_device_id`, `last_mentioned_repair_id`
-   - Формат: `devices[]` с `repairs[]` внутри
+1. **BAT Queue Processor** — исправлены Pop Message nodes
+   - Добавлен `propertyName: "value"` ко всем 10 нодам Pop Message
+   - Заменён Execute Workflow на Redis Push для debounce queue
 
-2. **Conversation focus auto-update** (`BAT_AI_Appeal_Router.json`)
-   - "Prepare Context" определяет текущий фокус диалога
-   - UPDATE ноды сохраняют `conversation_focus`, `last_mentioned_device_id`, `last_mentioned_repair_id`
-   - Метка "← В ФОКУСЕ" в контексте AI
+2. **BAT Batch Debouncer** — исправлен Parse Job
+   - Теперь корректно обрабатывает и объект и строку из Redis
+   - Добавлен `propertyName: "value"` в Pop Batch Job
+   - Добавлен `key` параметр в Get Batch Queue
 
-3. **Disambiguation Handler** (`BAT_Disambiguation_Handler.json`)
-   - Паттерны: порядковые номера (первый/второй), владелец (мой/сына/жены), проблема (экран/батарея)
-   - Если не распознано — формирует уточняющий вопрос
-
-4. **Touchpoints регистрация в роутере**
-   - Нода "Register Touchpoint (Outbound)" после Save Response
-   - Вызывает `/webhook/neo4j/touchpoint/register`
-   - `continueOnFail: true` — не блокирует поток
+3. **Проблема: Get Batch Queue возвращает null**
+   - Queue Processor кладёт сообщения в `queue:batch:*`
+   - Debouncer получает job из `queue:debounce:pending`
+   - Но при попытке прочитать `queue:batch:*` — пусто
+   - Возможно race condition или старые executions удалили данные
 
 ---
 
 ## Файлы для импорта в n8n
 
 ```
-workflows_to_import/
-├── modified/
-│   └── BAT_AI_Appeal_Router.json  ← заменить существующий
-└── new/
-    └── BAT_Disambiguation_Handler.json  ← новый workflow
+workflows_to_import/modified/
+├── BAT_Queue_Processor.json      ← ВАЖНО: Push to Debounce вместо Execute Workflow
+├── BAT_Batch_Debouncer_10.json   ← исправлен Parse Job + propertyName
+├── BAT_AI_Appeal_Router.json
+└── BAT_IN_Telegram.json
 ```
-
-Также обновлён: `n8n_workflows/API/API_Android_Appeal_Detail.json`
 
 ---
 
@@ -68,27 +62,23 @@ workflows_to_import/
 5. **GitHub** — https://github.com/n8nRemacs/Eldoleado
 6. **Neo4j** — CRUD + Touchpoints работает
 7. **n8n workflows** — 95+ штук
-8. **Touchpoints система** — 4 типа (inbound, outbound, promo, mutual)
+8. **Telegram MCP proxy** — работает на tg.eldoleado.ru
 9. **Client Merge** — спроектировано (таблица + Neo4j MERGED_INTO)
-10. **Channel Enrichment** — спроектировано (на потом)
 
 ---
 
 ## Следующие шаги
 
-1. **Импортировать workflows в n8n:**
-   - `BAT_AI_Appeal_Router.json` — заменить
-   - `BAT_Disambiguation_Handler.json` — создать новый
+1. **Дебаг Telegram flow** (приоритет!):
+   - Проверить Redis напрямую после Queue Processor
+   - Убедиться что `queue:batch:*` содержит данные
+   - Тест чистого прохода: остановить все Debouncer, отправить сообщение, проверить Redis
 
-2. **Android UI для мультиконтекста:**
-   - Список устройств в appeal detail
-   - Добавление/редактирование устройств
-   - Переключение фокуса
+2. **После фикса flow:**
+   - Протестировать полный цикл до AI ответа
+   - Проверить отправку ответа обратно в Telegram
 
-3. **Тестирование полного цикла:**
-   - Клиент пишет про 2 устройства
-   - AI определяет фокус
-   - Disambiguation при неоднозначности
+3. **Android UI для мультиконтекста**
 
 ---
 
@@ -96,9 +86,10 @@ workflows_to_import/
 
 | Сервер | IP/URL | Назначение |
 |--------|--------|------------|
-| n8n | n8n.n8nsrv.ru | Workflow automation |
+| n8n | n8n.n8nsrv.ru / 185.221.214.83 | Workflow + Redis |
 | Neo4j | 45.144.177.128:7474 | Graph database |
 | PostgreSQL | 185.221.214.83:6544 | Main database |
+| MCP Telegram | 217.145.79.27 (tg.eldoleado.ru) | Telegram proxy |
 
 ---
 
@@ -107,6 +98,7 @@ workflows_to_import/
 ```
 PostgreSQL: postgresql://supabase_admin:Mi31415926pS@185.221.214.83:6544/postgres
 Neo4j: bolt://neo4j:Mi31415926pS@45.144.177.128:7687
+Redis: на сервере n8n (185.221.214.83)
 ```
 
 ---

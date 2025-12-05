@@ -34,82 +34,57 @@ git add -A && git commit -m "Session update: краткое описание" &&
 
 ---
 
-## Последняя сессия: 4 декабря 2025, 22:15 (UTC+4)
+## Последняя сессия: 5 декабря 2025, 17:30 (UTC+4)
 
 ## Что сделано в этой сессии
 
-### Мультиконтекст Backend — ГОТОВО
+### Telegram Flow Debug — В ПРОЦЕССЕ
 
-1. **GET API для devices/repairs** (`API_Android_Appeal_Detail.json`)
-   - SQL загружает `appeal_devices` с вложенными `appeal_repairs`
-   - Добавлены поля: `conversation_focus`, `last_mentioned_device_id`, `last_mentioned_repair_id`
-   - Формат ответа: `devices[]` с `repairs[]` внутри
+1. **BAT Queue Processor** — исправлены Pop Message nodes
+   - Добавлен `propertyName: "value"` ко всем 10 нодам Pop Message
+   - Заменён Execute Workflow на Redis Push для debounce queue
+   - Исправлены connections Loop Over Batches (main[0] → loop, main[1] → done)
 
-2. **Conversation focus auto-update** (`BAT_AI_Appeal_Router.json`)
-   - "Prepare Context" определяет текущий фокус диалога
-   - Все UPDATE ноды сохраняют conversation_focus
-   - Метка "← В ФОКУСЕ" в контексте AI
+2. **BAT Batch Debouncer 10** — исправлен Parse Job
+   - Теперь корректно обрабатывает и объект и строку из Redis
+   - Добавлен `propertyName: "value"` в Pop Batch Job
+   - Добавлен `key` параметр в Get Batch Queue
 
-3. **Disambiguation Handler** (`BAT_Disambiguation_Handler.json`)
-   - Паттерны: порядковые номера (первый/второй), владелец (мой/сына/жены), проблема (экран/батарея)
-   - Если не распознано — формирует уточняющий вопрос с нумерованным списком
-
-4. **Touchpoints регистрация в роутере**
-   - Нода "Register Touchpoint (Outbound)" после Save Response
-   - Вызывает `/webhook/neo4j/touchpoint/register`
-   - `continueOnFail: true` — не блокирует поток
+3. **Найденная проблема: Get Batch Queue возвращает null**
+   - Queue Processor кладёт сообщения в `queue:batch:telegram:tg_xxx`
+   - Debouncer получает job из `queue:debounce:pending`
+   - Но при попытке прочитать `queue:batch:*` — пусто
+   - Подозрение: race condition или старые executions удаляют данные
 
 ---
 
-## Файлы для импорта в n8n
+## Файлы изменены в этой сессии
 
 ```
-workflows_to_import/
-├── modified/
-│   └── BAT_AI_Appeal_Router.json  ← заменить существующий
-└── new/
-    └── BAT_Disambiguation_Handler.json  ← новый workflow
-```
+n8n_workflows/TaskWork/
+├── BAT_Queue_Processor.json         ← полностью переработан
+└── BAT_Batch_Debouncer_10.json      ← исправлен Parse Job
 
-Также обновлён: `n8n_workflows/API/API_Android_Appeal_Detail.json`
+workflows_to_import/modified/
+├── BAT_Queue_Processor.json
+└── BAT_Batch_Debouncer_10.json
+```
 
 ---
 
-## Что НЕ сделано (на завтра)
+## Что НЕ сделано (на следующую сессию)
 
-1. **Импортировать workflows в n8n**
-   - BAT_AI_Appeal_Router.json — заменить
-   - BAT_Disambiguation_Handler.json — создать новый
+1. **Найти причину пустой batch queue**
+   - Остановить все Debouncer workflows
+   - Отправить тестовое сообщение
+   - Проверить Redis напрямую: `LRANGE queue:batch:telegram:tg_xxx 0 -1`
+   - Если данные есть — запустить один Debouncer и отследить
 
-2. **Android UI для мультиконтекста**
-   - Список устройств в appeal detail
-   - Добавление/редактирование устройств
-   - Переключение фокуса
+2. **После фикса:**
+   - Тест полного цикла до AI ответа
+   - Тест отправки ответа обратно в Telegram
 
-3. **Тестирование полного цикла**
-   - Клиент пишет про 2 устройства
-   - AI определяет фокус
-   - Disambiguation при неоднозначности
-
----
-
-## Структура touchpoints в Neo4j
-
-```cypher
-// Узел Touchpoint
-(:Touchpoint {
-  id: "uuid",
-  timestamp: datetime,
-  type: "message|call|visit",
-  channel: "telegram|whatsapp|...",
-  direction: "inbound|outbound|promo|mutual"
-})
-
-// Связи
-(t:Touchpoint)-[:FROM]->(c:Client)  // inbound: клиент → нам
-(t:Touchpoint)-[:TO]->(c:Client)    // outbound/promo: мы → клиенту
-// mutual: обе связи FROM и TO
-```
+3. **Android UI для мультиконтекста**
 
 ---
 
@@ -117,10 +92,10 @@ workflows_to_import/
 
 | Сервер | IP | Назначение |
 |--------|-----|------------|
-| n8n | 185.221.214.83 | Workflow automation |
+| n8n | 185.221.214.83 | Workflow automation + Redis |
 | Neo4j | 45.144.177.128:7474 | Graph database |
 | PostgreSQL | 185.221.214.83:6544 | Main database |
-| API | 45.144.177.128 | Backend API |
+| MCP Telegram | 217.145.79.27 | Telegram proxy (tg.eldoleado.ru) |
 
 ---
 
@@ -130,8 +105,8 @@ workflows_to_import/
 
 ---
 
-## Для продолжения завтра
+## Для продолжения
 
 1. Прочитать `Start.md`
-2. Импортировать workflows из `workflows_to_import/` в n8n
-3. Продолжить с механикой merge клиентов
+2. Импортировать исправленные workflows из `workflows_to_import/modified/`
+3. Дебаг Redis и batch queue
