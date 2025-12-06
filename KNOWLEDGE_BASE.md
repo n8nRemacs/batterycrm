@@ -1,6 +1,6 @@
 # ELDOLEADO KNOWLEDGE BASE
 
-*Auto-generated: 2025-12-06 16:35:00*
+*Auto-generated: 2025-12-06 16:45:44*
 
 ---
 
@@ -2285,10 +2285,10 @@
 - `workflow:API_Android_Normalize` → `workflow:BAT Operator Response Handler 3 - Text Voice Normalize`
 - `workflow:API_Operator_Appeal_Detail` → `workflow:Tool - Build Appeal Meta`
 - `workflow:API_Operator_Normalize` → `workflow:BAT Operator Response Handler 3 - Text Voice Normalize`
-- `android_api_service:ApiService` → `workflow:API_Android_Send_Response`
-- `android_api_service:ApiService` → `workflow:API_Android_Appeals_List`
-- `android_api_service:ApiService` → `workflow:API_Operator_Appeals_List`
 - `android_api_service:ApiService` → `workflow:API_Android_Send_Promo`
+- `android_api_service:ApiService` → `workflow:API_Android_Appeals_List`
+- `android_api_service:ApiService` → `workflow:API_Android_Send_Response`
+- `android_api_service:ApiService` → `workflow:API_Operator_Appeals_List`
 - `workflow:BAT AI Appeal Router` → `workflow:BAT Operator Notifier`
 - `workflow:BAT AI Appeal Router` → `workflow:BAT Neo4j Touchpoint Register`
 - `workflow:BAT AI Appeal Router` → `workflow:BAT AI Task Dispatcher`
@@ -2314,22 +2314,22 @@
 - `workflow:BAT IN VK` → `workflow:BAT_Tenant_Resolver`
 - `workflow:BAT IN WhatsApp` → `workflow:BAT_Tenant_Resolver`
 - `workflow:BAT Operator Notifier` → `workflow:BAT_FCM_Sender`
-- `workflow:BAT Operator Response Handler 1 - Main Router` → `workflow:BAT Client Response Sender`
 - `workflow:BAT Operator Response Handler 1 - Main Router` → `workflow:BAT Operator Response Handler 3 - Text Voice Normalize`
+- `workflow:BAT Operator Response Handler 1 - Main Router` → `workflow:BAT Client Response Sender`
 - `workflow:BAT OUT Avito` → `workflow:BAT Neo4j Touchpoint Register`
 - `workflow:BAT OUT MAX` → `workflow:BAT Neo4j Touchpoint Register`
-- `workflow:BAT Out Processor 1` → `workflow:BAT OUT Avito`
 - `workflow:BAT Out Processor 1` → `workflow:BAT OUT VK`
-- `workflow:BAT Out Processor 1` → `workflow:BAT OUT WhatsApp`
 - `workflow:BAT Out Processor 1` → `workflow:BAT OUT MAX`
-- `workflow:BAT Out Processor 2` → `workflow:BAT OUT WhatsApp`
+- `workflow:BAT Out Processor 1` → `workflow:BAT OUT WhatsApp`
+- `workflow:BAT Out Processor 1` → `workflow:BAT OUT Avito`
 - `workflow:BAT Out Processor 2` → `workflow:BAT OUT VK`
 - `workflow:BAT Out Processor 2` → `workflow:BAT OUT MAX`
 - `workflow:BAT Out Processor 2` → `workflow:BAT OUT Avito`
-- `workflow:BAT Out Processor 3` → `workflow:BAT OUT WhatsApp`
+- `workflow:BAT Out Processor 2` → `workflow:BAT OUT WhatsApp`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT VK`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT MAX`
 - `workflow:BAT Out Processor 3` → `workflow:BAT OUT Avito`
+- `workflow:BAT Out Processor 3` → `workflow:BAT OUT WhatsApp`
 - *...and 19 more*
 
 ### Depends On (5)
@@ -2344,8 +2344,8 @@
 
 - `workflow:API_Android_Appeal_Detail` → `table:appeal_repairs`
 - `workflow:API_Android_Appeal_Detail` → `table:repair_categories`
-- `workflow:API_Android_Appeal_Detail` → `table:issue_types`
 - `workflow:API_Android_Appeal_Detail` → `table:appeal_devices`
+- `workflow:API_Android_Appeal_Detail` → `table:issue_types`
 - `workflow:API_Android_Device_Create` → `table:appeal_devices`
 - `workflow:API_Android_Device_Delete` → `table:appeal_devices`
 - `workflow:API_Android_Device_Update` → `table:appeal_devices`
@@ -2356,15 +2356,15 @@
 - `workflow:API_Android_Repair_Create` → `table:appeal_repairs`
 - `workflow:API_Android_Repair_Delete` → `table:appeal_repairs`
 - `workflow:API_Android_Repair_Update` → `table:appeal_repairs`
-- `workflow:BAT AI Appeal Router` → `table:appeal_repairs`
+- `workflow:BAT AI Appeal Router` → `table:appeal_devices`
 - `workflow:BAT AI Appeal Router` → `table:context_fields_config`
 - `workflow:BAT AI Appeal Router` → `table:repair_categories`
-- `workflow:BAT AI Appeal Router` → `table:appeal_devices`
+- `workflow:BAT AI Appeal Router` → `table:appeal_repairs`
+- `workflow:BAT AI Task Dispatcher` → `table:ai_extraction_tasks`
+- `workflow:BAT AI Task Dispatcher` → `table:appeal_repairs`
 - `workflow:BAT AI Task Dispatcher` → `table:ai_entity_configs`
 - `workflow:BAT AI Task Dispatcher` → `table:repair_categories`
 - `workflow:BAT AI Task Dispatcher` → `table:appeal_devices`
-- `workflow:BAT AI Task Dispatcher` → `table:ai_extraction_tasks`
-- `workflow:BAT AI Task Dispatcher` → `table:appeal_repairs`
 - `workflow:BAT AI Universal Worker` → `table:ai_extraction_tasks`
 - `workflow:BAT AI Universal Worker 1` → `table:ai_extraction_tasks`
 - `workflow:BAT AI Universal Worker 2` → `table:ai_extraction_tasks`

@@ -17,6 +17,35 @@ When user says:
 
 ---
 
+## Documentation Index
+
+| Category | Path | Description |
+|----------|------|-------------|
+| **Specs** | `docs/specs/` | Технические задания на фичи |
+| **Current** | `docs/current/` | Актуальная документация системы |
+| **AI** | `docs/ai/` | AI система, промпты, экстракторы |
+| **Android** | `docs/android/` | FCM, сессии, фронтенд |
+| **Backend** | `docs/backend/` | API, база данных |
+| **Architecture** | `docs/architecture/` | Архитектурные решения |
+| **Deployment** | `docs/deployment/` | Чеклисты деплоя |
+| **Setup** | `docs/setup/` | Инструкции по настройке |
+| **n8n** | `docs/n8n/` | Работа с n8n |
+| **Features** | `docs/features/` | Документация фич |
+| **Flows** | `docs/flows/` | Автогенерируемые потоки (auto) |
+
+### Key Documents
+
+| Document | Description |
+|----------|-------------|
+| `docs/specs/tenant_ai_instructions.md` | ТЗ: Обучаемые реакции AI-бота |
+| `docs/current/01_SYSTEM_OVERVIEW.md` | Обзор системы |
+| `docs/current/02_DATABASE_SCHEMA_EXTENDED.md` | Схема БД |
+| `docs/current/03_WORKFLOWS_COMPLETE.md` | Все workflows |
+| `docs/ai/UNIVERSAL_AI_PROMPT_SYSTEM.md` | AI промпт система |
+| `docs/backend/Database_Structure_BatteryCRM_COMPLETE.md` | Полная структура БД |
+
+---
+
 ## Project Structure
 
 ```
@@ -35,6 +64,7 @@ workflows_to_import/    # Для новых/изменённых workflows
 supabase/migrations/    # SQL миграции
 scripts/                # Python скрипты автоматизации
 docs/flows/             # Автогенерируемая документация потоков
+docs/specs/             # Технические задания на фичи
 Plans/                  # Документы планирования
 ```
 

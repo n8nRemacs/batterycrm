@@ -521,6 +521,122 @@ def analyze_table_references(project_root, components_by_key):
     return relations
 
 
+def analyze_doc_relations(project_root, components_by_key):
+    """Analyze documentation files to find what they document."""
+    relations = []
+    docs_dirs = [project_root / "docs", project_root / "Plans"]
+
+    # Build index of component names for matching
+    component_names = {}
+    for (typ, name), comp in components_by_key.items():
+        # Index by name (lowercase for matching)
+        component_names[name.lower()] = (typ, name)
+        # Also index by name variants
+        if name.startswith("BAT "):
+            component_names[name[4:].lower()] = (typ, name)
+        if name.startswith("API_Android_"):
+            component_names[name[12:].lower()] = (typ, name)
+        if name.startswith("MCP_"):
+            component_names[name[4:].lower()] = (typ, name)
+
+    for docs_dir in docs_dirs:
+        if not docs_dir.exists():
+            continue
+
+        for md_file in docs_dir.rglob("*.md"):
+            try:
+                content = md_file.read_text(encoding="utf-8")
+                doc_name = md_file.stem
+                doc_key = ("doc", doc_name)
+
+                if doc_key not in components_by_key:
+                    continue
+
+                # Find references to components in the document
+                found_refs = set()
+
+                # 1. Look for workflow names (BAT*, API_Android_*)
+                workflow_patterns = [
+                    r'\bBAT[_ ]IN[_ ]\w+',
+                    r'\bBAT[_ ]OUT[_ ]\w+',
+                    r'\bBAT[_ ]\w+',
+                    r'\bAPI_Android_\w+',
+                    r'\bAPI_Operator_\w+',
+                ]
+                for pattern in workflow_patterns:
+                    matches = re.findall(pattern, content, re.I)
+                    for match in matches:
+                        # Normalize name
+                        name_normalized = match.replace("_", " ").strip()
+                        wf_key = ("workflow", name_normalized)
+                        if wf_key in components_by_key:
+                            found_refs.add(("workflow", name_normalized, "documents"))
+                        else:
+                            # Try with underscores
+                            wf_key2 = ("workflow", match)
+                            if wf_key2 in components_by_key:
+                                found_refs.add(("workflow", match, "documents"))
+
+                # 2. Look for MCP server references
+                mcp_patterns = [
+                    r'\bmcp-(\w+)',
+                    r'\bMCP[_ ](\w+)',
+                ]
+                for pattern in mcp_patterns:
+                    matches = re.findall(pattern, content, re.I)
+                    for match in matches:
+                        mcp_name = f"MCP_{match.upper()}"
+                        mcp_key = ("mcp_server", mcp_name)
+                        if mcp_key in components_by_key:
+                            found_refs.add(("mcp_server", mcp_name, "documents"))
+
+                # 3. Look for table references
+                table_patterns = [
+                    r'\b(appeals|clients|messages|tenants|devices|repairs|appeal_devices)\b',
+                    r'\bFROM\s+([a-z_]+)',
+                    r'\bINTO\s+([a-z_]+)',
+                    r'\btable:\s*`?([a-z_]+)`?',
+                ]
+                for pattern in table_patterns:
+                    matches = re.findall(pattern, content, re.I)
+                    for match in matches:
+                        table_key = ("table", match.lower())
+                        if table_key in components_by_key:
+                            found_refs.add(("table", match.lower(), "documents"))
+
+                # 4. Look for Android component references
+                android_patterns = [
+                    r'\b(\w+Activity)\b',
+                    r'\b(\w+ViewModel)\b',
+                    r'\b(\w+Repository)\b',
+                    r'\b(\w+Service)\b',
+                ]
+                for pattern in android_patterns:
+                    matches = re.findall(pattern, content)
+                    for match in matches:
+                        # Check all android types
+                        for android_type in ["android_activity", "android_viewmodel", "android_repository", "android_api_service"]:
+                            android_key = (android_type, match)
+                            if android_key in components_by_key:
+                                found_refs.add((android_type, match, "documents"))
+
+                # Create relations
+                for ref_type, ref_name, rel_type in found_refs:
+                    relations.append({
+                        "from_type": "doc",
+                        "from_name": doc_name,
+                        "to_type": ref_type,
+                        "to_name": ref_name,
+                        "relation_type": rel_type,
+                        "description": f"Documentation reference"
+                    })
+
+            except Exception as e:
+                print(f"  Warning: Could not analyze {md_file}: {e}")
+
+    return relations
+
+
 def deduplicate_relations(relations):
     """Remove duplicate relations."""
     seen = set()
@@ -642,6 +758,12 @@ def main():
     table_refs = analyze_table_references(PROJECT_ROOT, components_by_key)
     print(f"  Found {len(table_refs)} relations")
     all_relations.extend(table_refs)
+
+    # Analyze doc -> component relations
+    print("Analyzing doc -> component relations...")
+    doc_rels = analyze_doc_relations(PROJECT_ROOT, components_by_key)
+    print(f"  Found {len(doc_rels)} relations")
+    all_relations.extend(doc_rels)
 
     # Deduplicate
     print("\nDeduplicating...")
