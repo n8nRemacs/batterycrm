@@ -1,100 +1,75 @@
-# Eldoleado Project Instructions
+# Eldoleado Project
+
+> Единый файл контекста проекта для Claude и разработчиков
+
+**Последнее обновление:** 2025-12-06
+
+---
 
 ## Quick Commands
 
 When user says:
-- **"фулл синк" / "full sync" / "обнови KB"** -> Run `python scripts/full_sync.py`
-- **"быстрый синк" / "quick sync"** -> Run `python scripts/full_sync.py --quick`
-- **"обнови документацию"** -> Run `python scripts/update_flow_docs.py --all`
-- **"покажи индекс workflow"** -> Run `python scripts/update_flow_docs.py --index`
-- **"stop" / "стоп"** -> Kill all background tasks, stop running scripts
+- **"фулл синк" / "full sync" / "обнови KB"** → `python scripts/full_sync.py`
+- **"быстрый синк" / "quick sync"** → `python scripts/full_sync.py --quick`
+- **"обнови документацию"** → `python scripts/update_flow_docs.py --all`
+- **"покажи индекс workflow"** → `python scripts/update_flow_docs.py --index`
+- **"stop" / "стоп"** → Kill all background tasks
 
-## How to Use Knowledge Base System
-
-### When CREATING new workflow/feature:
-1. Check existing patterns: `python scripts/trace_flow.py "similar_keyword"`
-2. Look at flow docs: `docs/flows/` for similar channels/actions
-3. After creating, run: `python scripts/full_sync.py` to update KB
-4. Check relations: `python scripts/update_flow_docs.py --index`
-
-### When MODIFYING existing workflow:
-1. First, trace current flow: `python scripts/trace_flow.py --workflow "WorkflowName"`
-2. Check which docs will be affected: `python scripts/update_flow_docs.py --index | grep "WorkflowName"`
-3. Make changes
-4. Update only affected docs: `python scripts/update_flow_docs.py --workflow "WorkflowName"`
-
-### When DEBUGGING:
-1. Trace the full flow: `python scripts/trace_flow.py "keyword_or_webhook"`
-2. See all DB operations: check `docs/flows/action_*.md` or `channel_*.md`
-3. Find which tables are affected: look at "Затронутые таблицы" section
-4. Check SQL queries in the flow doc
-5. Query DB directly to verify data:
-   ```sql
-   -- Connect via psycopg2 or psql
-   SELECT * FROM workflow_nodes WHERE workflow_name = 'WorkflowName';
-   SELECT * FROM node_connections WHERE workflow_name = 'WorkflowName';
-   ```
-
-### Useful Queries:
-```sql
--- Find all workflows that touch a table
-SELECT DISTINCT workflow_name FROM workflow_nodes
-WHERE details->>'sql' ILIKE '%table_name%';
-
--- Find workflows by webhook
-SELECT name, metadata->>'webhook_path' FROM project_components
-WHERE type = 'workflow' AND metadata->>'webhook_path' IS NOT NULL;
-
--- Find workflow chain
-SELECT * FROM component_relations
-WHERE relation_type = 'calls'
-AND from_component_id IN (SELECT id FROM project_components WHERE name = 'WorkflowName');
-```
+---
 
 ## Project Structure
 
-- `app/` - Android приложение (Kotlin)
-- `n8n_workflows/` - JSON файлы workflow с n8n сервера
-- `supabase/migrations/` - SQL миграции
-- `scripts/` - Python скрипты для автоматизации
-- `docs/flows/` - Автогенерируемая документация потоков
+```
+app/                    # Android приложение (Kotlin)
+MCP/                    # MCP серверы (Python FastAPI)
+  ├── mcp-telegram/
+  ├── mcp-whatsapp/
+  ├── mcp-avito/
+  ├── mcp-vk/
+  ├── mcp-max/
+  ├── mcp-form/
+  ├── api-android/
+  └── shared/           # Общий storage модуль
+n8n_workflows/          # JSON файлы workflow с n8n сервера (READ-ONLY)
+workflows_to_import/    # Для новых/изменённых workflows
+supabase/migrations/    # SQL миграции
+scripts/                # Python скрипты автоматизации
+docs/flows/             # Автогенерируемая документация потоков
+Plans/                  # Документы планирования
+```
 
-## Knowledge Base Scripts
+---
 
-| Script | Purpose |
-|--------|---------|
-| `full_sync.py` | Full KB sync (n8n + components + relations + nodes + docs) |
-| `sync_and_update_kb.py` | Sync from n8n and update components/relations |
-| `populate_workflow_nodes.py` | Extract nodes from workflow JSON |
-| `populate_node_connections.py` | Extract node connections |
-| `update_flow_docs.py` | Generate/update flow documentation |
-| `trace_flow.py` | Trace execution path through workflows |
-
-## Database
-
-- **PostgreSQL**: `185.221.214.83:6544/postgres`
-- **Tables**: project_components, component_relations, workflow_nodes, node_connections, channel_accounts
-
-## Servers
+## Servers & Services
 
 ### RU Server (45.144.177.128)
-| Service | Port | Description |
-|---------|------|-------------|
-| mcp-avito | 8765 | Avito Messenger API v2.0.0 multi-tenant |
-| mcp-vk | 8767 | VK Community API v2.0.0 multi-tenant |
-| mcp-max | 8768 | MAX (VK Teams) API v2.0.0 multi-tenant |
-| mcp-form | 8770 | Web forms API |
-| api-android | 8780 | Android API Gateway |
+
+| Service | Port | Version | Description |
+|---------|------|---------|-------------|
+| mcp-avito | 8765 | v2.0.0 multi-tenant | Avito Messenger API |
+| mcp-vk | 8767 | v2.0.0 multi-tenant | VK Community API |
+| mcp-max | 8768 | v2.0.0 multi-tenant | MAX (VK Teams) API |
+| mcp-form | 8770 | v1.0.0 | Web forms API |
+| api-android | 8780 | - | Android API Gateway |
 | Redis (avito-redis) | - | Docker network: avito-api_default |
 
 ### Finnish Server (217.145.79.27)
-| Service | Port | Description |
-|---------|------|-------------|
-| mcp-telegram | 8767 | Telegram Bot API v2.0.0 multi-tenant |
-| mcp-whatsapp | 8766 | WhatsApp (Wappi.pro) API v2.0.0 multi-tenant |
+
+| Service | Port | Version | Description |
+|---------|------|---------|-------------|
+| mcp-telegram | 8767 | v2.0.0 multi-tenant | Telegram Bot API |
+| mcp-whatsapp | 8766 | v2.0.0 multi-tenant | WhatsApp (Wappi.pro) API |
 | Redis (mcp-redis) | 6379 | Docker network: mcp-network |
 
+### n8n Server (185.221.214.83)
+
+| Service | Port | Description |
+|---------|------|-------------|
+| n8n | 5678 | https://n8n.n8nsrv.ru |
+| PostgreSQL | 6544 | Main database |
+
 ### Multi-tenant Webhook URLs
+
 ```
 /webhook/telegram/{bot_hash}
 /webhook/avito/{user_hash}
@@ -104,33 +79,152 @@ AND from_component_id IN (SELECT id FROM project_components WHERE name = 'Workfl
 ```
 Hash = SHA256(primary_credential)[:16]
 
-## n8n Server
+---
 
-- **URL**: https://n8n.n8nsrv.ru
-- **Workflows prefix**: BAT (BattCRM/Eldoleado)
+## Database
 
-### IMPORTANT: n8n is READ-ONLY!
+**Connection:** `postgresql://supabase_admin:***@185.221.214.83:6544/postgres`
 
-**n8n сервер только для чтения. НЕ пытаться загружать workflows через API.**
+### Key Tables
 
-- `n8n_workflows/` - только для ЧТЕНИЯ (синхронизация с сервера)
-- `workflows_to_import/` - для НОВЫХ и ИЗМЕНЁННЫХ workflows
+| Category | Tables |
+|----------|--------|
+| Core | tenants, clients, appeals, messages |
+| Devices | appeal_devices, repair_categories, issue_types |
+| Funnel | funnel_stages, appeal_stage_history |
+| Marketing | promo_campaigns, short_links, fingerprints |
+| AI | ai_prompts, ai_extraction_queue |
+| Knowledge Base | project_components, component_relations, workflow_nodes, channel_accounts |
 
-**Когда создаёшь/изменяешь workflow:**
-1. Создай JSON файл в `workflows_to_import/`
-2. Пользователь вручную импортирует через n8n UI
-3. После импорта запусти `python scripts/full_sync.py` для синхронизации
+---
 
-**Структура workflows_to_import:**
+## Project Status
+
+### Production Ready
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| mcp-telegram | ✅ v2.0.0 | 1 bot registered |
+| mcp-whatsapp | ✅ v2.0.0 | Wappi.pro integration |
+| mcp-avito | ✅ v2.0.0 | OAuth + rate limiting |
+| mcp-vk | ✅ v2.0.0 | Callback confirmation |
+| mcp-max | ✅ v2.0.0 | VK Teams |
+| mcp-form | ✅ v1.0.0 | Web forms |
+| api-android | ✅ | Android API Gateway |
+| Android App | ✅ | Calls, chat, appeals |
+| n8n Workflows | ✅ | ~100 workflows |
+
+### In Progress
+
+| Component | Status | What's Left |
+|-----------|--------|-------------|
+| mcp-docs-rag | 🔄 90% | Apply pgvector migration, index docs |
+| mcp-instagram | 🔄 50% | FB Graph API integration |
+
+### TODO (Priority)
+
+1. **BAT IN Telegram** — Activate workflow (MCP ready)
+2. **Admin Panel** — Web UI for tenant management
+3. **10-20 paying customers** — Proof for investor
+
+---
+
+## Architecture Decisions
+
+### 2025-12-06: Multi-tenant MCP
+
+All MCP channels v2.0.0 use unified storage (Redis + PostgreSQL) with dynamic webhook URLs.
+Webhook format: `/webhook/{channel}/{account_hash}` where hash = SHA256[:16] of primary credential.
+
+### 2025-12-06: Two Servers for MCP
+
+- RU server for avito/vk/max/form/android
+- Finnish server for telegram/whatsapp (closer to EU APIs)
+
+### 2025-12-05: Separate MCP Servers
+
+Each channel = separate FastAPI server. Isolation, scaling, reusability.
+
+### 2025-12-04: PostgreSQL as Main DB
+
+PostgreSQL + JSONB instead of MongoDB. Relational joins, transactions, pgvector for embeddings.
+
+---
+
+## n8n Rules
+
+**n8n сервер только для ЧТЕНИЯ. НЕ загружать workflows через API.**
+
+- `n8n_workflows/` — READ-ONLY (sync from server)
+- `workflows_to_import/` — for NEW and MODIFIED workflows
+
+**When creating/modifying workflow:**
+1. Create JSON in `workflows_to_import/`
+2. User imports manually via n8n UI
+3. Run `python scripts/full_sync.py` to sync
+
+---
+
+## Useful Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `full_sync.py` | Full KB sync (n8n + components + relations) |
+| `trace_flow.py` | Trace execution path through workflows |
+| `update_flow_docs.py` | Generate flow documentation |
+| `populate_*.py` | Populate KB tables |
+
+### Trace Examples
+
+```bash
+# Trace by keyword
+python scripts/trace_flow.py "telegram"
+
+# Trace specific workflow
+python scripts/trace_flow.py --workflow "BAT IN Telegram"
 ```
-workflows_to_import/
-├── new/           # Новые workflows
-├── modified/      # Изменённые существующие
-└── README.md      # Инструкции по импорту
+
+---
+
+## Useful SQL
+
+```sql
+-- Find workflows touching a table
+SELECT DISTINCT workflow_name FROM workflow_nodes
+WHERE details->>'sql' ILIKE '%appeals%';
+
+-- Find workflows by webhook
+SELECT name, metadata->>'webhook_path' FROM project_components
+WHERE type = 'workflow' AND metadata->>'webhook_path' IS NOT NULL;
+
+-- Component relations
+SELECT c2.type, c2.name, r.relation_type
+FROM component_relations r
+JOIN project_components c2 ON c2.id = r.to_component_id
+WHERE r.from_component_id = (SELECT id FROM project_components WHERE name = 'X');
 ```
 
-## Key Conventions
+---
+
+## Conventions
 
 - Workflow naming: `BAT IN {Channel}` for inbound, `API_Android_{Action}` for API
 - All documentation in Russian
-- Flow docs have YAML frontmatter with participating workflows for incremental updates
+- Flow docs have YAML frontmatter for incremental updates
+
+---
+
+## History
+
+### 2025-12-06
+- Deployed all MCP servers v2.0.0 multi-tenant to production
+- Created shared storage module (Redis + PostgreSQL)
+- Created CONTEXT.md, merged into CLAUDE.md
+
+### 2025-12-05
+- Created shared storage for MCP servers
+- Added channel_accounts table
+
+### 2025-12-04
+- Created KB structure (project_components, component_relations)
+- Created automation scripts
