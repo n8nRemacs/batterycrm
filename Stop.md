@@ -34,68 +34,91 @@ git add -A && git commit -m "Session update: краткое описание" &&
 
 ---
 
-## Последняя сессия: 5 декабря 2025, 17:30 (UTC+4)
+## Последняя сессия: 6 декабря 2025, 12:45 (UTC+4)
 
 ## Что сделано в этой сессии
 
-### Telegram Flow Debug — В ПРОЦЕССЕ
+### 1. Анализ архитектуры для масштабирования на 1000 тенантов
 
-1. **BAT Queue Processor** — исправлены Pop Message nodes
-   - Добавлен `propertyName: "value"` ко всем 10 нодам Pop Message
-   - Заменён Execute Workflow на Redis Push для debounce queue
-   - Исправлены connections Loop Over Batches (main[0] → loop, main[1] → done)
+- Проанализированы узкие места текущей архитектуры
+- Спроектирована схема горизонтального масштабирования:
+  - Шардирование тенантов по серверам n8n (1-200 → shard-1, 201-400 → shard-2)
+  - HTTP webhooks для AI Workers вместо внутренних workflow triggers
+  - Резервный сервер с auto-failover через nginx
+  - API Gateway для tenant routing
+- Решение: сначала стабильный монолит, масштабирование по мере роста
 
-2. **BAT Batch Debouncer 10** — исправлен Parse Job
-   - Теперь корректно обрабатывает и объект и строку из Redis
-   - Добавлен `propertyName: "value"` в Pop Batch Job
-   - Добавлен `key` параметр в Get Batch Queue
+### 2. Android API Gateway — РАЗВЁРНУТ
 
-3. **Найденная проблема: Get Batch Queue возвращает null**
-   - Queue Processor кладёт сообщения в `queue:batch:telegram:tg_xxx`
-   - Debouncer получает job из `queue:debounce:pending`
-   - Но при попытке прочитать `queue:batch:*` — пусто
-   - Подозрение: race condition или старые executions удаляют данные
+Создан и задеплоен FastAPI сервер для Android приложения:
 
----
-
-## Файлы изменены в этой сессии
-
+**Структура MCP/api-android/:**
 ```
-n8n_workflows/TaskWork/
-├── BAT_Queue_Processor.json         ← полностью переработан
-└── BAT_Batch_Debouncer_10.json      ← исправлен Parse Job
-
-workflows_to_import/modified/
-├── BAT_Queue_Processor.json
-└── BAT_Batch_Debouncer_10.json
+├── app.py              # FastAPI endpoints (22 endpoint'а)
+├── config.py           # Settings (pydantic)
+├── n8n_client.py       # HTTP client для n8n webhooks
+├── auth.py             # JWT authentication
+├── models.py           # Pydantic models
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
 ```
+
+**Деплой:**
+- Сервер: 45.144.177.128 (Beget)
+- Порт: 8780
+- URL: http://45.144.177.128:8780
+- Health: http://45.144.177.128:8780/health ✅
+- Swagger: http://45.144.177.128:8780/docs
+
+### 3. Nginx конфиг для домена — ПОДГОТОВЛЕН
+
+- Создан конфиг `/etc/nginx/sites-available/android-api`
+- Готов к получению SSL сертификата
+- Ждёт DNS запись: `android-api.eldoleado.ru → 45.144.177.128`
 
 ---
 
 ## Что НЕ сделано (на следующую сессию)
 
-1. **Найти причину пустой batch queue**
-   - Остановить все Debouncer workflows
-   - Отправить тестовое сообщение
-   - Проверить Redis напрямую: `LRANGE queue:batch:telegram:tg_xxx 0 -1`
-   - Если данные есть — запустить один Debouncer и отследить
+1. **DNS запись для android-api.eldoleado.ru**
+   - Добавить A-запись: `android-api → 45.144.177.128`
+   - После этого получить SSL: `certbot --nginx -d android-api.eldoleado.ru`
 
-2. **После фикса:**
-   - Тест полного цикла до AI ответа
-   - Тест отправки ответа обратно в Telegram
+2. **Дебаг Telegram flow**
+   - Проверить Redis напрямую после Queue Processor
+   - Тест: остановить все Debouncer, отправить сообщение, проверить Redis
 
-3. **Android UI для мультиконтекста**
+3. **Обновить Android приложение**
+   - Заменить прямые вызовы n8n на новый API Gateway
+   - Base URL: `https://android-api.eldoleado.ru`
+
+4. **Импортировать workflows в n8n**
+   - BAT_AI_Appeal_Router.json — заменить
+   - BAT_Disambiguation_Handler.json — создать новый
 
 ---
 
 ## Серверы
 
-| Сервер | IP | Назначение |
-|--------|-----|------------|
-| n8n | 185.221.214.83 | Workflow automation + Redis |
-| Neo4j | 45.144.177.128:7474 | Graph database |
-| PostgreSQL | 185.221.214.83:6544 | Main database |
-| MCP Telegram | 217.145.79.27 | Telegram proxy (tg.eldoleado.ru) |
+| Сервер | IP | Порт | Назначение |
+|--------|-----|------|------------|
+| n8n | n8n.n8nsrv.ru | 443 | Workflow automation |
+| Neo4j | 45.144.177.128 | 7474/7687 | Graph database |
+| PostgreSQL | 185.221.214.83 | 6544 | Main database |
+| Android API | 45.144.177.128 | 8780 | API Gateway (FastAPI) |
+| Redis | 185.221.214.83 | 6379 | Queues/cache |
+| MCP Telegram | 217.145.79.27 | 443 | tg.eldoleado.ru |
+
+---
+
+## Команды для SSL (после DNS)
+
+```bash
+# На сервере 45.144.177.128
+certbot --nginx -d android-api.eldoleado.ru
+nginx -t && systemctl reload nginx
+```
 
 ---
 
@@ -108,5 +131,7 @@ workflows_to_import/modified/
 ## Для продолжения
 
 1. Прочитать `Start.md`
-2. Импортировать исправленные workflows из `workflows_to_import/modified/`
-3. Дебаг Redis и batch queue
+2. Добавить DNS запись `android-api.eldoleado.ru → 45.144.177.128`
+3. Получить SSL сертификат
+4. Дебаг Telegram flow (Redis batch queue)
+5. Обновить Android приложение для работы с новым API
