@@ -1,7 +1,7 @@
 # Отладка: Telegram → AI не работает
 
 **Дата начала:** 2025-12-06
-**Статус:** Найдена проблема, нужно исправить
+**Статус:** РЕШЕНО (2025-12-07)
 
 ---
 
@@ -9,72 +9,99 @@
 
 Сообщения из Telegram доходят до n8n, но AI не отвечает клиенту.
 
-## Что проверили
-
-### 1. MCP серверы — ОК
-- mcp-telegram (Finnish server :8767) — работает
-- Webhook получает сообщения — ОК
-- Отправляет в n8n — ОК
-
-### 2. BAT IN Telegram — ОК
-- Получает webhook
-- Push to queue:incoming — работает
-- Сообщение попадает в Redis queue:incoming
-
-### 3. BAT Queue Processor — ПРОБЛЕМА ЗДЕСЬ
-- Pop from queue:incoming — ОК (данные получены)
-- Acquire Batch Lock — ОК
-- Prepare New Batch — ОК (JSON корректный)
-- **Push New Batch Messages — НЕ ЗАПИСЫВАЕТ!** ❌
-- Set Last Seen — ОК
-- Trigger Debouncer — вызывается
-
-### 4. BAT Batch Debouncer
-- Get Batch Queue — получает NULL (данных нет в Redis)
-- Считает что batch пустой
-- Удаляет "пустую" очередь
-
-### 5. Redis
-- SET работает (`last_seen:*` ключи есть)
-- GET работает
-- POP работает
-- **PUSH не работает** (ключей `queue:batch:*` нет)
-
----
-
 ## Корневая причина
 
-n8n Redis node operation `push` с динамическим `messageData`:
-```javascript
-"messageData": "={{ $json.messages_json.join('|||SEPARATOR|||') }}"
-```
+**BAT Batch Debouncer** использовал операцию `GET` для чтения очереди `queue:batch:*`, но данные записаны через PUSH как **list** тип.
 
-**Не выполняет реальную запись в Redis.** Output ноды = Input (данные проходят насквозь без записи).
+- GET работает только для string типа → возвращает NULL для list
+- Debouncer считал batch пустым и удалял очередь с данными
 
 ---
 
 ## Решение
 
-Заменить PUSH на SET с JSON-сериализацией.
+### 1. Добавить ноду "Pop Batch Job"
 
-**См. `stop.md` для деталей реализации.**
+Между Schedule Trigger и Init Debouncer:
+
+| Параметр | Значение |
+|----------|----------|
+| Type | Redis |
+| Operation | pop |
+| List | `queue:debounce:pending` |
+| Property Name | `value` |
+
+### 2. Исправить "Init Debouncer"
+
+```javascript
+// Получаем данные о батче из входа
+const raw = $input.first().json;
+const input = raw.value || raw;
+
+return {
+  batch_key: input.batch_key,
+  channel: input.channel,
+  external_chat_id: input.external_chat_id,
+  queue_key: input.queue_key || `queue:batch:${input.batch_key}`,
+  lock_key: input.lock_key || `lock:batch:${input.batch_key}`,
+  last_seen_key: input.last_seen_key || `last_seen:${input.batch_key}`,
+  debounce_seconds: 20,
+  max_wait_seconds: 300,
+  start_time: new Date().toISOString()
+};
+```
+
+### 3. Заменить "Get Batch Queue" на 10 параллельных POP
+
+Убрать ноду с GET, добавить:
+- "Prepare Pop" — передаёт `queue_key`
+- "Pop Message 1-10" — Redis POP операции
+- Все POP ноды → "Combine Messages"
+
+| Параметр | Значение |
+|----------|----------|
+| Operation | pop |
+| List | `={{ $json.queue_key }}` или `={{ $('Prepare Pop').item.json.queue_key }}` |
+| Property Name | `value` |
+
+### 4. Убрать "Delete Queue"
+
+POP уже удаляет элементы. Отдельный DELETE не нужен.
 
 ---
 
-## Тестирование после исправления
+## Проверка Redis
 
-1. Отправить сообщение в Telegram бот
-2. Проверить Redis:
-   ```bash
-   ssh root@45.144.177.128 'docker exec redis redis-cli -a "Mi31415926pSss!" KEYS "queue:batch:*"'
-   ```
-3. Должен появиться ключ `queue:batch:telegram:tg_XXXXX`
-4. Через 20 секунд (debounce) AI должен ответить
+```bash
+# Все ключи
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! KEYS "*"'
+
+# Длина очереди
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LLEN "queue:batch:telegram:tg_1132511247"'
+
+# Содержимое очереди
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LRANGE "queue:batch:telegram:tg_1132511247" 0 -1'
+```
+
+---
+
+## Redis Insight
+
+http://185.221.214.83:5540
+
+---
+
+## Результат
+
+После исправления:
+- Сообщения читаются из `queue:batch:*` через POP
+- Батч собирается корректно
+- Данные передаются в Client Resolver
+- Очередь очищается автоматически
 
 ---
 
 ## Связанные файлы
 
-- `n8n_workflows/Core/BAT Queue Processor.json`
 - `n8n_workflows/TaskWork/BAT_Batch_Debouncer.json`
-- `docs/debug/stop.md` — детали решения
+- `workflows_to_import/modified/BAT_Batch_Debouncer_FIXED.json`

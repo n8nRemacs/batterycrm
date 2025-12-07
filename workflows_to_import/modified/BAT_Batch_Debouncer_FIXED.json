@@ -92,11 +92,11 @@
       "parameters": {
         "jsCode": "// Передаём queue_key для POP операций\nconst data = $('Check Silence Duration').first().json;\nreturn { queue_key: data.queue_key };"
       },
-      "id": "prep-pop-1",
+      "id": "prep-pop",
       "name": "Prepare Pop",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-320, -112]
+      "position": [-320, -16]
     },
     {
       "parameters": {
@@ -109,7 +109,7 @@
       "name": "Pop Message 1",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-96, -352],
+      "position": [-96, -496],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -128,7 +128,7 @@
       "name": "Pop Message 2",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-96, -192],
+      "position": [-96, -368],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -147,7 +147,7 @@
       "name": "Pop Message 3",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-96, -32],
+      "position": [-96, -240],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -166,7 +166,7 @@
       "name": "Pop Message 4",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-96, 128],
+      "position": [-96, -112],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -185,7 +185,7 @@
       "name": "Pop Message 5",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-96, 288],
+      "position": [-96, 16],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -195,13 +195,108 @@
     },
     {
       "parameters": {
-        "jsCode": "// Собираем все сообщения из POP операций\nconst allItems = $input.all();\nconst initData = $('Check Silence Duration').first().json;\nconst messages = [];\n\nfor (const item of allItems) {\n  const val = item.json?.value;\n  if (val && val !== null && val !== 'null' && val !== '') {\n    try {\n      // Проверяем, содержит ли строка сепаратор\n      if (typeof val === 'string' && val.includes('|||SEPARATOR|||')) {\n        const parts = val.split('|||SEPARATOR|||');\n        for (const part of parts) {\n          if (part.trim()) {\n            messages.push(JSON.parse(part));\n          }\n        }\n      } else {\n        const parsed = typeof val === 'string' ? JSON.parse(val) : val;\n        messages.push(parsed);\n      }\n    } catch (e) {\n      console.error('Failed to parse message:', val, e);\n    }\n  }\n}\n\nif (messages.length === 0) {\n  return {\n    empty: true,\n    batch_key: initData.batch_key\n  };\n}\n\n// Сортируем по timestamp\nconst toTs = (m) => {\n  const t = m.timestamp ? Date.parse(m.timestamp) : NaN;\n  return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;\n};\nmessages.sort((a, b) => toTs(a) - toTs(b));\n\n// Собираем тексты\nconst texts = messages\n  .map(m => m.media?.voice_transcribed_text\n    ? `[Голосовое]: ${m.media.voice_transcribed_text}`\n    : (m.text || ''))\n  .filter(t => t.trim());\n\nconst combinedText = texts.join('\\n\\n');\n\n// Берём первое сообщение как базу\nconst base = messages[0];\n\n// Находим последнее с raw\nconst lastWithRaw = [...messages].reverse().find(m => m?.meta?.raw);\n\nreturn {\n  empty: false,\n  batch_key: initData.batch_key,\n  channel: base.channel,\n  external_user_id: base.external_user_id,\n  external_chat_id: base.external_chat_id,\n  text: combinedText,\n  timestamp: base.timestamp,\n  client_phone: base.client_phone,\n  client_name: base.client_name,\n  client_email: base.client_email,\n  tenant_id: base.tenant_id,\n  media: base.media,\n  meta: {\n    ...base.meta,\n    ...(lastWithRaw?.meta?.raw ? { raw: lastWithRaw.meta.raw } : {}),\n    batched: true,\n    batch_size: messages.length,\n    batch_wait_time: initData.debounce_seconds,\n    batch_reason: initData.reason,\n    original_messages: messages.map(m => ({\n      timestamp: m.timestamp,\n      type: m.meta?.original_media_type || 'text',\n      text_length: (m.text || '').length\n    })),\n    combined_at: new Date().toISOString()\n  },\n  prefilled_data: base.prefilled_data\n};"
+        "operation": "pop",
+        "list": "={{ $('Prepare Pop').item.json.queue_key }}",
+        "propertyName": "value",
+        "options": {}
+      },
+      "id": "pop-msg-6",
+      "name": "Pop Message 6",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-96, 144],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "={{ $('Prepare Pop').item.json.queue_key }}",
+        "propertyName": "value",
+        "options": {}
+      },
+      "id": "pop-msg-7",
+      "name": "Pop Message 7",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-96, 272],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "={{ $('Prepare Pop').item.json.queue_key }}",
+        "propertyName": "value",
+        "options": {}
+      },
+      "id": "pop-msg-8",
+      "name": "Pop Message 8",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-96, 400],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "={{ $('Prepare Pop').item.json.queue_key }}",
+        "propertyName": "value",
+        "options": {}
+      },
+      "id": "pop-msg-9",
+      "name": "Pop Message 9",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-96, 528],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "={{ $('Prepare Pop').item.json.queue_key }}",
+        "propertyName": "value",
+        "options": {}
+      },
+      "id": "pop-msg-10",
+      "name": "Pop Message 10",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-96, 656],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Собираем все сообщения из POP операций\nconst allItems = $input.all();\nconst initData = $('Check Silence Duration').first().json;\nconst messages = [];\n\nfor (const item of allItems) {\n  const val = item.json?.value;\n  if (val && val !== null && val !== 'null' && val !== '') {\n    try {\n      // Проверяем, содержит ли строка сепаратор\n      if (typeof val === 'string' && val.includes('|||SEPARATOR|||')) {\n        const parts = val.split('|||SEPARATOR|||');\n        for (const part of parts) {\n          if (part.trim()) {\n            messages.push(JSON.parse(part));\n          }\n        }\n      } else {\n        const parsed = typeof val === 'string' ? JSON.parse(val) : val;\n        messages.push(parsed);\n      }\n    } catch (e) {\n      console.error('Failed to parse message:', val, e);\n    }\n  }\n}\n\nif (messages.length === 0) {\n  return {\n    empty: true,\n    batch_key: initData.batch_key\n  };\n}\n\n// Сортируем по timestamp\nconst toTs = (m) => {\n  const t = m.timestamp ? Date.parse(m.timestamp) : NaN;\n  return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;\n};\nmessages.sort((a, b) => toTs(a) - toTs(b));\n\n// Собираем тексты\nconst texts = messages\n  .map(m => m.media?.voice_transcribed_text\n    ? `[Голосовое]: ${m.media.voice_transcribed_text}`\n    : (m.text || ''))\n  .filter(t => t.trim());\n\nconst combinedText = texts.join('\\n\\n');\n\n// Берём первое сообщение как базу\nconst base = messages[0];\n\n// Находим последнее с raw\nconst lastWithRaw = [...messages].reverse().find(m => m?.meta?.raw);\n\nreturn {\n  empty: false,\n  batch_key: initData.batch_key,\n  channel: base.channel,\n  external_user_id: base.external_user_id,\n  external_chat_id: base.external_chat_id,\n  text: combinedText,\n  timestamp: base.timestamp,\n  client_phone: base.client_phone,\n  client_name: base.client_name,\n  client_email: base.client_email,\n  client_username: base.client_username,\n  tenant_id: base.tenant_id,\n  media: base.media,\n  meta: {\n    ...base.meta,\n    ...(lastWithRaw?.meta?.raw ? { raw: lastWithRaw.meta.raw } : {}),\n    batched: true,\n    batch_size: messages.length,\n    batch_wait_time: initData.debounce_seconds,\n    batch_reason: initData.reason,\n    original_messages: messages.map(m => ({\n      timestamp: m.timestamp,\n      type: m.meta?.original_media_type || 'text',\n      text_length: (m.text || '').length\n    })),\n    combined_at: new Date().toISOString()\n  },\n  prefilled_data: base.prefilled_data\n};"
       },
       "id": "5694e506-795b-4632-8083-59e7a13c7646",
       "name": "Combine Messages",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [144, -112]
+      "position": [176, -16]
     },
     {
       "parameters": {
@@ -231,7 +326,7 @@
       "name": "Is Batch Empty?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [368, -112]
+      "position": [400, -16]
     },
     {
       "parameters": {
@@ -242,7 +337,7 @@
       "name": "Delete Queue (Empty)",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [592, -224],
+      "position": [624, -128],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -259,24 +354,7 @@
       "name": "Release Lock (Empty)",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [816, -224],
-      "credentials": {
-        "redis": {
-          "id": "7FQcEivUY94atW24",
-          "name": "Redis account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "delete",
-        "key": "={{ $('Check Silence Duration').item.json.queue_key }}"
-      },
-      "id": "156ad4d8-cf5e-4ddb-85fc-0c4e06a7427a",
-      "name": "Delete Queue",
-      "type": "n8n-nodes-base.redis",
-      "typeVersion": 1,
-      "position": [592, -16],
+      "position": [848, -128],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -293,7 +371,7 @@
       "name": "Release Lock",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [816, -16],
+      "position": [624, 96],
       "credentials": {
         "redis": {
           "id": "7FQcEivUY94atW24",
@@ -310,7 +388,7 @@
       "name": "→ Client Resolver",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [1040, -16]
+      "position": [848, 96]
     }
   ],
   "connections": {
@@ -342,7 +420,12 @@
           {"node": "Pop Message 2", "type": "main", "index": 0},
           {"node": "Pop Message 3", "type": "main", "index": 0},
           {"node": "Pop Message 4", "type": "main", "index": 0},
-          {"node": "Pop Message 5", "type": "main", "index": 0}
+          {"node": "Pop Message 5", "type": "main", "index": 0},
+          {"node": "Pop Message 6", "type": "main", "index": 0},
+          {"node": "Pop Message 7", "type": "main", "index": 0},
+          {"node": "Pop Message 8", "type": "main", "index": 0},
+          {"node": "Pop Message 9", "type": "main", "index": 0},
+          {"node": "Pop Message 10", "type": "main", "index": 0}
         ]
       ]
     },
@@ -361,20 +444,32 @@
     "Pop Message 5": {
       "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
     },
+    "Pop Message 6": {
+      "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
+    },
+    "Pop Message 7": {
+      "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
+    },
+    "Pop Message 8": {
+      "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
+    },
+    "Pop Message 9": {
+      "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
+    },
+    "Pop Message 10": {
+      "main": [[{"node": "Combine Messages", "type": "main", "index": 0}]]
+    },
     "Combine Messages": {
       "main": [[{"node": "Is Batch Empty?", "type": "main", "index": 0}]]
     },
     "Is Batch Empty?": {
       "main": [
         [{"node": "Delete Queue (Empty)", "type": "main", "index": 0}],
-        [{"node": "Delete Queue", "type": "main", "index": 0}]
+        [{"node": "Release Lock", "type": "main", "index": 0}]
       ]
     },
     "Delete Queue (Empty)": {
       "main": [[{"node": "Release Lock (Empty)", "type": "main", "index": 0}]]
-    },
-    "Delete Queue": {
-      "main": [[{"node": "Release Lock", "type": "main", "index": 0}]]
     },
     "Release Lock": {
       "main": [[{"node": "→ Client Resolver", "type": "main", "index": 0}]]
