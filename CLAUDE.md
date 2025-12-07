@@ -2,7 +2,7 @@
 
 > Единый файл контекста проекта для Claude и разработчиков
 
-**Последнее обновление:** 2025-12-06
+**Последнее обновление:** 2025-12-07
 
 ---
 
@@ -32,6 +32,7 @@ When user says:
 | **n8n** | `docs/n8n/` | Работа с n8n |
 | **Features** | `docs/features/` | Документация фич |
 | **Flows** | `docs/flows/` | Автогенерируемые потоки (auto) |
+| **Debug** | `docs/debug/` | Отладка и troubleshooting |
 
 ### Key Documents
 
@@ -43,6 +44,7 @@ When user says:
 | `docs/current/03_WORKFLOWS_COMPLETE.md` | Все workflows |
 | `docs/ai/UNIVERSAL_AI_PROMPT_SYSTEM.md` | AI промпт система |
 | `docs/backend/Database_Structure_BatteryCRM_COMPLETE.md` | Полная структура БД |
+| `docs/debug/redis-debug-guide.md` | Руководство по отладке Redis |
 
 ---
 
@@ -97,6 +99,7 @@ Plans/                  # Документы планирования
 |---------|------|-------------|
 | n8n | 5678 | https://n8n.n8nsrv.ru |
 | PostgreSQL | 6544 | Main database |
+| Redis Insight | 5540 | http://185.221.214.83:5540 |
 
 ### Multi-tenant Webhook URLs
 
@@ -244,7 +247,38 @@ WHERE r.from_component_id = (SELECT id FROM project_components WHERE name = 'X')
 
 ---
 
+## Redis Debug
+
+### Методология отладки n8n workflows
+
+1. **Запустить один цикл workflow**
+2. **Проверить Redis** — что изменилось
+3. **Верифицировать проблему** — сравнить ожидаемое vs реальное
+4. **Только потом править**
+
+### Быстрые команды
+
+```bash
+# Все ключи
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! KEYS "*"'
+
+# Тип ключа (ВАЖНО! GET не работает для list)
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! TYPE "queue:batch:telegram:tg_123"'
+
+# Содержимое list
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LRANGE "queue:batch:telegram:tg_123" 0 -1'
+```
+
+Подробнее: `docs/debug/redis-debug-guide.md`
+
+---
+
 ## History
+
+### 2025-12-07
+- Fixed BAT Batch Debouncer (GET→POP for list data)
+- Installed Redis Insight on n8n server
+- Created Redis debug guide
 
 ### 2025-12-06
 - Deployed all MCP servers v2.0.0 multi-tenant to production
