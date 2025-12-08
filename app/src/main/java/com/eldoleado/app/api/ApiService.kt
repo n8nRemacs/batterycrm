@@ -30,31 +30,31 @@ interface ApiService {
         @Query("limit") limit: Int = 50
     ): Call<AppealDetailResponse>
 
-    @POST("api/android/appeals/{id}/send")
+    @POST("unique-send-response/api/android/appeals/{id}/send")
     fun sendResponse(
         @Path("id") appealId: String,
         @Body request: SendMessageRequest
     ): Call<ApiResponse>
 
-    @POST("api/android/appeals/{id}/normalize")
+    @POST("unique-normalize/api/android/appeals/{id}/normalize")
     fun normalizeText(
         @Path("id") appealId: String,
         @Body request: NormalizeRequest
     ): Call<NormalizeResponse>
 
-    @POST("api/android/appeals/{id}/take")
+    @POST("unique-take-appeal/api/android/appeals/{id}/take")
     fun takeAppeal(
         @Path("id") appealId: String,
         @Body request: TakeAppealRequest
     ): Call<ApiResponse>
 
-    @POST("api/android/appeals/{id}/reject")
+    @POST("api-operator-reject/api/android/appeals/{id}/reject")
     fun rejectAiResponse(
         @Path("id") appealId: String,
         @Body request: RejectRequest
     ): Call<ApiResponse>
 
-    @POST("api/android/appeals/{id}/promo")
+    @POST("operator-send-promo/api/android/appeals/{id}/promo")
     fun sendPromo(
         @Path("id") appealId: String,
         @Body request: PromoRequest

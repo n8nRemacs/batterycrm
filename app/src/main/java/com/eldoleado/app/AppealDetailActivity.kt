@@ -375,9 +375,8 @@ class AppealDetailActivity : AppCompatActivity() {
         // Update devices list
         updateDevicesList(appeal)
 
-        // Filter out agent messages, sort by createdAt
+        // Sort messages by createdAt
         val filteredMessages = messages
-            .filter { it.senderType.lowercase() != "agent" }
             .sortedBy { it.createdAt }
 
         messagesAdapter.updateMessagesFromEntities(filteredMessages)

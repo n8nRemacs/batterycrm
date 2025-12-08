@@ -1,5 +1,4 @@
 {
-  "name": "API_Operator_Send_Response",
   "nodes": [
     {
       "parameters": {
@@ -30,7 +29,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "api/android/appeals/:id/send",
+        "path": "/api/android/appeals/{id}/send",
         "responseMode": "responseNode",
         "options": {
           "allowedOrigins": "*"
@@ -376,8 +375,35 @@
       ]
     }
   },
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {
+    "Webhook": [
+      {
+        "headers": {
+          "host": "n8n.n8nsrv.ru",
+          "user-agent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; ru-RU) WindowsPowerShell/5.1.22621.2428",
+          "content-length": "103",
+          "content-type": "application/json; charset=utf-8",
+          "via": "1.1 Caddy",
+          "x-forwarded-for": "176.100.126.245",
+          "x-forwarded-host": "n8n.n8nsrv.ru",
+          "x-forwarded-proto": "https",
+          "x-session-token": "4e9afe35-6901-4655-8226-5976e3dc4dd7",
+          "accept-encoding": "gzip"
+        },
+        "params": {
+          "id": "5dcf855d-1049-4882-924b-ead254f01175"
+        },
+        "query": {},
+        "body": {
+          "message_text": "Тестовое сообщение от оператора через API"
+        },
+        "webhookUrl": "https://n8n.n8nsrv.ru/webhook/unique-send-response/api/operator/appeals/:id/send",
+        "executionMode": "production"
+      }
+    ]
   },
-  "staticData": null
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ae77ca901b15c37bb42b26ea9b5a21b78217dd557a563108d875a64964c49bb"
+  }
 }
