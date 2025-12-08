@@ -34,7 +34,7 @@ git add -A && git commit -m "Session update: краткое описание" &&
 
 ---
 
-## Последняя сессия: 8 декабря 2025, 18:15 (UTC+4)
+## Последняя сессия: 8 декабря 2025, 18:45 (UTC+4)
 
 ## Что сделано в этой сессии
 
@@ -44,34 +44,41 @@ git add -A && git commit -m "Session update: краткое описание" &&
 - Возвращает: `device_action`, `matched_device_id`, `problem_action`
 - Файл: `workflows_to_import/modified/BAT_Neo4j_Context_Builder_with_Matcher.json`
 
-### 2. Appeal Router с Graph Matcher — ОБНОВЛЁН
-- Добавлен вызов `Call Graph Matcher` после Merge Results
-- Добавлен `Process Match Result` для обработки ответа
-- SQL изменён на PL/pgSQL с условной логикой
-- Файл: `workflows_to_import/modified/BAT_AI_Appeal_Router_with_Matcher.json`
+### 2. Appeal Router — ПОДГОТОВЛЕНЫ ИЗМЕНЕНИЯ
+- Файл с изменениями: `n8n_workflows/Core/BAT_AI_Appeal_Router.json`
+- Нужно добавить руками в n8n:
+  - Нода `Call Graph Matcher` (HTTP Request после Merge Results)
+  - Нода `Process Match Result` (Code после Call Graph Matcher)
+  - Изменить SQL в `Update Full Data` и `Update Partial Data`
 
-### 3. Проблема дублей устройств — РЕШЕНА
-- Логика: извлечённые данные → матчинг с графом → create/use_existing
-- SQL теперь: `IF device_action = 'use_existing' THEN v_device_id := matched_device_id`
+### 3. Спецификация логики — СОЗДАНА
+- Файл: `docs/specs/message_processing_logic.md`
+- Логика: ЗАПИСАТЬ → ВЫТАЩИТЬ → АНАЛИЗИРОВАТЬ
+- Приоритет: Client → Model → Owner → Problem
 
 ### 4. Предыдущие достижения сессии
 - Neo4j Context Builder исправлен (HTTPS→HTTP)
 - Task Dispatcher с Neo4j контекстом работает
-- Спецификация `docs/specs/message_processing_logic.md` создана
 
 ---
 
 ## Что НЕ сделано (на следующую сессию)
 
-1. **Тестирование полного flow**
+1. **Внести изменения в Appeal Router руками в n8n**
+   - Добавить `Call Graph Matcher` после `Merge Results`
+   - Добавить `Process Match Result` после `Call Graph Matcher`
+   - Изменить SQL в `Update Full Data` и `Update Partial Data`
+   - См. инструкции в предыдущем сообщении чата
+
+2. **Тестирование полного flow**
    - Проверить работу с реальными сообщениями
    - Убедиться что устройства не дублируются
 
-2. **DNS запись для android-api.eldoleado.ru**
+3. **DNS запись для android-api.eldoleado.ru**
    - Добавить A-запись: `android-api → 45.144.177.128`
    - После этого получить SSL: `certbot --nginx -d android-api.eldoleado.ru`
 
-3. **Обновить Android приложение**
+4. **Обновить Android приложение**
    - Заменить прямые вызовы n8n на новый API Gateway
    - Base URL: `https://android-api.eldoleado.ru`
 
@@ -115,7 +122,8 @@ ssh root@185.221.214.83 'docker exec n8n-redis redis-cli KEYS "*"'
 |------|----------|
 | `docs/specs/message_processing_logic.md` | Спецификация логики обработки |
 | `Plans/Eldoleado_Мультичат_ТЗ_v2.md` | Бизнес-требования |
-| `n8n_workflows/Core/BAT_AI_Appeal_Router.json` | Нужно исправить SQL |
+| `n8n_workflows/Core/BAT_AI_Appeal_Router.json` | Основной роутер |
+| `workflows_to_import/modified/BAT_AI_Appeal_Router_with_Matcher.json` | Версия с Graph Matcher |
 
 ---
 
@@ -123,5 +131,5 @@ ssh root@185.221.214.83 'docker exec n8n-redis redis-cli KEYS "*"'
 
 1. Прочитать `Start.md`
 2. Прочитать `docs/specs/message_processing_logic.md`
-3. Реализовать Graph Matcher
-4. Исправить SQL для устройств
+3. Внести изменения в Appeal Router (руками в n8n)
+4. Тестировать с реальными сообщениями
