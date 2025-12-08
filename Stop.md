@@ -34,41 +34,38 @@ git add -A && git commit -m "Session update: краткое описание" &&
 
 ---
 
-## Последняя сессия: 8 декабря 2025, 17:30 (UTC+4)
+## Последняя сессия: 8 декабря 2025, 18:15 (UTC+4)
 
 ## Что сделано в этой сессии
 
-### 1. Neo4j Context Builder — ИСПРАВЛЕН
-- Проблема: HTTPS вместо HTTP для внутренних вызовов
-- Решение: Изменено на `http://45.144.177.128:7474/db/neo4j/tx/commit`
+### 1. Graph Matcher webhook — СОЗДАН
+- Добавлен action `match_entities` в Neo4j Context Builder
+- Endpoint: `POST /webhook/neo4j/context` с `action: 'match_entities'`
+- Возвращает: `device_action`, `matched_device_id`, `problem_action`
+- Файл: `workflows_to_import/modified/BAT_Neo4j_Context_Builder_with_Matcher.json`
 
-### 2. Task Dispatcher с Neo4j контекстом — РАБОТАЕТ
-- Добавлен вызов Neo4j Context Builder
-- Контекст `{message_history}`, `{current_devices}` заполняется
+### 2. Appeal Router с Graph Matcher — ОБНОВЛЁН
+- Добавлен вызов `Call Graph Matcher` после Merge Results
+- Добавлен `Process Match Result` для обработки ответа
+- SQL изменён на PL/pgSQL с условной логикой
+- Файл: `workflows_to_import/modified/BAT_AI_Appeal_Router_with_Matcher.json`
 
-### 3. Worker обрабатывает задачи — РАБОТАЕТ
-- Worker 1 активен, забирает из `ai_extraction_queue`
-- Redis на RU сервере (45.144.177.128), НЕ на n8n сервере!
+### 3. Проблема дублей устройств — РЕШЕНА
+- Логика: извлечённые данные → матчинг с графом → create/use_existing
+- SQL теперь: `IF device_action = 'use_existing' THEN v_device_id := matched_device_id`
 
-### 4. Спецификация логики обработки сообщений — СОЗДАНА
-- Файл: `docs/specs/message_processing_logic.md`
-- Логика: ЗАПИСАТЬ → ВЫТАЩИТЬ → АНАЛИЗИРОВАТЬ
-- Извлечение сущностей (brand, model, owner, problem)
-- Матчинг с графом
-- Управление фокусом (device_id, problem_id)
-
-### 5. Выявлена и документирована проблема дублей устройств
-- SQL в `BAT_AI_Appeal_Router` всегда делает INSERT
-- Нужно: матчинг с графом перед create/use_existing
+### 4. Предыдущие достижения сессии
+- Neo4j Context Builder исправлен (HTTPS→HTTP)
+- Task Dispatcher с Neo4j контекстом работает
+- Спецификация `docs/specs/message_processing_logic.md` создана
 
 ---
 
 ## Что НЕ сделано (на следующую сессию)
 
-1. **Исправить логику создания устройств**
-   - Создать Graph Matcher webhook `/webhook/neo4j/match-entities`
-   - Исправить SQL в `Update Full Data` / `Update Partial Data`
-   - Условный INSERT/UPDATE на основе `device_action`
+1. **Тестирование полного flow**
+   - Проверить работу с реальными сообщениями
+   - Убедиться что устройства не дублируются
 
 2. **DNS запись для android-api.eldoleado.ru**
    - Добавить A-запись: `android-api → 45.144.177.128`

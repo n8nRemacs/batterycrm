@@ -14,11 +14,28 @@ git pull
 ---
 
 ## Дата и время последнего обновления
-**8 декабря 2025, 17:30 (UTC+4)**
+**8 декабря 2025, 18:15 (UTC+4)**
 
 ---
 
 ## Что сделано в последних сессиях
+
+### Сессия 08.12.2025 (продолжение) — Graph Matcher + Исправление дублей
+
+1. **Graph Matcher webhook — СОЗДАН ✅**
+   - Добавлен action `match_entities` в Neo4j Context Builder
+   - Возвращает `device_action` (use_existing/create_new)
+   - Возвращает `matched_device_id` если найдено существующее
+   - Файл: `workflows_to_import/modified/BAT_Neo4j_Context_Builder_with_Matcher.json`
+
+2. **Appeal Router с Graph Matcher — ОБНОВЛЁН ✅**
+   - Добавлен вызов `match_entities` после Merge Results
+   - SQL изменён: использует matched_device_id вместо создания нового
+   - Файл: `workflows_to_import/modified/BAT_AI_Appeal_Router_with_Matcher.json`
+
+3. **Проблема дублей устройств — РЕШЕНА ✅**
+   - Теперь: извлечённые данные → матчинг с графом → create/use_existing
+   - SQL использует PL/pgSQL с условной логикой
 
 ### Сессия 08.12.2025 — Neo4j интеграция + Логика обработки сообщений
 
@@ -39,11 +56,6 @@ git pull
    - Извлечение сущностей (brand, model, owner, problem)
    - Матчинг с графом
    - Управление фокусом (device_id, problem_id)
-
-5. **ПРОБЛЕМА ВЫЯВЛЕНА: Дубли устройств**
-   - Каждое сообщение создаёт новое устройство
-   - SQL использует `INSERT` с `device_order = MAX + 1`
-   - Нужно: сначала матчинг с графом, потом решение create/use_existing
 
 ### Сессия 06.12.2025 — Android API Gateway
 
