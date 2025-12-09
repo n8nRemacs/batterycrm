@@ -1,0 +1,209 @@
+{
+  "name": "ELO_Core_Tenant_Resolver",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-816, 176],
+      "id": "trigger-node",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Определяем параметры для поиска tenant через elo_channel_accounts\nconst channel = data.channel;\nlet lookupValue = '';\n\n// Извлекаем credential в зависимости от канала\nif (channel === 'telegram' && data.bot_token) {\n  lookupValue = data.bot_token;\n} else if (channel === 'vk' && data.meta?.raw?.group_id) {\n  lookupValue = data.meta.raw.group_id.toString();\n} else if (channel === 'whatsapp' && data.meta?.profile_id) {\n  lookupValue = data.meta.profile_id;\n} else if (channel === 'avito' && data.meta?.user_id) {\n  lookupValue = data.meta.user_id.toString();\n} else if (channel === 'max' && data.meta?.bot_token) {\n  lookupValue = data.meta.bot_token;\n}\n\n// Если нет credential - используем default tenant\nconst needsDefaultTenant = !lookupValue;\n\nreturn {\n  ...data,\n  lookup_channel: channel,\n  lookup_value: lookupValue,\n  needs_default_tenant: needsDefaultTenant\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-608, 176],
+      "id": "prepare-lookup",
+      "name": "Prepare Lookup"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "skip-lookup-check",
+              "leftValue": "={{ $json.needs_default_tenant }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-400, 176],
+      "id": "skip-db-lookup",
+      "name": "Skip DB Lookup?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  ca.tenant_id,\n  t.name as tenant_name,\n  t.is_active,\n  t.settings as tenant_settings,\n  ca.credentials as channel_config\nFROM elo_channel_accounts ca\nJOIN elo_tenants t ON t.id = ca.tenant_id\nWHERE ca.channel = '{{ $json.lookup_channel }}'\n  AND (\n    ca.account_id = '{{ $json.lookup_value }}'\n    OR ca.credentials->>'bot_token' = '{{ $json.lookup_value }}'\n    OR ca.credentials->>'token' = '{{ $json.lookup_value }}'\n    OR ca.credentials->>'group_id' = '{{ $json.lookup_value }}'\n    OR ca.credentials->>'profile_id' = '{{ $json.lookup_value }}'\n  )\n  AND ca.is_active = true\n  AND t.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-176, 240],
+      "id": "find-tenant",
+      "name": "Find Tenant",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "tenant-found-check",
+              "leftValue": "={{ $json.tenant_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [32, 240],
+      "id": "tenant-found",
+      "name": "Tenant Found?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('When Executed by Another Workflow').first().json;\n\n// Default tenant - используется для тестирования или неизвестных каналов\nreturn {\n  ...originalData,\n  tenant_id: 'a0000000-0000-0000-0000-000000000001',\n  tenant_name: 'Default Tenant',\n  tenant_settings: {},\n  channel_config: {}\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, 80],
+      "id": "use-default-tenant",
+      "name": "Use Default Tenant"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tenantData = $input.first().json;\nconst originalData = $('When Executed by Another Workflow').first().json;\n\nreturn {\n  ...originalData,\n  tenant_id: tenantData.tenant_id,\n  tenant_name: tenantData.tenant_name,\n  tenant_settings: tenantData.tenant_settings || {},\n  channel_config: tenantData.channel_config || {}\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 240],
+      "id": "attach-tenant-from-db",
+      "name": "Attach Tenant From DB"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lookup": {
+      "main": [
+        [
+          {
+            "node": "Skip DB Lookup?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip DB Lookup?": {
+      "main": [
+        [
+          {
+            "node": "Use Default Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Tenant": {
+      "main": [
+        [
+          {
+            "node": "Tenant Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Found?": {
+      "main": [
+        [
+          {
+            "node": "Attach Tenant From DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use Default Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "Eldoleado"
+    },
+    {
+      "name": "Core"
+    }
+  ]
+}

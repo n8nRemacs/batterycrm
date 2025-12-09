@@ -14,7 +14,7 @@ git pull
 ---
 
 ## Дата и время последнего обновления
-**9 декабря 2025, 21:30 (UTC+4)**
+**9 декабря 2025, 23:45 (UTC+4)**
 
 ---
 
@@ -35,6 +35,34 @@ git pull
 ---
 
 ## Что сделано в последних сессиях
+
+### Сессия 09.12.2025 (поздний вечер) — n8n Workflows для CORE_NEW
+
+1. **SQL миграции применены ✅**
+   - Файл: `CORE_NEW/migrations/001_elo_tables.sql`
+   - Все 13 elo_* таблиц созданы в PostgreSQL
+
+2. **ELO Workflows созданы ✅**
+   - `ELO_In_*` — входные воркеры (7 шт) — переименованы из BAT
+   - `ELO_Out_*` — выходные воркеры (5 шт) — переименованы из BAT
+   - `ELO_Core_Tenant_Resolver` — определение тенанта по elo_channel_accounts
+   - `ELO_Core_Batcher` — батчинг сообщений с настраиваемым таймаутом
+   - `ELO_Core_Dialog_Engine` — обработка диалогов (elo_dialogs, elo_events, elo_clients)
+
+3. **Data Contract спецификация ✅**
+   - Файл: `CORE_NEW/docs/06_DATA_CONTRACT.md`
+   - Минимальный пакет данных между workflows
+   - Правила прокидывания: tenant_id → client_id → dialog_id
+   - Каждый воркер может восстановить контекст по ID
+
+4. **Батчинг сообщений:**
+   - Таймаут настраивается в `elo_tenants.settings.batch_timeout_sec`
+   - Default: 10 секунд
+   - Redis очереди: `queue:elo:{channel}:{chat_id}`
+
+5. **Каналы:**
+   - telegram, whatsapp, vk, avito, max, phone, web
+   - **api** — для Android приложения и других платформ через API Gateway
 
 ### Сессия 09.12.2025 (ночь) — Tasks в PostgreSQL
 
@@ -113,8 +141,10 @@ git pull
 | Neo4j Schema | ✅ | `CORE_NEW/docs/03_GRAPH_SCHEMA.md` |
 | API v2 Contracts | ✅ | `CORE_NEW/docs/04_API_CONTRACTS.md` |
 | AI Architecture | ✅ | `CORE_NEW/docs/05_AI_ARCHITECTURE.md` |
-| SQL миграции | ⏳ | TODO |
-| Workflows | ⏳ | TODO |
+| SQL миграции | ✅ | `CORE_NEW/migrations/001_elo_tables.sql` |
+| Data Contract | ✅ | `CORE_NEW/docs/06_DATA_CONTRACT.md` |
+| ELO Workflows | 🔄 | `workflows_to_import/ELO_*` |
+| Android App | ⏳ | Переработка из старой версии |
 
 ### Старая архитектура (рабочая):
 
@@ -130,21 +160,25 @@ git pull
 
 ## Следующие шаги (приоритет)
 
-### 1. SQL миграции для CORE_NEW
-```sql
--- Создать elo_* таблицы
--- Скрипты в CORE_NEW/migrations/
-```
+### 1. Импорт ELO Workflows в n8n
+- Файлы в `workflows_to_import/ELO_*`
+- Импортировать вручную через n8n UI
+- Обновить ID ссылок между workflows
 
-### 2. Адаптировать workflows
-- Под `elo_dialogs` вместо `appeals`
-- Под новый API v2
+### 2. Переработка Android приложения
+- Адаптировать под новый API v2 (`/v2/dialogs`)
+- Использовать старую версию как базу
+- Обновить эндпоинты
 
 ### 3. DNS + SSL для API
 ```
 android-api.eldoleado.ru → 45.144.177.128
 certbot --nginx -d android-api.eldoleado.ru
 ```
+
+### 4. Создать ELO_Core_AI_Router
+- Адаптация BAT_AI_Appeal_Router под elo_dialogs
+- Работа с elo_events вместо messages_history
 
 ---
 
@@ -158,6 +192,7 @@ certbot --nginx -d android-api.eldoleado.ru
 | `CORE_NEW/docs/03_NEO4J_SCHEMA.md` | Neo4j: Client, Device, Problem |
 | `CORE_NEW/docs/04_API_CONTRACTS.md` | API v2 контракты |
 | `CORE_NEW/docs/05_AI_ARCHITECTURE.md` | AI: 7 уровней, Prompt-in-Request |
+| `CORE_NEW/docs/06_DATA_CONTRACT.md` | Минимальный пакет данных между workflows |
 
 ---
 
