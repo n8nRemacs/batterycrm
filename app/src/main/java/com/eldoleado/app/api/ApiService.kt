@@ -144,7 +144,8 @@ data class LoginResponse(
     val email: String,
     val location_id: String?,
     val password_valid: Boolean? = null,
-    val session_token: String
+    val session_token: String,
+    val token: String? = null
 )
 
 data class AppealsListResponse(
@@ -313,6 +314,7 @@ data class PromoRequest(
 data class FCMTokenRegisterRequest(
     val operator_id: String,
     val session_token: String,
+    val token: String? = null,
     val fcm_token: String,
     val device_info: DeviceInfo? = null
 )
