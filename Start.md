@@ -14,7 +14,47 @@ git pull
 ---
 
 ## Дата и время последнего обновления
-**9 декабря 2025, 23:45 (UTC+4)**
+**10 декабря 2025, 01:30 (UTC+4)**
+
+---
+
+## ВАЖНО: Открытые вопросы по Graph (разобрать утром!)
+
+### 1. Register vs Tracker — дублирование или разные сценарии?
+- **Touchpoint Register** (`/neo4j/touchpoint/register`): Neo4j + PostgreSQL, поддерживает mutual
+- **Touchpoint Tracker** (`/neo4j/touchpoint`): только Neo4j, добавляет ABOUT_DEVICE/ABOUT_PROBLEM с confidence
+
+### 2. Direction — кто определяет inbound/outbound/mutual?
+- Вызывающий workflow передаёт готовое значение?
+- Или Graph сам определяет по логике is_new_client?
+
+### 3. enrichment_paths — что за таблица?
+- Пути конверсии каналов типа "telegram → собрать phone"?
+
+### 4. Когда какой touchpoint вызывать?
+- Register → для всех входящих/исходящих?
+- Tracker → только когда AI определил упоминание устройства?
+
+---
+
+## Подход к разработке (согласован)
+
+```
+1. Проработать все блоки (понять что есть)
+   ├── Channel Layer ✅ (12/12)
+   ├── Input Contour ✅ (5/5)
+   ├── Core (разобран, не документирован)
+   ├── Graph (вопросы выше ↑)
+   └── API (TODO)
+
+2. Создать подробную структуру (как должно быть)
+
+3. Структура БД (elo_* таблицы)
+
+4. Создать воркеры
+
+5. Дебаг
+```
 
 ---
 
@@ -35,6 +75,29 @@ git pull
 ---
 
 ## Что сделано в последних сессиях
+
+### Сессия 10.12.2025 (ночь) — Документирование OLD архитектуры
+
+1. **Создана структура документации ✅**
+   - `NEW/Core_info/` — папка с документацией по блокам
+   - `INDEX.md` — навигация по всем блокам
+   - `HOW_TO_DOCUMENT.md` — инструкция документирования
+
+2. **Channel Layer задокументирован ✅ (12/12)**
+   - `01_Channel_Layer/workflows_info/` — 7 ELO_In + 5 ELO_Out
+
+3. **Input Contour задокументирован ✅ (5/5)**
+   - `02_Input_Contour/workflows_info/` — Overview + 4 workflows
+   - ELO_Core_Tenant_Resolver, Queue_Processor, Batch_Debouncer, Client_Resolver
+
+4. **Core разобран (не документирован)**
+   - Прочитаны: Appeal_Manager, AI_Router, Task_Dispatcher, AI_Universal_Worker, Client_Creator
+   - Отложено до проработки остальных блоков
+
+5. **Graph начат (вопросы открыты)**
+   - Прочитаны все 5 Neo4j workflows
+   - Создан `04_Graph/workflows_info/GRAPH_OVERVIEW.md`
+   - **4 вопроса на утро** (см. выше)
 
 ### Сессия 09.12.2025 (поздний вечер) — n8n Workflows для CORE_NEW
 
