@@ -1,19 +1,31 @@
-# Eldoleado Project
+# Eldoleado Project — CORE_NEW
 
 > Единый файл контекста проекта для Claude и разработчиков
 
-**Последнее обновление:** 2025-12-07
+**Последнее обновление:** 2025-12-09
 
 ---
 
 ## Quick Commands
 
 When user says:
-- **"фулл синк" / "full sync" / "обнови KB"** → `python scripts/full_sync.py`
-- **"быстрый синк" / "quick sync"** → `python scripts/full_sync.py --quick`
-- **"обнови документацию"** → `python scripts/update_flow_docs.py --all`
-- **"покажи индекс workflow"** → `python scripts/update_flow_docs.py --index`
+- **"обнови контекст"** → `python scripts/update_core_context.py`
 - **"stop" / "стоп"** → Kill all background tasks
+
+---
+
+## CORE_NEW — Новая архитектура
+
+### Философия: "Люди общаются. Машина ведёт учёт."
+
+```
+Старый подход:  Клиент → Заявки → Устройства → Проблемы (50 таблиц)
+Новый подход:   Клиент → Диалоги (с контекстом внутри) (13 таблиц)
+```
+
+- Человеку — естественное общение в мессенджерах
+- Машине — рутина, учёт, таблицы (AI под капотом)
+- БЕЗ канбанов, БЕЗ заполнения форм
 
 ---
 
@@ -21,36 +33,33 @@ When user says:
 
 | Category | Path | Description |
 |----------|------|-------------|
-| **Specs** | `docs/specs/` | Технические задания на фичи |
-| **Current** | `docs/current/` | Актуальная документация системы |
-| **AI** | `docs/ai/` | AI система, промпты, экстракторы |
-| **Android** | `docs/android/` | FCM, сессии, фронтенд |
-| **Backend** | `docs/backend/` | API, база данных |
-| **Architecture** | `docs/architecture/` | Архитектурные решения |
-| **Deployment** | `docs/deployment/` | Чеклисты деплоя |
-| **Setup** | `docs/setup/` | Инструкции по настройке |
-| **n8n** | `docs/n8n/` | Работа с n8n |
-| **Features** | `docs/features/` | Документация фич |
-| **Flows** | `docs/flows/` | Автогенерируемые потоки (auto) |
-| **Debug** | `docs/debug/` | Отладка и troubleshooting |
+| **CORE_NEW** | `CORE_NEW/docs/` | Документация новой архитектуры |
+| **Context** | `CORE_NEW/CONTEXT.md` | Быстрый обзор состояния проекта |
+| **Old** | `Old/docs/` | Старая документация (архив) |
+| **Plans** | `Plans/` | Бизнес-планы и требования |
 
-### Key Documents
+### Key Documents (CORE_NEW)
 
 | Document | Description |
 |----------|-------------|
-| `docs/specs/tenant_ai_instructions.md` | ТЗ: Обучаемые реакции AI-бота |
-| `docs/current/01_SYSTEM_OVERVIEW.md` | Обзор системы |
-| `docs/current/02_DATABASE_SCHEMA_EXTENDED.md` | Схема БД |
-| `docs/current/03_WORKFLOWS_COMPLETE.md` | Все workflows |
-| `docs/ai/UNIVERSAL_AI_PROMPT_SYSTEM.md` | AI промпт система |
-| `docs/backend/Database_Structure_BatteryCRM_COMPLETE.md` | Полная структура БД |
-| `docs/debug/redis-debug-guide.md` | Руководство по отладке Redis |
+| `CORE_NEW/CONTEXT.md` | Quick Stats + состояние проекта |
+| `CORE_NEW/docs/00_VISION.md` | Видение продукта |
+| `CORE_NEW/docs/01_CORE_DESIGN.md` | Архитектура ядра, глоссарий |
+| `CORE_NEW/docs/02_DATABASE_SCHEMA.md` | PostgreSQL: 13 elo_* таблиц |
+| `CORE_NEW/docs/03_NEO4J_SCHEMA.md` | Neo4j: Client, Device, Problem |
+| `CORE_NEW/docs/04_API_CONTRACTS.md` | API v2 контракты |
+| `CORE_NEW/docs/05_AI_ARCHITECTURE.md` | AI: 7 уровней, Prompt-in-Request |
 
 ---
 
 ## Project Structure
 
 ```
+CORE_NEW/               # Новая архитектура (АКТИВНАЯ)
+  ├── docs/             # Документация
+  ├── CONTEXT.md        # Состояние проекта
+  └── migrations/       # SQL миграции (TODO)
+
 app/                    # Android приложение (Kotlin)
 MCP/                    # MCP серверы (Python FastAPI)
   ├── mcp-telegram/
@@ -60,14 +69,17 @@ MCP/                    # MCP серверы (Python FastAPI)
   ├── mcp-max/
   ├── mcp-form/
   ├── api-android/
-  └── shared/           # Общий storage модуль
-n8n_workflows/          # JSON файлы workflow с n8n сервера (READ-ONLY)
-workflows_to_import/    # Для новых/изменённых workflows
-supabase/migrations/    # SQL миграции
-scripts/                # Python скрипты автоматизации
-docs/flows/             # Автогенерируемая документация потоков
-docs/specs/             # Технические задания на фичи
+  └── shared/
+
+scripts/                # Скрипты автоматизации
 Plans/                  # Документы планирования
+
+Old/                    # Старая архитектура (АРХИВ)
+  ├── docs/             # Старая документация
+  ├── database/         # Старые миграции
+  ├── n8n_workflows/    # Старые workflows
+  ├── scripts/          # Старые скрипты синхронизации
+  └── KNOWLEDGE_BASE.md # Старая база знаний
 ```
 
 ---
@@ -76,22 +88,22 @@ Plans/                  # Документы планирования
 
 ### RU Server (45.144.177.128)
 
-| Service | Port | Version | Description |
-|---------|------|---------|-------------|
-| mcp-avito | 8765 | v2.0.0 multi-tenant | Avito Messenger API |
-| mcp-vk | 8767 | v2.0.0 multi-tenant | VK Community API |
-| mcp-max | 8768 | v2.0.0 multi-tenant | MAX (VK Teams) API |
-| mcp-form | 8770 | v1.0.0 | Web forms API |
-| api-android | 8780 | - | Android API Gateway |
-| Redis (avito-redis) | - | Docker network: avito-api_default |
+| Service | Port | Description |
+|---------|------|-------------|
+| mcp-avito | 8765 | Avito Messenger API |
+| mcp-vk | 8767 | VK Community API |
+| mcp-max | 8768 | MAX (VK Teams) API |
+| mcp-form | 8770 | Web forms API |
+| api-android | 8780 | Android API Gateway |
+| Neo4j | 7474/7687 | Graph database |
+| Redis | 6379 | Cache |
 
 ### Finnish Server (217.145.79.27)
 
-| Service | Port | Version | Description |
-|---------|------|---------|-------------|
-| mcp-telegram | 8767 | v2.0.0 multi-tenant | Telegram Bot API |
-| mcp-whatsapp | 8766 | v2.0.0 multi-tenant | WhatsApp (Wappi.pro) API |
-| Redis (mcp-redis) | 6379 | Docker network: mcp-network |
+| Service | Port | Description |
+|---------|------|-------------|
+| mcp-telegram | 8767 | Telegram Bot API |
+| mcp-whatsapp | 8766 | WhatsApp (Wappi.pro) |
 
 ### n8n Server (185.221.214.83)
 
@@ -99,18 +111,7 @@ Plans/                  # Документы планирования
 |---------|------|-------------|
 | n8n | 5678 | https://n8n.n8nsrv.ru |
 | PostgreSQL | 6544 | Main database |
-| Redis Insight | 5540 | http://185.221.214.83:5540 |
-
-### Multi-tenant Webhook URLs
-
-```
-/webhook/telegram/{bot_hash}
-/webhook/avito/{user_hash}
-/webhook/vk/{group_hash}
-/webhook/max/{token_hash}
-/webhook/whatsapp/{profile_hash}
-```
-Hash = SHA256(primary_credential)[:16]
+| Redis | 6379 | n8n cache |
 
 ---
 
@@ -118,177 +119,96 @@ Hash = SHA256(primary_credential)[:16]
 
 **Connection:** `postgresql://supabase_admin:***@185.221.214.83:6544/postgres`
 
-### Key Tables
+### CORE_NEW Tables (elo_*)
 
 | Category | Tables |
 |----------|--------|
-| Core | tenants, clients, appeals, messages |
-| Devices | appeal_devices, repair_categories, issue_types |
-| Funnel | funnel_stages, appeal_stage_history |
-| Marketing | promo_campaigns, short_links, fingerprints |
-| AI | ai_prompts, ai_extraction_queue |
-| Knowledge Base | project_components, component_relations, workflow_nodes, channel_accounts |
+| Ядро (5) | elo_tenants, elo_clients, elo_dialogs, elo_events, elo_operators |
+| Справочники (3) | elo_verticals, elo_tenant_verticals, elo_price_list |
+| AI (2) | elo_ai_extractions, elo_ai_suggestions |
+| Каналы (1) | elo_channel_accounts |
+| Задачи (2) | elo_tasks, elo_task_updates |
+
+**Всего: 13 таблиц с префиксом elo_**
 
 ---
 
-## Project Status
+## AI Architecture (7 уровней)
 
-### Production Ready
+```
+┌─────────────────────────────────────────────────────────┐
+│  7. MCP Channels (Telegram, WhatsApp, Avito, VK, MAX)   │
+├─────────────────────────────────────────────────────────┤
+│  6. Response Builder (форматирование под канал)         │
+├─────────────────────────────────────────────────────────┤
+│  5. Dialog Engine (обработка сообщений, граф)           │
+├─────────────────────────────────────────────────────────┤
+│  4. Universal Tools (воркеры с промптами)               │
+├─────────────────────────────────────────────────────────┤
+│  3. Universal Orchestrator (слепой исполнитель)         │
+├─────────────────────────────────────────────────────────┤
+│  2. Request Builder (правила → AI → правила)            │
+├─────────────────────────────────────────────────────────┤
+│  1. Context Builder (PostgreSQL + Neo4j)                │
+└─────────────────────────────────────────────────────────┘
+```
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| mcp-telegram | ✅ v2.0.0 | 1 bot registered |
-| mcp-whatsapp | ✅ v2.0.0 | Wappi.pro integration |
-| mcp-avito | ✅ v2.0.0 | OAuth + rate limiting |
-| mcp-vk | ✅ v2.0.0 | Callback confirmation |
-| mcp-max | ✅ v2.0.0 | VK Teams |
-| mcp-form | ✅ v1.0.0 | Web forms |
-| api-android | ✅ | Android API Gateway |
-| Android App | ✅ | Calls, chat, appeals |
-| n8n Workflows | ✅ | ~100 workflows |
+### Ключевые концепции
 
-### In Progress
-
-| Component | Status | What's Left |
-|-----------|--------|-------------|
-| mcp-docs-rag | 🔄 90% | Apply pgvector migration, index docs |
-| mcp-instagram | 🔄 50% | FB Graph API integration |
-
-### TODO (Priority)
-
-1. **BAT IN Telegram** — Activate workflow (MCP ready)
-2. **Admin Panel** — Web UI for tenant management
-3. **10-20 paying customers** — Proof for investor
-
----
-
-## Architecture Decisions
-
-### 2025-12-06: Multi-tenant MCP
-
-All MCP channels v2.0.0 use unified storage (Redis + PostgreSQL) with dynamic webhook URLs.
-Webhook format: `/webhook/{channel}/{account_hash}` where hash = SHA256[:16] of primary credential.
-
-### 2025-12-06: Two Servers for MCP
-
-- RU server for avito/vk/max/form/android
-- Finnish server for telegram/whatsapp (closer to EU APIs)
-
-### 2025-12-05: Separate MCP Servers
-
-Each channel = separate FastAPI server. Isolation, scaling, reusability.
-
-### 2025-12-04: PostgreSQL as Main DB
-
-PostgreSQL + JSONB instead of MongoDB. Relational joins, transactions, pgvector for embeddings.
+| Концепция | Описание |
+|-----------|----------|
+| **Prompt-in-Request** | Промпты передаются в запросе, не хардкодятся |
+| **Кнут-Пряник-Кнут** | Правила → AI-свобода → Валидация |
+| **ai_freedom_level** | 0-100, регулятор жёсткости AI |
+| **Dialog-centric** | Диалог — центральная сущность, не заявка |
 
 ---
 
-## n8n Rules
-
-**n8n сервер только для ЧТЕНИЯ. НЕ загружать workflows через API.**
-
-- `n8n_workflows/` — READ-ONLY (sync from server)
-- `workflows_to_import/` — for NEW and MODIFIED workflows
-
-**When creating/modifying workflow:**
-1. Create JSON in `workflows_to_import/`
-2. User imports manually via n8n UI
-3. Run `python scripts/full_sync.py` to sync
-
----
-
-## Useful Scripts
+## Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `full_sync.py` | Full KB sync (n8n + components + relations) |
-| `trace_flow.py` | Trace execution path through workflows |
-| `update_flow_docs.py` | Generate flow documentation |
-| `populate_*.py` | Populate KB tables |
-
-### Trace Examples
-
-```bash
-# Trace by keyword
-python scripts/trace_flow.py "telegram"
-
-# Trace specific workflow
-python scripts/trace_flow.py --workflow "BAT IN Telegram"
-```
-
----
-
-## Useful SQL
-
-```sql
--- Find workflows touching a table
-SELECT DISTINCT workflow_name FROM workflow_nodes
-WHERE details->>'sql' ILIKE '%appeals%';
-
--- Find workflows by webhook
-SELECT name, metadata->>'webhook_path' FROM project_components
-WHERE type = 'workflow' AND metadata->>'webhook_path' IS NOT NULL;
-
--- Component relations
-SELECT c2.type, c2.name, r.relation_type
-FROM component_relations r
-JOIN project_components c2 ON c2.id = r.to_component_id
-WHERE r.from_component_id = (SELECT id FROM project_components WHERE name = 'X');
-```
+| `update_core_context.py` | Обновить CORE_NEW/CONTEXT.md |
+| `test_connections.py` | Проверить подключения к серверам |
+| `n8n_manager.py` | Управление n8n workflows |
 
 ---
 
 ## Conventions
 
-- Workflow naming: `BAT IN {Channel}` for inbound, `API_Android_{Action}` for API
-- All documentation in Russian
-- Flow docs have YAML frontmatter for incremental updates
+- **Таблицы CORE_NEW:** префикс `elo_`
+- **Neo4j лейблы:** без префикса (Client, Device, Problem)
+- **Workflows CORE_NEW:** префикс `ELO_` (TODO)
+- Документация на русском
 
 ---
 
-## Redis Debug
+## Session Workflow
 
-### Методология отладки n8n workflows
+**При старте:**
+1. `git pull`
+2. Прочитать `Start.md`
+3. Прочитать `CORE_NEW/CONTEXT.md`
 
-1. **Запустить один цикл workflow**
-2. **Проверить Redis** — что изменилось
-3. **Верифицировать проблему** — сравнить ожидаемое vs реальное
-4. **Только потом править**
-
-### Быстрые команды
-
-```bash
-# Все ключи
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! KEYS "*"'
-
-# Тип ключа (ВАЖНО! GET не работает для list)
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! TYPE "queue:batch:telegram:tg_123"'
-
-# Содержимое list
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LRANGE "queue:batch:telegram:tg_123" 0 -1'
-```
-
-Подробнее: `docs/debug/redis-debug-guide.md`
+**При завершении:**
+1. Обновить `Start.md`
+2. `python scripts/update_core_context.py`
+3. `git add -A && git commit && git push`
 
 ---
 
 ## History
 
+### 2025-12-09
+- Создана система CORE_NEW (13 таблиц вместо 50)
+- Создана AI архитектура (7 уровней)
+- Перенесена старая архитектура в Old/
+- Создан CORE_NEW/CONTEXT.md
+- Создан scripts/update_core_context.py
+
 ### 2025-12-07
-- Fixed BAT Batch Debouncer (GET→POP for list data)
-- Installed Redis Insight on n8n server
+- Fixed BAT Batch Debouncer
 - Created Redis debug guide
 
 ### 2025-12-06
-- Deployed all MCP servers v2.0.0 multi-tenant to production
-- Created shared storage module (Redis + PostgreSQL)
-- Created CONTEXT.md, merged into CLAUDE.md
-
-### 2025-12-05
-- Created shared storage for MCP servers
-- Added channel_accounts table
-
-### 2025-12-04
-- Created KB structure (project_components, component_relations)
-- Created automation scripts
+- Deployed all MCP servers v2.0.0 multi-tenant

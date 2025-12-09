@@ -14,7 +14,7 @@ git pull
 ---
 
 ## Дата и время последнего обновления
-**9 декабря 2025, 17:00 (UTC+4)**
+**9 декабря 2025, 21:30 (UTC+4)**
 
 ---
 
@@ -24,7 +24,7 @@ git pull
 
 ```
 Старый подход:  Клиент → Заявки → Устройства → Проблемы (50 таблиц)
-Новый подход:   Клиент → Диалоги (с контекстом внутри) (11 таблиц)
+Новый подход:   Клиент → Диалоги (с контекстом внутри) (13 таблиц)
 ```
 
 - Человеку — естественное общение в мессенджерах
@@ -35,6 +35,18 @@ git pull
 ---
 
 ## Что сделано в последних сессиях
+
+### Сессия 09.12.2025 (ночь) — Tasks в PostgreSQL
+
+1. **Таблицы задач добавлены ✅**
+   - `elo_tasks` — задачи для сотрудников
+   - `elo_task_updates` — история обновлений задач
+   - **Архитектурное решение: Tasks ТОЛЬКО в PostgreSQL, не в Neo4j**
+   - Задачи — это CRUD, не граф связей
+
+2. **Обновлено:**
+   - `CORE_NEW/docs/02_DATABASE_SCHEMA.md` — добавлены секции 12 и 13
+   - Итого: **13 таблиц** с префиксом `elo_`
 
 ### Сессия 09.12.2025 (вечер) — AI Архитектура
 
@@ -142,7 +154,7 @@ certbot --nginx -d android-api.eldoleado.ru
 |------|----------|
 | `CORE_NEW/docs/00_VISION.md` | Видение продукта |
 | `CORE_NEW/docs/01_CORE_DESIGN.md` | Архитектура ядра, концепция ЛИНИИ |
-| `CORE_NEW/docs/02_DATABASE_SCHEMA.md` | PostgreSQL: 11 elo_* таблиц |
+| `CORE_NEW/docs/02_DATABASE_SCHEMA.md` | PostgreSQL: 13 elo_* таблиц (+ tasks) |
 | `CORE_NEW/docs/03_NEO4J_SCHEMA.md` | Neo4j: Client, Device, Problem |
 | `CORE_NEW/docs/04_API_CONTRACTS.md` | API v2 контракты |
 | `CORE_NEW/docs/05_AI_ARCHITECTURE.md` | AI: 7 уровней, Prompt-in-Request |

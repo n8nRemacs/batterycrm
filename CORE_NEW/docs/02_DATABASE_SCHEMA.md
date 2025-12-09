@@ -586,6 +586,174 @@ FROM messages_history;
 
 ---
 
+## Задачи сотрудников
+
+> **Архитектурное решение:** Задачи хранятся ТОЛЬКО в PostgreSQL, не в Neo4j.
+> Задачи — это CRUD-сущности, а не граф связей. Переназначение задачи между мастерами — это просто UPDATE assignee_id.
+
+### 12. elo_tasks — Задачи
+
+```sql
+CREATE TABLE elo_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES elo_tenants(id),
+
+    -- Привязки (опциональные)
+    dialog_id UUID REFERENCES elo_dialogs(id),      -- из какого диалога создана
+    client_id UUID REFERENCES elo_clients(id),      -- для какого клиента
+    device_id UUID,                                  -- UUID устройства (из context диалога)
+
+    -- Исполнитель
+    assignee_id UUID REFERENCES elo_operators(id),   -- кому назначено
+    created_by_id UUID REFERENCES elo_operators(id), -- кто создал
+
+    -- Содержимое
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+
+    -- Тип задачи
+    task_type VARCHAR(50) DEFAULT 'general',
+    -- general: обычная задача
+    -- repair: ремонт устройства
+    -- call: перезвонить клиенту
+    -- delivery: доставка
+    -- purchase: закупка запчастей
+
+    -- Сроки
+    deadline TIMESTAMPTZ,
+    estimated_duration_min INT,                      -- оценка времени в минутах
+
+    -- Статус
+    status VARCHAR(20) DEFAULT 'pending',
+    -- pending: ожидает выполнения
+    -- in_progress: в работе
+    -- blocked: заблокирована (ждёт чего-то)
+    -- completed: выполнена
+    -- cancelled: отменена
+
+    -- Приоритет
+    priority VARCHAR(10) DEFAULT 'normal',
+    -- low, normal, high, urgent
+
+    -- Иерархия задач
+    parent_task_id UUID REFERENCES elo_tasks(id),
+
+    -- Метаданные (расширяемое)
+    metadata JSONB DEFAULT '{}',
+    -- metadata.blocked_reason: 'ждём запчасть'
+    -- metadata.result: 'успешно отремонтировано'
+    -- metadata.parts_used: [{name: '...', price: 500}]
+
+    -- Timestamps
+    started_at TIMESTAMPTZ,                          -- когда взяли в работу
+    completed_at TIMESTAMPTZ,                        -- когда завершили
+
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_elo_tasks_tenant ON elo_tasks(tenant_id);
+CREATE INDEX idx_elo_tasks_assignee ON elo_tasks(assignee_id, status);
+CREATE INDEX idx_elo_tasks_dialog ON elo_tasks(dialog_id);
+CREATE INDEX idx_elo_tasks_client ON elo_tasks(client_id);
+CREATE INDEX idx_elo_tasks_status ON elo_tasks(tenant_id, status, priority);
+CREATE INDEX idx_elo_tasks_deadline ON elo_tasks(tenant_id, deadline) WHERE status IN ('pending', 'in_progress');
+CREATE INDEX idx_elo_tasks_parent ON elo_tasks(parent_task_id);
+```
+
+### 13. elo_task_updates — История обновлений задач
+
+```sql
+CREATE TABLE elo_task_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL REFERENCES elo_tasks(id) ON DELETE CASCADE,
+
+    -- Кто
+    author_id UUID NOT NULL REFERENCES elo_operators(id),
+
+    -- Тип обновления
+    update_type VARCHAR(30) NOT NULL,
+    -- comment: текстовый комментарий
+    -- status_change: смена статуса
+    -- assignee_change: переназначение
+    -- progress: отчёт о прогрессе
+    -- attachment: прикрепление файла
+    -- time_log: лог времени
+
+    -- Содержимое
+    content TEXT,                                    -- текст комментария/отчёта
+
+    -- Данные изменения (для status_change, assignee_change)
+    changes JSONB DEFAULT '{}',
+    -- status_change: {from: 'pending', to: 'in_progress'}
+    -- assignee_change: {from_id: 'uuid', to_id: 'uuid', from_name: '...', to_name: '...'}
+    -- time_log: {minutes: 30, description: 'диагностика'}
+
+    -- Вложения
+    attachments JSONB DEFAULT '[]',
+    -- [{url: '...', name: 'photo.jpg', type: 'image/jpeg', size: 12345}]
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_elo_task_updates_task ON elo_task_updates(task_id, created_at DESC);
+CREATE INDEX idx_elo_task_updates_author ON elo_task_updates(author_id);
+```
+
+### Примеры использования
+
+```sql
+-- Создать задачу из диалога
+INSERT INTO elo_tasks (tenant_id, dialog_id, client_id, assignee_id, created_by_id, title, task_type, priority)
+VALUES (
+    '...tenant_id...',
+    '...dialog_id...',
+    '...client_id...',
+    '...master_id...',
+    '...operator_id...',
+    'Ремонт iPhone 14 Pro - замена экрана',
+    'repair',
+    'high'
+);
+
+-- Задачи мастера на сегодня
+SELECT t.*, c.name as client_name
+FROM elo_tasks t
+LEFT JOIN elo_clients c ON c.id = t.client_id
+WHERE t.assignee_id = '...master_id...'
+  AND t.status IN ('pending', 'in_progress')
+  AND (t.deadline IS NULL OR t.deadline >= NOW())
+ORDER BY t.priority DESC, t.deadline ASC NULLS LAST;
+
+-- Переназначить задачу другому мастеру
+UPDATE elo_tasks
+SET assignee_id = '...new_master_id...', updated_at = NOW()
+WHERE id = '...task_id...';
+
+-- Добавить комментарий о переназначении
+INSERT INTO elo_task_updates (task_id, author_id, update_type, content, changes)
+VALUES (
+    '...task_id...',
+    '...operator_id...',
+    'assignee_change',
+    'Передано Ивану - у него опыт с этой моделью',
+    '{"from_id": "...", "to_id": "...", "from_name": "Петр", "to_name": "Иван"}'
+);
+
+-- Статистика мастера
+SELECT
+    o.name,
+    COUNT(*) FILTER (WHERE t.status = 'completed') as completed,
+    COUNT(*) FILTER (WHERE t.status = 'in_progress') as in_progress,
+    AVG(EXTRACT(EPOCH FROM (t.completed_at - t.created_at))/3600) as avg_hours_to_complete
+FROM elo_operators o
+LEFT JOIN elo_tasks t ON t.assignee_id = o.id AND t.created_at > NOW() - INTERVAL '30 days'
+WHERE o.tenant_id = '...tenant_id...'
+GROUP BY o.id, o.name;
+```
+
+---
+
 ## Итого
 
 ### Количество таблиц
@@ -594,8 +762,9 @@ FROM messages_history;
 **Справочники (3):** elo_verticals, elo_tenant_verticals, elo_price_list
 **AI (2):** elo_ai_extractions, elo_ai_suggestions
 **Каналы (1):** elo_channel_accounts
+**Задачи (2):** elo_tasks, elo_task_updates
 
-**Всего: 11 таблиц с префиксом elo_** (вместо 50)
+**Всего: 13 таблиц с префиксом elo_** (вместо 50)
 
 ### Принципы
 
