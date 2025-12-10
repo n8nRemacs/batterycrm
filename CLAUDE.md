@@ -115,11 +115,45 @@ Old/                    # Старая архитектура (АРХИВ)
 
 ---
 
+## Database Access (без паролей)
+
+SSH ключи настроены. Пароли зашиты в команды.
+
+### PostgreSQL (185.221.214.83)
+```bash
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'QUERY'"
+```
+
+### Neo4j (45.144.177.128)
+```bash
+ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost:7687' -u neo4j -p 'Mi31415926pS' 'QUERY'"
+```
+
+### n8n API (ТОЛЬКО ЧТЕНИЕ — изменения через UI)
+```bash
+# Список workflows
+curl -s "https://n8n.n8nsrv.ru/api/v1/workflows" -H "X-N8N-API-KEY: n8n_api_key_below"
+
+# Конкретный workflow
+curl -s "https://n8n.n8nsrv.ru/api/v1/workflows/{id}" -H "X-N8N-API-KEY: n8n_api_key_below"
+
+# API Key (expires 2026-01-01):
+# eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZDUyMjJhMS04ZjUzLTQ5NDAtYjdkZS05M2RhZWFlMDQzOTMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY0NzY4NzE0LCJleHAiOjE3NzI0ODE2MDB9.JzC21XpXh7188Qlx2xWpZPHQysksg_Jj0hWuTgy6PmQ
+```
+
+### Локальные скрипты (Windows)
+```cmd
+scripts\db\pg.cmd "SELECT * FROM elo_tenants;"
+scripts\db\neo4j.cmd "MATCH (n) RETURN count(n);"
+```
+
+---
+
 ## Database
 
 **Connection:** `postgresql://supabase_admin:***@185.221.214.83:6544/postgres`
 
-### CORE_NEW Tables (elo_*)
+### CORE_NEW Tables (elo_*) — 26 таблиц
 
 | Category | Tables |
 |----------|--------|
@@ -128,8 +162,9 @@ Old/                    # Старая архитектура (АРХИВ)
 | AI (2) | elo_ai_extractions, elo_ai_suggestions |
 | Каналы (1) | elo_channel_accounts |
 | Задачи (2) | elo_tasks, elo_task_updates |
-
-**Всего: 13 таблиц с префиксом elo_**
+| Граф-зеркала (7) | elo_messages, elo_issues, elo_symptoms, elo_diagnoses, elo_repairs, elo_facts, elo_settings |
+| Справочники типов (4) | elo_symptom_types, elo_diagnosis_types, elo_repair_actions, elo_problem_categories |
+| Микроворонка (2) | elo_funnel_stages, elo_dialog_stage_history |
 
 ---
 

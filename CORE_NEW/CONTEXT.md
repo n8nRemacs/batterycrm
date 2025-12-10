@@ -1,6 +1,6 @@
 # CORE_NEW — Контекст разработки
 
-*Последнее обновление: 2025-12-09 22:45 (UTC+4)*
+*Последнее обновление: 2025-12-10 18:30 (UTC+4)*
 
 > Этот файл — единый источник правды о состоянии CORE_NEW.
 > Обновляется при каждом коммите/закрытии сессии.
@@ -14,8 +14,25 @@
 | PostgreSQL таблицы (elo_*) | 14 | ✅ Созданы |
 | Neo4j лейблы (ELO_*) | 3 | ✅ Созданы |
 | API v2 эндпоинты | 19 | ✅ Описаны |
-| n8n workflows (ELO_*) | 0 | TODO |
-| MCP серверы | 10 | v2.0.0 |
+| n8n workflows (ELO_*) | 15 | ⚠️ Импортированы, НЕ РАБОТАЮТ |
+| MCP серверы | 7 | ✅ v2.0.0 production |
+
+---
+
+## Текущий статус
+
+### ⚠️ ELO Workflows требуют перепроектирования
+
+**Проблема:** 15 ELO_* workflows импортированы в n8n, но архитектура неправильная:
+- ELO_In_Telegram вызывает старый BAT_Tenant_Resolver вместо ELO_Core_Tenant_Resolver
+- ELO_Core_Batcher использует Execute Workflow Trigger, но никто его не вызывает
+- Нет единой цепочки обработки сообщений
+- Workflows не связаны между собой
+
+**Решение:** Нужно спроектировать архитектуру с нуля в следующей сессии.
+
+См. `CORE_NEW/docs/NEXT_SESSION_BRIEF.md` для деталей.
+
 ---
 
 ## Архитектура
@@ -52,7 +69,7 @@
 
 ---
 
-## PostgreSQL: 13 таблиц (elo_*)
+## PostgreSQL: 14 таблиц (elo_*)
 
 ### Ядро (5)
 
@@ -92,6 +109,14 @@
 | `elo_tasks` | Задачи сотрудников |
 | `elo_task_updates` | История обновлений задач |
 
+### Seed data (1)
+
+| Таблица | Описание |
+|---------|----------|
+| `elo_problem_categories` | Категории проблем (display, battery, etc) |
+| `elo_funnel_stages` | Этапы воронки для вертикали |
+| `elo_symptom_types` | Типы симптомов |
+
 ---
 
 ## Neo4j: 5 лейблов (ELO_*)
@@ -106,67 +131,49 @@
 
 ---
 
-## API v2 Endpoints
+## n8n Workflows (ELO_*)
 
-### Dialogs
+### Текущее состояние (НЕ РАБОТАЕТ)
 
-| Method | Endpoint | Описание |
-|--------|----------|----------|
-| GET | `/v2/dialogs` | Список диалогов |
-| GET | `/v2/dialogs/{id}` | Детали диалога |
-| POST | `/v2/dialogs` | Создать диалог |
-| PATCH | `/v2/dialogs/{id}` | Обновить диалог |
-| POST | `/v2/dialogs/{id}/messages` | Отправить сообщение |
+| Workflow | Статус в n8n | Проблема |
+|----------|--------------|----------|
+| ELO_In_Telegram | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_WhatsApp | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_Avito | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_VK | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_MAX | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_Form | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_In_Phone | ACTIVE | Вызывает старый BAT_Tenant_Resolver |
+| ELO_Core_Tenant_Resolver | OFF | Никто не вызывает |
+| ELO_Core_Batcher | OFF | Никто не вызывает |
+| ELO_Core_Dialog_Engine | OFF | Никто не вызывает |
+| ELO_Out_Telegram | OFF | Никто не вызывает |
+| ELO_Out_WhatsApp | OFF | Никто не вызывает |
+| ELO_Out_Avito | OFF | Никто не вызывает |
+| ELO_Out_VK | OFF | Никто не вызывает |
+| ELO_Out_MAX | OFF | Никто не вызывает |
 
-### AI
+### Требуется
 
-| Method | Endpoint | Описание |
-|--------|----------|----------|
-| GET | `/v2/dialogs/{id}/suggestions` | AI подсказки |
-| POST | `/v2/dialogs/{id}/extract` | Запустить AI извлечение |
-
-### Events
-
-| Method | Endpoint | Описание |
-|--------|----------|----------|
-| GET | `/v2/dialogs/{id}/events` | Timeline событий |
-| GET | `/v2/clients/{id}/events` | События клиента |
-
-### Tasks
-
-| Method | Endpoint | Описание |
-|--------|----------|----------|
-| GET | `/v2/tasks` | Список задач |
-| POST | `/v2/tasks` | Создать задачу |
-| PATCH | `/v2/tasks/{id}` | Обновить задачу |
-
----
-
-## n8n Workflows (CORE_NEW)
-
-> TODO: Создать workflows для новой архитектуры
-
-| ID | Название | Webhook | Статус |
-|----|----------|---------|--------|
-| — | ELO_IN_Telegram | `/elo/telegram` | TODO |
-| — | ELO_IN_WhatsApp | `/elo/whatsapp` | TODO |
-| — | ELO_Dialog_Engine | — | TODO |
-| — | ELO_Context_Builder | `/elo/context` | TODO |
-| — | ELO_AI_Orchestrator | — | TODO |
+Перепроектировать архитектуру workflows:
+1. Определить блоки и их ответственность
+2. Определить связи (Redis, Execute Workflow, HTTP)
+3. Определить триггеры каждого блока
+4. Создать workflows по утверждённой схеме
 
 ---
 
 ## MCP Серверы
 
-| Сервер | Порт | Сервер | Статус |
-|--------|------|--------|--------|
-| mcp-telegram | 8767 | 217.145.79.27 (FI) | v2.0.0 multi-tenant |
-| mcp-whatsapp | 8766 | 217.145.79.27 (FI) | v2.0.0 multi-tenant |
-| mcp-avito | 8765 | 45.144.177.128 (RU) | v2.0.0 multi-tenant |
-| mcp-vk | 8767 | 45.144.177.128 (RU) | v2.0.0 multi-tenant |
-| mcp-max | 8768 | 45.144.177.128 (RU) | v2.0.0 multi-tenant |
-| mcp-form | 8770 | 45.144.177.128 (RU) | v1.0.0 |
-| api-android | 8780 | 45.144.177.128 (RU) | Gateway |
+| Сервер | Порт | Хост | Статус |
+|--------|------|------|--------|
+| mcp-telegram | 8767 | 217.145.79.27 (FI) | ✅ v2.0.0 |
+| mcp-whatsapp | 8766 | 217.145.79.27 (FI) | ✅ v2.0.0 |
+| mcp-avito | 8765 | 45.144.177.128 (RU) | ✅ v2.0.0 |
+| mcp-vk | 8767 | 45.144.177.128 (RU) | ✅ v2.0.0 |
+| mcp-max | 8768 | 45.144.177.128 (RU) | ✅ v2.0.0 |
+| mcp-form | 8770 | 45.144.177.128 (RU) | ✅ v1.0.0 |
+| api-android | 8780 | 45.144.177.128 (RU) | ✅ Gateway |
 
 ---
 
@@ -176,46 +183,47 @@
 |------|----------|--------|
 | [00_VISION.md](docs/00_VISION.md) | Видение продукта | ✅ |
 | [01_CORE_DESIGN.md](docs/01_CORE_DESIGN.md) | Архитектура ядра, глоссарий | ✅ |
-| [02_DATABASE_SCHEMA.md](docs/02_DATABASE_SCHEMA.md) | PostgreSQL: 13 таблиц | ✅ |
+| [02_DATABASE_SCHEMA.md](docs/02_DATABASE_SCHEMA.md) | PostgreSQL: 14 таблиц | ✅ |
 | [03_NEO4J_SCHEMA.md](docs/03_NEO4J_SCHEMA.md) | Neo4j: 5 лейблов | ✅ |
 | [04_API_CONTRACTS.md](docs/04_API_CONTRACTS.md) | API v2 контракты | ✅ |
 | [05_AI_ARCHITECTURE.md](docs/05_AI_ARCHITECTURE.md) | AI: 7 уровней | ✅ |
+| [06_DATA_CONTRACT.md](docs/06_DATA_CONTRACT.md) | Формат данных между workflows | ✅ |
+| [NEXT_SESSION_BRIEF.md](docs/NEXT_SESSION_BRIEF.md) | Brief для проектирования | ✅ |
+| [workflows/](docs/workflows/) | Черновики документации workflows | ⚠️ Требует переработки |
 
 ---
 
-## Миграции
+## Доступ к ресурсам
 
-| Файл | Описание | Статус |
-|------|----------|--------|
-| `CORE_NEW/migrations/001_elo_tables.sql` | Все 13 таблиц | TODO |
-
----
-
-## Связи компонентов
-
-```
-MCP Channels ──webhook──> n8n Workflows
-                              │
-                              ▼
-                    ┌─────────────────┐
-                    │ Dialog Engine   │
-                    │ (n8n workflow)  │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-        PostgreSQL        Neo4j        AI Workers
-        (elo_*)          (ELO_*)      (Universal)
+### PostgreSQL
+```bash
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'QUERY'"
 ```
 
+### Neo4j
+```bash
+ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost:7687' -u neo4j -p 'Mi31415926pS' 'QUERY'"
+```
+
+### n8n API (read-only)
+```bash
+curl -s "https://n8n.n8nsrv.ru/api/v1/workflows" -H "X-N8N-API-KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZDUyMjJhMS04ZjUzLTQ5NDAtYjdkZS05M2RhZWFlMDQzOTMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY0NzY4NzE0LCJleHAiOjE3NzI0ODE2MDB9.JzC21XpXh7188Qlx2xWpZPHQysksg_Jj0hWuTgy6PmQ"
+```
+
+### Redis Insight
+http://185.221.214.83:5540
+
 ---
 
-## Чеклист перед коммитом
+## Папки проекта
 
-- [ ] Обновить этот файл (CONTEXT.md)
-- [ ] Обновить Start.md
-- [ ] Запустить `python scripts/update_core_context.py` (когда будет готов)
-- [ ] git add && git commit && git push
+| Папка | Назначение |
+|-------|------------|
+| `CORE_NEW/docs/` | Документация новой архитектуры |
+| `CORE_NEW/migrations/` | SQL миграции |
+| `CORE_NEW/workflows/` | Синхронизированные JSON workflows (read-only) |
+| `workflows_to_import/` | Новые/изменённые workflows для импорта в n8n |
+| `Old/n8n_workflows/` | Старые BAT_* workflows (справочно) |
 
 ---
 
@@ -223,8 +231,22 @@ MCP Channels ──webhook──> n8n Workflows
 
 | Дата | Изменение |
 |------|-----------|
+| 2025-12-10 | Импортированы 15 ELO_* workflows (не работают) |
+| 2025-12-10 | Анализ архитектуры: workflows не связаны правильно |
+| 2025-12-10 | Решение: перепроектировать с нуля |
+| 2025-12-10 | Создана документация workflows (черновик) |
 | 2025-12-09 | Создан CONTEXT.md |
 | 2025-12-09 | Добавлены таблицы elo_tasks, elo_task_updates |
 | 2025-12-09 | Создана AI архитектура (7 уровней) |
-| 2025-12-09 | Создана схема PostgreSQL (13 таблиц) |
+| 2025-12-09 | Создана схема PostgreSQL (14 таблиц) |
 | 2025-12-09 | Создана схема Neo4j (5 лейблов) |
+
+---
+
+## Следующие шаги
+
+1. **Новая сессия:** Спроектировать архитектуру ELO workflows с нуля
+2. Определить минимальный набор блоков
+3. Определить связи между блоками
+4. Создать workflows по схеме
+5. Активировать и протестировать
