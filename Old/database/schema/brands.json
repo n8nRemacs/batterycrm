@@ -1,0 +1,13 @@
+{
+  "table_name": "brands",
+  "columns": [
+    "id",
+    "name",
+    "normalized_name",
+    "aliases",
+    "is_active",
+    "created_at",
+    "tenant_id"
+  ],
+  "row_count": 1
+}

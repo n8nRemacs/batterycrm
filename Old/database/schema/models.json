@@ -1,0 +1,14 @@
+{
+  "table_name": "models",
+  "columns": [
+    "id",
+    "brand_id",
+    "name",
+    "aliases",
+    "is_active",
+    "created_at",
+    "device_type_id",
+    "tenant_id"
+  ],
+  "row_count": 1
+}

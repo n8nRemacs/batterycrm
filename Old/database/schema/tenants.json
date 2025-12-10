@@ -1,0 +1,11 @@
+{
+  "table_name": "tenants",
+  "columns": [
+    "id",
+    "name",
+    "domain",
+    "is_active",
+    "created_at"
+  ],
+  "row_count": 1
+}

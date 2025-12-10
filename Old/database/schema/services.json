@@ -1,0 +1,18 @@
+{
+  "table_name": "services",
+  "columns": [
+    "id",
+    "malfunction_category",
+    "malfunction_type",
+    "price_rub",
+    "duration_minutes",
+    "is_active",
+    "created_at",
+    "updated_at",
+    "repair_type_id",
+    "brand_id",
+    "model_id",
+    "tenant_id"
+  ],
+  "row_count": 1
+}

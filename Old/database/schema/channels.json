@@ -1,0 +1,11 @@
+{
+  "table_name": "channels",
+  "columns": [
+    "id",
+    "code",
+    "name",
+    "is_active",
+    "created_at"
+  ],
+  "row_count": 1
+}

@@ -1,4 +1,13 @@
 {
+  "env": {
+    "PGHOST": "185.221.214.83",
+    "PGPORT": "6544",
+    "PGDATABASE": "postgres",
+    "PGUSER": "supabase_admin",
+    "PGPASSWORD": "Mi31415926pSss!",
+    "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxZDUyMjJhMS04ZjUzLTQ5NDAtYjdkZS05M2RhZWFlMDQzOTMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY0NzY4NzE0LCJleHAiOjE3NzI0ODE2MDB9.JzC21XpXh7188Qlx2xWpZPHQysksg_Jj0hWuTgy6PmQ",
+    "N8N_URL": "https://n8n.n8nsrv.ru"
+  },
   "permissions": {
     "allow": [
       "Bash(env)",
@@ -61,7 +70,15 @@
       "WebSearch",
       "Bash(done)",
       "Bash(npm install)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(./ck-client.exe:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(ssh-copy-id:*)",
+      "Bash(psql:*)",
+      "Read(//c/Users/User/.ssh/**)"
     ],
     "deny": [],
     "ask": []

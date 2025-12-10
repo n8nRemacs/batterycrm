@@ -1,0 +1,239 @@
+{
+  "id": "rRO6sxLqiCdgvLZz",
+  "name": "BAT_Tenant_Resolver",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        176
+      ],
+      "id": "13b5f187-9f26-4bdb-9ad7-09424b7dca1e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Определяем параметры для поиска tenant\nconst channel = data.channel;\nlet lookupKey = '';\nlet lookupValue = '';\n\nif (channel === 'telegram' && data.bot_token) {\n  lookupKey = 'telegram_bot_token';\n  lookupValue = data.bot_token;\n} else if (channel === 'vk' && data.app_id) {\n  lookupKey = 'vk_app_id';\n  lookupValue = data.app_id;\n} else if (channel === 'whatsapp' && data.phone_id) {\n  lookupKey = 'whatsapp_phone_id';\n  lookupValue = data.phone_id;\n} else if (channel === 'avito' && data.client_id) {\n  lookupKey = 'avito_client_id';\n  lookupValue = data.client_id;\n}\n\n// Если lookup параметры пустые, сразу возвращаем флаг для использования default tenant\nconst needsDefaultTenant = !lookupKey || !lookupValue;\n\nreturn {\n  ...data,\n  lookup_key: lookupKey,\n  lookup_value: lookupValue,\n  needs_default_tenant: needsDefaultTenant\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        176
+      ],
+      "id": "6755978f-3f9a-46b3-a5f6-158d82cbf74e",
+      "name": "Prepare Lookup"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "skip-lookup-check",
+              "leftValue": "={{ $json.needs_default_tenant }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        176
+      ],
+      "id": "796b3841-439d-42c0-a0d9-fd34732004a9",
+      "name": "Skip DB Lookup?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  t.id as tenant_id,\n  t.name as tenant_name,\n  t.is_active,\n  tc.value as config\nFROM tenants t\nLEFT JOIN tenant_configs tc ON tc.tenant_id = t.id\nWHERE tc.key = '{{ $json.lookup_key }}'\n  AND tc.value->>'token' = '{{ $json.lookup_value }}'\n  AND t.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        240
+      ],
+      "id": "138033dd-7be2-4660-a6fa-668d6ef111f8",
+      "name": "Find Tenant",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0db731ef-8563-4d63-ae88-3523d6fbc0b4",
+              "leftValue": "={{ $json.tenant_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        240
+      ],
+      "id": "3b6f8c98-14b3-4425-953d-dbf8f77f11b4",
+      "name": "Tenant Found?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('When Executed by Another Workflow').first().json;\n\nreturn {\n  ...originalData,\n  tenant_id: 'a0000000-0000-0000-0000-000000000001',\n  tenant_name: 'Default Tenant',\n  tenant_config: {}\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        80
+      ],
+      "id": "259d75fd-ee0b-43e1-8541-859233d4715c",
+      "name": "Use Default Tenant"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tenantData = $input.first().json;\nconst originalData = $('When Executed by Another Workflow').first().json;\n\nreturn {\n  ...originalData,\n  tenant_id: tenantData.tenant_id,\n  tenant_name: tenantData.tenant_name,\n  tenant_config: tenantData.config || tenantData.tenant_config || {}\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        240
+      ],
+      "id": "4edd4e36-9fb8-4454-a6d9-7138fcb8630c",
+      "name": "Attach Tenant From DB"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lookup": {
+      "main": [
+        [
+          {
+            "node": "Skip DB Lookup?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip DB Lookup?": {
+      "main": [
+        [
+          {
+            "node": "Use Default Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Find Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Tenant": {
+      "main": [
+        [
+          {
+            "node": "Tenant Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Found?": {
+      "main": [
+        [
+          {
+            "node": "Attach Tenant From DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Use Default Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "id": "8zD9sDD78ytgu5T2",
+      "name": "BattCRM"
+    },
+    {
+      "updatedAt": "2025-11-23T04:04:01.292Z",
+      "createdAt": "2025-11-23T04:04:01.292Z",
+      "id": "eiI07cPEeFxzR69p",
+      "name": "Core"
+    }
+  ],
+  "updatedAt": "2025-12-05T10:43:36.000Z",
+  "createdAt": "2025-10-26T11:38:12.745Z"
+}

@@ -1,0 +1,358 @@
+{
+  "export_date": "2025-11-22T12:19:55.319970",
+  "database_url": "https://supabase.n8nsrv.ru",
+  "total_tables": 26,
+  "tables": {
+    "tenants": {
+      "table_name": "tenants",
+      "columns": [
+        "id",
+        "name",
+        "domain",
+        "is_active",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "tenant_configs": {
+      "table_name": "tenant_configs",
+      "columns": [
+        "id",
+        "tenant_id",
+        "key",
+        "value",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "clients": {
+      "table_name": "clients",
+      "columns": [
+        "id",
+        "phone",
+        "name",
+        "telegram_id",
+        "vk_id",
+        "whatsapp_id",
+        "livesklad_client_id",
+        "unsubscribed",
+        "created_at",
+        "updated_at",
+        "email",
+        "avito_id",
+        "max_id",
+        "tenant_id",
+        "has_telegram",
+        "has_whatsapp",
+        "has_phone",
+        "has_yandex",
+        "has_google",
+        "has_instagram",
+        "has_avito"
+      ],
+      "row_count": 1
+    },
+    "client_merges": {
+      "table_name": "client_merges",
+      "columns": [],
+      "row_count": 0
+    },
+    "appeals": {
+      "table_name": "appeals",
+      "columns": [
+        "id",
+        "client_id",
+        "phone_brand",
+        "phone_model",
+        "malfunction_category",
+        "malfunction_type",
+        "problem_description",
+        "appeal_status",
+        "stage",
+        "ad_channel",
+        "ad_id",
+        "estimated_cost",
+        "estimated_time",
+        "appointment_datetime",
+        "master_id",
+        "qr_code",
+        "livesklad_order_id",
+        "synced_with_livesklad",
+        "synced_at",
+        "visited_at",
+        "completed_at",
+        "notified_2h_after_contact",
+        "notified_1day_before",
+        "notified_2h_before",
+        "notified_after_completion",
+        "notified_review_request",
+        "notified_warranty_reminder",
+        "created_at",
+        "updated_at",
+        "device_type_id",
+        "brand_id",
+        "model_id",
+        "deal_type_id",
+        "repair_type_id",
+        "ad_channel_id",
+        "operation_mode",
+        "notified_",
+        "type",
+        "type_confidence",
+        "type_identified",
+        "type_reasoning",
+        "pending_operator_approval",
+        "draft_response",
+        "routing_history",
+        "parts_owner",
+        "client_parts",
+        "tenant_id",
+        "location_id"
+      ],
+      "row_count": 1
+    },
+    "messages_history": {
+      "table_name": "messages_history",
+      "columns": [
+        "id",
+        "appeal_id",
+        "message_type",
+        "message_text",
+        "channel",
+        "created_at",
+        "channel_id",
+        "external_message_id",
+        "external_chat_id",
+        "tenant_id"
+      ],
+      "row_count": 1
+    },
+    "operators": {
+      "table_name": "operators",
+      "columns": [
+        "id",
+        "telegram_id",
+        "name",
+        "is_active",
+        "created_at",
+        "tenant_id",
+        "username",
+        "password_hash",
+        "last_login_at",
+        "last_login_platform",
+        "email",
+        "location_id",
+        "session_token",
+        "session_token_created_at",
+        "fcm_token",
+        "fcm_token_updated_at"
+      ],
+      "row_count": 1
+    },
+    "operator_actions": {
+      "table_name": "operator_actions",
+      "columns": [
+        "id",
+        "operator_telegram_id",
+        "operator_id",
+        "action_type",
+        "details",
+        "created_at",
+        "context_appeal_id",
+        "tenant_id",
+        "action_source"
+      ],
+      "row_count": 1
+    },
+    "operator_appeal_status": {
+      "table_name": "operator_appeal_status",
+      "columns": [
+        "id",
+        "tenant_id",
+        "appeal_id",
+        "operator_id",
+        "status",
+        "telegram_message_id",
+        "taken_at",
+        "completed_at",
+        "created_at",
+        "updated_at"
+      ],
+      "row_count": 1
+    },
+    "channels": {
+      "table_name": "channels",
+      "columns": [
+        "id",
+        "code",
+        "name",
+        "is_active",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "sales_channels": {
+      "table_name": "sales_channels",
+      "columns": [],
+      "row_count": 0
+    },
+    "lead_sources": {
+      "table_name": "lead_sources",
+      "columns": [],
+      "row_count": 0
+    },
+    "device_types": {
+      "table_name": "device_types",
+      "columns": [
+        "id",
+        "name",
+        "is_active",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "brands": {
+      "table_name": "brands",
+      "columns": [
+        "id",
+        "name",
+        "normalized_name",
+        "aliases",
+        "is_active",
+        "created_at",
+        "tenant_id"
+      ],
+      "row_count": 1
+    },
+    "models": {
+      "table_name": "models",
+      "columns": [
+        "id",
+        "brand_id",
+        "name",
+        "aliases",
+        "is_active",
+        "created_at",
+        "device_type_id",
+        "tenant_id"
+      ],
+      "row_count": 1
+    },
+    "repair_types": {
+      "table_name": "repair_types",
+      "columns": [
+        "id",
+        "name",
+        "description",
+        "is_active",
+        "created_at",
+        "tenant_id"
+      ],
+      "row_count": 1
+    },
+    "issue_types": {
+      "table_name": "issue_types",
+      "columns": [],
+      "row_count": 0
+    },
+    "issues": {
+      "table_name": "issues",
+      "columns": [],
+      "row_count": 0
+    },
+    "deal_types": {
+      "table_name": "deal_types",
+      "columns": [
+        "id",
+        "name",
+        "is_repair",
+        "is_active",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "services": {
+      "table_name": "services",
+      "columns": [
+        "id",
+        "malfunction_category",
+        "malfunction_type",
+        "price_rub",
+        "duration_minutes",
+        "is_active",
+        "created_at",
+        "updated_at",
+        "repair_type_id",
+        "brand_id",
+        "model_id",
+        "tenant_id"
+      ],
+      "row_count": 1
+    },
+    "masters": {
+      "table_name": "masters",
+      "columns": [
+        "id",
+        "name",
+        "working_hours_start",
+        "working_hours_end",
+        "is_active",
+        "created_at"
+      ],
+      "row_count": 1
+    },
+    "appointments": {
+      "table_name": "appointments",
+      "columns": [],
+      "row_count": 0
+    },
+    "knowledge_base": {
+      "table_name": "knowledge_base",
+      "columns": [],
+      "row_count": 0
+    },
+    "appeal_meta_config": {
+      "table_name": "appeal_meta_config",
+      "columns": [
+        "id",
+        "label",
+        "group",
+        "order",
+        "source_field",
+        "format_type",
+        "is_active",
+        "created_at",
+        "updated_at"
+      ],
+      "row_count": 1
+    },
+    "appeal_meta_visibility": {
+      "table_name": "appeal_meta_visibility",
+      "columns": [
+        "config_id",
+        "deal_type_id",
+        "tenant_id",
+        "is_visible",
+        "created_at",
+        "updated_at"
+      ],
+      "row_count": 1
+    },
+    "operator_devices": {
+      "table_name": "operator_devices",
+      "columns": [
+        "id",
+        "operator_id",
+        "tenant_id",
+        "device_type",
+        "fcm_token",
+        "session_token",
+        "device_id",
+        "device_info",
+        "last_active_at",
+        "created_at"
+      ],
+      "row_count": 1
+    }
+  }
+}

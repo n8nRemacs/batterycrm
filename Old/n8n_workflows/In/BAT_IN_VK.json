@@ -1,0 +1,448 @@
+{
+  "id": "aRjmaO3jZqhl8hOG",
+  "name": "BAT IN VK",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vk",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "640302a9-28d4-4e52-994a-a48259d07422",
+      "name": "VK Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -1680,
+        32
+      ],
+      "webhookId": "vk-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "confirmation"
+            }
+          ]
+        }
+      },
+      "id": "5a1b6925-ebe6-42c8-a575-715616ff2bb3",
+      "name": "Is Confirmation?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1456,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $env.VK_CONFIRMATION_STRING }}",
+        "options": {}
+      },
+      "id": "b92668a6-18d9-4191-bb73-1a38354cdf4c",
+      "name": "Send Confirmation",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "message_new"
+            }
+          ]
+        }
+      },
+      "id": "6067d84a-2098-4d69-8670-e274d8f7d767",
+      "name": "Is New Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "ok",
+        "options": {}
+      },
+      "id": "56d80fb0-2b10-4419-870b-b7d8013a3b5a",
+      "name": "Respond OK (Other)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.object.message.attachments && $json.object.message.attachments.some(a => a.type === 'audio_message') }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "943521d1-905b-42f3-ab47-578678f34ac3",
+      "name": "Has Voice?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $input.first().json.object.message;\n\n// Находим голосовое сообщение\nconst voiceAttachment = msg.attachments.find(a => a.type === 'audio_message');\nconst voiceUrl = voiceAttachment?.audio_message?.link_mp3;\n\nif (!voiceUrl) {\n  throw new Error('Voice URL not found');\n}\n\nreturn {\n  voice_url: voiceUrl,\n  original_message: msg\n};"
+      },
+      "id": "69fc93cb-9764-4617-acb5-2bcb6bb2f7c9",
+      "name": "Extract Voice URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.voice_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "7bf1ce34-2d48-4589-8ae6-11b45228f3f9",
+      "name": "Download Voice",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -560,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -352,
+        -80
+      ],
+      "id": "6deab3c5-b92b-453d-bb38-6d83282c69b2",
+      "name": "Transcribe Voice",
+      "credentials": {
+        "openAiApi": {
+          "id": "ptoy1RvCOn39G0Af",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $('Extract Voice URL').first().json.original_message;\nconst transcription = $input.first().json.text;\n\nlet messageText = msg.text || '';\n\nconst hasPhoto = msg.attachments?.some(a => a.type === 'photo') || false;\nconst hasVoice = true;\nconst hasVideo = msg.attachments?.some(a => a.type === 'video') || false;\nconst hasDocument = msg.attachments?.some(a => a.type === 'doc') || false;\n\nconst urls = [];\nlet photoUrl = null;\n\nif (hasPhoto) {\n  const photoAttachment = msg.attachments.find(a => a.type === 'photo');\n  if (photoAttachment?.photo?.sizes) {\n    const maxSize = photoAttachment.photo.sizes.reduce((max, size) => \n      (size.width * size.height > max.width * max.height) ? size : max\n    );\n    photoUrl = maxSize.url;\n    urls.push(photoUrl);\n  }\n}\n\n// Добавляем транскрипцию\nif (transcription) {\n  messageText = (messageText ? messageText + '\\n\\n' : '') + transcription;\n}\n\nreturn {\n  channel: 'vk',\n  external_user_id: msg.from_id.toString(),\n  external_chat_id: msg.peer_id.toString(),\n  \n  text: messageText,\n  timestamp: new Date(msg.date * 1000).toISOString(),\n  \n  client_phone: null,\n  client_name: null,\n  client_email: null,\n  \n  media: {\n    has_voice: true,\n    voice_transcribed_text: transcription,\n    has_images: hasPhoto,\n    images: hasPhoto ? [{ url: photoUrl }] : [],\n    has_video: hasVideo,\n    videos: [],\n    has_document: hasDocument\n  },\n  \n  meta: {\n    external_message_id: msg.id.toString(),\n    ad_channel: 'vk',\n    ad_id: null,\n    original_media_type: 'voice',\n    raw: msg,\n    group_id: msg.group_id?.toString()\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
+      },
+      "id": "b6bc3037-7556-43be-a260-6dd08688dbb3",
+      "name": "Normalize with Voice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $input.first().json.object.message;\n\nlet messageText = msg.text || '';\n\nconst hasPhoto = msg.attachments?.some(a => a.type === 'photo') || false;\nconst hasVoice = false;\nconst hasVideo = msg.attachments?.some(a => a.type === 'video') || false;\nconst hasDocument = msg.attachments?.some(a => a.type === 'doc') || false;\n\nconst urls = [];\nlet photoUrl = null;\n\nif (hasPhoto) {\n  const photoAttachment = msg.attachments.find(a => a.type === 'photo');\n  if (photoAttachment?.photo?.sizes) {\n    const maxSize = photoAttachment.photo.sizes.reduce((max, size) => \n      (size.width * size.height > max.width * max.height) ? size : max\n    );\n    photoUrl = maxSize.url;\n    urls.push(photoUrl);\n  }\n}\n\nreturn {\n  channel: 'vk',\n  external_user_id: msg.from_id.toString(),\n  external_chat_id: msg.peer_id.toString(),\n  \n  text: messageText,\n  timestamp: new Date(msg.date * 1000).toISOString(),\n  \n  client_phone: null,\n  client_name: null,\n  client_email: null,\n  \n  media: {\n    has_voice: false,\n    voice_transcribed_text: null,\n    has_images: hasPhoto,\n    images: hasPhoto ? [{ url: photoUrl }] : [],\n    has_video: hasVideo,\n    videos: [],\n    has_document: hasDocument\n  },\n  \n  meta: {\n    external_message_id: msg.id.toString(),\n    ad_channel: 'vk',\n    ad_id: null,\n    original_media_type: hasPhoto ? 'photo' : 'text',\n    raw: msg\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
+      },
+      "id": "df8496aa-6a86-4ec8-968a-3c8b0342a005",
+      "name": "Normalize without Voice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "rRO6sxLqiCdgvLZz",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/rRO6sxLqiCdgvLZz",
+          "cachedResultName": "BAT_Tenant_Resolver"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        32
+      ],
+      "id": "436d4e35-6695-4f09-bcc8-a59da79ae416",
+      "name": "Execute Tenant Resolver"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Подготавливаем сообщение для Redis очереди\nconst data = $input.first().json;\n\nreturn {\n  message_json: JSON.stringify(data),\n  batch_key: `${data.channel}:${data.external_chat_id}`\n};"
+      },
+      "id": "2de62c29-58ff-4753-8ad2-c5b1c0484a51",
+      "name": "Prepare for Queue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "queue:incoming",
+        "messageData": "={{ $json.message_json }}",
+        "tail": true
+      },
+      "id": "30b49763-bf3c-4ee7-b62c-0b2519ed4579",
+      "name": "Push to Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        528,
+        32
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "ok",
+        "options": {}
+      },
+      "id": "b36a5e04-93f5-4d1b-bc28-7f4cca057907",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        752,
+        32
+      ]
+    }
+  ],
+  "connections": {
+    "VK Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is Confirmation?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Confirmation?": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is New Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Message?": {
+      "main": [
+        [
+          {
+            "node": "Has Voice?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond OK (Other)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Voice?": {
+      "main": [
+        [
+          {
+            "node": "Extract Voice URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize without Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Voice URL": {
+      "main": [
+        [
+          {
+            "node": "Download Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Voice": {
+      "main": [
+        [
+          {
+            "node": "Normalize with Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize with Voice": {
+      "main": [
+        [
+          {
+            "node": "Execute Tenant Resolver",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize without Voice": {
+      "main": [
+        [
+          {
+            "node": "Execute Tenant Resolver",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Tenant Resolver": {
+      "main": [
+        [
+          {
+            "node": "Prepare for Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for Queue": {
+      "main": [
+        [
+          {
+            "node": "Push to Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push to Queue": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "id": "8zD9sDD78ytgu5T2",
+      "name": "BattCRM"
+    },
+    {
+      "updatedAt": "2025-11-23T04:03:40.721Z",
+      "createdAt": "2025-11-23T04:03:40.721Z",
+      "id": "nLdF41tEx70V7m3A",
+      "name": "In"
+    }
+  ],
+  "updatedAt": "2025-12-05T09:45:48.000Z",
+  "createdAt": "2025-10-14T06:43:11.670Z"
+}
