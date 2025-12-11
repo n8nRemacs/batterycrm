@@ -68,6 +68,8 @@
 │  └────────────────────────┬────────────────────────────┘                        │
 │                           │                                                      │
 │                           ├──▶ POST /query (Graph Tool :8773)                   │
+│                           ├──▶ POST /extract (AI Tool :8774)                    │
+│                           ├──▶ POST /chat (AI Tool :8774)                       │
 │                           │                                                      │
 │                           ▼  POST /webhook/elo-out-{channel}                    │
 └───────────────────────────│─────────────────────────────────────────────────────┘
@@ -458,7 +460,147 @@
 
 ---
 
-## 6. Core → Channel OUT
+## 6. Core → AI Tool
+
+### POST /extract
+
+| Parameter | Value |
+|-----------|-------|
+| **From** | n8n Core (Context Builder, AI Extractor) |
+| **To** | AI Tool MCP (45.144.177.128:8774) |
+| **n8n Polygon** | `https://n8n.n8nsrv.ru/webhook/elo-ai-extract` |
+| **Method** | POST |
+| **Content-Type** | application/json |
+| **Timeout** | 60s |
+
+**Request:**
+```json
+{
+  "message": "Разбил экран на iPhone 14 Pro, сколько стоит замена?",
+  "extraction_schema": {
+    "type": "object",
+    "properties": {
+      "device": {
+        "type": "object",
+        "properties": {
+          "brand": {"type": "string"},
+          "model": {"type": "string"}
+        }
+      },
+      "symptoms": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "code": {"type": "string"},
+            "text": {"type": "string"}
+          }
+        }
+      },
+      "intent": {"type": "string", "enum": ["repair", "purchase", "question", "sale"]}
+    }
+  },
+  "model": "qwen/qwen3-30b-a3b"
+}
+```
+
+**Response (success):**
+```json
+{
+  "success": true,
+  "data": {
+    "device": {"brand": "Apple", "model": "iPhone 14 Pro"},
+    "symptoms": [{"code": "screen_cracked", "text": "разбил экран"}],
+    "intent": "repair"
+  },
+  "raw_response": "...",
+  "execution_time_ms": 1234,
+  "model_used": "qwen/qwen3-30b-a3b"
+}
+```
+
+**Response (error):**
+```json
+{
+  "success": false,
+  "error": "Failed to parse JSON: ...",
+  "raw_response": "...",
+  "execution_time_ms": 1234,
+  "model_used": "qwen/qwen3-30b-a3b"
+}
+```
+
+### POST /chat
+
+| Parameter | Value |
+|-----------|-------|
+| **From** | n8n Core (Orchestrator) |
+| **To** | AI Tool MCP (45.144.177.128:8774) |
+| **n8n Polygon** | `https://n8n.n8nsrv.ru/webhook/elo-ai-chat` |
+| **Method** | POST |
+| **Content-Type** | application/json |
+| **Timeout** | 120s |
+
+**Request:**
+```json
+{
+  "messages": [
+    {"role": "system", "content": "You are a phone repair assistant."},
+    {"role": "user", "content": "Сколько стоит замена экрана iPhone 14?"}
+  ],
+  "tools": [
+    {
+      "name": "get_price",
+      "description": "Get price for repair",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device_model": {"type": "string"},
+          "repair_type": {"type": "string"}
+        }
+      }
+    }
+  ],
+  "model": "anthropic/claude-3-5-sonnet",
+  "max_tokens": 4096,
+  "temperature": 0.7
+}
+```
+
+**Response (success):**
+```json
+{
+  "success": true,
+  "content": "Для уточнения цены мне нужно проверить прайс.",
+  "tool_calls": [
+    {
+      "name": "get_price",
+      "arguments": {
+        "device_model": "iPhone 14",
+        "repair_type": "screen_replacement"
+      }
+    }
+  ],
+  "execution_time_ms": 2345,
+  "model_used": "anthropic/claude-3-5-sonnet",
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 50
+  }
+}
+```
+
+### Available Models
+
+| Model | Default For | Provider |
+|-------|-------------|----------|
+| `qwen/qwen3-30b-a3b` | Extraction | OpenRouter |
+| `anthropic/claude-3-5-sonnet` | Chat | OpenRouter |
+| `openai/gpt-4o` | Chat (alternative) | OpenRouter |
+
+---
+
+## 7. Core → Channel OUT
 
 ### POST /webhook/elo-out-{channel}
 
@@ -620,6 +762,7 @@
 | Input Contour | `GET http://45.144.177.128:8771/health` | `{"status":"ok","redis":true}` |
 | Client Contour | `GET http://45.144.177.128:8772/health` | `{"status":"ok","postgres":true}` |
 | Graph Tool | `GET http://45.144.177.128:8773/health` | `{"status":"ok","postgres":true,"neo4j":true}` |
+| AI Tool | `GET http://45.144.177.128:8774/health` | `{"status":"ok","openrouter_configured":true}` |
 | mcp-telegram | `GET http://217.145.79.27:8767/health` | `{"status":"ok"}` |
 | mcp-whatsapp | `GET http://217.145.79.27:8766/health` | `{"status":"ok"}` |
 | mcp-avito | `GET http://45.144.177.128:8765/health` | `{"status":"ok"}` |
@@ -658,6 +801,8 @@
 | ELO_Input_Worker | (Schedule trigger) | Emulates MCP 8771 worker |
 | ELO_Client_Resolve | `/webhook/elo-client-resolve` | Emulates MCP 8772 /resolve |
 | ELO_Graph_Query | `/webhook/elo-graph-query` | Proxy to Graph Tool 8773 |
+| ELO_AI_Extract | `/webhook/elo-ai-extract` | Proxy to AI Tool 8774 /extract |
+| ELO_AI_Chat | `/webhook/elo-ai-chat` | Proxy to AI Tool 8774 /chat |
 | ELO_Core_Ingest | `/webhook/elo-core-ingest` | Core entry point |
 | ELO_Out_Telegram | `/webhook/elo-out-telegram` | Send to Telegram |
 | ELO_Out_WhatsApp | `/webhook/elo-out-whatsapp` | Send to WhatsApp |
