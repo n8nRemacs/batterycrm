@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  input-contour:
+    build: ./input-contour
+    container_name: input-contour
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://45.144.177.128:6379/0
+      - CLIENT_CONTOUR_URL=http://client-contour:8772/resolve
+      - DEBOUNCE_SECONDS=10
+      - MAX_WAIT_SECONDS=300
+      - POLL_INTERVAL=1.0
+      - BATCH_SIZE=100
+    ports:
+      - "8771:8771"
+    depends_on:
+      - client-contour
+
+  client-contour:
+    build: ./client-contour
+    container_name: client-contour
+    restart: unless-stopped
+    environment:
+      - CORE_URL=https://n8n.n8nsrv.ru/webhook/elo-core-ingest
+      - REDIS_URL=redis://45.144.177.128:6379/0
+      - HOST=0.0.0.0
+      - PORT=8772
+      - DATABASE_URL=postgresql://user:pass@185.221.214.83:6544/postgres
+      - NEO4J_URI=bolt://45.144.177.128:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=Mi31415926pS
+    ports:
+      - "8772:8772"
+

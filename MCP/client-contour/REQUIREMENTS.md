@@ -3,22 +3,30 @@
 > Task for developer: create Client Contour MCP service
 
 **Date:** 2025-12-11
-**Status:** Not started
+**Status:** In development
+**Updated:** 2025-12-11 (decisions finalized)
 
 ---
 
 ## Overview
 
 Client Contour is a Python/FastAPI MCP service that:
-1. Receives messages from Input Contour (after batching)
+1. Receives batched messages from Input Contour
 2. Resolves tenant by credentials (bot_token, profile_id, etc.)
-3. Resolves/creates client
+3. Resolves/creates client (exact match only in MVP)
 4. Resolves/creates dialog
-5. Sends enriched payload to Core
+5. Sends enriched payload to Core (async, fire-and-forget)
 
 ---
 
 ## Architecture Position
+
+```
+Input Contour (MCP:8771)     Client Contour (MCP:8772)     Core Contour (n8n)
+├── Tenant Resolver          ├── Client Resolver           ├── Context Builder
+├── Queue/Processor          └── Dialog Resolver           ├── Orchestrator
+└── Debouncer                    (один сервис, 2 метода)   └── Dialog Engine
+```
 
 ```
 MCP Adapters (telegram, whatsapp, ...)
@@ -26,32 +34,48 @@ MCP Adapters (telegram, whatsapp, ...)
        │ POST /ingest (normalized message)
        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  INPUT CONTOUR (MCP)                                         │
-│  • Queue to Redis                                            │
-│  • Debounce (10s silence)                                    │
-│  • Aggregate messages                                        │
-│  • POST to Client Contour                                    │
+│  INPUT CONTOUR (MCP:8771)                                   │
+│  • Queue to Redis                                           │
+│  • Debounce (10s silence, 300s max_wait)                    │
+│  • Aggregate messages                                       │
+│  • POST to Client Contour                                   │
+│  • Retry x3 + DLQ                                           │
 └─────────────────────────────────────────────────────────────┘
        │
        │ POST /resolve (batched message)
        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  CLIENT CONTOUR (MCP) ← THIS SERVICE                         │
-│  • Tenant Resolver (by bot_token/profile_id)                 │
-│  • Client Resolver (find/create)                             │
-│  • Dialog Resolver (find/create active)                      │
-│  • POST to Core                                              │
+│  CLIENT CONTOUR (MCP:8772) ← THIS SERVICE                   │
+│  • Tenant Resolver (by bot_token/profile_id)                │
+│  • Client Resolver (find/create, exact match only)          │
+│  • Dialog Resolver (find/create active)                     │
+│  • POST to Core (async, fire-and-forget)                    │
 └─────────────────────────────────────────────────────────────┘
        │
        │ POST /webhook/elo-core-ingest (fully enriched)
        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  CORE (n8n for now, MCP later)                               │
-│  • Context Builder                                           │
-│  • AI Processing                                             │
-│  • Response                                                  │
+│  CORE CONTOUR (n8n for now, MCP later)                      │
+│  • Context Builder                                          │
+│  • Orchestrator + AI                                        │
+│  • Dialog Engine                                            │
+│  • → Channel OUT (response to client)                       │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Finalized Decisions
+
+| Question | Decision |
+|----------|----------|
+| Sync vs Async to Core? | **Async (fire-and-forget)**. Return immediately after resolve. Core sends response via Channel OUT. |
+| DLQ for unknown tenant? | **Yes**, Redis `dlq:unknown_tenant` |
+| Retry policy | **Input Contour handles retries**. Client Contour is stateless. |
+| Client merge in MVP? | **No fuzzy matching**. Exact match only (channel+external_id, then phone). |
+| Protocol to Core | **HTTP JSON** (MVP). gRPC as future target. |
+| vertical_id | **Core determines**. Client Contour passes NULL. |
+| Redis keys format | **With tenant**: `queue:batch:{tenant_id}:{channel}:{chat_id}` |
 
 ---
 
@@ -78,7 +102,7 @@ Main endpoint. Receives batched message from Input Contour, resolves all IDs, fo
   "meta": {
     "batched": true,
     "batch_size": 3,
-    "batch_reason": "silence_reached"
+    "batch_reason": "debounce"
   }
 }
 ```
@@ -87,7 +111,8 @@ Main endpoint. Receives batched message from Input Contour, resolves all IDs, fo
 1. Tenant Resolver → get `tenant_id`, `domain_id`, `channel_id`
 2. Client Resolver → get/create `client_id`
 3. Dialog Resolver → get/create `dialog_id`
-4. Forward to Core
+4. Forward to Core (async, don't wait)
+5. Return immediately to Input Contour
 
 **Output to Core:**
 ```json
@@ -106,9 +131,18 @@ Main endpoint. Receives batched message from Input Contour, resolves all IDs, fo
   "meta": {
     "batched": true,
     "batch_size": 3,
-    "batch_reason": "silence_reached",
+    "batch_reason": "debounce",
     "is_new_client": false,
     "is_new_dialog": false
+  },
+  "client": {
+    "id": "uuid",
+    "name": "Ivan Petrov",
+    "phone": "+79991234567",
+    "channels": [
+      {"channel": "telegram", "external_id": "123456789"},
+      {"channel": "whatsapp", "external_id": "79991234567"}
+    ]
   }
 }
 ```
@@ -134,7 +168,31 @@ Health check.
 {
   "status": "ok",
   "postgres": true,
-  "neo4j": true
+  "neo4j": true,
+  "redis": true
+}
+```
+
+---
+
+### GET /dlq
+
+Get unknown tenant errors.
+
+```json
+{
+  "count": 5,
+  "items": [...]
+}
+```
+
+### DELETE /dlq
+
+Clear DLQ.
+
+```json
+{
+  "cleared": true
 }
 ```
 
@@ -169,12 +227,12 @@ LIMIT 1;
 | max | `bot_id` | MAX bot ID |
 
 **Error handling:**
-- Credential not found → 404 "Unknown tenant"
+- Credential not found → 404 + DLQ `dlq:unknown_tenant`
 - Tenant inactive → 403 "Tenant disabled"
 
 ---
 
-## Client Resolver Logic
+## Client Resolver Logic (MVP — exact match only)
 
 **Step 1: Find by channel + external_id**
 ```sql
@@ -187,7 +245,7 @@ WHERE cc.channel_id = $channel_id
 LIMIT 1;
 ```
 
-**Step 2: Find by phone (if provided and Step 1 failed)**
+**Step 2: Find by exact phone (if provided and Step 1 failed)**
 ```sql
 SELECT id as client_id, name, phone
 FROM clients
@@ -221,6 +279,8 @@ VALUES ($client_id, $channel_id, $external_chat_id, $username);
   }
 }
 ```
+
+**MVP: No fuzzy matching, no candidate flow, no auto-merge.**
 
 ---
 
@@ -257,9 +317,12 @@ DATABASE_URL=postgresql://user:pass@185.221.214.83:6544/postgres
 # Neo4j (for client sync)
 NEO4J_URI=bolt://45.144.177.128:7687
 NEO4J_USER=neo4j
-NEO4J_PASSWORD=***
+NEO4J_PASSWORD=Mi31415926pS
 
-# Core endpoint
+# Redis (for DLQ)
+REDIS_URL=redis://45.144.177.128:6379/0
+
+# Core endpoint (async fire-and-forget)
 CORE_URL=https://n8n.n8nsrv.ru/webhook/elo-core-ingest
 
 # Service
@@ -277,28 +340,7 @@ PORT=8772
 **Dependencies:**
 - PostgreSQL (remote: 185.221.214.83:6544)
 - Neo4j (local: 45.144.177.128:7687)
-- Redis (local: 45.144.177.128:6379) — for caching, optional
-
----
-
-## Integration with Input Contour
-
-Input Contour must be updated to call Client Contour:
-
-```python
-# In input-contour/main.py
-
-CLIENT_CONTOUR_URL = os.getenv("CLIENT_CONTOUR_URL", "http://localhost:8772/resolve")
-
-async def aggregate_and_dispatch(key: str):
-    # ... existing aggregation logic ...
-
-    # Instead of posting directly to CORE_URL,
-    # post to Client Contour which will forward to Core
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(CLIENT_CONTOUR_URL, json=payload)
-        # Client Contour handles forwarding to Core
-```
+- Redis (local: 45.144.177.128:6379) — for DLQ
 
 ---
 
@@ -328,29 +370,63 @@ MCP/client-contour/
 - Tenant Resolver (by credential)
 - Client Resolver (exact match: channel+external_id, phone)
 - Dialog Resolver (find/create active)
-- Forward to Core
+- Forward to Core (async)
+- DLQ for unknown tenants
 
 **Out of scope (future):**
-- Client merge (fuzzy matching)
+- Client merge (fuzzy matching, candidate flow)
 - Touchpoint registration
 - Caching layer
-- Metrics/tracing
+- Metrics/tracing (structlog only for MVP)
+- gRPC protocol
+- client_merges table logic
 
 ---
 
-## Questions for Discussion
+## Mock Mode (until DB ready)
 
-1. Should Client Contour respond synchronously (wait for Core response) or async (fire-and-forget to Core)?
-   - **Recommendation:** Async (fire-and-forget), return immediately after resolve
+For development before database is ready:
 
-2. Should failed tenant resolution be logged to DLQ?
-   - **Recommendation:** Yes, log to Redis `dlq:unknown_tenant`
+```python
+# Mock responses
+MOCK_TENANT = {
+    "tenant_id": "test-tenant-uuid",
+    "domain_id": 1,
+    "channel_id": 1
+}
 
-3. Error retry policy?
-   - **Recommendation:** Let Input Contour handle retries, Client Contour is stateless
+MOCK_CLIENT = {
+    "id": "test-client-uuid",
+    "name": "Test Client",
+    "phone": None,
+    "is_new": False,
+    "channels": [
+        {"channel": "telegram", "external_id": "123456789"}
+    ]
+}
+
+MOCK_DIALOG = {
+    "id": "test-dialog-uuid",
+    "is_new": False
+}
+```
+
+Core forward: log payload to console (n8n webhook not ready yet).
+
+---
+
+## Contract Fields
+
+| Field | Required | Purpose |
+|-------|----------|---------|
+| `message_id` | Yes | Idempotency/dedup |
+| `trace_id` | Yes | E2E tracing |
+| `tenant_id` | Yes | Multi-tenant isolation |
+| `client_id` | Yes | Client identity |
+| `dialog_id` | Yes | Dialog context |
 
 ---
 
 **Document:** REQUIREMENTS.md
-**Author:** Claude
+**Author:** Claude + Dmitry
 **Status:** Ready for implementation
