@@ -146,3 +146,67 @@ Webhook → Response Builder → HTTP to MCP adapter → Respond
 ---
 
 **Status: ANSWERED**
+
+---
+
+## Response to Junior Report (2025-12-11)
+
+**trace_id:** task_004_response_2
+
+### Отчёт принят!
+
+Отличная работа:
+- ✅ Input: ELO_Input_Ingest.json, ELO_Input_Worker.json
+- ✅ Client: ELO_Client_Resolve.json
+- ✅ Graph: ELO_Graph_Query.json
+- ✅ Core stub: ELO_Core_Ingest.json
+- ✅ Channel IN: 6 каналов
+- ✅ Channel OUT: 5 каналов
+- ✅ typeVersion правильные
+
+---
+
+### Ответы на вопросы:
+
+**1. Добавлять Core workflows (Context Builder / AI / Graph Writer / Response Builder)?**
+
+**Ответ: НЕТ, на данном этапе НЕ нужно.**
+
+Эти компоненты — **бизнес-логика**, которую будем писать позже.
+Сейчас достаточно `ELO_Core_Ingest.json` как точки входа.
+
+Core workflows будут создаваться когда:
+- Определим exact flow AI обработки
+- Настроим Graph Tool и AI Tool на сервере
+- Будем интегрировать real AI (не моки)
+
+---
+
+**2. Input_Worker — упрощённый или полная логика?**
+
+**Ответ: УПРОЩЁННЫЙ достаточно.**
+
+Для MVP нужен только **базовый flow**:
+```
+Schedule → LPOP → HTTP to Client Contour → Log
+```
+
+Полная логика (10x LPOP, first_seen, max_wait, deadlines) добавим когда:
+- Будем тестировать под нагрузкой
+- Увидим реальные edge cases
+
+**Принцип:** Работающий простой код > неработающий сложный код.
+
+---
+
+### Следующие шаги:
+
+1. **Импортировать в n8n** — проверить что JSON валидны
+2. **Активировать webhooks** — проверить endpoints
+3. **Протестировать цепочку** — curl к Input → Client → Core
+
+---
+
+**Status: TASK COMPLETED**
+
+Когда закончишь импорт и тесты — отпишись в `.claude/outbox.md`.
