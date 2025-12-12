@@ -14,29 +14,68 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**December 11, 2025, 23:30 (UTC+4)**
+**December 12, 2025, 17:00 (UTC+4)**
 
 ---
 
-## CORE AI — КОНЦЕПЦИЯ РАЗРАБОТАНА
+## CORE AI — РЕАЛИЗОВАНО, НУЖЕН ДЕБАГ
 
-### Ключевое понимание
+### Что сделано
 
 ```
-ВСЯ ЛОГИКА CORE AI = ГРАФ + ПРОМПТЫ
-├── Схема слотов (что собирать)
-├── Зависимости (как выводить)
-├── Этапы воронки (stages)
-├── Триггеры (conditions → actions)
-└── Промпты (тексты)
+✅ Документация Core AI (07_Core_AI/)
+   ├── CORE_AI_OVERVIEW.md — полное описание Context Lines
+   └── workflows_info/ — 6 документов по воркерам
 
-ОТЛИЧИЕ ВЕРТИКАЛЕЙ = ТОЛЬКО TOOLS
-Оркестратор один, логика одна — Context Lines
+✅ n8n Workflows (NEW/workflows/ELO_Core_AI/)
+   ├── ELO_Core_AI_Orchestrator.json — главный оркестратор
+   ├── ELO_Core_Lines_Analyzer.json — анализ линий
+   ├── ELO_Core_AI_Derive.json — вычисление зависимых слотов
+   ├── ELO_Core_Triggers_Checker.json — проверка триггеров
+   ├── ELO_Core_Stage_Manager.json — управление этапами
+   ├── ELO_Core_Response_Generator.json — генерация ответов
+   └── ELO_Core_AI_Test_Stub.json — тестовая заглушка (эхо)
+
+✅ ELO_Out_Router — роутинг ответов по каналам
+   ├── Webhook: /webhook/elo-out-router
+   ├── Switch по channel_id (1-5)
+   └── Вызывает ELO_Out_* как sub-workflow
 ```
 
 ---
 
-### Модель "Context Lines"
+### Текущий статус
+
+```
+Channel IN → Input Contour → Client Contour → [Core AI] → Out Router → Channel OUT
+                                                  ↑
+                                          ЗДЕСЬ ДЕБАЖИМ
+```
+
+**Test Stub:** `ELO_Core_AI_Test_Stub` — простой эхо для отладки цепочки без сложного AI.
+
+---
+
+## NEXT STEPS — ДЕБАГ И ТЕСТИРОВАНИЕ
+
+### 1. Проверить цепочку с Test Stub
+- Отправить сообщение через Telegram
+- Проверить что проходит через Input → Client → Test Stub → Out Router → Telegram
+
+### 2. Включить полный Core AI
+- Заменить Test Stub на Orchestrator
+- Тестировать по этапам
+
+### 3. Отладить каждый компонент
+- Lines Analyzer — правильно ли создаёт/переключает линии
+- AI Derive — работает ли вычисление symptom → repair → price
+- Stage Manager — корректны ли переходы между этапами
+- Triggers Checker — срабатывают ли триггеры
+- Response Generator — адекватны ли ответы AI
+
+---
+
+## Модель "Context Lines" (напоминание)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -55,178 +94,28 @@ Focus = активная линия
 Waiting = линии с обрывами
 ```
 
-### Алгоритм (ВСЯ ЛОГИКА)
-
-```
-1. ПОЛУЧИТЬ сообщение клиента
-
-2. AI EXTRACT — вытащить ВСЕ параметры (не по одному!)
-   {device: ?, symptom: ?, owner: ?, ...}
-
-3. АНАЛИЗ:
-   - Новый owner/device? → CREATE линию
-   - Owner/device другой линии? → SWITCH focus
-   - Заполнить ВСЕ найденные слоты
-   - Двинуть cursor
-
-4. DERIVE — вычислить зависимые (symptom → repair → price)
-
-5. TRIGGERS — проверить условия, выполнить действия
-
-6. ПРОВЕРИТЬ:
-   - Линия done? → убрать из waiting
-   - Все done? → переход на следующий этап
-   - Есть waiting? → switch на первую
-
-7. СПРОСИТЬ — слот на cursor активной линии
-```
-
 ---
 
-### Этапы воронки
+## Этапы воронки
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  ЭТАП 1: Сбор данных                                    │
+│  ЭТАП 1: data_collection — сбор данных                 │
 │  slots: [device, symptom, owner, price]                 │
 ├─────────────────────────────────────────────────────────┤
-│  ЭТАП 2: Презентация                                    │
+│  ЭТАП 2: presentation — презентация                    │
 │  slots: [offer_shown] + triggers                        │
 ├─────────────────────────────────────────────────────────┤
-│  ЭТАП 3: Согласование                                   │
+│  ЭТАП 3: agreement — согласование                      │
 │  slots: [conditions_ok, ready_to_book]                  │
 ├─────────────────────────────────────────────────────────┤
-│  ЭТАП 4: Запись                                         │
+│  ЭТАП 4: booking — запись                              │
 │  slots: [date, time, name, phone]                       │
 ├─────────────────────────────────────────────────────────┤
-│  ЭТАП 5: Подтверждение                                  │
+│  ЭТАП 5: confirmation — подтверждение                  │
 │  slots: [confirmed] → INTAKE CREATED                    │
 └─────────────────────────────────────────────────────────┘
 ```
-
----
-
-### Триггеры в графе
-
-```cypher
-(:Trigger {stage: "presentation", conditions: {device_brand: "Apple", repair: "battery_replace"}})
-  -[:EXECUTES]->
-(:Action {type: "send_file", file: "battery_care.pdf"})
-```
-
----
-
-### Масштабирование и стоимость
-
-```
-1000 tenants × 50 диалогов × 40 сообщений = 2M msg/день
-
-Python FastAPI async: 2-3 пода достаточно
-OpenRouter Qwen3-30B: paid tier, нет лимита
-
-Стоимость AI:
-- Extract (дешёвая модель): ~$5/день
-- Response (умная модель): ~$74/день
-- Итого: ~$2.40/tenant/месяц
-```
-
----
-
-## PLAN FILE
-
-**Полная концепция:** `.claude/plans/snazzy-prancing-piglet.md`
-
----
-
-## NEXT STEPS (реализация)
-
-### Фаза 1: Context Lines для сбора данных
-1. Структура Line, Context (Python)
-2. AI Extract для всех параметров схемы
-3. Логика раскидывания по линиям
-4. Focus / waiting / cursor
-5. Derive зависимых слотов
-
-### Фаза 2: Этапы воронки
-1. Stage schema в графе
-2. Переходы между этапами
-3. Слоты для каждого этапа
-
-### Фаза 3: Триггеры и действия
-1. Trigger schema в графе
-2. Проверка conditions
-3. Выполнение actions
-
-### Фаза 4: Воркеры
-1. Правильно расставить воркеры
-2. Описать контекст от пункта к пункту
-3. Связать этапы в единый flow
-
----
-
-## CURRENT PROJECT STATUS
-
-### Strategy defined
-
-**Product:** Dialog-centric CRM for service centers
-
-**Philosophy:** "People talk. Machine keeps records."
-
-**MVP Vertical:** Phone Repair + Buy/Sell (trade-in, used)
-
-**WOW-effect:** "No lost customers" — AI responds at 11 PM, schedules for tomorrow
-
----
-
-## WHAT'S DONE — FULL HISTORY
-
-### Session 11.12.2025 (night) — CORE AI Concept ✅
-
-**Разработана полная концепция Core AI:**
-
-| Компонент | Описание | Статус |
-|-----------|----------|--------|
-| Context Lines | Модель сбора данных (lines, cursor, focus, waiting) | ✅ |
-| Stages | Этапы воронки (5 этапов) | ✅ |
-| Triggers | Условия → действия (в графе) | ✅ |
-| Scaling | 2-3 пода для 1000 tenants | ✅ |
-| Cost | ~$2.40/tenant/месяц на AI | ✅ |
-
-**Тестовые данные в Neo4j:**
-- DeviceModel: iPhone 12 Pro, iPhone 14
-- RepairType: display, battery, charging
-- Symptom → RepairType (с алиасами)
-- Price: iPhone 12 Pro (8500, 2800, 2500)
-
-**Git commit:** `98349ec` — Core AI: Inference-based logic design + Neo4j test data
-
----
-
-### Session 12.11.2025 (day) — MCP Contours Architecture + AI Tool
-
-**4-контурная архитектура:**
-```
-MCP Channels → Input (8771) → Client (8772) → Core (n8n) → Graph (8773)
-                                                    ↓
-                                              AI Tool (8774)
-```
-
-**MCP сервисы:**
-
-| Service | Port | Purpose | Status |
-|---------|------|---------|--------|
-| Input Contour | 8771 | Ingest + Redis queue | 📝 Documented |
-| Client Contour | 8772 | Tenant/Client/Dialog | ✅ Code ready |
-| Graph Tool | 8773 | Neo4j proxy | 📝 Documented |
-| AI Tool | 8774 | Extract + Chat | ✅ Created |
-
----
-
-### Session 12.11.2025 (night) — Commercial Strategy + ROADMAP
-
-**Created:**
-- `NEW/ROADMAP.md` (~1200 lines) — Killer features, AI tools
-- `NEW/ARCHITECTURE_SYNC.md` (~550 lines) — Architecture mapping
 
 ---
 
@@ -252,6 +141,20 @@ MCP Channels → Input (8771) → Client (8772) → Core (n8n) → Graph (8773)
 
 ---
 
+## n8n Workflows (импортированы)
+
+| Workflow | Webhook | Status |
+|----------|---------|--------|
+| ELO_Out_Router | /webhook/elo-out-router | ✅ Active |
+| ELO_Core_AI_Test_Stub | /webhook/elo-core-ingest | ✅ For debug |
+| ELO_Out_Telegram | sub-workflow | ✅ |
+| ELO_Out_WhatsApp | sub-workflow | ✅ |
+| ELO_Out_Avito | sub-workflow | ✅ |
+| ELO_Out_VK | sub-workflow | ✅ |
+| ELO_Out_MAX | sub-workflow | ✅ |
+
+---
+
 ## DATABASE CONNECTIONS
 
 ```
@@ -264,11 +167,14 @@ Redis (RU): redis://:Mi31415926pSss!@45.144.177.128:6379
 
 ## KEY DOCUMENTS
 
-**On session start:**
-1. This file (Start.md)
-2. `.claude/plans/snazzy-prancing-piglet.md` — Core AI concept
-3. `NEW/ROADMAP.md` — killer features
-4. `CORE_NEW/docs/05_AI_ARCHITECTURE.md` — 7 levels
+**Core AI:**
+1. `NEW/Core_info/07_Core_AI/CORE_AI_OVERVIEW.md` — архитектура
+2. `NEW/Core_info/07_Core_AI/workflows_info/` — описания воркеров
+3. `NEW/workflows/ELO_Core_AI/` — JSON для импорта
+
+**Architecture:**
+1. `NEW/ROADMAP.md` — killer features
+2. `CORE_NEW/docs/05_AI_ARCHITECTURE.md` — 7 levels
 
 ---
 
@@ -280,6 +186,11 @@ ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost
 
 # Redis queue check
 ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LLEN "ai_extraction_queue"'
+
+# Test Out Router
+curl -X POST https://n8n.n8nsrv.ru/webhook/elo-out-router \
+  -H "Content-Type: application/json" \
+  -d '{"channel_id": 1, "external_chat_id": "123", "text": "test"}'
 
 # Update context
 python scripts/update_core_context.py
