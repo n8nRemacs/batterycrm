@@ -1,0 +1,156 @@
+{
+  "name": "ELO_Core_Response_Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "path": "elo-core-response-generator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "elo-core-response-generator"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst context = input.context;\nconst triggersFired = input.triggers_fired || [];\n\nconst stage = context.current_stage;\nconst focusLine = context.lines.find(l => l.id === context.focus_line_id) || context.lines[0];\n\nlet responseGoal = {\n  type: 'ask_slot',\n  slot: null,\n  stage: stage\n};\n\n// Determine what to ask for based on stage\nswitch (stage) {\n  case 'data_collection':\n    if (focusLine) {\n      // Find first empty required slot\n      const requiredSlots = ['device', 'symptom'];\n      for (const slot of requiredSlots) {\n        if (!focusLine.slots[slot]) {\n          responseGoal.slot = slot;\n          break;\n        }\n      }\n      \n      // If all required filled, confirm data\n      if (!responseGoal.slot) {\n        responseGoal.type = 'confirm_data';\n      }\n    }\n    break;\n  \n  case 'presentation':\n    responseGoal.type = 'present_offer';\n    responseGoal.include_price = true;\n    break;\n  \n  case 'agreement':\n    responseGoal.type = 'ask_confirmation';\n    break;\n  \n  case 'booking':\n    const bookingSlots = ['date', 'time', 'name', 'phone'];\n    const booking = context.booking || {};\n    for (const slot of bookingSlots) {\n      if (!booking[slot]) {\n        responseGoal.type = 'ask_booking_slot';\n        responseGoal.slot = slot;\n        break;\n      }\n    }\n    break;\n  \n  case 'confirmation':\n    responseGoal.type = 'ask_final_confirmation';\n    break;\n}\n\n// Add trigger messages to include\nresponseGoal.trigger_messages = triggersFired\n  .filter(t => t.action?.type === 'send_message')\n  .map(t => t.action.message);\n\nreturn {\n  context: context,\n  response_goal: responseGoal,\n  focus_line: focusLine\n};"
+      },
+      "id": "determine-goal",
+      "name": "Determine Goal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $json.context;\nconst goal = $json.response_goal;\nconst focusLine = $json.focus_line;\n\n// Build device string\nconst deviceStr = focusLine?.slots?.device\n  ? `${focusLine.slots.device.brand} ${focusLine.slots.device.model}`\n  : 'устройство';\n\nconst symptomStr = focusLine?.slots?.symptom?.text || 'проблема';\nconst diagnosisStr = focusLine?.slots?.diagnosis?.text || 'диагностика';\nconst priceStr = focusLine?.slots?.price?.amount || '???';\n\n// Prompt templates\nconst PROMPTS = {\n  ask_device: `Спроси у клиента какое устройство нужно отремонтировать.\nБудь дружелюбным, используй имя клиента если известно.\nПримеры: \"Какое устройство нужно починить?\", \"Что за телефон?\"`,\n\n  ask_symptom: `Спроси у клиента что случилось с устройством.\nУстройство уже известно: ${deviceStr}.\nПримеры: \"Что произошло с ${deviceStr}?\", \"Какая проблема?\"`,\n\n  confirm_data: `Подтверди собранные данные.\nУстройство: ${deviceStr}\nПроблема: ${symptomStr}\n\nПример: \"Понял, ${deviceStr}, ${symptomStr}. Сейчас посмотрю цену.\"`,\n\n  present_offer: `Представь клиенту предложение по ремонту.\nВключи:\n- Стоимость: ${priceStr}₽\n- Гарантия: 6 месяцев\n\nУстройство: ${deviceStr}\nПроблема: ${symptomStr}\n\nБудь уверенным. Предложи записаться.`,\n\n  ask_confirmation: `Спроси готов ли клиент записаться.\nПримеры: \"Записываем?\", \"Готовы прийти?\"`,\n\n  ask_date: `Спроси удобную дату для визита.\nПримеры: \"На какой день записать?\", \"Когда удобно?\"`,\n\n  ask_time: `Спроси удобное время.\nПримеры: \"Во сколько удобно?\", \"Какое время?\"`,\n\n  ask_name: `Спроси имя для записи.\nПример: \"Как вас записать?\"`,\n\n  ask_phone: `Спроси телефон для связи.\nПример: \"Оставьте номер для подтверждения записи\"`,\n\n  ask_final_confirmation: `Попроси подтвердить запись.\nУстройство: ${deviceStr}\nРемонт: ${diagnosisStr}\nЦена: ${priceStr}₽\n\nПример: \"Подтверждаете запись?\"`\n};\n\n// Get prompt template\nlet promptTemplate = '';\nif (goal.type === 'ask_slot') {\n  promptTemplate = PROMPTS[`ask_${goal.slot}`] || PROMPTS.ask_device;\n} else if (goal.type === 'ask_booking_slot') {\n  promptTemplate = PROMPTS[`ask_${goal.slot}`] || PROMPTS.ask_date;\n} else {\n  promptTemplate = PROMPTS[goal.type] || PROMPTS.ask_device;\n}\n\n// Build system prompt\nconst systemPrompt = `Ты — AI-ассистент сервисного центра по ремонту телефонов.\n\nПРАВИЛА:\n1. Отвечай на русском языке\n2. Будь кратким (1-3 предложения)\n3. Используй имя клиента: ${context.client?.name || 'клиент'}\n4. Не задавай несколько вопросов сразу\n5. Будь дружелюбным и профессиональным\n\n${goal.trigger_messages?.length > 0 ? `\nТАКЖЕ ВКЛЮЧИ В ОТВЕТ:\n${goal.trigger_messages.join('\\n')}\n` : ''}`;\n\nconst userMessage = `Контекст диалога:\n- Этап: ${goal.stage}\n- Задача: ${goal.type}\n${goal.slot ? `- Спросить: ${goal.slot}` : ''}\n\n${promptTemplate}\n\nСгенерируй ТОЛЬКО ответ клиенту.`;\n\nreturn {\n  system_prompt: systemPrompt,\n  user_message: userMessage,\n  goal: goal,\n  context: context,\n  focus_line: focusLine\n};"
+      },
+      "id": "build-prompt",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: 'qwen/qwen3-30b-a3b',\n  messages: [\n    { role: 'system', content: $json.system_prompt },\n    { role: 'user', content: $json.user_message }\n  ],\n  temperature: 0.7,\n  max_tokens: 300\n}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-openrouter",
+      "name": "Call OpenRouter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "openrouter-api",
+          "name": "OpenRouter API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json;\nconst goal = $('Build Prompt').first().json.goal;\nconst context = $('Build Prompt').first().json.context;\nconst focusLine = $('Build Prompt').first().json.focus_line;\n\nlet responseText = '';\ntry {\n  responseText = response.choices?.[0]?.message?.content || '';\n  // Clean up\n  responseText = responseText.trim();\n  // Remove thinking tags if present (Qwen3)\n  responseText = responseText.replace(/<think>[\\s\\S]*?<\\/think>/g, '').trim();\n} catch (e) {\n  responseText = 'Спасибо за сообщение! Чем могу помочь?';\n}\n\n// Build buttons based on stage/goal\nlet buttons = [];\n\nswitch (goal.stage) {\n  case 'presentation':\n    buttons = [\n      { text: 'Записаться', callback_data: 'book' },\n      { text: 'Уточнить', callback_data: 'clarify' }\n    ];\n    break;\n  \n  case 'agreement':\n    buttons = [\n      { text: 'Да, записать', callback_data: 'confirm_book' },\n      { text: 'Нет, спасибо', callback_data: 'decline' }\n    ];\n    break;\n  \n  case 'booking':\n    if (goal.slot === 'date') {\n      const today = new Date();\n      buttons = [0, 1, 2].map(offset => {\n        const date = new Date(today);\n        date.setDate(date.getDate() + offset);\n        const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });\n        return {\n          text: offset === 0 ? 'Сегодня' : offset === 1 ? 'Завтра' : dateStr,\n          callback_data: `date_${date.toISOString().split('T')[0]}`\n        };\n      });\n    } else if (goal.slot === 'time') {\n      buttons = [\n        { text: '10:00', callback_data: 'time_10:00' },\n        { text: '14:00', callback_data: 'time_14:00' },\n        { text: '18:00', callback_data: 'time_18:00' }\n      ];\n    }\n    break;\n  \n  case 'confirmation':\n    buttons = [\n      { text: 'Подтверждаю', callback_data: 'confirm' },\n      { text: 'Изменить', callback_data: 'change' }\n    ];\n    break;\n}\n\nreturn {\n  response: {\n    text: responseText,\n    buttons: buttons,\n    attachments: [],\n    metadata: {\n      stage: goal.stage,\n      asking_for: goal.slot || goal.type,\n      ai_model: response.model,\n      tokens_used: response.usage?.total_tokens\n    }\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1350, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Determine Goal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Goal": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call OpenRouter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenRouter": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": ""
+  },
+  "tags": [
+    {
+      "name": "ELO_Core_AI"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "ELO_Core_AI_Test_Stub",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "path": "elo-core-ingest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "elo-core-ingest"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\n// Log what we received\nconsole.log('=== ELO_Core_AI_Test_Stub ===' );\nconsole.log('Received:', JSON.stringify(input, null, 2));\n\n// Build test response\nconst response = {\n  tenant_id: input.tenant_id,\n  dialog_id: input.dialog_id,\n  channel_id: input.channel_id,\n  external_chat_id: input.external_chat_id,\n  \n  message: {\n    text: `[TEST] Получено: \"${input.text || input.message?.text || 'пусто'}\"`,\n    buttons: [],\n    attachments: []\n  },\n  \n  context_updated: true,\n  trace_id: input.trace_id || `trace_${Date.now()}`,\n  \n  // Echo all input for debugging\n  _debug: {\n    received_at: new Date().toISOString(),\n    input_keys: Object.keys(input),\n    client: input.client,\n    meta: input.meta\n  }\n};\n\nreturn response;"
+      },
+      "id": "build-test-response",
+      "name": "Build Test Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [690, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Test Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Test Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": ""
+  },
+  "tags": [
+    {
+      "name": "ELO_Core_AI"
+    },
+    {
+      "name": "TEST"
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "name": "ELO_Core_AI_Derive",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "path": "elo-core-ai-derive",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "elo-core-ai-derive"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst context = input.context;\nconst linesToDerive = input.lines_to_derive || [];\n\n// Get lines that need derivation\nconst lines = context.lines.filter(line => {\n  // Include if specified in lines_to_derive\n  if (linesToDerive.length > 0) {\n    return linesToDerive.includes(line.id);\n  }\n  // Or if has symptom but no diagnosis\n  return line.slots?.symptom && !line.slots?.diagnosis;\n});\n\nreturn {\n  context: context,\n  lines: lines,\n  has_lines_to_derive: lines.length > 0\n};"
+      },
+      "id": "filter-lines",
+      "name": "Filter Lines",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-has-lines",
+              "leftValue": "={{ $json.has_lines_to_derive }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-lines",
+      "name": "Has Lines?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const context = $('Filter Lines').first().json.context;\nconst lines = $('Filter Lines').first().json.lines;\n\n// Process each line for derivation\nconst derivations = [];\n\nfor (const line of lines) {\n  const symptomText = line.slots?.symptom?.text;\n  const device = line.slots?.device;\n  \n  if (!symptomText) continue;\n  \n  // Simple derivation logic (will be replaced with Graph queries)\n  const derivation = {\n    line_id: line.id,\n    derived: {}\n  };\n  \n  // Symptom text to diagnosis mapping (simple rules for MVP)\n  const symptomMappings = {\n    'разбит экран': { code: 'display_replacement', text: 'Замена дисплея' },\n    'не работает экран': { code: 'display_replacement', text: 'Замена дисплея' },\n    'треснул экран': { code: 'display_replacement', text: 'Замена дисплея' },\n    'замена экрана': { code: 'display_replacement', text: 'Замена дисплея' },\n    'замена дисплея': { code: 'display_replacement', text: 'Замена дисплея' },\n    'батарея': { code: 'battery_replacement', text: 'Замена батареи' },\n    'аккумулятор': { code: 'battery_replacement', text: 'Замена батареи' },\n    'не заряжается': { code: 'charging_repair', text: 'Ремонт разъема зарядки' },\n    'зарядка': { code: 'charging_repair', text: 'Ремонт разъема зарядки' }\n  };\n  \n  // Find matching diagnosis\n  const symptomLower = symptomText.toLowerCase();\n  for (const [key, value] of Object.entries(symptomMappings)) {\n    if (symptomLower.includes(key)) {\n      derivation.derived.diagnosis = {\n        code: value.code,\n        text: value.text,\n        confidence: 0.8\n      };\n      derivation.derived.repair_type = {\n        code: value.code,\n        text: value.text\n      };\n      break;\n    }\n  }\n  \n  // Price lookup (simple rules for MVP)\n  if (derivation.derived.repair_type && device) {\n    const priceMap = {\n      'Apple': {\n        'display_replacement': 8500,\n        'battery_replacement': 2800,\n        'charging_repair': 2500\n      },\n      'Samsung': {\n        'display_replacement': 6500,\n        'battery_replacement': 2200,\n        'charging_repair': 2000\n      }\n    };\n    \n    const brandPrices = priceMap[device.brand] || priceMap['Samsung'];\n    const price = brandPrices[derivation.derived.repair_type.code];\n    \n    if (price) {\n      derivation.derived.price = {\n        amount: price,\n        currency: 'RUB',\n        is_estimate: false\n      };\n    }\n  }\n  \n  if (Object.keys(derivation.derived).length > 0) {\n    derivations.push(derivation);\n  }\n}\n\nreturn {\n  derivations: derivations,\n  context: context\n};"
+      },
+      "id": "derive-values",
+      "name": "Derive Values",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No lines to derive - return empty derivations\nreturn {\n  derivations: [],\n  context: $('Filter Lines').first().json.context\n};"
+      },
+      "id": "empty-derivations",
+      "name": "Empty Derivations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [910, 400]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": []
+        },
+        "options": {}
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1350, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Lines": {
+      "main": [
+        [
+          {
+            "node": "Has Lines?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Lines?": {
+      "main": [
+        [
+          {
+            "node": "Derive Values",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Empty Derivations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Derive Values": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty Derivations": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": ""
+  },
+  "tags": [
+    {
+      "name": "ELO_Core_AI"
+    }
+  ]
+}

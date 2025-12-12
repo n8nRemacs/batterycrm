@@ -12,6 +12,7 @@
 Core_info/
 ├── INDEX.md                              ← this file
 ├── HOW_TO_DOCUMENT.md                    ← guide
+├── API_CONTRACTS.md                      ✅
 ├── 01_Channel_Layer/
 │   └── workflows_info/
 │       ├── ELO_In_Telegram.md            ✅
@@ -41,10 +42,19 @@ Core_info/
 │       └── GRAPH_OVERVIEW.md            ✅
 ├── 05_Core_Contour/
 │   └── CORE_CONTOUR_OVERVIEW.md         ✅
-└── 06_API/
+├── 06_API/
+│   └── workflows_info/
+│       ├── API_Android_Auth.md           ✅
+│       └── API_Android_Appeals_List.md   ✅
+└── 07_Core_AI/                           ✅ NEW
+    ├── CORE_AI_OVERVIEW.md               ✅
     └── workflows_info/
-        ├── API_Android_Auth.md           ✅
-        └── API_Android_Appeals_List.md   ✅
+        ├── ELO_Core_AI_Orchestrator.md   ✅
+        ├── ELO_Core_Lines_Analyzer.md    ✅
+        ├── ELO_Core_AI_Derive.md         ✅
+        ├── ELO_Core_Triggers_Checker.md  ✅
+        ├── ELO_Core_Stage_Manager.md     ✅
+        └── ELO_Core_Response_Generator.md ✅
 ```
 
 ---
@@ -59,6 +69,7 @@ Core_info/
 | 4 | Graph | Neo4j operations, Graph Query Tool | **1/1** |
 | 5 | Core Contour | Context Builder, Request Builder, Orchestrator, Dialog Engine | **1/1** |
 | 6 | API | Android API endpoints | 2/27 |
+| 7 | **Core AI** | Context Lines, Stages, Triggers, Response | **7/7** ✅ NEW |
 
 ---
 
@@ -126,6 +137,23 @@ Core_info/
 |----------|------|----------|
 | API_Android_Auth | [API_Android_Auth.md](06_API/workflows_info/API_Android_Auth.md) | Operator authorization |
 | API_Android_Appeals_List | [API_Android_Appeals_List.md](06_API/workflows_info/API_Android_Appeals_List.md) | Appeals list |
+
+### 07_Core_AI (7) ✅ NEW
+
+| Document | File | Features |
+|----------|------|----------|
+| **Overview** | [CORE_AI_OVERVIEW.md](07_Core_AI/CORE_AI_OVERVIEW.md) | Context Lines model, funnel stages, algorithm |
+
+#### Core AI Workflows (6)
+
+| Workflow | File | Purpose |
+|----------|------|---------|
+| ELO_Core_AI_Orchestrator | [ELO_Core_AI_Orchestrator.md](07_Core_AI/workflows_info/ELO_Core_AI_Orchestrator.md) | Main controller, Context Lines loop |
+| ELO_Core_Lines_Analyzer | [ELO_Core_Lines_Analyzer.md](07_Core_AI/workflows_info/ELO_Core_Lines_Analyzer.md) | Create/update lines, manage focus |
+| ELO_Core_AI_Derive | [ELO_Core_AI_Derive.md](07_Core_AI/workflows_info/ELO_Core_AI_Derive.md) | Derive values via Graph lookups |
+| ELO_Core_Triggers_Checker | [ELO_Core_Triggers_Checker.md](07_Core_AI/workflows_info/ELO_Core_Triggers_Checker.md) | Check conditions, execute actions |
+| ELO_Core_Stage_Manager | [ELO_Core_Stage_Manager.md](07_Core_AI/workflows_info/ELO_Core_Stage_Manager.md) | Funnel stage transitions |
+| ELO_Core_Response_Generator | [ELO_Core_Response_Generator.md](07_Core_AI/workflows_info/ELO_Core_Response_Generator.md) | AI response generation |
 
 ---
 
