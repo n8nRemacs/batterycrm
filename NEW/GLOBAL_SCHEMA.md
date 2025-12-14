@@ -283,6 +283,29 @@ Client (orig lang) ← Output Contour ← [Translate back] ← Response (EN)
 - **Input:** ELO_Input_Processor (after Merge Batch)
 - **Output:** ELO_Out_Router (before channel dispatch)
 
+### Text vs Voice Processing
+
+| Type | Normalization | Translation | Location |
+|------|---------------|-------------|----------|
+| **Text** | Combined with translation | Single LLM call | Input Contour |
+| **Voice** | Separate (RU context) | After normalization | MCP → Input Contour |
+
+**Text:** Normalize + translate in one LLM call (efficient, LLM understands context).
+
+**Voice:** ASR errors are language-specific ("тилифон" → "телефон"), so normalize in Russian first (MCP), then translate (Input Contour).
+
+### Voice Message Fields
+
+```json
+{
+  "text": "Hello, my phone is broken",
+  "text_original": "Привет, телефон сломался",
+  "voice_raw": "превет тилифон сламалса",
+  "lang": "ru",
+  "is_voice": true
+}
+```
+
 ---
 
 ## Block 1: Channel Layer (IN/OUT)

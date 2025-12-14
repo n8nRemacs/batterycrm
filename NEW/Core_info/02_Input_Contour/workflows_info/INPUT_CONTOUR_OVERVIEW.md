@@ -233,6 +233,32 @@ Input Contour solves:
 
 Translation back to client's language happens in **Output Contour** (ELO_Out_Router).
 
+### Text vs Voice Processing
+
+| Type | Normalization | Translation | Location |
+|------|---------------|-------------|----------|
+| **Text** | Combined with translation | Single LLM call | Input Contour |
+| **Voice** | Separate (RU context) | After normalization | MCP → Input Contour |
+
+**Text messages:** Single LLM call that normalizes and translates simultaneously.
+```
+"превет тилифон сламалса" → "Hello, my phone is broken"
+```
+
+**Voice messages:** ASR errors are language-specific, so:
+1. **MCP:** ASR → Normalize in Russian ("тилифон" → "телефон")
+2. **Input Contour:** Translate normalized text to English
+
+```json
+{
+  "text": "Hello, my phone is broken",
+  "text_original": "Привет, телефон сломался",
+  "voice_raw": "превет тилифон сламалса",
+  "lang": "ru",
+  "is_voice": true
+}
+```
+
 ---
 
 ## Data Contract

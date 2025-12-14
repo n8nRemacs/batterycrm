@@ -75,6 +75,39 @@ New approach: Extract ALL → Analyze Lines → Derive → Respond (multi-entity
 3. **Analytics** — all data in one language for analysis
 4. **Graph queries** — symptom/diagnosis matching works in English
 
+### Text vs Voice Processing
+
+| Type | Normalization | Translation | Where |
+|------|---------------|-------------|-------|
+| **Text** | Combined with translation | In one LLM call | Input Contour |
+| **Voice** | Separate, in Russian | After normalization | MCP → Input Contour |
+
+**Text messages:**
+```
+Text → [Normalize + Translate in one call] → EN
+       "превет тилифон сламалса"  →  "Hello, my phone is broken"
+```
+Single LLM call that fixes errors and translates simultaneously.
+
+**Voice messages:**
+```
+Voice → ASR → [Normalize RU] → [Translate EN]
+              MCP              Input Contour
+```
+Normalization in MCP (Russian context for ASR errors), translation in Input Contour.
+
+### Voice Message Fields
+
+```json
+{
+  "text": "Hello, my phone is broken",
+  "text_original": "Привет, телефон сломался",
+  "voice_raw": "превет тилифон сламалса",
+  "lang": "ru",
+  "is_voice": true
+}
+```
+
 ---
 
 ## Context Lines Model
