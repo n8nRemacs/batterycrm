@@ -14,121 +14,113 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**December 12, 2025, 17:00 (UTC+4)**
+**December 13, 2025, 17:30 (UTC+4)**
 
 ---
 
-## CORE AI — РЕАЛИЗОВАНО, НУЖЕН ДЕБАГ
+## ТЕКУЩАЯ ЗАДАЧА: ELO_Input_Worker → Разделить на 2 воркфлоу
 
-### Что сделано
+### Проблема
 
+ELO_Input_Worker пытается в одном цикле:
+1. Забрать сообщение из очереди
+2. Добавить в batch
+3. Проверить deadline
+4. Если due — собрать и отправить
+
+**Но это не работает**, потому что:
+- Цикл 1: Pop msg1 → batch → deadline not due → end
+- Цикл 2: Pop msg2 → batch → deadline not due → end
+- Цикл 3: Pop msg3 → batch → deadline not due → end
+- Цикл 4: Queue empty → deadline DUE! → но Parse Message пустой!
+
+### Решение — 2 воркфлоу:
+
+**1. ELO_Input_Batcher (Schedule 3 sec)**
 ```
-✅ Документация Core AI (07_Core_AI/)
-   ├── CORE_AI_OVERVIEW.md — полное описание Context Lines
-   └── workflows_info/ — 6 документов по воркерам
-
-✅ n8n Workflows (NEW/workflows/ELO_Core_AI/)
-   ├── ELO_Core_AI_Orchestrator.json — главный оркестратор
-   ├── ELO_Core_Lines_Analyzer.json — анализ линий
-   ├── ELO_Core_AI_Derive.json — вычисление зависимых слотов
-   ├── ELO_Core_Triggers_Checker.json — проверка триггеров
-   ├── ELO_Core_Stage_Manager.json — управление этапами
-   ├── ELO_Core_Response_Generator.json — генерация ответов
-   └── ELO_Core_AI_Test_Stub.json — тестовая заглушка (эхо)
-
-✅ ELO_Out_Router — роутинг ответов по каналам
-   ├── Webhook: /webhook/elo-out-router
-   ├── Switch по channel_id (1-5)
-   └── Вызывает ELO_Out_* как sub-workflow
+Pop Message → Parse → Push to Batch → Set Deadline → END
 ```
+Только батчит, не проверяет готовность.
+
+**2. ELO_Input_Processor (Schedule 3 sec)**
+```
+Get All Batches → Check Deadlines → If Due → Collect from Redis → Merge → Send
+```
+Только проверяет готовность и отправляет.
 
 ---
 
-### Текущий статус
+## n8n Redis Node — ВАЖНЫЕ БАГИ
 
-```
-Channel IN → Input Contour → Client Contour → [Core AI] → Out Router → Channel OUT
-                                                  ↑
-                                          ЗДЕСЬ ДЕБАЖИМ
-```
+При работе с Redis в n8n учитывай:
 
-**Test Stub:** `ELO_Core_AI_Test_Stub` — простой эхо для отладки цепочки без сложного AI.
+| Операция | Где данные | Пример |
+|----------|-----------|--------|
+| POP | `$json.propertyName` (объект) или `$json.value` (строка) | Проверяй оба |
+| KEYS | Ключи как свойства объекта | `Object.keys($json).filter(k => k.startsWith('batch:'))` |
+| GET | Значение в имени ключа | `$json['deadline:telegram:tg_123']` |
+| SET | Нужен `String()` | `={{String($json.value)}}` |
 
----
-
-## NEXT STEPS — ДЕБАГ И ТЕСТИРОВАНИЕ
-
-### 1. Проверить цепочку с Test Stub
-- Отправить сообщение через Telegram
-- Проверить что проходит через Input → Client → Test Stub → Out Router → Telegram
-
-### 2. Включить полный Core AI
-- Заменить Test Stub на Orchestrator
-- Тестировать по этапам
-
-### 3. Отладить каждый компонент
-- Lines Analyzer — правильно ли создаёт/переключает линии
-- AI Derive — работает ли вычисление symptom → repair → price
-- Stage Manager — корректны ли переходы между этапами
-- Triggers Checker — срабатывают ли триггеры
-- Response Generator — адекватны ли ответы AI
+**IF ноды:** всегда ставь `looseTypeValidation: true` (Convert types = ON)
 
 ---
 
-## Модель "Context Lines" (напоминание)
+## Архитектура (n8n only, MCP отключены)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      CONTEXT                            │
-│                                                         │
-│  Line 0: ●──●──●──○──○  (cursor=3, waiting)            │
-│  Line 1: ●──●──●──●──✓  (done)                         │
-│  Line 2: ●──○──○──○──○  (cursor=1, active) ← focus     │
-│                                                         │
-│  ● = filled, ○ = empty, ✓ = complete                   │
-└─────────────────────────────────────────────────────────┘
-
-Line = intake с слотами [device, symptom, owner, price]
-Cursor = где остановились
-Focus = активная линия
-Waiting = линии с обрывами
+┌─────────────────────────────────────────────────────────────────────┐
+│                         n8n WORKFLOWS                                │
+├─────────────────────────────────────────────────────────────────────┤
+│  Channel IN (webhooks from MCP messengers)                          │
+│      ↓                                                               │
+│  ELO_In_Telegram/WhatsApp/Avito/VK/MAX                              │
+│      ↓                                                               │
+│  queue:incoming (Redis)                                              │
+│      ↓                                                               │
+│  ELO_Input_Batcher ←── TODO: создать                                │
+│      ↓                                                               │
+│  batch:* + deadline:* + first_seen:* (Redis)                        │
+│      ↓                                                               │
+│  ELO_Input_Processor ←── TODO: создать                              │
+│      ↓                                                               │
+│  ELO_Client_Resolve                                                  │
+│      ↓                                                               │
+│  [Core AI] ←── Test Stub пока                                       │
+│      ↓                                                               │
+│  ELO_Out_Router → ELO_Out_*                                         │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+**MCP Messengers (работают):**
+- mcp-telegram (217.145.79.27:8767)
+- mcp-whatsapp (217.145.79.27:8766)
+- mcp-avito (45.144.177.128:8765)
+- mcp-vk (45.144.177.128:8767)
+- mcp-max (45.144.177.128:8768)
+
+**MCP Contours (ОТКЛЮЧЕНЫ):**
+- input-contour, client-contour, graph-tool, ai-tool — disabled
 
 ---
 
-## Этапы воронки
+## Redis структура (debounce batching)
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  ЭТАП 1: data_collection — сбор данных                 │
-│  slots: [device, symptom, owner, price]                 │
-├─────────────────────────────────────────────────────────┤
-│  ЭТАП 2: presentation — презентация                    │
-│  slots: [offer_shown] + triggers                        │
-├─────────────────────────────────────────────────────────┤
-│  ЭТАП 3: agreement — согласование                      │
-│  slots: [conditions_ok, ready_to_book]                  │
-├─────────────────────────────────────────────────────────┤
-│  ЭТАП 4: booking — запись                              │
-│  slots: [date, time, name, phone]                       │
-├─────────────────────────────────────────────────────────┤
-│  ЭТАП 5: confirmation — подтверждение                  │
-│  slots: [confirmed] → INTAKE CREATED                    │
-└─────────────────────────────────────────────────────────┘
+queue:incoming          — входящие сообщения (FIFO)
+batch:{channel}:{chat}  — накопленные сообщения для батча (LIST)
+deadline:{channel}:{chat} — timestamp когда обрабатывать (STRING, TTL 120s)
+first_seen:{channel}:{chat} — timestamp первого сообщения (STRING, TTL 120s)
+dlq:input_contour       — dead letter queue для ошибок
 ```
+
+**Debounce логика:**
+- DEBOUNCE_MS = 10000 (10 сек тишины)
+- MAX_WAIT_MS = 40000 (40 сек максимум)
+- deadline = min(first_seen + max_wait, now + debounce)
 
 ---
 
 ## SERVERS
-
-### MCP Contours:
-
-| Service | IP | Port | Status |
-|---------|----|------|--------|
-| Input Contour | 45.144.177.128 | 8771 | 📝 Documented |
-| Client Contour | 45.144.177.128 | 8772 | ✅ Code ready |
-| Graph Tool | 45.144.177.128 | 8773 | 📝 Documented |
-| AI Tool | 45.144.177.128 | 8774 | ✅ Created |
 
 ### Infrastructure:
 
@@ -138,20 +130,6 @@ Waiting = линии с обрывами
 | Neo4j | 45.144.177.128 | 7474/7687 | Graph database |
 | PostgreSQL | 185.221.214.83 | 6544 | Main database |
 | Redis (RU) | 45.144.177.128 | 6379 | Queues |
-
----
-
-## n8n Workflows (импортированы)
-
-| Workflow | Webhook | Status |
-|----------|---------|--------|
-| ELO_Out_Router | /webhook/elo-out-router | ✅ Active |
-| ELO_Core_AI_Test_Stub | /webhook/elo-core-ingest | ✅ For debug |
-| ELO_Out_Telegram | sub-workflow | ✅ |
-| ELO_Out_WhatsApp | sub-workflow | ✅ |
-| ELO_Out_Avito | sub-workflow | ✅ |
-| ELO_Out_VK | sub-workflow | ✅ |
-| ELO_Out_MAX | sub-workflow | ✅ |
 
 ---
 
@@ -165,36 +143,42 @@ Redis (RU): redis://:Mi31415926pSss!@45.144.177.128:6379
 
 ---
 
-## KEY DOCUMENTS
-
-**Core AI:**
-1. `NEW/Core_info/07_Core_AI/CORE_AI_OVERVIEW.md` — архитектура
-2. `NEW/Core_info/07_Core_AI/workflows_info/` — описания воркеров
-3. `NEW/workflows/ELO_Core_AI/` — JSON для импорта
-
-**Architecture:**
-1. `NEW/ROADMAP.md` — killer features
-2. `CORE_NEW/docs/05_AI_ARCHITECTURE.md` — 7 levels
-
----
-
 ## QUICK COMMANDS
 
 ```bash
-# Neo4j test data check
+# Redis - проверить все ключи
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! KEYS "*"'
+
+# Redis - очистить всё
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! FLUSHALL'
+
+# Redis - добавить тестовые сообщения
+ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! RPUSH "queue:incoming" "{\"channel\":\"telegram\",\"external_chat_id\":\"tg_123\",\"text\":\"Test 1\"}" "{\"channel\":\"telegram\",\"external_chat_id\":\"tg_123\",\"text\":\"Test 2\"}" "{\"channel\":\"telegram\",\"external_chat_id\":\"tg_123\",\"text\":\"Test 3\"}"'
+
+# Neo4j test
 ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost:7687' -u neo4j -p 'Mi31415926pS' 'MATCH (n) RETURN labels(n), count(n)'"
-
-# Redis queue check
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! LLEN "ai_extraction_queue"'
-
-# Test Out Router
-curl -X POST https://n8n.n8nsrv.ru/webhook/elo-out-router \
-  -H "Content-Type: application/json" \
-  -d '{"channel_id": 1, "external_chat_id": "123", "text": "test"}'
-
-# Update context
-python scripts/update_core_context.py
 ```
+
+---
+
+## KEY DOCUMENTS
+
+**Input Contour:**
+- `NEW/workflows/Input Contour/ELO_Input_Worker.json` — текущая (нерабочая) версия
+- `NEW/workflows/Chanel Contour/ELO_In/ELO_In_Telegram.json` — Telegram input
+
+**Core AI:**
+- `NEW/Core_info/07_Core_AI/CORE_AI_OVERVIEW.md` — архитектура
+- `NEW/workflows/ELO_Core_AI/` — JSON для импорта
+
+---
+
+## NEXT STEPS
+
+1. **Создать ELO_Input_Batcher** — только батчинг
+2. **Создать ELO_Input_Processor** — только проверка deadline и отправка
+3. **Протестировать цепочку** — 3 сообщения → 1 merged
+4. **Подключить Core AI** — заменить Test Stub на Orchestrator
 
 ---
 

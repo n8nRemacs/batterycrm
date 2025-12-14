@@ -60,60 +60,59 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 12 December 2025, 17:00 (UTC+4)
+## Last session: 13 December 2025, 17:30 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### CORE AI: Полная реализация n8n workflows ✅
+### ELO_Input_Worker — отладка и рефакторинг
 
-**Документация:**
-- `NEW/Core_info/07_Core_AI/CORE_AI_OVERVIEW.md` — полное описание Context Lines
-- 6 документов в `workflows_info/` по каждому воркеру
+**Проблемы найдены и задокументированы:**
 
-**n8n Workflows (JSON) — 7 штук:**
-- `ELO_Core_AI_Orchestrator.json` — главный оркестратор
-- `ELO_Core_Lines_Analyzer.json` — анализ линий
-- `ELO_Core_AI_Derive.json` — вычисление зависимых слотов
-- `ELO_Core_Triggers_Checker.json` — проверка триггеров
-- `ELO_Core_Stage_Manager.json` — управление этапами
-- `ELO_Core_Response_Generator.json` — генерация ответов
-- `ELO_Core_AI_Test_Stub.json` — тестовая заглушка (эхо)
+1. **n8n Redis node quirks:**
+   - POP возвращает данные в `propertyName` или `value`
+   - KEYS возвращает ключи как свойства объекта
+   - GET возвращает значение в имени ключа
+   - SET требует `String()` для числовых значений
+
+2. **IF nodes:** требуют `looseTypeValidation: true`
+
+3. **Архитектурная проблема:** батчинг и дебаунсинг не работают в одном цикле воркфлоу
+
+**Решение принято:** разделить на 2 воркфлоу:
+- `ELO_Input_Batcher` — только батчинг
+- `ELO_Input_Processor` — только проверка deadline и отправка
 
 ---
 
-### ELO_Out_Router ✅
+### MCP Contours отключены
 
-**Создан и импортирован:**
-- Webhook: `/webhook/elo-out-router`
-- Switch по `channel_id` (1-5)
-- Вызывает ELO_Out_* как sub-workflow через `executeWorkflow`
+Решено использовать только n8n workflows без MCP contour серверов:
+- input-contour (8771) — disabled
+- client-contour (8772) — disabled
+- graph-tool (8773) — disabled
+- ai-tool (8774) — disabled
 
-**Структура:**
-```
-Webhook → Determine Channel → Switch Channel ─┬─ Telegram → ELO_Out_Telegram ─┐
-                                               ├─ WhatsApp → ELO_Out_WhatsApp ─┤
-                                               ├─ Avito    → ELO_Out_Avito ────┼─→ Respond
-                                               ├─ VK       → ELO_Out_VK ───────┤
-                                               ├─ MAX      → ELO_Out_MAX ──────┤
-                                               └─ fallback → Error ────────────┘
-```
+MCP messengers остаются активными (telegram, whatsapp, avito, vk, max).
 
 ---
 
 ## Текущее состояние системы
 
 ```
-Channel IN → Input Contour → Client Contour → [Core AI] → Out Router → Channel OUT
-                                                  ↑
-                                        Test Stub для отладки
+Channel IN → ELO_In_* → queue:incoming → [Batcher] → batch:* → [Processor] → Client → Core AI → Out
+                                              ↑                      ↑
+                                         TODO: создать          TODO: создать
 ```
 
-**Импортировано в n8n:**
-- ELO_Out_Router ✅
-- ELO_Core_AI_Test_Stub ✅
-- ELO_Out_Telegram/WhatsApp/Avito/VK/MAX ✅
+**Работает:**
+- ELO_In_Telegram — принимает сообщения, кладёт в queue:incoming
+- ELO_Out_Router — роутит ответы по каналам
+- ELO_Client_Resolve — резолвит клиента
+
+**Не работает:**
+- ELO_Input_Worker — требует разделения на Batcher + Processor
 
 ---
 
@@ -121,38 +120,41 @@ Channel IN → Input Contour → Client Contour → [Core AI] → Out Router →
 
 | Файл | Описание |
 |------|----------|
-| `NEW/Core_info/07_Core_AI/CORE_AI_OVERVIEW.md` | Архитектура Core AI |
-| `NEW/Core_info/07_Core_AI/workflows_info/` | Документация воркеров |
-| `NEW/workflows/ELO_Core_AI/` | JSON для импорта |
-| `NEW/workflows/Chanel Contour/ELO_Out_Router.json` | Роутер каналов |
+| `NEW/workflows/Input Contour/ELO_Input_Worker.json` | Текущая версия (нерабочая) |
+| `Start.md` | Обновлён с новым контекстом |
 
 ---
 
 ## НА ЧЁМ ОСТАНОВИЛИСЬ
 
-### Реализация завершена, нужен дебаг:
+### Создать 2 воркфлоу вместо 1:
 
-**1. Проверить цепочку с Test Stub:**
-- Отправить сообщение через Telegram
-- Убедиться что проходит: Input → Client → Test Stub → Out Router → Telegram
+**1. ELO_Input_Batcher:**
+```
+Schedule (3s) → Pop Message → Parse → If Empty?
+                                        ↓ No
+                              Get First Seen → Calc Deadline → Push to Batch → Set Deadline → END
+```
 
-**2. Включить полный Core AI:**
-- Заменить Test Stub на Orchestrator
-- Тестировать по этапам
-
-**3. Отладить каждый компонент:**
-- Lines Analyzer — создание/переключение линий
-- AI Derive — вычисление symptom → repair → price
-- Stage Manager — переходы между этапами
-- Triggers Checker — срабатывание триггеров
-- Response Generator — генерация ответов AI
+**2. ELO_Input_Processor:**
+```
+Schedule (3s) → Get All Batches → Prepare Check → If Has Batches?
+                                                      ↓ Yes
+                                        Split → Get Deadline → Check If Due?
+                                                                    ↓ Yes
+                                              Collect All → Merge → Send to Client Resolve → Cleanup
+```
 
 ---
 
-## Git commits
+## Redis структура
 
 ```
-079962f Add Core AI architecture: docs, workflows, ELO_Out_Router
+queue:incoming          — входящие сообщения
+batch:{channel}:{chat}  — накопленные сообщения (LIST)
+deadline:{channel}:{chat} — когда обрабатывать (STRING, TTL 120s)
+first_seen:{channel}:{chat} — первое сообщение (STRING, TTL 120s)
+dlq:input_contour       — ошибки
 ```
 
 ---
@@ -161,5 +163,6 @@ Channel IN → Input Contour → Client Contour → [Core AI] → Out Router →
 
 1. **git pull** — sync latest changes
 2. **Read Start.md** — full context
-3. **Test chain** — Telegram → Test Stub → Out Router → Telegram
-4. **Debug Core AI** — component by component
+3. **Create ELO_Input_Batcher** — batching only
+4. **Create ELO_Input_Processor** — deadline check and send
+5. **Test** — 3 messages → 1 merged → Client Resolve
