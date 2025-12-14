@@ -195,6 +195,46 @@ Input Contour solves:
 
 ---
 
+## Translation to English
+
+**IMPORTANT:** Core AI works entirely in English. Translation happens in Input Contour.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ELO_Input_Processor                                         │
+│                                                              │
+│  Merge Batch                                                 │
+│       │                                                      │
+│       ▼                                                      │
+│  Translate to EN (OpenRouter Qwen3-30B)                      │
+│       │  - Translate text to English                         │
+│       │  - Preserve original in text_original                │
+│       │  - Detect language → lang field                      │
+│       │                                                      │
+│       ▼                                                      │
+│  Call Client Resolve → Core AI (EN only)                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Message Fields After Translation
+
+| Field | Example |
+|-------|---------|
+| `text` | "Hello, I broke my phone screen" |
+| `text_original` | "Привет, разбил экран телефона" |
+| `lang` | "ru" |
+
+### API
+
+- **Model:** `qwen/qwen3-30b-a3b:free` via OpenRouter
+- **Endpoint:** `https://openrouter.ai/api/v1/chat/completions`
+
+### Output Translation
+
+Translation back to client's language happens in **Output Contour** (ELO_Out_Router).
+
+---
+
 ## Data Contract
 
 **Input to Input Contour (from IN workflow):**

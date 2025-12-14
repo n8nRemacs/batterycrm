@@ -67,10 +67,32 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ## Architecture (n8n only, MCP disabled)
 
 ```
-ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:* 
-         → ELO_Input_Processor → ELO_Client_Resolve 
-         → ELO_Core_AI_Test_Stub → ELO_Out_Router
+ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:*
+         → ELO_Input_Processor
+              ├─ Merge Batch
+              ├─ **Translate to EN** (OpenRouter Qwen3)
+              └─ Call Client Resolve
+         → ELO_Client_Resolve
+         → ELO_Core_AI (English only)
+         → ELO_Out_Router
+              ├─ **Translate to client lang**
+              └─ Channel OUT
 ```
+
+## Language Architecture
+
+**Core AI works entirely in English.**
+
+| Step | Where | What |
+|------|-------|------|
+| Input | ELO_Input_Processor | Translate client message → EN |
+| Core | ELO_Core_AI | All prompts/responses in EN |
+| Output | ELO_Out_Router | Translate response → client's lang |
+
+**Message fields:**
+- `text` — working text (EN)
+- `text_original` — original message (any lang)
+- `lang` — detected language (ru, en, etc.)
 
 ---
 

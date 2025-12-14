@@ -249,12 +249,39 @@ CREATE TABLE elo_dialog_verticals (
 |---|-------|-------------|
 | 1 | Channel Layer | MCP + In + Out (per channel) |
 | 2 | Billing | Subscriptions, balances, checks |
-| 3 | Input Contour | Tenant Resolver → Batcher |
-| 4 | Core | Dialog Engine + AI Pipeline |
-| 5 | Graph | Neo4j (Client, Device, Symptom, Diagnosis, Repair) |
-| 6 | Diagnostic Engine | Symptoms → Diagnoses → Repairs |
+| 3 | Input Contour | Tenant Resolver → Batcher → **Translate to EN** |
+| 4 | Core | Dialog Engine + AI Pipeline **(English only)** |
+| 5 | Output Contour | **Translate to client lang** → Channel OUT |
+| 6 | Graph | Neo4j (Client, Device, Symptom, Diagnosis, Repair) |
+| 7 | Diagnostic Engine | Symptoms → Diagnoses → Repairs |
 
 + **Tools** — separately later.
+
+---
+
+## Language Architecture
+
+**IMPORTANT:** Core AI works entirely in English.
+
+```
+Client (any lang) → Input Contour → [Translate to EN] → Core AI (EN)
+                                                              ↓
+Client (orig lang) ← Output Contour ← [Translate back] ← Response (EN)
+```
+
+### Message Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `text` | string | Working text (EN after translation) |
+| `text_original` | string | Original client message (any language) |
+| `lang` | string | Detected language code (ru, en, uk, etc.) |
+
+### Translation API
+
+- **Model:** `qwen/qwen3-30b-a3b:free` via OpenRouter
+- **Input:** ELO_Input_Processor (after Merge Batch)
+- **Output:** ELO_Out_Router (before channel dispatch)
 
 ---
 

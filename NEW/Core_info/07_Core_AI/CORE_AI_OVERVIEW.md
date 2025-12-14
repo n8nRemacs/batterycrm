@@ -20,6 +20,63 @@ New approach: Extract ALL → Analyze Lines → Derive → Respond (multi-entity
 
 ---
 
+## Language: English Only
+
+**IMPORTANT:** Core AI works entirely in English.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Input Contour                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  ELO_Input_Processor                                         ││
+│  │       │                                                      ││
+│  │       ├── Merge Batch                                        ││
+│  │       │                                                      ││
+│  │       ├── **Translate to EN** (OpenRouter Qwen3)            ││
+│  │       │       text_original → text (EN)                      ││
+│  │       │       + detect lang                                  ││
+│  │       │                                                      ││
+│  │       └── Call Client Resolve → Core AI                      ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  CORE AI (English only)                                          │
+│  - All prompts in English                                        │
+│  - All extraction in English                                     │
+│  - All responses generated in English                            │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  Output Contour                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  ELO_Out_Router                                              ││
+│  │       │                                                      ││
+│  │       ├── **Translate to Original Language**                 ││
+│  │       │       text (EN) → text (client's lang)               ││
+│  │       │                                                      ││
+│  │       └── Channel OUT (Telegram, WhatsApp, etc.)             ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Message Fields
+
+| Field | Description |
+|-------|-------------|
+| `text` | Current working text (EN after input translation) |
+| `text_original` | Original client message (any language) |
+| `lang` | Detected language code (ru, en, etc.) |
+
+### Why English?
+
+1. **Unified prompts** — no need to maintain prompts in multiple languages
+2. **Better AI performance** — English training data is more extensive
+3. **Analytics** — all data in one language for analysis
+4. **Graph queries** — symptom/diagnosis matching works in English
+
+---
+
 ## Context Lines Model
 
 ```

@@ -42,24 +42,38 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 14 December 2025, 13:10 (UTC+4)
+## Last session: 14 December 2025, 15:30 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### Input Contour — COMPLETED
+### Translation Architecture — DESIGNED
+
+1. **Core AI works in English only** — all prompts, extraction, responses
+2. **ELO_Input_Processor_v2** — added translation nodes (Qwen3 via OpenRouter)
+3. **Documentation updated** — GLOBAL_SCHEMA, CORE_AI_OVERVIEW, INPUT_CONTOUR_OVERVIEW
+
+### Translation Flow
+
+```
+Client (RU) → Input Processor → [Translate to EN] → Core AI (EN)
+                                                         ↓
+Client (RU) ← Out Router ← [Translate to RU] ← Response (EN)
+```
+
+### Message Fields
+
+- `text` — working text (EN after translation)
+- `text_original` — original message (any lang)
+- `lang` — detected language (ru, en, etc.)
+
+### Previous: Input Contour — COMPLETED
 
 1. **ELO_Input_Batcher** — batching workflow (created)
 2. **ELO_Input_Processor** — processing workflow (created)
 3. **ELO_Client_Resolve** — fixed (table names, cache parsing, IF conditions)
 4. **ELO_Core_AI_Test_Stub** — fixed (POST method, body parsing)
-
-### Test Results
-
-```
-3 messages → merged → client/dialog created → Core AI received ✓
-```
 
 ---
 
@@ -77,9 +91,12 @@ All components working ✓
 
 ## NEXT STEPS
 
-1. **Replace Test Stub with real Core AI**
-2. **Test Output Contour** — ELO_Out_Router → ELO_Out_Telegram
-3. **End-to-end test** — real Telegram message → response
+1. **Create OpenRouter credential in n8n** — for translation API
+2. **Import ELO_Input_Processor_v2** — with translation nodes
+3. **Add translation to ELO_Out_Router** — translate response back to client's lang
+4. **Replace Test Stub with real Core AI**
+5. **Test Output Contour** — ELO_Out_Router → ELO_Out_Telegram
+6. **End-to-end test** — real Telegram message → response
 
 ---
 
