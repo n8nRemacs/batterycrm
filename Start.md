@@ -14,53 +14,78 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**December 14, 2025, 13:10 (UTC+4)**
+**15 December 2025, 13:00 (UTC+4)**
 
 ---
 
-## COMPLETED: Input Contour — Batcher + Processor
+## COMPLETED: AI Contour — Hardcode Removed
 
 ### What was done
 
-1. **ELO_Input_Batcher** — created and working
-   - Schedule 3 sec
-   - Pop Message → Parse → Push to Batch → Set Deadline
+1. **All workflows rewritten to use PostgreSQL** instead of hardcoded config:
+   - ELO_Core_AI_Derive → SQL derivation chain
+   - ELO_Core_Triggers_Checker → SQL triggers from elo_v_triggers
+   - ELO_Core_Stage_Manager → SQL stages from elo_v_funnel_stages
+   - ELO_Core_Response_Generator → SQL prompts from elo_v_prompts
 
-2. **ELO_Input_Processor** — created and working
-   - Schedule 3 sec
-   - Get All Deadlines → Check If Due → Get Batch → Merge → Call Client Resolve
+2. **ELO_AI_Extract rewritten** — from AI Tool MCP (8774) to OpenRouter API
 
-3. **ELO_Client_Resolve** — fixed
-   - Fixed table names: elo_* → elo_t_*
-   - Fixed column names: credential → account_id, status → status_id
-   - Fixed cache parsing: $json.value → $json.propertyName || $json.value
-   - Fixed IF conditions: use is not empty operator
+3. **ELO_AI_Chat deleted** — unused, redundant
 
-4. **ELO_Core_AI_Test_Stub** — fixed
-   - Changed webhook to POST
-   - Fixed data reading: $json → $json.body || $json
+4. **New workflows created:**
+   - ELO_Core_Graph_Writer — write to Neo4j
+   - ELO_Core_Context_Builder — load context from Neo4j/Redis
 
-### Test Results
-
-```
-3 messages → ELO_Input_Batcher → batch:telegram:tg_test_001
-           → ELO_Input_Processor → merge → "Message 1\n\nMessage 2\n\nMessage 3"
-           → ELO_Client_Resolve → client + dialog created
-           → ELO_Core_AI_Test_Stub → received correctly
-```
+5. **Documentation created:**
+   - AI_CONTOUR_ARCHITECTURE.md — full architecture, call graph, data flow
 
 ---
 
-## n8n Redis Node — IMPORTANT QUIRKS
+## COMPLETED: Database — Derivation Chain
 
-| Operation | Where data is | Example |
-|-----------|---------------|---------|
-| GET | $json.propertyName | Check for null |
-| POP | $json.propertyName or $json.value | Check both |
-| KEYS | Keys as object properties | Object.keys($json) |
-| SET | Needs String() | ={{String($json.value)}} |
+1. **Migrations created (005):**
+   - symptom → diagnosis links: 5 → 28
+   - diagnosis → repair links: 3 → 10
+   - price list entries: 10 → 22
 
-**IF nodes:** use is not empty operator, NOT exists
+2. **100% coverage** — all 25 symptoms now have derivation chain
+
+---
+
+## Current AI Contour (10 workflows)
+
+```
+ELO_Core_AI_Orchestrator.json    # Coordinator
+ELO_AI_Extract.json              # Entity extraction (OpenRouter)
+ELO_Core_Lines_Analyzer.json     # Multi-intake lines management
+ELO_Core_AI_Derive.json          # symptom→diagnosis→repair→price
+ELO_Core_Triggers_Checker.json   # Conditional triggers
+ELO_Core_Stage_Manager.json      # Funnel stage management
+ELO_Core_Response_Generator.json # AI response generation
+ELO_Core_Graph_Writer.json       # Neo4j persistence
+ELO_Core_Context_Builder.json    # Context loading
+ELO_Core_AI_Test_Stub.json       # Test stub
+```
+
+**Location:** `NEW/workflows/AI Contour/`
+
+---
+
+## Current System State
+
+**Database:** Ready
+- All tables created (global, vertical, tenant levels)
+- Derivation chain 100% complete
+- Test tenant configured
+
+**AI Contour:** Ready
+- 10 workflows, no hardcode
+- All config from PostgreSQL
+- All AI calls via OpenRouter
+
+**Not yet connected:**
+- Context_Builder not called by Orchestrator (inline code instead)
+- End-to-end test not done
 
 ---
 
@@ -88,11 +113,6 @@ ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:*
 | Input | ELO_Input_Processor | Translate client message → EN |
 | Core | ELO_Core_AI | All prompts/responses in EN |
 | Output | ELO_Out_Router | Translate response → client's lang |
-
-**Message fields:**
-- `text` — working text (EN)
-- `text_original` — original message (any lang)
-- `lang` — detected language (ru, en, etc.)
 
 ---
 
@@ -124,9 +144,10 @@ ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi3141
 
 ## NEXT STEPS
 
-1. **Replace Test Stub with real Core AI**
-2. **Test Output Contour** — ELO_Out_Router → ELO_Out_Telegram
-3. **End-to-end test** — real Telegram message → response
+1. **Connect Context_Builder to Orchestrator** — load existing context instead of creating new
+2. **Import workflows to n8n** — all JSON files ready in `NEW/workflows/AI Contour/`
+3. **Test derivation chain** — real message → extraction → derivation → price
+4. **End-to-end test** — Telegram → Core AI → response
 
 ---
 

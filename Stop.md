@@ -42,61 +42,81 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 14 December 2025, 15:30 (UTC+4)
+## Last session: 15 December 2025, 13:00 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### Translation Architecture — DESIGNED
+### AI Contour — HARDCODE REMOVED
 
-1. **Core AI works in English only** — all prompts, extraction, responses
-2. **ELO_Input_Processor_v2** — added translation nodes (Qwen3 via OpenRouter)
-3. **Documentation updated** — GLOBAL_SCHEMA, CORE_AI_OVERVIEW, INPUT_CONTOUR_OVERVIEW
+1. **All workflows rewritten to use PostgreSQL** instead of hardcoded config:
+   - ELO_Core_AI_Derive → SQL derivation chain
+   - ELO_Core_Triggers_Checker → SQL triggers from elo_v_triggers
+   - ELO_Core_Stage_Manager → SQL stages from elo_v_funnel_stages
+   - ELO_Core_Response_Generator → SQL prompts from elo_v_prompts
 
-### Translation Flow
+2. **ELO_AI_Extract rewritten** — from AI Tool MCP (8774) to OpenRouter API
+
+3. **ELO_AI_Chat deleted** — unused, redundant
+
+4. **New workflows created:**
+   - ELO_Core_Graph_Writer — write to Neo4j
+   - ELO_Core_Context_Builder — load context from Neo4j/Redis
+
+5. **Documentation created:**
+   - AI_CONTOUR_ARCHITECTURE.md — full architecture, call graph, data flow
+
+### Database — DERIVATION CHAIN COMPLETED
+
+1. **Migrations created (005):**
+   - symptom → diagnosis links: 5 → 28
+   - diagnosis → repair links: 3 → 10
+   - price list entries: 10 → 22
+
+2. **100% coverage** — all 25 symptoms now have derivation chain
+
+### Current AI Contour (10 workflows)
 
 ```
-Client (RU) → Input Processor → [Translate to EN] → Core AI (EN)
-                                                         ↓
-Client (RU) ← Out Router ← [Translate to RU] ← Response (EN)
+ELO_Core_AI_Orchestrator.json    # Coordinator
+ELO_AI_Extract.json              # Entity extraction (OpenRouter)
+ELO_Core_Lines_Analyzer.json     # Multi-intake lines management
+ELO_Core_AI_Derive.json          # symptom→diagnosis→repair→price
+ELO_Core_Triggers_Checker.json   # Conditional triggers
+ELO_Core_Stage_Manager.json      # Funnel stage management
+ELO_Core_Response_Generator.json # AI response generation
+ELO_Core_Graph_Writer.json       # Neo4j persistence
+ELO_Core_Context_Builder.json    # Context loading
+ELO_Core_AI_Test_Stub.json       # Test stub
 ```
-
-### Message Fields
-
-- `text` — working text (EN after translation)
-- `text_original` — original message (any lang)
-- `lang` — detected language (ru, en, etc.)
-
-### Previous: Input Contour — COMPLETED
-
-1. **ELO_Input_Batcher** — batching workflow (created)
-2. **ELO_Input_Processor** — processing workflow (created)
-3. **ELO_Client_Resolve** — fixed (table names, cache parsing, IF conditions)
-4. **ELO_Core_AI_Test_Stub** — fixed (POST method, body parsing)
 
 ---
 
 ## Current system state
 
-```
-ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:*
-         → ELO_Input_Processor → ELO_Client_Resolve
-         → ELO_Core_AI_Test_Stub → ELO_Out_Router
-```
+**Database:** ✅ Ready
+- All tables created (global, vertical, tenant levels)
+- Derivation chain 100% complete
+- Test tenant configured
 
-All components working ✓
+**AI Contour:** ✅ Ready
+- 10 workflows, no hardcode
+- All config from PostgreSQL
+- All AI calls via OpenRouter
+
+**Not yet connected:**
+- Context_Builder not called by Orchestrator (inline code instead)
+- End-to-end test not done
 
 ---
 
 ## NEXT STEPS
 
-1. **Create OpenRouter credential in n8n** — for translation API
-2. **Import ELO_Input_Processor_v2** — with translation nodes
-3. **Add translation to ELO_Out_Router** — translate response back to client's lang
-4. **Replace Test Stub with real Core AI**
-5. **Test Output Contour** — ELO_Out_Router → ELO_Out_Telegram
-6. **End-to-end test** — real Telegram message → response
+1. **Connect Context_Builder to Orchestrator** — load existing context instead of creating new
+2. **Import workflows to n8n** — all JSON files ready
+3. **Test derivation chain** — real message → extraction → derivation → price
+4. **End-to-end test** — Telegram → Core AI → response
 
 ---
 
@@ -104,4 +124,4 @@ All components working ✓
 
 1. **git pull** — sync latest changes
 2. **Read Start.md** — full context
-3. **Connect real Core AI** — replace test stub
+3. **Import workflows to n8n** — from NEW/workflows/AI Contour/
