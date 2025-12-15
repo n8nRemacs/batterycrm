@@ -42,81 +42,64 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 15 December 2025, 13:00 (UTC+4)
+## Last session: 15 December 2025, 23:30 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### AI Contour — HARDCODE REMOVED
+### MVP Messenger — Инвентаризация
 
-1. **All workflows rewritten to use PostgreSQL** instead of hardcoded config:
-   - ELO_Core_AI_Derive → SQL derivation chain
-   - ELO_Core_Triggers_Checker → SQL triggers from elo_v_triggers
-   - ELO_Core_Stage_Manager → SQL stages from elo_v_funnel_stages
-   - ELO_Core_Response_Generator → SQL prompts from elo_v_prompts
+1. **Собран инвентарь всех готовых компонентов:**
+   - Telegram Bot (mcp-telegram/) ✅
+   - WhatsApp Baileys (mcp-whatsapp-baileys/) ✅
+   - VK Community (mcp-vk/) ✅
+   - Авито User reverse (mcp-avito-user/) - partial
 
-2. **ELO_AI_Extract rewritten** — from AI Tool MCP (8774) to OpenRouter API
+2. **Восстановлен из git history:**
+   - avito_user_client.py (reverse engineering клиент для Авито)
 
-3. **ELO_AI_Chat deleted** — unused, redundant
+3. **Определены НЕиспользуемые компоненты:**
+   - Wappi.pro (WhatsApp, VK, MAX) — платные
+   - MAX Bot API — только для ботов
+   - Авито Business API — только для бизнес-аккаунтов
 
-4. **New workflows created:**
-   - ELO_Core_Graph_Writer — write to Neo4j
-   - ELO_Core_Context_Builder — load context from Neo4j/Redis
+4. **Создана документация:**
+   - NEW/MVP/INVENTORY.md — полный инвентарь каналов и API
+   - NEW/MVP/PLAN_DAY1.md — план первого дня
+   - NEW/MVP/REVERSE_API_REQUIREMENTS.md — требования к реверсу
 
-5. **Documentation created:**
-   - AI_CONTOUR_ARCHITECTURE.md — full architecture, call graph, data flow
-
-### Database — DERIVATION CHAIN COMPLETED
-
-1. **Migrations created (005):**
-   - symptom → diagnosis links: 5 → 28
-   - diagnosis → repair links: 3 → 10
-   - price list entries: 10 → 22
-
-2. **100% coverage** — all 25 symptoms now have derivation chain
-
-### Current AI Contour (10 workflows)
-
-```
-ELO_Core_AI_Pipeline.json        # Main pipeline (sequential calls)
-ELO_AI_Extract.json              # Entity extraction (OpenRouter)
-ELO_Core_Lines_Analyzer.json     # Multi-intake lines management
-ELO_Core_AI_Derive.json          # symptom→diagnosis→repair→price
-ELO_Core_Triggers_Checker.json   # Conditional triggers
-ELO_Core_Stage_Manager.json      # Funnel stage management
-ELO_Core_Response_Generator.json # AI response generation
-ELO_Core_Graph_Writer.json       # Neo4j persistence
-ELO_Core_Context_Builder.json    # Context loading
-ELO_Core_AI_Test_Stub.json       # Test stub
-```
+### Git commits
+- `adc8d47` - Restore Avito user reverse engineering client
+- `3ab5006` - MVP: Add comprehensive inventory of messaging components
 
 ---
 
 ## Current system state
 
-**Database:** ✅ Ready
-- All tables created (global, vertical, tenant levels)
-- Derivation chain 100% complete
-- Test tenant configured
+**Ready channels:**
+- Telegram Bot ✅
+- WhatsApp Baileys ✅
+- VK Community ✅
+- Авито User (read only) ⚠️
 
-**AI Contour:** ✅ Ready
-- 10 workflows, no hardcode
-- All config from PostgreSQL
-- All AI calls via OpenRouter
+**TODO channels:**
+- Telegram User (Pyrogram wrapper)
+- Авито User (sendMessage reverse)
+- MAX User (full reverse)
+- VK User (User API wrapper)
 
-**Not yet connected:**
-- Context_Builder not called by Pipeline (inline code instead)
-- End-to-end test not done
+**Infrastructure:**
+- Tunnel Server (FastAPI skeleton) — TODO
+- Android Tunnel Client (Kotlin) — TODO
 
 ---
 
-## NEXT STEPS
+## NEXT STEPS (16 декабря)
 
-1. **Connect Context_Builder to Pipeline** — load existing context instead of creating new
-2. **Import workflows to n8n** — all JSON files ready
-3. **Test derivation chain** — real message → extraction → derivation → price
-4. **End-to-end test** — Telegram → Core AI → response
+1. **Telegram User** — создать Pyrogram wrapper
+2. **Авито User** — найти sendMessage через DevTools
+3. **Tunnel Server** — FastAPI + WebSocket skeleton
 
 ---
 
@@ -124,4 +107,4 @@ ELO_Core_AI_Test_Stub.json       # Test stub
 
 1. **git pull** — sync latest changes
 2. **Read Start.md** — full context
-3. **Import workflows to n8n** — from NEW/workflows/AI Contour/
+3. **Start with INVENTORY.md** — understand what's ready

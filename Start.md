@@ -14,105 +14,116 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**15 December 2025, 13:00 (UTC+4)**
+**15 December 2025, 23:30 (UTC+4)**
 
 ---
 
-## COMPLETED: AI Contour — Hardcode Removed
+## MVP Messenger - План на 16 декабря
 
-### What was done
+### Контекст
 
-1. **All workflows rewritten to use PostgreSQL** instead of hardcoded config:
-   - ELO_Core_AI_Derive → SQL derivation chain
-   - ELO_Core_Triggers_Checker → SQL triggers from elo_v_triggers
-   - ELO_Core_Stage_Manager → SQL stages from elo_v_funnel_stages
-   - ELO_Core_Response_Generator → SQL prompts from elo_v_prompts
+Создаём омниканальный мессенджер для сервисных центров.
+Архитектура: Android туннель → Server → n8n backend.
 
-2. **ELO_AI_Extract rewritten** — from AI Tool MCP (8774) to OpenRouter API
+### Каналы для MVP
 
-3. **ELO_AI_Chat deleted** — unused, redundant
+| Канал | Статус | Что делать |
+|-------|--------|------------|
+| Telegram Bot | ✅ Ready | - |
+| Telegram User | 🔨 TODO | Pyrogram wrapper |
+| WhatsApp Baileys | ✅ Ready | - |
+| Авито User | ⚠️ Partial | Найти sendMessage |
+| MAX User | 🔨 TODO | Реверс через DevTools |
+| VK Community | ✅ Ready | - |
+| VK User | 🔨 TODO | User API wrapper |
 
-4. **New workflows created:**
-   - ELO_Core_Graph_Writer — write to Neo4j
-   - ELO_Core_Context_Builder — load context from Neo4j/Redis
-
-5. **Documentation created:**
-   - AI_CONTOUR_ARCHITECTURE.md — full architecture, call graph, data flow
-
----
-
-## COMPLETED: Database — Derivation Chain
-
-1. **Migrations created (005):**
-   - symptom → diagnosis links: 5 → 28
-   - diagnosis → repair links: 3 → 10
-   - price list entries: 10 → 22
-
-2. **100% coverage** — all 25 symptoms now have derivation chain
+### НЕ используем
+- Wappi.pro (платный)
+- MAX Bot API (только боты)
+- Авито Business API (только бизнес)
 
 ---
 
-## Current AI Contour (10 workflows)
+## Задачи на День 1 (16 декабря)
 
-```
-ELO_Core_AI_Pipeline.json        # Main pipeline (sequential calls)
-ELO_AI_Extract.json              # Entity extraction (OpenRouter)
-ELO_Core_Lines_Analyzer.json     # Multi-intake lines management
-ELO_Core_AI_Derive.json          # symptom→diagnosis→repair→price
-ELO_Core_Triggers_Checker.json   # Conditional triggers
-ELO_Core_Stage_Manager.json      # Funnel stage management
-ELO_Core_Response_Generator.json # AI response generation
-ELO_Core_Graph_Writer.json       # Neo4j persistence
-ELO_Core_Context_Builder.json    # Context loading
-ELO_Core_AI_Test_Stub.json       # Test stub
+### 1. Telegram User - Pyrogram wrapper
+```python
+# mcp-telegram-user/telegram_user_client.py
+from pyrogram import Client
+
+# Методы:
+# - get_dialogs()
+# - get_chat_history()
+# - send_message()
+# - send_photo/video/document/voice()
+# - on_message handler
 ```
 
-**Location:** `NEW/workflows/AI Contour/`
+### 2. Авито User - найти sendMessage
+- Открыть m.avito.ru в браузере
+- DevTools → Network
+- Отправить сообщение
+- Записать endpoint и payload
+
+### 3. Tunnel Server skeleton
+```
+NEW/MVP/tunnel-server/
+├── app.py          # FastAPI + WebSocket
+├── config.py
+├── requirements.txt
+└── Dockerfile
+```
+
+Endpoints:
+- `WS /tunnel/{client_id}` — WebSocket с туннелем
+- `POST /tunnel/{client_id}/send` — отправить через туннель
+- `GET /tunnel/{client_id}/status` — статус туннеля
 
 ---
 
-## Current System State
+## Ключевые файлы
 
-**Database:** Ready
-- All tables created (global, vertical, tenant levels)
-- Derivation chain 100% complete
-- Test tenant configured
-
-**AI Contour:** Ready
-- 10 workflows, no hardcode
-- All config from PostgreSQL
-- All AI calls via OpenRouter
-
-**Not yet connected:**
-- Context_Builder not called by Pipeline (inline code instead)
-- End-to-end test not done
+| Файл | Описание |
+|------|----------|
+| `NEW/MVP/INVENTORY.md` | Инвентарь каналов и API |
+| `NEW/MVP/PLAN_DAY1.md` | План первого дня |
+| `NEW/MVP/REVERSE_API_REQUIREMENTS.md` | Список endpoints для реверса |
+| `NEW/MVP/MCP/mcp-avito-user/` | Авито reverse client (partial) |
+| `NEW/MVP/MCP/mcp-whatsapp-baileys/` | WhatsApp Baileys (ready) |
+| `NEW/MVP/MCP/mcp-telegram/` | Telegram Bot (ready) |
+| `NEW/MVP/MCP/mcp-vk/` | VK Community (ready) |
 
 ---
 
-## Architecture (n8n only, MCP disabled)
+## Архитектура туннеля
 
 ```
-ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:*
-         → ELO_Input_Processor
-              ├─ Merge Batch
-              ├─ **Translate to EN** (OpenRouter Qwen3)
-              └─ Call Client Resolve
-         → ELO_Client_Resolve
-         → ELO_Core_AI (English only)
-         → ELO_Out_Router
-              ├─ **Translate to client lang**
-              └─ Channel OUT
+┌─────────────────────────────────────────────────────────┐
+│                       SERVER                             │
+│  ┌─────────────┐     ┌─────────────────────────────┐   │
+│  │ Tunnel      │────►│           n8n               │   │
+│  │ Server      │     │    (Message Hub Backend)    │   │
+│  │ FastAPI+WS  │     └─────────────────────────────┘   │
+│  └──────┬──────┘                                        │
+└─────────┼───────────────────────────────────────────────┘
+          │ WebSocket (WSS)
+┌─────────┼───────────────────────────────────────────────┐
+│         │          ANDROID (Tunnel Client)              │
+│  ┌──────┴──────┐                                        │
+│  │ Tunnel      │  ← Foreground Service                  │
+│  │ Service     │  ← WebSocket to Server                 │
+│  └──────┬──────┘                                        │
+│         │ HTTP localhost                                │
+│  ┌──────┴──────────────────────────────────────────┐   │
+│  │  Local services (Termux):                        │   │
+│  │  - Baileys (WhatsApp) :3001                      │   │
+│  │  - Pyrogram (Telegram User) :3002                │   │
+│  │  - Avito Reverse :3003                           │   │
+│  │  - MAX Reverse :3004                             │   │
+│  │  - VK User :3005                                 │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
 ```
-
-## Language Architecture
-
-**Core AI works entirely in English.**
-
-| Step | Where | What |
-|------|-------|------|
-| Input | ELO_Input_Processor | Translate client message → EN |
-| Core | ELO_Core_AI | All prompts/responses in EN |
-| Output | ELO_Out_Router | Translate response → client's lang |
 
 ---
 
@@ -124,31 +135,23 @@ ELO_In_* → queue:incoming → ELO_Input_Batcher → batch:*
 | Neo4j | 45.144.177.128 | 7474/7687 | Graph database |
 | PostgreSQL | 185.221.214.83 | 6544 | Main database |
 | Redis (RU) | 45.144.177.128 | 6379 | Queues |
+| **Tunnel** | TBD | TBD | New dedicated server |
 
 ---
 
-## QUICK COMMANDS
+## QUICK START
 
 ```bash
-# Redis - check all keys
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! KEYS "*"'
+# 1. Sync
+git pull
 
-# Redis - clear all
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! FLUSHALL'
+# 2. Read inventory
+cat NEW/MVP/INVENTORY.md
 
-# Redis - add test messages (with bot_token!)
-ssh root@45.144.177.128 'docker exec redis redis-cli --no-auth-warning -a Mi31415926pSss! RPUSH "queue:incoming" "{\"channel\":\"telegram\",\"bot_token\":\"TEST_BOT_TOKEN_12345\",\"external_chat_id\":\"tg_test_001\",\"text\":\"Test 1\"}"'
+# 3. Start with Telegram User wrapper
+# Create: NEW/MVP/MCP/mcp-telegram-user/
 ```
 
 ---
 
-## NEXT STEPS
-
-1. **Connect Context_Builder to Pipeline** — load existing context instead of creating new
-2. **Import workflows to n8n** — all JSON files ready in `NEW/workflows/AI Contour/`
-3. **Test derivation chain** — real message → extraction → derivation → price
-4. **End-to-end test** — Telegram → Core AI → response
-
----
-
-**Before ending session:** update Start.md, git push
+**Before ending session:** update Start.md, Stop.md, git push
