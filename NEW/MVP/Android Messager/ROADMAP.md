@@ -32,19 +32,31 @@
 
 ## Deployment Checklist
 
-### Phase 1: VPS (tunnel-server)
+### Phase 1: VPS (tunnel-server) ✅ DEPLOYED
 
-**Server:** Any VPS with public IP (recommend: 45.144.177.128 or new)
+**Server:** 155.212.221.189:8800
 
 | Step | Command / Action | Status |
 |------|------------------|--------|
-| 1 | SSH to server | ⬜ |
-| 2 | `git clone` or `scp` tunnel-server folder | ⬜ |
-| 3 | `cp .env.example .env` | ⬜ |
-| 4 | Fill `.env` (see below) | ⬜ |
-| 5 | `./start.sh` or systemd service | ⬜ |
-| 6 | Configure nginx + SSL | ⬜ |
-| 7 | Open firewall port 8800 | ⬜ |
+| 1 | SSH to server | ✅ |
+| 2 | `scp` tunnel-server folder | ✅ |
+| 3 | Create `.env` with secrets | ✅ |
+| 4 | Docker network `eldoleado` | ✅ |
+| 5 | `docker-compose up -d` | ✅ |
+| 6 | Health check working | ✅ |
+| 7 | Port 8800 open | ✅ |
+
+**Deployment commands:**
+```bash
+# Re-deploy
+cd /c/Users/User/Eldoleado/NEW/MVP/Android\ Messager/tunnel-server
+scp -r app main.py requirements.txt Dockerfile docker-compose.yml root@155.212.221.189:/opt/eldoleado/tunnel-server/
+ssh root@155.212.221.189 "cd /opt/eldoleado/tunnel-server && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+
+# Check status
+curl http://155.212.221.189:8800/api/health
+ssh root@155.212.221.189 "docker logs tunnel-server --tail 50"
+```
 
 **Required `.env` for tunnel-server:**
 
@@ -121,9 +133,16 @@ server {
 
 ```env
 # Tunnel Connection
-TUNNEL_URL=wss://tunnel.eldoleado.ru/ws
+TUNNEL_URL=ws://155.212.221.189:8800/ws   # <-- NEW SERVER
 TUNNEL_SECRET=<generate_random_32_chars>
 SERVER_ID=phone_1  # unique per phone
+
+# Tenant/Proxy Settings (NEW)
+TENANT_ID=your_tenant_id          # Required for proxy registration
+NODE_TYPE=operator                 # "operator" or "client"
+WIFI_ONLY=true                     # Only use proxy on WiFi
+MAX_REQUESTS_PER_HOUR=10           # Rate limit for proxy requests
+STATUS_UPDATE_INTERVAL=60          # Status updates frequency (seconds)
 
 # Telegram (from my.telegram.org)
 TELEGRAM_API_ID=12345678
@@ -146,16 +165,25 @@ LOG_LEVEL=INFO
 
 ---
 
-### Phase 3: Android App (Optional)
+### Phase 3: Android App ✅ PROTOCOL READY
 
-**For:** Native Android app with call recording, push notifications
+**For:** Native Android app with TunnelService (proxy support)
 
 | Step | Action | Status |
 |------|--------|--------|
 | 1 | Open `app_original` in Android Studio | ⬜ |
 | 2 | Add `google-services.json` from Firebase | ⬜ |
-| 3 | Build APK | ⬜ |
-| 4 | Install on phone | ⬜ |
+| 3 | Configure tunnel URL in SessionManager | ⬜ |
+| 4 | Build APK | ⬜ |
+| 5 | Install on phone | ⬜ |
+
+**TunnelService features implemented:**
+- ✅ WebSocket connection with auto-reconnect
+- ✅ `hello` message with tenant_id, node_type, device info
+- ✅ `proxy_status` updates (WiFi, battery level)
+- ✅ `http_request` handler for local services
+- ✅ `proxy_fetch` handler for mobile IP proxy
+- ✅ Foreground service with notification
 
 ---
 
@@ -344,33 +372,76 @@ curl https://tunnel.eldoleado.ru/api/proxy/stats
 
 ---
 
+## Implemented Features
+
+### Multi-Tenant Proxy System ✅
+
+- **ProxyManager** — балансировка запросов между телефонами
+- **ProxyNode types:** `operator` (сотрудники) и `client` (клиенты с бонусами)
+- **Rate limiting** — max_requests_per_hour per node
+- **WiFi-only mode** — прокси только на WiFi
+- **Status updates** — WiFi/battery мониторинг
+- **Auto-registration** — телефоны регистрируются при hello
+
+### WebSocket Protocol ✅
+
+| Action | Direction | Description |
+|--------|-----------|-------------|
+| `hello` | Client→Server | Registration with tenant_id, services |
+| `proxy_status` | Client→Server | WiFi/battery status updates |
+| `http_request` | Server→Client | Proxy to local services |
+| `proxy_fetch` | Server→Client | Direct URL fetch via mobile IP |
+| `proxy_response` | Client→Server | Response from proxy_fetch |
+| `ping`/`pong` | Both | Heartbeat |
+
+---
+
 ## Future Enhancements
 
 - [ ] AI Pipeline integration (Level 3-5)
 - [ ] Push notifications via FCM
 - [ ] Admin dashboard
 - [ ] Automatic phone provisioning
-- [ ] Proxy bonus system UI
+- [x] ~~Proxy bonus system~~ (implemented in ProxyManager)
 - [ ] Geographic load balancing
+- [ ] SSL/WSS via nginx reverse proxy
 
 ---
 
 ## Quick Start Commands
 
 ```bash
-# === VPS ===
-cd tunnel-server
-cp .env.example .env
-nano .env  # fill secrets
-./start.sh
+# === VPS (already deployed) ===
+# Check status
+curl http://155.212.221.189:8800/api/health
+ssh root@155.212.221.189 "docker logs tunnel-server --tail 20"
+
+# Restart
+ssh root@155.212.221.189 "cd /opt/eldoleado/tunnel-server && docker-compose restart"
 
 # === Phone (Termux) ===
 cd mobile-server
 cp .env.example .env
-nano .env  # fill secrets
-./start.sh
+nano .env  # fill: TUNNEL_URL=ws://155.212.221.189:8800/ws, TENANT_ID, etc.
+pip install -r requirements.txt
+python -m tunnel_proxy.proxy
 
 # === Test connection ===
-curl https://tunnel.eldoleado.ru/api/servers
-# Should show: {"servers": ["phone_1"]}
+curl http://155.212.221.189:8800/api/health
+# {"status":"ok","tunnels_connected":0,"version":"1.0.0"}
+
+# After phone connects:
+curl http://155.212.221.189:8800/api/servers
+# {"servers": ["phone_1"]}
 ```
+
+---
+
+## Current Status (2025-12-17)
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| tunnel-server | ✅ Running | 155.212.221.189:8800 |
+| mobile-server | ✅ Code ready | Needs Termux setup |
+| Android app | ✅ Protocol ready | Needs build + deploy |
+| SSL/WSS | ⬜ Pending | Need nginx reverse proxy |
