@@ -1,0 +1,26 @@
+package com.avito.android.crm_paid_cvs.view.base;
+
+import com.avito.android.crm_paid_cvs.features.cv_list.entity.a;
+import com.avito.android.crm_paid_cvs.view.base.CrmPaidCvsFragment;
+import kotlin.Metadata;
+import kotlin.jvm.internal.s0;
+
+/* compiled from: Views.kt */
+@s0
+@Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0004\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002¨\u0006\u0003"}, d2 = {"Lkotlin/G0;", "run", "()V", "com/avito/android/util/E6", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes12.dex */
+public final class f implements Runnable {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ CrmPaidCvsFragment f130757b;
+
+    public f(CrmPaidCvsFragment crmPaidCvsFragment) {
+        this.f130757b = crmPaidCvsFragment;
+    }
+
+    @Override // java.lang.Runnable
+    public final void run() {
+        CrmPaidCvsFragment.a aVar = CrmPaidCvsFragment.f130713C0;
+        this.f130757b.r5().accept(a.l.f130531a);
+    }
+}

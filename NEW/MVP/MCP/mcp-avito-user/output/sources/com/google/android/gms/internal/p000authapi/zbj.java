@@ -1,0 +1,11 @@
+package com.google.android.gms.internal.p000authapi;
+
+import android.os.IInterface;
+import com.google.android.gms.auth.api.identity.AuthorizationResult;
+import com.google.android.gms.common.api.Status;
+
+/* compiled from: com.google.android.gms:play-services-auth@@21.1.1 */
+/* loaded from: classes6.dex */
+public interface zbj extends IInterface {
+    void zbb(Status status, AuthorizationResult authorizationResult);
+}

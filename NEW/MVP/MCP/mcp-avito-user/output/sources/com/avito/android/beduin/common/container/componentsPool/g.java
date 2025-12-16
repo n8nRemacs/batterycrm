@@ -1,0 +1,25 @@
+package com.avito.android.beduin.common.container.componentsPool;
+
+import Y41.p;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: ComponentsPoolHolders.kt */
+@Metadata(d1 = {"\u0000\u0014\n\u0002\u0010\b\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"", "<anonymous parameter 0>", "Lcom/avito/android/beduin/common/container/componentsPool/k;", "<anonymous parameter 1>", "Lkotlin/G0;", "invoke", "(ILcom/avito/android/beduin/common/container/componentsPool/k;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes11.dex */
+final class g extends N implements p<Integer, k, G0> {
+    static {
+        new g();
+    }
+
+    public g() {
+        super(2);
+    }
+
+    @Override // Y41.p
+    public final /* bridge */ /* synthetic */ G0 invoke(Integer num, k kVar) {
+        num.intValue();
+        return G0.f406611a;
+    }
+}

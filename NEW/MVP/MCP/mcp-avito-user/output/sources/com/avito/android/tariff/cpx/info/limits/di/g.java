@@ -1,0 +1,31 @@
+package com.avito.android.tariff.cpx.info.limits.di;
+
+import com.avito.android.tariff.cpx.info.limits.deeplink.TariffCpxInfoLimitsLink;
+import dagger.internal.x;
+import dagger.internal.y;
+import kotlin.jvm.internal.m0;
+
+/* compiled from: TariffCpxInfoLimitsFragmentMappingsModule_ProvideTariffCpxInfoLimitsMappingFactory.java */
+@dagger.internal.e
+@x
+@y
+/* loaded from: classes4.dex */
+public final class g implements dagger.internal.h<A50.a> {
+
+    /* compiled from: TariffCpxInfoLimitsFragmentMappingsModule_ProvideTariffCpxInfoLimitsMappingFactory.java */
+    public static final class a {
+
+        /* renamed from: a, reason: collision with root package name */
+        public static final g f296594a = new g();
+    }
+
+    public static g a() {
+        return a.f296594a;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        f.f296593a.getClass();
+        return new A50.a(m0.f406844a.b(TariffCpxInfoLimitsLink.class), new com.avito.android.tariff.cpx.info.limits.d());
+    }
+}

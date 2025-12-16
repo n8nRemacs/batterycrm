@@ -1,0 +1,24 @@
+package com.avito.android.location_list;
+
+import android.view.View;
+import android.view.ViewGroup;
+import kotlin.Metadata;
+
+/* compiled from: LocationItemTwoLinesRadioButtonBlueprint.kt */
+@Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"Landroid/view/ViewGroup;", "<anonymous parameter 0>", "Landroid/view/View;", "view", "Lcom/avito/android/location_list/n0;", "invoke", "(Landroid/view/ViewGroup;Landroid/view/View;)Lcom/avito/android/location_list/n0;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* renamed from: com.avito.android.location_list.v, reason: case insensitive filesystem */
+/* loaded from: classes14.dex */
+final class C31527v extends kotlin.jvm.internal.N implements Y41.p<ViewGroup, View, n0> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public static final C31527v f182085l = new C31527v();
+
+    public C31527v() {
+        super(2);
+    }
+
+    @Override // Y41.p
+    public final n0 invoke(ViewGroup viewGroup, View view) {
+        return new n0(view);
+    }
+}

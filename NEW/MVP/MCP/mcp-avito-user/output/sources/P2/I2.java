@@ -1,0 +1,23 @@
+package p2;
+
+import kotlin.Metadata;
+
+/* compiled from: com_avito_android_auto_evidence_request_deepLink_AutoEvidenceRequestDeeplinkModule_b1006c2e.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_auto-evidence-request_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes10.dex */
+public final class I2 {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<com.avito.android.auto_evidence_request.deepLink.c> f423287a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<cv.m> f423288b;
+
+    static {
+        kotlin.jvm.internal.n0 n0Var = kotlin.jvm.internal.m0.f406844a;
+        f423287a = n0Var.b(com.avito.android.auto_evidence_request.deepLink.c.class);
+        f423288b = n0Var.b(cv.m.class);
+    }
+}

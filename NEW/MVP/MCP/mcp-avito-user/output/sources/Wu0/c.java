@@ -1,0 +1,78 @@
+package wu0;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.analytics.provider.clickstream.ParametrizedClickStreamEvent;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.s0;
+
+/* compiled from: ServiceOrderWidgetShownEvent.kt */
+@s0
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lwu0/c;", "Lcom/avito/android/analytics/provider/clickstream/a;", "_avito_service-order-widget_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public final class c implements com.avito.android.analytics.provider.clickstream.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ ParametrizedClickStreamEvent f441848b;
+
+    public c(@l String str, @l String str2, @l String str3, @l String str4, @l String str5, @l String str6, @l String str7, @l String str8, @l String str9, @l String str10, @l String str11, @l Integer num) {
+        LinkedHashMap linkedHashMap = new LinkedHashMap();
+        if (str != null) {
+            linkedHashMap.put("cid", str);
+        }
+        if (str8 != null) {
+            linkedHashMap.put("q", str8);
+        }
+        if (str2 != null) {
+            linkedHashMap.put("mcid", str2);
+        }
+        linkedHashMap.put("position", str10);
+        if (str4 != null) {
+            linkedHashMap.put("x", str4);
+        }
+        if (str6 != null) {
+            linkedHashMap.put("from_page", str6);
+        }
+        if (str5 != null) {
+            linkedHashMap.put("locationid", str5);
+        }
+        if (str7 != null) {
+            linkedHashMap.put("target_page", str7);
+        }
+        if (str3 != null) {
+            linkedHashMap.put("raw_params", str3);
+        }
+        if (str9 != null) {
+            linkedHashMap.put("button_name", str9);
+        }
+        if (str11 != null) {
+            linkedHashMap.put("from_type", str11);
+        }
+        if (num != null) {
+            linkedHashMap.put("survey_version", String.valueOf(num.intValue()));
+        }
+        G0 g02 = G0.f406611a;
+        this.f441848b = new ParametrizedClickStreamEvent(7169, 5, linkedHashMap, null, 8, null);
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    /* renamed from: getEventId */
+    public final int getF19677b() {
+        return this.f441848b.f90247b;
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    @k
+    public final Map<String, Object> getParams() {
+        return this.f441848b.f90249d;
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    /* renamed from: getVersion */
+    public final int getF19678c() {
+        return this.f441848b.f90248c;
+    }
+}

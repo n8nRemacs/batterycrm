@@ -1,0 +1,28 @@
+package com.avito.android.orderBeduinV2.mvi;
+
+import dagger.internal.x;
+import dagger.internal.y;
+
+/* compiled from: OrderReducer_Factory.java */
+@dagger.internal.e
+@x
+@y
+/* loaded from: classes15.dex */
+public final class v implements dagger.internal.h<u> {
+
+    /* compiled from: OrderReducer_Factory.java */
+    public static final class a {
+
+        /* renamed from: a, reason: collision with root package name */
+        public static final v f209932a = new v();
+    }
+
+    public static v a() {
+        return a.f209932a;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        return new u();
+    }
+}

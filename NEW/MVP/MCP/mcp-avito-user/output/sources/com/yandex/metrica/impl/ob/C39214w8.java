@@ -1,0 +1,14 @@
+package com.yandex.metrica.impl.ob;
+
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+
+/* renamed from: com.yandex.metrica.impl.ob.w8, reason: case insensitive filesystem */
+/* loaded from: classes7.dex */
+public class C39214w8 extends AbstractC38922k8 {
+    @Override // com.yandex.metrica.impl.ob.AbstractC38922k8
+    public void a(SQLiteDatabase sQLiteDatabase) throws SQLException {
+        sQLiteDatabase.execSQL("DROP TABLE IF EXISTS api_level_info");
+        sQLiteDatabase.execSQL("DROP TABLE IF EXISTS device_id_info");
+    }
+}

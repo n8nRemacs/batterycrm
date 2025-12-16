@@ -1,0 +1,26 @@
+package com.avito.android.help_center.help_center_articles;
+
+import com.yatatsu.powerwebview.rx.PowerWebViewStateChangeEvent;
+import io.reactivex.rxjava3.core.z;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: HelpCenterArticlesView.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0004\u001a\b\u0012\u0004\u0012\u00020\u00010\u0000H\n¢\u0006\u0004\b\u0002\u0010\u0003"}, d2 = {"Lio/reactivex/rxjava3/core/z;", "Lcom/yatatsu/powerwebview/rx/PowerWebViewStateChangeEvent;", "invoke", "()Lio/reactivex/rxjava3/core/z;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes13.dex */
+final class p extends N implements Y41.a<z<PowerWebViewStateChangeEvent>> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ q f161752l;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public p(q qVar) {
+        super(0);
+        this.f161752l = qVar;
+    }
+
+    @Override // Y41.a
+    public final z<PowerWebViewStateChangeEvent> invoke() {
+        return this.f161752l.f161755c.f304688b;
+    }
+}

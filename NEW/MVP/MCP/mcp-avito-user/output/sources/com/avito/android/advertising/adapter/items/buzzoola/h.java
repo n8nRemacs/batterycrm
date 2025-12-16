@@ -1,0 +1,25 @@
+package com.avito.android.advertising.adapter.items.buzzoola;
+
+import dagger.internal.x;
+import dagger.internal.y;
+import javax.inject.Provider;
+
+/* compiled from: BuzzoolaListBlueprint_Factory.java */
+@dagger.internal.e
+@y
+@x
+/* loaded from: classes11.dex */
+public final class h implements dagger.internal.h<g> {
+
+    /* renamed from: a, reason: collision with root package name */
+    public final Provider<i> f87305a;
+
+    public h(Provider<i> provider) {
+        this.f87305a = provider;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        return new g(this.f87305a.get());
+    }
+}

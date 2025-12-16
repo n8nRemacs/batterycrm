@@ -1,0 +1,6 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public interface mi4 {
+    Object a();
+}

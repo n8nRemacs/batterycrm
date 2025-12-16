@@ -1,0 +1,73 @@
+package com.avito.android.comfortable_deal.stages_transition.item.datetime;
+
+import TV0.g;
+import Y41.p;
+import Y61.k;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.R;
+import javax.inject.Inject;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: DateTimeBlueprint.kt */
+@P
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/comfortable_deal/stages_transition/item/datetime/a;", "LTV0/b;", "Lcom/avito/android/comfortable_deal/stages_transition/item/datetime/h;", "Lcom/avito/android/comfortable_deal/stages_transition/item/datetime/c;", "_avito_comfortable-deal_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes12.dex */
+public final class a implements TV0.b<h, c> {
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final f f122872a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final g.a<com.avito.konveyor.adapter.b> f122873b = new g.a<>(R.layout.stages_transition_item_date_time, C3651a.f122874l);
+
+    /* compiled from: DateTimeBlueprint.kt */
+    @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"Landroid/view/ViewGroup;", "<anonymous parameter 0>", "Landroid/view/View;", "view", "Lcom/avito/android/comfortable_deal/stages_transition/item/datetime/j;", "invoke", "(Landroid/view/ViewGroup;Landroid/view/View;)Lcom/avito/android/comfortable_deal/stages_transition/item/datetime/j;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    /* renamed from: com.avito.android.comfortable_deal.stages_transition.item.datetime.a$a, reason: collision with other inner class name */
+    public static final class C3651a extends N implements p<ViewGroup, View, j> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public static final C3651a f122874l = new C3651a();
+
+        public C3651a() {
+            super(2);
+        }
+
+        @Override // Y41.p
+        public final j invoke(ViewGroup viewGroup, View view) {
+            return new j(view);
+        }
+    }
+
+    @Inject
+    public a(@k f fVar) {
+        this.f122872a = fVar;
+    }
+
+    @Override // TV0.b
+    public final TV0.d a() {
+        return this.f122872a;
+    }
+
+    @Override // TV0.b
+    @k
+    public final g.a<com.avito.konveyor.adapter.b> b() {
+        return this.f122873b;
+    }
+
+    @Override // TV0.b
+    @k
+    /* renamed from: c */
+    public final String getF175463a() {
+        return "";
+    }
+
+    @Override // TV0.b
+    public final boolean d(@k TV0.a aVar) {
+        return aVar instanceof c;
+    }
+}

@@ -1,0 +1,18 @@
+package com.avito.android.ui;
+
+import com.avito.android.analytics.event.C28449x0;
+import kotlin.Metadata;
+
+/* compiled from: UserProfileStatusDataProviderImpl.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\b\n\u0002\b\u0003\u0010\u0005\u001a\u00020\u00022\u0006\u0010\u0001\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"Lcom/avito/android/analytics/event/x0;", "it", "", "apply", "(Lcom/avito/android/analytics/event/x0;)Ljava/lang/Integer;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes4.dex */
+final class l<T, R> implements l41.o {
+
+    /* renamed from: b, reason: collision with root package name */
+    public static final l<T, R> f304631b = new l<>();
+
+    @Override // l41.o
+    public final Object apply(Object obj) {
+        return Integer.valueOf(((C28449x0) obj).f90147a);
+    }
+}

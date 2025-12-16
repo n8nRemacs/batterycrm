@@ -1,0 +1,27 @@
+package com.avito.android.lib.design.chips;
+
+import androidx.recyclerview.widget.RecyclerView;
+import com.avito.android.lib.design.chips.Chips;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.H;
+
+/* compiled from: Chips.kt */
+@Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+final /* synthetic */ class k extends H implements Y41.p<Integer, Boolean, G0> {
+    @Override // Y41.p
+    public final G0 invoke(Integer num, Boolean bool) {
+        h hVarJ;
+        Chips.a aVar;
+        int iIntValue = num.intValue();
+        boolean zBooleanValue = bool.booleanValue();
+        Chips chips = (Chips) this.receiver;
+        RecyclerView.Adapter adapter = chips.f178693s.getAdapter();
+        t tVar = adapter instanceof t ? (t) adapter : null;
+        if (tVar != null && zBooleanValue && (hVarJ = tVar.j(iIntValue)) != null && (aVar = chips.chipsClickedListener) != null) {
+            aVar.a(hVarJ);
+        }
+        return G0.f406611a;
+    }
+}

@@ -1,0 +1,29 @@
+package com.avito.android.deeplink_factory.legacy;
+
+import android.net.Uri;
+import com.avito.android.deep_linking.links.ToastMessageLink;
+import com.avito.android.remote.model.text.TooltipAttribute;
+import kotlin.Metadata;
+import okhttp3.internal.ws.WebSocketProtocol;
+
+/* compiled from: LegacyDeepLinkFactory.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\u0010\u0000\u001a\u00020\u00012\u0006\u0010\u0002\u001a\u00020\u0003H\n¢\u0006\u0002\b\u0004"}, d2 = {"<anonymous>", "Lcom/avito/android/deep_linking/links/ToastMessageLink;", TooltipAttribute.PARAM_DEEP_LINK, "Landroid/net/Uri;", "invoke"}, k = 3, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.deeplink_factory.legacy.k, reason: case insensitive filesystem */
+/* loaded from: classes12.dex */
+final class C29736k extends kotlin.jvm.internal.N implements Y41.l<Uri, ToastMessageLink> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ E2 f134305l;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public C29736k(E2 e22) {
+        super(1);
+        this.f134305l = e22;
+    }
+
+    @Override // Y41.l
+    public final ToastMessageLink invoke(Uri uri) {
+        this.f134305l.getClass();
+        return new ToastMessageLink(Ku.i.o(uri, "message"), null, null, null, null, false, null, WebSocketProtocol.PAYLOAD_SHORT, null);
+    }
+}

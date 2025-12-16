@@ -1,0 +1,25 @@
+package com.google.android.gms.dynamite;
+
+import android.content.Context;
+import com.google.android.gms.dynamite.DynamiteModule;
+
+/* compiled from: com.google.android.gms:play-services-basement@@18.3.0 */
+/* loaded from: classes6.dex */
+final class g implements DynamiteModule.a {
+    @Override // com.google.android.gms.dynamite.DynamiteModule.a
+    public final DynamiteModule.a.b a(Context context, String str, DynamiteModule.a.InterfaceC10624a interfaceC10624a) {
+        DynamiteModule.a.b bVar = new DynamiteModule.a.b();
+        int iA2 = interfaceC10624a.a(context, str);
+        bVar.f349676a = iA2;
+        if (iA2 != 0) {
+            bVar.f349678c = -1;
+        } else {
+            int iB2 = interfaceC10624a.b(context, str, true);
+            bVar.f349677b = iB2;
+            if (iB2 != 0) {
+                bVar.f349678c = 1;
+            }
+        }
+        return bVar;
+    }
+}

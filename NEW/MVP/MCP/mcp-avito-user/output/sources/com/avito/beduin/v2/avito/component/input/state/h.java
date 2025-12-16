@@ -1,0 +1,14 @@
+package com.avito.beduin.v2.avito.component.input.state;
+
+import com.avito.beduin.v2.engine.component.G;
+import kotlin.Metadata;
+
+/* compiled from: AvitoInputStylePatchDeclaration.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001¨\u0006\u0003"}, d2 = {"Lcom/avito/beduin/v2/avito/component/input/state/h;", "Lcom/avito/beduin/v2/theme/o;", "Lcom/avito/beduin/v2/avito/component/input/state/c;", "impl_release"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes5.dex */
+public final class h extends com.avito.beduin.v2.theme.o<c> {
+    @Override // com.avito.beduin.v2.theme.d
+    public final Object a(G g12) {
+        return new c(g12.getString("themeName"), c(g12), com.avito.beduin.v2.theme.h.a(g12, "height", d.f334526b), com.avito.beduin.v2.theme.h.c(g12, "textStyle", com.avito.beduin.v2.avito.component.text.state.n.f335362b), com.avito.beduin.v2.theme.s.b(g12, "textColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledTextColor"), com.avito.beduin.v2.theme.s.b(g12, "errorTextColor"), com.avito.beduin.v2.theme.s.b(g12, "warningTextColor"), com.avito.beduin.v2.theme.s.b(g12, "placeholderColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledPlaceholderColor"), com.avito.beduin.v2.theme.s.b(g12, "errorPlaceholderColor"), com.avito.beduin.v2.theme.s.b(g12, "warningPlaceholderColor"), com.avito.beduin.v2.theme.s.b(g12, "backgroundColor"), com.avito.beduin.v2.theme.s.b(g12, "errorBackgroundColor"), com.avito.beduin.v2.theme.s.b(g12, "warningBackgroundColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledBackgroundColor"), com.avito.beduin.v2.theme.h.a(g12, "borderWidth", e.f334527b), com.avito.beduin.v2.theme.s.b(g12, "borderColor"), com.avito.beduin.v2.theme.s.b(g12, "errorBorderColor"), com.avito.beduin.v2.theme.s.b(g12, "warningBorderColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledBorderColor"), com.avito.beduin.v2.theme.s.b(g12, "iconStartColor"), com.avito.beduin.v2.theme.s.b(g12, "errorIconStartColor"), com.avito.beduin.v2.theme.s.b(g12, "warningIconStartColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledIconStartColor"), com.avito.beduin.v2.theme.s.b(g12, "iconEndColor"), com.avito.beduin.v2.theme.s.b(g12, "errorIconEndColor"), com.avito.beduin.v2.theme.s.b(g12, "warningIconEndColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledIconEndColor"), com.avito.beduin.v2.theme.h.c(g12, "spinnerStyle", com.avito.beduin.v2.avito.component.spinner.state.k.f335151b), com.avito.beduin.v2.theme.s.b(g12, "errorSpinnerColor"), com.avito.beduin.v2.theme.s.b(g12, "warningSpinnerColor"), com.avito.beduin.v2.theme.s.b(g12, "disabledSpinnerColor"), com.avito.beduin.v2.theme.s.b(g12, "cursorColor"), com.avito.beduin.v2.theme.h.a(g12, "cornerRadius", f.f334528b), com.avito.beduin.v2.theme.h.a(g12, "maxLines", g.f334529b));
+    }
+}

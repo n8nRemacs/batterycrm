@@ -1,0 +1,76 @@
+package ru.cyberity.cbr.core.data.source.applicant;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.publish.drafts.LocalPublishState;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.collections.P0;
+import kotlin.coroutines.Continuation;
+import ru.cyberity.cbr.core.data.model.DocumentType;
+import ru.cyberity.cbr.core.data.model.IdentitySide;
+import ru.cyberity.cbr.core.data.model.g;
+import ru.cyberity.cbr.core.data.model.remote.e;
+import ru.cyberity.cbr.core.data.source.applicant.remote.a0;
+import ru.cyberity.cbr.core.data.source.applicant.remote.r;
+import ru.cyberity.cbr.core.data.source.applicant.remote.t;
+import ru.cyberity.cbr.core.data.source.applicant.remote.w;
+import ru.cyberity.cbr.core.data.source.applicant.remote.x;
+import ru.cyberity.cbr.core.data.source.applicant.remote.z;
+
+/* compiled from: ApplicantRepository.kt */
+@Metadata(d1 = {"\u0000 \u0001\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0010\u000e\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010$\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\b\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0002\b\u0002\n\u0002\u0010 \n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u0012\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\bf\u0018\u00002\u00020\u0001Je\u0010\u000f\u001a\u0004\u0018\u00010\u000e2\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u0010\u0004\u001a\u00020\u00022\u0006\u0010\u0006\u001a\u00020\u00052\b\u0010\u0007\u001a\u0004\u0018\u00010\u00022\n\b\u0002\u0010\t\u001a\u0004\u0018\u00010\b2\u0014\b\u0002\u0010\u000b\u001a\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00020\n2\n\b\u0002\u0010\r\u001a\u0004\u0018\u00010\fH¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010\u0010J#\u0010\u000f\u001a\u00020\u00132\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u0010\u0012\u001a\u00020\u0011H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010\u0014J\u001b\u0010\u000f\u001a\u00020\u00152\u0006\u0010\u0003\u001a\u00020\u0002H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010\u0016J?\u0010\u000f\u001a\u00020\u001a2\u0006\u0010\u0003\u001a\u00020\u00022\u0012\u0010\u0017\u001a\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00010\n2\u000e\u0010\u0019\u001a\n\u0012\u0004\u0012\u00020\u0002\u0018\u00010\u0018H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010\u001bJM\u0010\u000f\u001a\u00020 2\u0006\u0010\u0003\u001a\u00020\u00022\b\u0010\u001c\u001a\u0004\u0018\u00010\u00022\b\u0010\u001d\u001a\u0004\u0018\u00010\u00022\f\u0010\u001f\u001a\b\u0012\u0004\u0012\u00020\u001e0\u00182\u000e\u0010\u0019\u001a\n\u0012\u0004\u0012\u00020\u0002\u0018\u00010\u0018H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010!J+\u0010\u000f\u001a\u00020$2\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u0010\"\u001a\u00020\u00022\u0006\u0010#\u001a\u00020\u0002H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010%J#\u0010\u000f\u001a\u00020$2\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u0010'\u001a\u00020&H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010(J\u001b\u0010+\u001a\u00020*2\u0006\u0010)\u001a\u00020\u0002H¦@ø\u0001\u0000¢\u0006\u0004\b+\u0010\u0016J\u001b\u0010\u000f\u001a\u00020*2\u0006\u0010-\u001a\u00020,H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u0010.J/\u0010\u000f\u001a\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00010\n2\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u00100\u001a\u00020/H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u00101J+\u00102\u001a\u0012\u0012\u0004\u0012\u00020\u0002\u0012\u0006\u0012\u0004\u0018\u00010\u0001\u0018\u00010\n2\u0006\u0010\u0003\u001a\u00020\u0002H¦@ø\u0001\u0000¢\u0006\u0004\b2\u0010\u0016J#\u0010\u000f\u001a\u0002042\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u00100\u001a\u000203H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u00105J+\u0010\u000f\u001a\u0002042\u0006\u0010\u0003\u001a\u00020\u00022\u0006\u00106\u001a\u00020\u00022\u0006\u00100\u001a\u000207H¦@ø\u0001\u0000¢\u0006\u0004\b\u000f\u00108J\u001b\u0010:\u001a\u0002092\u0006\u0010\u0003\u001a\u00020\u0002H¦@ø\u0001\u0000¢\u0006\u0004\b:\u0010\u0016ø\u0001\u0001\u0082\u0002\n\n\u0002\b\u0019\n\u0004\b!0\u0001¨\u0006;À\u0006\u0001"}, d2 = {"Lru/cyberity/cbr/core/data/source/applicant/b;", "", "", "applicantId", "country", "Ljava/io/File;", "file", "identityType", "Lru/cyberity/cbr/core/data/model/IdentitySide;", "side", "", "headers", "Lru/cyberity/cbr/core/data/model/DocumentType;", "idDocSetType", "Lru/cyberity/cbr/core/data/model/remote/k;", "a", "(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;Lru/cyberity/cbr/core/data/model/IdentitySide;Ljava/util/Map;Lru/cyberity/cbr/core/data/model/DocumentType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "", "imageId", "Lkotlin/G0;", "(Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;", "", "(Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", LocalPublishState.FIELDS, "", "unsetFields", "Lru/cyberity/cbr/core/data/model/g$a;", "(Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "email", "phone", "Lru/cyberity/cbr/core/data/model/remote/e;", "customFields", "Lru/cyberity/cbr/core/data/model/g;", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "verificationId", "code", "Lru/cyberity/cbr/core/data/source/applicant/remote/x;", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "Lru/cyberity/cbr/core/data/source/applicant/remote/w;", "requestCode", "(Ljava/lang/String;Lru/cyberity/cbr/core/data/source/applicant/remote/w;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "questionnaireId", "Lru/cyberity/cbr/core/data/source/applicant/remote/t;", "f", "Lru/cyberity/cbr/core/data/source/applicant/remote/r;", "questionnaire", "(Lru/cyberity/cbr/core/data/source/applicant/remote/r;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "", "data", "(Ljava/lang/String;[BLkotlin/coroutines/Continuation;)Ljava/lang/Object;", "e", "Lru/cyberity/cbr/core/data/source/applicant/remote/b;", "Lru/cyberity/cbr/core/data/source/applicant/remote/a0;", "(Ljava/lang/String;Lru/cyberity/cbr/core/data/source/applicant/remote/b;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "confirmationId", "Lru/cyberity/cbr/core/data/source/applicant/remote/a;", "(Ljava/lang/String;Ljava/lang/String;Lru/cyberity/cbr/core/data/source/applicant/remote/a;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "Lru/cyberity/cbr/core/data/source/applicant/remote/z;", "d", "cyberity-mobile-sdk-internal-core_release"}, k = 1, mv = {1, 7, 1})
+/* loaded from: classes9.dex */
+public interface b {
+    static /* synthetic */ Object a(b bVar, String str, String str2, File file, String str3, IdentitySide identitySide, Map map, DocumentType documentType, Continuation continuation, int i12, Object obj) {
+        if (obj == null) {
+            return bVar.a(str, str2, file, str3, (i12 & 16) != 0 ? null : identitySide, (i12 & 32) != 0 ? P0.c() : map, (i12 & 64) != 0 ? null : documentType, continuation);
+        }
+        throw new UnsupportedOperationException("Super calls with default arguments not supported in this target, function: uploadFile");
+    }
+
+    @l
+    Object a(@k String str, int i12, @k Continuation<? super G0> continuation);
+
+    @l
+    Object a(@k String str, @k String str2, @k File file, @l String str3, @l IdentitySide identitySide, @k Map<String, String> map, @l DocumentType documentType, @k Continuation<? super ru.cyberity.cbr.core.data.model.remote.k> continuation);
+
+    @l
+    Object a(@k String str, @l String str2, @l String str3, @k List<e> list, @l List<String> list2, @k Continuation<? super g> continuation);
+
+    @l
+    Object a(@k String str, @k String str2, @k String str3, @k Continuation<? super x> continuation);
+
+    @l
+    Object a(@k String str, @k String str2, @k ru.cyberity.cbr.core.data.source.applicant.remote.a aVar, @k Continuation<? super a0> continuation);
+
+    @l
+    Object a(@k String str, @k Map<String, ? extends Object> map, @l List<String> list, @k Continuation<? super g.a> continuation);
+
+    @l
+    Object a(@k String str, @k Continuation<? super Boolean> continuation);
+
+    @l
+    Object a(@k String str, @k ru.cyberity.cbr.core.data.source.applicant.remote.b bVar, @k Continuation<? super a0> continuation);
+
+    @l
+    Object a(@k String str, @k w wVar, @k Continuation<? super x> continuation);
+
+    @l
+    Object a(@k String str, @k byte[] bArr, @k Continuation<? super Map<String, ? extends Object>> continuation);
+
+    @l
+    Object a(@k r rVar, @k Continuation<? super t> continuation);
+
+    @l
+    Object d(@k String str, @k Continuation<? super z> continuation);
+
+    @l
+    Object e(@k String str, @k Continuation<? super Map<String, ? extends Object>> continuation);
+
+    @l
+    Object f(@k String str, @k Continuation<? super t> continuation);
+}

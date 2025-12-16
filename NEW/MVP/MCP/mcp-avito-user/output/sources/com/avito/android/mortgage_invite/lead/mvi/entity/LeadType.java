@@ -1,0 +1,47 @@
+package com.avito.android.mortgage_invite.lead.mvi.entity;
+
+import kotlin.Metadata;
+import kotlin.enums.a;
+import kotlin.enums.c;
+
+/* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+/* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+/* compiled from: ApplicationLeadState.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0010\n\u0000\b\u0086\u0081\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00000\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/mortgage_invite/lead/mvi/entity/LeadType;", "", "_avito_mortgage-invite_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes15.dex */
+public final class LeadType {
+
+    /* renamed from: b, reason: collision with root package name */
+    public static final LeadType f205910b;
+
+    /* renamed from: c, reason: collision with root package name */
+    public static final LeadType f205911c;
+
+    /* renamed from: d, reason: collision with root package name */
+    public static final /* synthetic */ LeadType[] f205912d;
+
+    /* renamed from: e, reason: collision with root package name */
+    public static final /* synthetic */ a f205913e;
+
+    static {
+        LeadType leadType = new LeadType("Client", 0);
+        f205910b = leadType;
+        LeadType leadType2 = new LeadType("Agent", 1);
+        f205911c = leadType2;
+        LeadType[] leadTypeArr = {leadType, leadType2};
+        f205912d = leadTypeArr;
+        f205913e = c.a(leadTypeArr);
+    }
+
+    public LeadType() {
+        throw null;
+    }
+
+    public static LeadType valueOf(String str) {
+        return (LeadType) Enum.valueOf(LeadType.class, str);
+    }
+
+    public static LeadType[] values() {
+        return (LeadType[]) f205912d.clone();
+    }
+}

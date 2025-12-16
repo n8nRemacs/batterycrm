@@ -1,0 +1,76 @@
+package com.avito.android.stories.adapter;
+
+import TV0.g;
+import Y41.p;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.R;
+import com.avito.android.stories.C35053b;
+import com.avito.android.stories.model.BannerType;
+import com.avito.android.stories.model.StoryBannerItem;
+import javax.inject.Inject;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: WideBannerSerpStoriesItemBlueprint.kt */
+@P
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/stories/adapter/l;", "LTV0/b;", "Lcom/avito/android/stories/view/a;", "Lcom/avito/android/stories/adapter/StoriesItem;", "_avito-discouraged_avito-libs_serp-core_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public final class l implements TV0.b<com.avito.android.stories.view.a, StoriesItem> {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final d f285068a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final com.avito.android.stories.view.j f285069b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.k
+    public final g.a<C35053b> f285070c = new g.a<>(R.layout.wide_banner_stories_list_item, new a());
+
+    /* compiled from: WideBannerSerpStoriesItemBlueprint.kt */
+    @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"Landroid/view/ViewGroup;", "<anonymous parameter 0>", "Landroid/view/View;", "view", "Lcom/avito/android/stories/b;", "invoke", "(Landroid/view/ViewGroup;Landroid/view/View;)Lcom/avito/android/stories/b;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class a extends N implements p<ViewGroup, View, C35053b> {
+        public a() {
+            super(2);
+        }
+
+        @Override // Y41.p
+        public final C35053b invoke(ViewGroup viewGroup, View view) {
+            return new C35053b(view, l.this.f285069b);
+        }
+    }
+
+    @Inject
+    public l(@Y61.k d dVar, @Y61.k com.avito.android.stories.view.j jVar) {
+        this.f285068a = dVar;
+        this.f285069b = jVar;
+    }
+
+    @Override // TV0.b
+    public final TV0.d a() {
+        return this.f285068a;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    public final g.a<C35053b> b() {
+        return this.f285070c;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    /* renamed from: c */
+    public final String getF175463a() {
+        return "";
+    }
+
+    @Override // TV0.b
+    public final boolean d(@Y61.k TV0.a aVar) {
+        StoryBannerItem storyBannerItem;
+        return (aVar instanceof StoriesItem) && (storyBannerItem = ((StoriesItem) aVar).f285030d) != null && storyBannerItem.f285162k == BannerType.f285149c;
+    }
+}

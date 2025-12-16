@@ -1,0 +1,28 @@
+package com.akita.compose.theme.re23.style;
+
+import kotlin.Metadata;
+
+/* compiled from: SpinnerStyles.kt */
+@androidx.compose.runtime.F3
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/akita/compose/theme/re23/style/w3;", "", "re23_release"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.akita.compose.theme.re23.style.w3, reason: case insensitive filesystem */
+/* loaded from: classes10.dex */
+public interface InterfaceC27604w3 {
+    @Y61.k
+    com.akita.compose.component.spinner.h a();
+
+    @Y61.k
+    com.akita.compose.component.spinner.h b();
+
+    @Y61.k
+    com.akita.compose.component.spinner.h c();
+
+    @Y61.k
+    com.akita.compose.component.spinner.h d();
+
+    @Y61.k
+    com.akita.compose.component.spinner.h e();
+
+    @Y61.k
+    com.akita.compose.component.spinner.h f();
+}

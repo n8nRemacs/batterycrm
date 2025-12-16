@@ -1,0 +1,27 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract /* synthetic */ class iz {
+    public static final /* synthetic */ int[] $EnumSwitchMapping$0;
+
+    static {
+        int[] iArr = new int[s10.values().length];
+        try {
+            iArr[2] = 1;
+        } catch (NoSuchFieldError unused) {
+        }
+        try {
+            iArr[3] = 2;
+        } catch (NoSuchFieldError unused2) {
+        }
+        try {
+            iArr[4] = 3;
+        } catch (NoSuchFieldError unused3) {
+        }
+        try {
+            iArr[5] = 4;
+        } catch (NoSuchFieldError unused4) {
+        }
+        $EnumSwitchMapping$0 = iArr;
+    }
+}

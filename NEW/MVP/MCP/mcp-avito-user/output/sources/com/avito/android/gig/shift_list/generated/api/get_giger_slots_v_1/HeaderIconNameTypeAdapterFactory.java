@@ -1,0 +1,51 @@
+package com.avito.android.gig.shift_list.generated.api.get_giger_slots_v_1;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.gig.shift_list.generated.api.get_giger_slots_v_1.Header;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.r;
+import com.google.gson.stream.a;
+import com.google.gson.stream.c;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: HeaderIconNameTypeAdapterFactory.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0004\u0018\u00002\u00020\u0001:\u0001\u0004B\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0005"}, d2 = {"Lcom/avito/android/gig/shift_list/generated/api/get_giger_slots_v_1/HeaderIconNameTypeAdapterFactory;", "Lcom/google/gson/r;", "<init>", "()V", "HeaderIconNameTypeAdapter", "_avito_gig_shift-list_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public final class HeaderIconNameTypeAdapterFactory implements r {
+
+    /* compiled from: HeaderIconNameTypeAdapterFactory.kt */
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001¨\u0006\u0003"}, d2 = {"Lcom/avito/android/gig/shift_list/generated/api/get_giger_slots_v_1/HeaderIconNameTypeAdapterFactory$HeaderIconNameTypeAdapter;", "Lcom/google/gson/TypeAdapter;", "Lcom/avito/android/gig/shift_list/generated/api/get_giger_slots_v_1/Header$IconName;", "_avito_gig_shift-list_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final class HeaderIconNameTypeAdapter extends TypeAdapter<Header.IconName> {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public final TypeAdapter<Header.IconName> f159470a;
+
+        public HeaderIconNameTypeAdapter(@k TypeAdapter<Header.IconName> typeAdapter) {
+            this.f159470a = typeAdapter;
+        }
+
+        @Override // com.google.gson.TypeAdapter
+        public final Header.IconName read(a aVar) {
+            Header.IconName iconName = this.f159470a.read(aVar);
+            return iconName == null ? Header.IconName.GrayInfo : iconName;
+        }
+
+        @Override // com.google.gson.TypeAdapter
+        public final void write(c cVar, Header.IconName iconName) {
+            this.f159470a.write(cVar, iconName);
+        }
+    }
+
+    @Override // com.google.gson.r
+    @l
+    public final <T> TypeAdapter<T> a(@k Gson gson, @k com.google.gson.reflect.a<T> aVar) {
+        if (L.f(aVar.getRawType(), Header.IconName.class)) {
+            return new HeaderIconNameTypeAdapter(gson.h(this, com.google.gson.reflect.a.get(Header.IconName.class)));
+        }
+        return null;
+    }
+}

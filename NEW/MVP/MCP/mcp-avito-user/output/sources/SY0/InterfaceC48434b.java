@@ -1,0 +1,11 @@
+package sy0;
+
+import com.avito.android.str_calendar.seller.calandar_parameters.di.n;
+import kotlin.Metadata;
+
+/* compiled from: StrCalendarModuleDependencies.kt */
+@Metadata(d1 = {"\u0000\u0016\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u00012\u00020\u00022\u00020\u00032\u00020\u0004¨\u0006\u0005"}, d2 = {"Lsy0/b;", "Lcom/avito/android/str_calendar/booking_calendar/di/c;", "Lsy0/a;", "Lcom/avito/android/str_calendar/seller/calendar/di/c;", "Lcom/avito/android/str_calendar/seller/calandar_parameters/di/n;", "_avito_str-calendar_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: sy0.b, reason: case insensitive filesystem */
+/* loaded from: classes4.dex */
+public interface InterfaceC48434b extends com.avito.android.str_calendar.booking_calendar.di.c, InterfaceC48433a, com.avito.android.str_calendar.seller.calendar.di.c, n {
+}

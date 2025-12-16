@@ -1,0 +1,37 @@
+package com.avito.android.advertising.analytics.events;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.advertising.analytics.events.BannerEvent;
+import com.avito.android.advertising.loaders.BannerInfo;
+import java.util.LinkedHashMap;
+import kotlin.Metadata;
+
+/* compiled from: BannerOnScreenEvent.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/advertising/analytics/events/c;", "Lcom/avito/android/advertising/analytics/events/BannerEvent;", "_avito_advertising_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class c extends BannerEvent {
+
+    /* renamed from: l, reason: collision with root package name */
+    @k
+    public final BannerInfo f87792l;
+
+    /* renamed from: m, reason: collision with root package name */
+    @l
+    public final String f87793m;
+
+    public c(@k BannerInfo bannerInfo, @k BannerPageSource bannerPageSource, @l String str, int i12, long j12, @l String str2) {
+        super(bannerInfo, bannerPageSource, str, Integer.valueOf(i12), BannerEvent.Type.f87773b, j12, 13570, 8);
+        this.f87792l = bannerInfo;
+        this.f87793m = str2;
+    }
+
+    @Override // com.avito.android.advertising.analytics.events.BannerEvent
+    public final void i(@k LinkedHashMap linkedHashMap) {
+        k(linkedHashMap, "req_num", Integer.valueOf(this.f87772k));
+        BannerInfo bannerInfo = this.f87792l;
+        k(linkedHashMap, "creative_id", bannerInfo.f87894y);
+        k(linkedHashMap, "uid", this.f87793m);
+        j(linkedHashMap, bannerInfo.f());
+    }
+}

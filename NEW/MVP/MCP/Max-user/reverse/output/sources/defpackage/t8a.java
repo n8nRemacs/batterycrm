@@ -1,0 +1,73 @@
+package defpackage;
+
+import java.util.List;
+import java.util.ListIterator;
+
+/* loaded from: classes.dex */
+public final class t8a implements ListIterator, my7 {
+    public final Object a;
+    public int b;
+
+    public t8a(int i, List list) {
+        this.a = list;
+        this.b = i - 1;
+    }
+
+    /* JADX WARN: Type inference failed for: r1v0, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator
+    public final void add(Object obj) {
+        int i = this.b + 1;
+        this.b = i;
+        this.a.add(i, obj);
+    }
+
+    /* JADX WARN: Type inference failed for: r1v0, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator, java.util.Iterator
+    public final boolean hasNext() {
+        return this.b < this.a.size() - 1;
+    }
+
+    @Override // java.util.ListIterator
+    public final boolean hasPrevious() {
+        return this.b >= 0;
+    }
+
+    /* JADX WARN: Type inference failed for: r1v0, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator, java.util.Iterator
+    public final Object next() {
+        int i = this.b + 1;
+        this.b = i;
+        return this.a.get(i);
+    }
+
+    @Override // java.util.ListIterator
+    public final int nextIndex() {
+        return this.b + 1;
+    }
+
+    /* JADX WARN: Type inference failed for: r1v1, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator
+    public final Object previous() {
+        int i = this.b;
+        this.b = i - 1;
+        return this.a.get(i);
+    }
+
+    @Override // java.util.ListIterator
+    public final int previousIndex() {
+        return this.b;
+    }
+
+    /* JADX WARN: Type inference failed for: r0v0, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator, java.util.Iterator
+    public final void remove() {
+        this.a.remove(this.b);
+        this.b--;
+    }
+
+    /* JADX WARN: Type inference failed for: r0v0, types: [java.lang.Object, java.util.List] */
+    @Override // java.util.ListIterator
+    public final void set(Object obj) {
+        this.a.set(this.b, obj);
+    }
+}

@@ -1,0 +1,34 @@
+package com.avito.android.str_booking.ui.banner;
+
+import Jx0.C14258a;
+import Vx0.AbstractC15725a;
+import Y41.r;
+import Y61.k;
+import Y61.l;
+import com.avito.android.remote.model.UniversalColor;
+import com.avito.android.str_booking.network.models.common.Prompt;
+import com.avito.android.str_booking.network.models.sections.BannerContent;
+import java.util.Map;
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: StrBookingBannerView.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/str_booking/ui/banner/i;", "LTV0/e;", "_avito_str-booking_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes4.dex */
+public interface i extends TV0.e {
+
+    /* compiled from: StrBookingBannerView.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+
+    void CW(@k c cVar);
+
+    void Ru(@l BannerContent bannerContent, @k r<? super AbstractC15725a, ? super Map<String, String>, ? super Prompt, ? super C14258a, G0> rVar);
+
+    void X7(boolean z12);
+
+    void iQ(@k c cVar, @l r<? super AbstractC15725a, ? super Map<String, String>, ? super Prompt, ? super C14258a, G0> rVar);
+
+    void pA(@k UniversalColor universalColor);
+}

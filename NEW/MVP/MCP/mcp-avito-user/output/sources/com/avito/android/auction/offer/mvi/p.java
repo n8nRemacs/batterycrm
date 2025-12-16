@@ -1,0 +1,18 @@
+package com.avito.android.auction.offer.mvi;
+
+import kotlin.Metadata;
+import lj.InterfaceC43779a;
+
+/* compiled from: ComponentsForms.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/auction/offer/mvi/p;", "", "_avito_auction_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class p {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final InterfaceC43779a f92601a;
+
+    public p(@Y61.k InterfaceC43779a interfaceC43779a) {
+        this.f92601a = interfaceC43779a;
+    }
+}

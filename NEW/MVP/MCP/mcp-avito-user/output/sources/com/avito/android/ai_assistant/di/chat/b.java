@@ -1,0 +1,41 @@
+package com.avito.android.ai_assistant.di.chat;
+
+import Nb.InterfaceC14555a;
+import com.avito.android.analytics.InterfaceC28373a;
+import com.avito.android.analytics.screens.tracker.InterfaceC28481c;
+import com.avito.android.di.InterfaceC29971h;
+import com.avito.android.util.R0;
+import kotlin.Metadata;
+
+/* compiled from: AiAssistantChatDependencies.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/ai_assistant/di/chat/b;", "Lcom/avito/android/di/h;", "_avito_ai-assistant_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@C11.c
+/* loaded from: classes11.dex */
+public interface b extends InterfaceC29971h {
+    @Y61.k
+    com.avito.android.favorite.l P0();
+
+    @Y61.k
+    InterfaceC28373a a();
+
+    @Y61.k
+    InterfaceC28481c b();
+
+    @Y61.k
+    R0 c();
+
+    @Y61.k
+    com.avito.android.util.text.a e();
+
+    @Y61.k
+    com.avito.android.clientEventBus.a h0();
+
+    @Y61.k
+    com.avito.android.lib.beduin_v2.feature.item.c j0();
+
+    @Y61.k
+    InterfaceC14555a m4();
+
+    @Y61.k
+    SK0.b p();
+}

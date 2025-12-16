@@ -1,0 +1,30 @@
+package com.avito.android.service_booking_common.di;
+
+import javax.inject.Provider;
+
+/* compiled from: ServiceBookingTimeslotItemModule_ProvideDiffCalculatorFactory.java */
+@dagger.internal.e
+@dagger.internal.y
+@dagger.internal.x
+/* loaded from: classes3.dex */
+public final class B implements dagger.internal.h<com.avito.android.recycler.data_aware.e> {
+
+    /* renamed from: a, reason: collision with root package name */
+    public final Provider<com.avito.android.recycler.data_aware.b> f276507a;
+
+    /* renamed from: b, reason: collision with root package name */
+    public final dagger.internal.u f276508b;
+
+    public B(dagger.internal.u uVar, Provider provider) {
+        this.f276507a = provider;
+        this.f276508b = uVar;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        com.avito.android.recycler.data_aware.b bVar = this.f276507a.get();
+        com.avito.android.recycler.data_aware.a aVar = (com.avito.android.recycler.data_aware.a) this.f276508b.get();
+        w.f276556a.getClass();
+        return new com.avito.android.recycler.data_aware.i(bVar, null, false, aVar, 2, null);
+    }
+}

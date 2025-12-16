@@ -1,0 +1,23 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public final class df9 extends q44 {
+    public /* synthetic */ Object X;
+    public final /* synthetic */ hf9 Y;
+    public int Z;
+    public hf9 d;
+    public hf9 o;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public df9(hf9 hf9Var, q44 q44Var) {
+        super(q44Var);
+        this.Y = hf9Var;
+    }
+
+    @Override // defpackage.ij0
+    public final Object n(Object obj) {
+        this.X = obj;
+        this.Z |= Integer.MIN_VALUE;
+        return this.Y.A(this);
+    }
+}

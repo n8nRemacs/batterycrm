@@ -1,0 +1,12 @@
+package com.google.android.gms.internal.mlkit_vision_barcode_bundled;
+
+import java.util.Iterator;
+
+/* compiled from: com.google.mlkit:barcode-scanning@@17.0.2 */
+/* loaded from: classes6.dex */
+final class zzgg implements Iterable {
+    @Override // java.lang.Iterable
+    public final Iterator iterator() {
+        return zzgh.f352516a;
+    }
+}

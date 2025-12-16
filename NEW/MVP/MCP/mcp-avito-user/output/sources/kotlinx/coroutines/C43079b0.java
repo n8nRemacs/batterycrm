@@ -1,0 +1,31 @@
+package kotlinx.coroutines;
+
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+
+/* compiled from: Builders.common.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0012\u0018\u0000*\u0004\b\u0000\u0010\u00012\b\u0012\u0004\u0012\u00028\u00000\u00022\b\u0012\u0004\u0012\u00028\u00000\u0003¨\u0006\u0004"}, d2 = {"Lkotlinx/coroutines/b0;", "T", "Lkotlinx/coroutines/a;", "Lkotlinx/coroutines/a0;", "kotlinx-coroutines-core"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: kotlinx.coroutines.b0, reason: case insensitive filesystem */
+/* loaded from: classes8.dex */
+class C43079b0<T> extends AbstractC43075a<T> implements InterfaceC43076a0<T> {
+    @Override // kotlinx.coroutines.InterfaceC43076a0
+    @Y61.l
+    public final Object F(@Y61.k Continuation<? super T> continuation) throws Throwable {
+        Object objT = T(continuation);
+        IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        return objT;
+    }
+
+    @Override // kotlinx.coroutines.InterfaceC43076a0
+    public final T i() throws Throwable {
+        Object objJ0 = j0();
+        if (objJ0 instanceof F0) {
+            throw new IllegalStateException("This job has not completed yet");
+        }
+        if (objJ0 instanceof E) {
+            throw ((E) objJ0).f410693a;
+        }
+        return (T) C43077a1.a(objJ0);
+    }
+}

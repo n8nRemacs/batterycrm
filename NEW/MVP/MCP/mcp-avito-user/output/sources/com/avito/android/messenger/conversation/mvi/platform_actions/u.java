@@ -1,0 +1,28 @@
+package com.avito.android.messenger.conversation.mvi.platform_actions;
+
+import com.avito.android.lib.deprecated_design.bottom_sheet.BottomSheet;
+import com.avito.android.util.D6;
+import kotlin.Metadata;
+
+/* compiled from: PlatformActionsView.kt */
+@Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0004\u001a\u00020\u00002\u0006\u0010\u0001\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0002\u0010\u0003"}, d2 = {"Lkotlin/G0;", "it", "accept", "(Lkotlin/G0;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes15.dex */
+final class u<T> implements l41.g {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ z f194048b;
+
+    public u(z zVar) {
+        this.f194048b = zVar;
+    }
+
+    @Override // l41.g
+    public final void accept(Object obj) {
+        z zVar = this.f194048b;
+        boolean zEquals = zVar.f194068o.getVisibility().equals(BottomSheet.d.c.f177838a);
+        BottomSheet bottomSheet = zVar.f194068o;
+        if (D6.y(bottomSheet.getF177843b()) && zEquals) {
+            bottomSheet.k2();
+        }
+    }
+}

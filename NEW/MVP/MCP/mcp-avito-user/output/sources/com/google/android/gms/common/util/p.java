@@ -1,0 +1,14 @@
+package com.google.android.gms.common.util;
+
+import java.util.regex.Pattern;
+
+/* compiled from: com.google.android.gms:play-services-basement@@18.3.0 */
+@RX0.a
+/* loaded from: classes6.dex */
+public class p {
+    static {
+        Pattern.compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
+        Pattern.compile("^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$");
+        Pattern.compile("^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$");
+    }
+}

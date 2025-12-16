@@ -1,0 +1,119 @@
+package qL0;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.deep_linking.links.DeepLink;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: VasDiscountV2Action.kt */
+@Metadata(d1 = {"\u0000\u001e\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0004\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bv\u0018\u00002\u00020\u0001:\u0004\u0002\u0003\u0004\u0005\u0082\u0001\u0004\u0006\u0007\b\t¨\u0006\n"}, d2 = {"LqL0/a;", "", "a", "b", "c", "d", "LqL0/a$a;", "LqL0/a$b;", "LqL0/a$c;", "LqL0/a$d;", "_avito_vas-discount_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: qL0.a, reason: case insensitive filesystem */
+/* loaded from: classes5.dex */
+public interface InterfaceC47317a {
+
+    /* compiled from: VasDiscountV2Action.kt */
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0086\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"LqL0/a$a;", "LqL0/a;", "_avito_vas-discount_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: qL0.a$a, reason: collision with other inner class name */
+    public static final /* data */ class C12321a implements InterfaceC47317a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public final DeepLink f429194a;
+
+        public C12321a(@k DeepLink deepLink) {
+            this.f429194a = deepLink;
+        }
+
+        public final boolean equals(@l Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            return (obj instanceof C12321a) && L.f(this.f429194a, ((C12321a) obj).f429194a);
+        }
+
+        public final int hashCode() {
+            return this.f429194a.hashCode();
+        }
+
+        @k
+        public final String toString() {
+            return com.avito.android.actions_sheet.a.v(new StringBuilder("OnActionButtonClicked(deepLink="), this.f429194a, ')');
+        }
+    }
+
+    /* compiled from: VasDiscountV2Action.kt */
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0086\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"LqL0/a$b;", "LqL0/a;", "_avito_vas-discount_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: qL0.a$b */
+    public static final /* data */ class b implements InterfaceC47317a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public final DeepLink f429195a;
+
+        public b(@k DeepLink deepLink) {
+            this.f429195a = deepLink;
+        }
+
+        public final boolean equals(@l Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            return (obj instanceof b) && L.f(this.f429195a, ((b) obj).f429195a);
+        }
+
+        public final int hashCode() {
+            return this.f429195a.hashCode();
+        }
+
+        @k
+        public final String toString() {
+            return com.avito.android.actions_sheet.a.v(new StringBuilder("OnAdvertClicked(deepLink="), this.f429195a, ')');
+        }
+    }
+
+    /* compiled from: VasDiscountV2Action.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\n\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"LqL0/a$c;", "LqL0/a;", "<init>", "()V", "_avito_vas-discount_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: qL0.a$c */
+    public static final /* data */ class c implements InterfaceC47317a {
+        static {
+            new c();
+        }
+
+        public final boolean equals(@l Object obj) {
+            return this == obj || (obj instanceof c);
+        }
+
+        public final int hashCode() {
+            return 1258323298;
+        }
+
+        @k
+        public final String toString() {
+            return "OnDismiss";
+        }
+    }
+
+    /* compiled from: VasDiscountV2Action.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\n\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"LqL0/a$d;", "LqL0/a;", "<init>", "()V", "_avito_vas-discount_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: qL0.a$d */
+    public static final /* data */ class d implements InterfaceC47317a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public static final d f429196a = new d();
+
+        public final boolean equals(@l Object obj) {
+            return this == obj || (obj instanceof d);
+        }
+
+        public final int hashCode() {
+            return 934790016;
+        }
+
+        @k
+        public final String toString() {
+            return "OnRetry";
+        }
+    }
+}

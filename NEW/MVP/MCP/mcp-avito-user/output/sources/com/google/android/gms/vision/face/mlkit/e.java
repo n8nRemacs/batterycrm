@@ -1,0 +1,6 @@
+package com.google.android.gms.vision.face.mlkit;
+
+/* compiled from: com.google.mlkit:face-detection@@16.1.6 */
+/* loaded from: classes6.dex */
+final class e {
+}

@@ -1,0 +1,55 @@
+package xyz.n.a;
+
+import Y61.k;
+
+/* loaded from: classes9.dex */
+public enum j2 {
+    INIT_SDK(0),
+    USE_SERVER(1),
+    USE_CREDENTIALS(2),
+    USE_LANGUAGE(3),
+    READY(4),
+    DEVICE_BLOCKED_BY_FEATURE_TOGGLE(5),
+    DEVICE_FEATURE_TOGGLE_CHECK_SUCCESSFULLY(6),
+    DEVICE_FEATURE_TOGGLE_CHECK_FAILURE(7),
+    CAMPAIGNS_SYNC(8),
+    CAMPAIGN_RESULT(9),
+    CAMPAIGN_STARTING(10),
+    CAMPAIGN_ATTRIBUTES(11),
+    CAMPAIGN_STARTED(12),
+    CAMPAIGN_FINISH(13),
+    CAMPAIGN_TERMINATED(14),
+    CAMPAIGN_NOT_FOUND(15),
+    CAMPAIGN_CANDIDATE_NOT_SELECTED(16),
+    CAMPAIGN_CANDIDATE_SELECTED(17),
+    CAMPAIGN_FOUND_CANDIDATES(18),
+    CAMPAIGN_GLOBAL_DELAY(19),
+    CAMPAIGN_START_COUNT(20),
+    CAMPAIGN_IS_STARTED(21),
+    CAMPAIGN_START_WITH_DELAY(22),
+    /* JADX INFO: Fake field, exist only in values array */
+    EXCEPTION(23),
+    CAMPAIGN_START_ATTRIBUTES_NOT_VALID(24),
+    CAMPAIGN_START_BAD_ATTRIBUTES_INFO(25),
+    EVENT_START(26),
+    EVENT_DONE(27),
+    EVENT_SCREENSHOT(28),
+    EVENT_FIELDS(29),
+    RETRY_TIME(30),
+    /* JADX INFO: Fake field, exist only in values array */
+    EXCEPTION(31),
+    RETRY_COUNT(32),
+    DEQUEUE_ON_ERROR(33),
+    LAUNCHED_WRONG_PROCESS(34),
+    APP_ID_IS_WRONG(35),
+    ACTIVITY_IS_NOT_PRESENT(36);
+
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final String f442781b;
+
+    j2(int i12) {
+        this.f442781b = str;
+    }
+}

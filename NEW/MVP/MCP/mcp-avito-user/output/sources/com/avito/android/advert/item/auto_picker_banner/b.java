@@ -1,0 +1,38 @@
+package com.avito.android.advert.item.auto_picker_banner;
+
+import androidx.compose.runtime.internal.P;
+import com.avito.android.analytics.InterfaceC28373a;
+import com.avito.android.di.module.InterfaceC30174s;
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: AutoPickerBannerAnalytics.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/advert/item/auto_picker_banner/b;", "Lcom/avito/android/advert/item/auto_picker_banner/a;", "_avito_advert-details_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes10.dex */
+public final class b implements a {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final InterfaceC28373a f72976a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final String f72977b;
+
+    @Inject
+    public b(@Y61.k InterfaceC28373a interfaceC28373a, @Y61.k @InterfaceC30174s String str) {
+        this.f72976a = interfaceC28373a;
+        this.f72977b = str;
+    }
+
+    @Override // com.avito.android.advert.item.auto_picker_banner.a
+    public final void a() {
+        this.f72976a.c(new m(this.f72977b));
+    }
+
+    @Override // com.avito.android.advert.item.auto_picker_banner.a
+    public final void b() {
+        this.f72976a.c(new l(this.f72977b));
+    }
+}

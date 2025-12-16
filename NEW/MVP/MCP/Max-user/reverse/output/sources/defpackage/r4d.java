@@ -1,0 +1,55 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class r4d {
+    public static int oneme_settings_twofa_change_email_title = 2131954207;
+    public static int oneme_settings_twofa_change_password_title = 2131954208;
+    public static int oneme_settings_twofa_check_password_subtitle = 2131954209;
+    public static int oneme_settings_twofa_check_password_title = 2131954210;
+    public static int oneme_settings_twofa_configuration_change_email_success = 2131954211;
+    public static int oneme_settings_twofa_configuration_change_password_success = 2131954212;
+    public static int oneme_settings_twofa_configuration_description = 2131954213;
+    public static int oneme_settings_twofa_configuration_disable_success = 2131954214;
+    public static int oneme_settings_twofa_configuration_disable_warning_negative_action = 2131954215;
+    public static int oneme_settings_twofa_configuration_disable_warning_positive_action = 2131954216;
+    public static int oneme_settings_twofa_configuration_disable_warning_subtitle = 2131954217;
+    public static int oneme_settings_twofa_configuration_disable_warning_title = 2131954218;
+    public static int oneme_settings_twofa_configuration_set_email_success = 2131954219;
+    public static int oneme_settings_twofa_creation_email_empty_confirmation_description = 2131954220;
+    public static int oneme_settings_twofa_creation_email_empty_confirmation_email_action = 2131954221;
+    public static int oneme_settings_twofa_creation_email_empty_confirmation_skip_action = 2131954222;
+    public static int oneme_settings_twofa_creation_email_empty_confirmation_title = 2131954223;
+    public static int oneme_settings_twofa_creation_email_hint = 2131954224;
+    public static int oneme_settings_twofa_creation_email_title = 2131954225;
+    public static int oneme_settings_twofa_creation_email_verify_resend_code = 2131954226;
+    public static int oneme_settings_twofa_creation_email_verify_resend_code_timer = 2131954227;
+    public static int oneme_settings_twofa_creation_email_verify_subtitle = 2131954228;
+    public static int oneme_settings_twofa_creation_email_verify_title = 2131954229;
+    public static int oneme_settings_twofa_creation_hint_input_hint = 2131954230;
+    public static int oneme_settings_twofa_creation_hint_subtitle = 2131954231;
+    public static int oneme_settings_twofa_creation_hint_title = 2131954232;
+    public static int oneme_settings_twofa_creation_new_email_description = 2131954233;
+    public static int oneme_settings_twofa_creation_new_email_title = 2131954234;
+    public static int oneme_settings_twofa_creation_new_password_title = 2131954235;
+    public static int oneme_settings_twofa_creation_other_action = 2131954236;
+    public static int oneme_settings_twofa_creation_password_action = 2131954237;
+    public static int oneme_settings_twofa_creation_password_first_hint = 2131954238;
+    public static int oneme_settings_twofa_creation_password_second_hint = 2131954239;
+    public static int oneme_settings_twofa_creation_password_title = 2131954240;
+    public static int oneme_settings_twofa_creation_toolbar_steps = 2131954241;
+    public static int oneme_settings_twofa_delete_user_title = 2131954242;
+    public static int oneme_settings_twofa_delete_user_undo_delete_action = 2131954243;
+    public static int oneme_settings_twofa_delete_user_undo_delete_success = 2131954244;
+    public static int oneme_settings_twofa_disable_password_title = 2131954245;
+    public static int oneme_settings_twofa_error_passwords_equals = 2131954246;
+    public static int oneme_settings_twofa_forget_password_action = 2131954247;
+    public static int oneme_settings_twofa_lost_email_action = 2131954248;
+    public static int oneme_settings_twofa_onboarding_description = 2131954249;
+    public static int oneme_settings_twofa_onboarding_set_password = 2131954250;
+    public static int oneme_settings_twofa_onboarding_success_description = 2131954251;
+    public static int oneme_settings_twofa_onboarding_success_title = 2131954252;
+    public static int oneme_settings_twofa_onboarding_title = 2131954253;
+    public static int oneme_settings_twofa_restore_delete_user_confirmation_action = 2131954254;
+    public static int oneme_settings_twofa_restore_delete_user_confirmation_description = 2131954255;
+    public static int oneme_settings_twofa_restore_delete_user_confirmation_title = 2131954256;
+}

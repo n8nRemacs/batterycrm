@@ -1,0 +1,23 @@
+package com.avito.android.location.find;
+
+import android.app.Activity;
+import io.reactivex.rxjava3.internal.operators.single.C42006d;
+import kotlin.Metadata;
+
+/* compiled from: FusedLocationInteractor.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/location/find/r;", "", "_avito_user-location_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public interface r {
+
+    /* compiled from: FusedLocationInteractor.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+
+    @Y61.k
+    C42006d a(boolean z12);
+
+    void d(@Y61.k Activity activity);
+
+    boolean e();
+}

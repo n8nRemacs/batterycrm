@@ -1,0 +1,63 @@
+package androidx.metrics.performance;
+
+import android.os.Handler;
+import android.view.FrameMetrics;
+import android.view.Window;
+import j.X;
+import java.util.ArrayList;
+import java.util.Iterator;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+import kotlin.jvm.internal.s0;
+
+/* compiled from: JankStatsApi24Impl.kt */
+@s0
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\b\u0003\u0018\u00002\u00020\u0001:\u0001\u0002¨\u0006\u0003"}, d2 = {"Landroidx/metrics/performance/a;", "Landroid/view/Window$OnFrameMetricsAvailableListener;", "a", "metrics-performance_release"}, k = 1, mv = {1, 8, 0}, xi = 48)
+@X
+/* loaded from: classes.dex */
+final class a implements Window.OnFrameMetricsAvailableListener {
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final C1866a f52690b = new C1866a(null);
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.l
+    public static Handler f52691c;
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final ArrayList f52692a;
+
+    /* compiled from: JankStatsApi24Impl.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Landroidx/metrics/performance/a$a;", "", "<init>", "()V", "metrics-performance_release"}, k = 1, mv = {1, 8, 0}, xi = 48)
+    /* renamed from: androidx.metrics.performance.a$a, reason: collision with other inner class name */
+    public static final class C1866a {
+        public /* synthetic */ C1866a(C42822w c42822w) {
+            this();
+        }
+
+        public C1866a() {
+        }
+    }
+
+    public a(@Y61.k ArrayList arrayList) {
+        this.f52692a = arrayList;
+    }
+
+    @Override // android.view.Window.OnFrameMetricsAvailableListener
+    public final void onFrameMetricsAvailable(@Y61.l Window window, @Y61.l FrameMetrics frameMetrics, int i12) {
+        synchronized (this) {
+            try {
+                Iterator it = this.f52692a.iterator();
+                while (it.hasNext()) {
+                    ((Window.OnFrameMetricsAvailableListener) it.next()).onFrameMetricsAvailable(window, frameMetrics, i12);
+                }
+                G0 g02 = G0.f406611a;
+            } catch (Throwable th2) {
+                throw th2;
+            }
+        }
+    }
+}

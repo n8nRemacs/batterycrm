@@ -1,0 +1,40 @@
+package com.avito.android.hotel_available_rooms.konveyor.text;
+
+import Y41.l;
+import Y61.k;
+import com.avito.android.hotel_available_rooms.konveyor.text.TextData;
+import javax.inject.Inject;
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: HotelRoomTextPresenter.kt */
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0000\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/hotel_available_rooms/konveyor/text/e;", "LTV0/d;", "Lcom/avito/android/hotel_available_rooms/konveyor/text/g;", "Lcom/avito/android/hotel_available_rooms/konveyor/text/HotelRoomTextItem;", "_avito_hotel-available-rooms_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public final class e implements TV0.d<g, HotelRoomTextItem> {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final l<JI.a, G0> f163081b;
+
+    /* JADX WARN: Multi-variable type inference failed */
+    @Inject
+    public e(@k l<? super JI.a, G0> lVar) {
+        this.f163081b = lVar;
+    }
+
+    @Override // TV0.d
+    public final void O5(TV0.e eVar, TV0.a aVar, int i12) {
+        g gVar = (g) eVar;
+        HotelRoomTextItem hotelRoomTextItem = (HotelRoomTextItem) aVar;
+        gVar.g1(new c(this));
+        gVar.a(new d(hotelRoomTextItem, this));
+        TextData textData = hotelRoomTextItem.f163068c;
+        if (textData instanceof TextData.AttributedTextData) {
+            gVar.m0(((TextData.AttributedTextData) textData).f163069b);
+        } else if (textData instanceof TextData.SimpleTextData) {
+            TextData.SimpleTextData simpleTextData = (TextData.SimpleTextData) textData;
+            gVar.J2(simpleTextData.f163072c);
+            gVar.y(simpleTextData.f163071b);
+        }
+    }
+}

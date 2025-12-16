@@ -1,0 +1,48 @@
+package qQ;
+
+import Y61.k;
+import com.avito.android.remote.R0;
+import dagger.internal.f;
+import dagger.internal.h;
+import dagger.internal.t;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+
+/* compiled from: CvVisibilityApi_Module_ProvideCvVisibilityApiFactory.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001:\u0001\u0003¨\u0006\u0004"}, d2 = {"LqQ/c;", "Ldagger/internal/h;", "LqQ/a;", "a", "_avito_job_cv-visibility_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public final class c implements h<InterfaceC47330a> {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public static final a f429271b = new a(null);
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final f f429272a;
+
+    /* compiled from: CvVisibilityApi_Module_ProvideCvVisibilityApiFactory.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"LqQ/c$a;", "", "<init>", "()V", "_avito_job_cv-visibility_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+        public /* synthetic */ a(C42822w c42822w) {
+            this();
+        }
+
+        public a() {
+        }
+    }
+
+    public c(@k f fVar) {
+        this.f429272a = fVar;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        R0 r02 = (R0) this.f429272a.get();
+        f429271b.getClass();
+        C47331b.f429270a.getClass();
+        InterfaceC47330a interfaceC47330a = (InterfaceC47330a) r02.create(InterfaceC47330a.class);
+        t.b(interfaceC47330a, "Cannot return null from a non-@Nullable @Provides method");
+        return interfaceC47330a;
+    }
+}

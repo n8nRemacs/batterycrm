@@ -1,0 +1,19 @@
+package com.avito.android.user_advert.advert.items.geo_references;
+
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: GeoReferenceItemPresenter.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0018\u00002\u00020\u0001B\t\b\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/user_advert/advert/items/geo_references/e;", "Lcom/avito/android/user_advert/advert/items/geo_references/d;", "<init>", "()V", "_avito_user-advert_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes4.dex */
+public final class e implements d {
+    @Inject
+    public e() {
+    }
+
+    @Override // TV0.d
+    public final void O5(TV0.e eVar, TV0.a aVar, int i12) {
+        a aVar2 = (a) aVar;
+        ((g) eVar).Jy(aVar2.f309449d, aVar2.f309450e, aVar2.f309448c);
+    }
+}

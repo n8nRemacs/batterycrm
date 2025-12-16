@@ -1,0 +1,10 @@
+package com.avito.android.publish.select;
+
+import dagger.internal.x;
+
+/* compiled from: SelectFragment_MembersInjector.java */
+@dagger.internal.e
+@x
+/* loaded from: classes16.dex */
+public final class f implements h31.g<SelectFragment> {
+}

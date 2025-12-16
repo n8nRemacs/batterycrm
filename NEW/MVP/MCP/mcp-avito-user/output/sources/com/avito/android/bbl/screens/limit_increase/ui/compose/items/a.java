@@ -1,0 +1,23 @@
+package com.avito.android.bbl.screens.limit_increase.ui.compose.items;
+
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: LimitIncreaseBanner.kt */
+@Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+final class a extends N implements Y41.a<G0> {
+    static {
+        new a();
+    }
+
+    public a() {
+        super(0);
+    }
+
+    @Override // Y41.a
+    public final /* bridge */ /* synthetic */ G0 invoke() {
+        return G0.f406611a;
+    }
+}

@@ -1,0 +1,56 @@
+package defpackage;
+
+import kotlin.coroutines.Continuation;
+
+/* loaded from: classes.dex */
+public final class wp2 extends dtf implements sm6 {
+    public /* synthetic */ Object X;
+    public final /* synthetic */ yq2 Y;
+    public final /* synthetic */ String Z;
+    public int o;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public wp2(yq2 yq2Var, String str, Continuation continuation) {
+        super(2, continuation);
+        this.Y = yq2Var;
+        this.Z = str;
+    }
+
+    @Override // defpackage.sm6
+    public final Object invoke(Object obj, Object obj2) {
+        return ((wp2) l((f84) obj, (Continuation) obj2)).n(qqg.a);
+    }
+
+    @Override // defpackage.ij0
+    public final Continuation l(Object obj, Continuation continuation) {
+        wp2 wp2Var = new wp2(this.Y, this.Z, continuation);
+        wp2Var.X = obj;
+        return wp2Var;
+    }
+
+    @Override // defpackage.ij0
+    public final Object n(Object obj) {
+        int i = this.o;
+        if (i == 0) {
+            g8j.b(obj);
+            f84 f84Var = (f84) this.X;
+            yq2 yq2Var = this.Y;
+            s78 s78Var = (s78) yq2Var.H0.getValue();
+            String str = this.Z;
+            x26 x26VarF = s78Var.f(str);
+            a40 a40Var = new a40(yq2Var, str, f84Var, 4);
+            this.o = 1;
+            Object objD = x26VarF.d(a40Var, this);
+            g84 g84Var = g84.a;
+            if (objD == g84Var) {
+                return g84Var;
+            }
+        } else {
+            if (i != 1) {
+                throw new IllegalStateException("call to 'resume' before 'invoke' with coroutine");
+            }
+            g8j.b(obj);
+        }
+        return qqg.a;
+    }
+}

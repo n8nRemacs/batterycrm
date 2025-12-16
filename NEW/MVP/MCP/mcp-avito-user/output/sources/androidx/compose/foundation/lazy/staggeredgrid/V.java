@@ -1,0 +1,17 @@
+package androidx.compose.foundation.lazy.staggeredgrid;
+
+import kotlin.Metadata;
+
+/* compiled from: LazyStaggeredGridItemScope.kt */
+@androidx.compose.runtime.internal.P
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÀ\u0002\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Landroidx/compose/foundation/lazy/staggeredgrid/V;", "Landroidx/compose/foundation/lazy/staggeredgrid/U;", "<init>", "()V", "foundation_release"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes.dex */
+public final class V implements U {
+
+    /* renamed from: a, reason: collision with root package name */
+    public static final /* synthetic */ int f29581a = 0;
+
+    static {
+        new V();
+    }
+}

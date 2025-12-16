@@ -1,0 +1,26 @@
+package com.avito.android.credits;
+
+/* loaded from: classes12.dex */
+public final class A {
+
+    public static final class a {
+    }
+
+    public static final class b {
+    }
+
+    public static final class c {
+    }
+
+    public static final class d {
+    }
+
+    public static final class e {
+    }
+
+    public static final class f {
+    }
+
+    public static final class g {
+    }
+}

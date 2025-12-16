@@ -1,0 +1,54 @@
+package com.avito.android.publish.input_imei.mvi;
+
+import com.avito.android.analytics.screens.tracker.ScreenPerformanceTracker;
+import com.avito.android.publish.input_imei.mvi.entity.InputImeiInternalAction;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+import le0.C43742c;
+import le0.InterfaceC43740a;
+import le0.InterfaceC43741b;
+
+/* compiled from: InputImeiFeatureBuilder.kt */
+@Metadata(d1 = {"\u0000\u001c\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\b\u001a\u00020\u0005*\u001a\u0012\u0004\u0012\u00020\u0001\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u0003\u0012\u0004\u0012\u00020\u00040\u0000H\n¢\u0006\u0004\b\u0006\u0010\u0007"}, d2 = {"Lcom/avito/android/arch/mvi/q;", "Lle0/a;", "Lcom/avito/android/publish/input_imei/mvi/entity/InputImeiInternalAction;", "Lle0/c;", "Lle0/b;", "Lkotlin/G0;", "invoke", "(Lcom/avito/android/arch/mvi/q;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes16.dex */
+final class o extends N implements Y41.l<com.avito.android.arch.mvi.q<InterfaceC43740a, InputImeiInternalAction, C43742c, InterfaceC43741b>, G0> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ m f236446l;
+
+    /* renamed from: m, reason: collision with root package name */
+    public final /* synthetic */ f f236447m;
+
+    /* renamed from: n, reason: collision with root package name */
+    public final /* synthetic */ ScreenPerformanceTracker f236448n;
+
+    /* renamed from: o, reason: collision with root package name */
+    public final /* synthetic */ t f236449o;
+
+    /* renamed from: p, reason: collision with root package name */
+    public final /* synthetic */ r f236450p;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public o(m mVar, f fVar, ScreenPerformanceTracker screenPerformanceTracker, t tVar, r rVar) {
+        super(1);
+        this.f236446l = mVar;
+        this.f236447m = fVar;
+        this.f236448n = screenPerformanceTracker;
+        this.f236449o = tVar;
+        this.f236450p = rVar;
+    }
+
+    @Override // Y41.l
+    public final G0 invoke(com.avito.android.arch.mvi.q<InterfaceC43740a, InputImeiInternalAction, C43742c, InterfaceC43741b> qVar) {
+        com.avito.android.arch.mvi.q<InterfaceC43740a, InputImeiInternalAction, C43742c, InterfaceC43741b> qVar2 = qVar;
+        qVar2.f92008d = this.f236446l;
+        qVar2.f92009e = this.f236447m;
+        qVar2.f92011g = new com.avito.android.analytics.screens.mvi.o(this.f236448n, this.f236449o);
+        qVar2.f92010f = this.f236450p;
+        AW.f fVar = AW.f.f434a;
+        com.avito.android.arch.mvi.log.g.f91991f.getClass();
+        qVar2.c(fVar, com.avito.android.arch.mvi.log.g.f91993h);
+        return G0.f406611a;
+    }
+}

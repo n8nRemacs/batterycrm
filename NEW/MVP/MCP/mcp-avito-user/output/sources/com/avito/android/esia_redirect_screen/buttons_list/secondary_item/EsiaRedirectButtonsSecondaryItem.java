@@ -1,0 +1,116 @@
+package com.avito.android.esia_redirect_screen.buttons_list.secondary_item;
+
+import Y61.k;
+import Y61.l;
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.compose.foundation.H;
+import com.avito.android.deep_linking.links.DeepLink;
+import com.avito.android.esia_redirect_screen.buttons_list.EsiaRedirectButtonsBaseItem;
+import com.avito.conveyor_item.a;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+import kotlin.jvm.internal.L;
+
+/* compiled from: EsiaRedirectButtonsSecondaryItem.kt */
+@K51.d
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0081\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/esia_redirect_screen/buttons_list/secondary_item/EsiaRedirectButtonsSecondaryItem;", "Lcom/avito/android/esia_redirect_screen/buttons_list/EsiaRedirectButtonsBaseItem;", "_avito_gig_esia-redirect-screen_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public final /* data */ class EsiaRedirectButtonsSecondaryItem implements EsiaRedirectButtonsBaseItem {
+
+    @k
+    public static final Parcelable.Creator<EsiaRedirectButtonsSecondaryItem> CREATOR = new a();
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final String f147958b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @k
+    public final String f147959c;
+
+    /* renamed from: d, reason: collision with root package name */
+    @k
+    public final DeepLink f147960d;
+
+    /* compiled from: EsiaRedirectButtonsSecondaryItem.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a implements Parcelable.Creator<EsiaRedirectButtonsSecondaryItem> {
+        @Override // android.os.Parcelable.Creator
+        public final EsiaRedirectButtonsSecondaryItem createFromParcel(Parcel parcel) {
+            return new EsiaRedirectButtonsSecondaryItem(parcel.readString(), parcel.readString(), (DeepLink) parcel.readParcelable(EsiaRedirectButtonsSecondaryItem.class.getClassLoader()));
+        }
+
+        @Override // android.os.Parcelable.Creator
+        public final EsiaRedirectButtonsSecondaryItem[] newArray(int i12) {
+            return new EsiaRedirectButtonsSecondaryItem[i12];
+        }
+    }
+
+    public EsiaRedirectButtonsSecondaryItem(@k String str, @k String str2, @k DeepLink deepLink) {
+        this.f147958b = str;
+        this.f147959c = str2;
+        this.f147960d = deepLink;
+    }
+
+    @Override // android.os.Parcelable
+    public final int describeContents() {
+        return 0;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof EsiaRedirectButtonsSecondaryItem)) {
+            return false;
+        }
+        EsiaRedirectButtonsSecondaryItem esiaRedirectButtonsSecondaryItem = (EsiaRedirectButtonsSecondaryItem) obj;
+        return L.f(this.f147958b, esiaRedirectButtonsSecondaryItem.f147958b) && L.f(this.f147959c, esiaRedirectButtonsSecondaryItem.f147959c) && L.f(this.f147960d, esiaRedirectButtonsSecondaryItem.f147960d);
+    }
+
+    @Override // com.avito.android.esia_redirect_screen.buttons_list.EsiaRedirectButtonsBaseItem
+    @k
+    /* renamed from: getDeepLink, reason: from getter */
+    public final DeepLink getF147960d() {
+        return this.f147960d;
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF117182c() {
+        return a.C10492a.a(this);
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @k
+    /* renamed from: getStringId, reason: from getter */
+    public final String getF281466b() {
+        return this.f147959c;
+    }
+
+    public final int hashCode() {
+        return this.f147960d.hashCode() + H.d(this.f147958b.hashCode() * 31, 31, this.f147959c);
+    }
+
+    @k
+    public final String toString() {
+        StringBuilder sb2 = new StringBuilder("EsiaRedirectButtonsSecondaryItem(title=");
+        sb2.append(this.f147958b);
+        sb2.append(", stringId=");
+        sb2.append(this.f147959c);
+        sb2.append(", deepLink=");
+        return com.avito.android.actions_sheet.a.v(sb2, this.f147960d, ')');
+    }
+
+    @Override // android.os.Parcelable
+    public final void writeToParcel(@k Parcel parcel, int i12) {
+        parcel.writeString(this.f147958b);
+        parcel.writeString(this.f147959c);
+        parcel.writeParcelable(this.f147960d, i12);
+    }
+
+    public /* synthetic */ EsiaRedirectButtonsSecondaryItem(String str, String str2, DeepLink deepLink, int i12, C42822w c42822w) {
+        this(str, (i12 & 2) != 0 ? str : str2, deepLink);
+    }
+}

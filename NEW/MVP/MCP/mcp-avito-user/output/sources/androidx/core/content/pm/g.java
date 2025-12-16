@@ -1,0 +1,14 @@
+package androidx.core.content.pm;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+
+/* compiled from: ShortcutManagerCompat.java */
+/* loaded from: classes.dex */
+class g extends BroadcastReceiver {
+    @Override // android.content.BroadcastReceiver
+    public final void onReceive(Context context, Intent intent) {
+        throw null;
+    }
+}

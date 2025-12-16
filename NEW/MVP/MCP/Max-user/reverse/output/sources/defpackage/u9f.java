@@ -1,0 +1,27 @@
+package defpackage;
+
+import java.util.ArrayList;
+import java.util.Objects;
+
+/* loaded from: classes2.dex */
+public final class u9f implements oud {
+    public ArrayList a;
+
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || u9f.class != obj.getClass()) {
+            return false;
+        }
+        return this.a.equals(((u9f) obj).a);
+    }
+
+    public final int hashCode() {
+        return Objects.hash(this.a);
+    }
+
+    public final String toString() {
+        return "StalledParticipantsNotification{participantIds=" + this.a + '}';
+    }
+}

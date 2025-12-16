@@ -1,0 +1,234 @@
+package I40;
+
+import Y41.p;
+import Y61.k;
+import Y61.l;
+import com.avito.android.beduin.common.component.input.BeduinInputModel;
+import kotlin.C42729a0;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+import kotlin.coroutines.jvm.internal.ContinuationImpl;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+import kotlin.coroutines.jvm.internal.SuspendLambda;
+import kotlin.jvm.internal.s0;
+import kotlinx.coroutines.flow.InterfaceC43160i;
+import kotlinx.coroutines.flow.InterfaceC43172j;
+
+/* compiled from: Emitters.kt */
+@s0
+@Metadata(d1 = {"\u0000\u0010\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0004\u001a\u00020\u0003\"\u0004\b\u0000\u0010\u0000\"\u0004\b\u0001\u0010\u0001*\b\u0012\u0004\u0012\u00028\u00010\u0002H\u008a@¢\u0006\u0004\b\u0004\u0010\u0005¨\u0006\u0006"}, d2 = {"T", "R", "Lkotlinx/coroutines/flow/j;", "Lkotlin/G0;", "<anonymous>", "(Lkotlinx/coroutines/flow/j;)V", "kotlinx/coroutines/flow/b0"}, k = 3, mv = {1, 9, 0})
+@DebugMetadata(c = "com.avito.android.onboarding.util.FlowExtKt$awaitEach$$inlined$transform$1", f = "FlowExt.kt", i = {}, l = {36}, m = "invokeSuspend", n = {}, s = {})
+/* loaded from: classes15.dex */
+public final class a extends SuspendLambda implements p<InterfaceC43172j<Object>, Continuation<? super G0>, Object> {
+
+    /* renamed from: q, reason: collision with root package name */
+    public int f7916q;
+
+    /* renamed from: r, reason: collision with root package name */
+    public /* synthetic */ Object f7917r;
+
+    /* renamed from: s, reason: collision with root package name */
+    public final /* synthetic */ InterfaceC43160i f7918s;
+
+    /* renamed from: t, reason: collision with root package name */
+    public final /* synthetic */ InterfaceC43160i[] f7919t;
+
+    /* compiled from: Emitters.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\f\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0007\u001a\u00020\u0003\"\u0004\b\u0000\u0010\u0000\"\u0004\b\u0001\u0010\u00012\u0006\u0010\u0002\u001a\u00028\u0000H\u008a@¢\u0006\u0004\b\u0004\u0010\u0005¨\u0006\u0006"}, d2 = {"T", "R", "value", "Lkotlin/G0;", "emit", "(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", "kotlinx/coroutines/flow/b0$a", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    /* renamed from: I40.a$a, reason: collision with other inner class name */
+    public static final class C0444a<T> implements InterfaceC43172j {
+
+        /* renamed from: b, reason: collision with root package name */
+        public final /* synthetic */ InterfaceC43172j<T> f7920b;
+
+        /* renamed from: c, reason: collision with root package name */
+        public final /* synthetic */ InterfaceC43160i[] f7921c;
+
+        /* compiled from: Emitters.kt */
+        @s0
+        @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+        @DebugMetadata(c = "com.avito.android.onboarding.util.FlowExtKt$awaitEach$$inlined$transform$1$1", f = "FlowExt.kt", i = {0, 0, 0}, l = {219, 222}, m = "emit", n = {"element", "$this$awaitEach_u24lambda_u241", "$this$forEach$iv"}, s = {"L$0", "L$1", "L$2"})
+        /* renamed from: I40.a$a$a, reason: collision with other inner class name */
+        public static final class C0445a extends ContinuationImpl {
+
+            /* renamed from: q, reason: collision with root package name */
+            public /* synthetic */ Object f7922q;
+
+            /* renamed from: r, reason: collision with root package name */
+            public int f7923r;
+
+            /* renamed from: t, reason: collision with root package name */
+            public Object f7925t;
+
+            /* renamed from: u, reason: collision with root package name */
+            public InterfaceC43172j f7926u;
+
+            /* renamed from: v, reason: collision with root package name */
+            public Object[] f7927v;
+
+            /* renamed from: w, reason: collision with root package name */
+            public int f7928w;
+
+            /* renamed from: x, reason: collision with root package name */
+            public int f7929x;
+
+            public C0445a(Continuation continuation) {
+                super(continuation);
+            }
+
+            @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+            @l
+            public final Object invokeSuspend(@k Object obj) {
+                this.f7922q = obj;
+                this.f7923r |= BeduinInputModel.MIN_TEXT_VERSION;
+                return C0444a.this.emit(null, this);
+            }
+        }
+
+        public C0444a(InterfaceC43172j interfaceC43172j, InterfaceC43160i[] interfaceC43160iArr) {
+            this.f7921c = interfaceC43160iArr;
+            this.f7920b = interfaceC43172j;
+        }
+
+        /* JADX WARN: Multi-variable type inference failed */
+        /* JADX WARN: Removed duplicated region for block: B:18:0x0056  */
+        /* JADX WARN: Removed duplicated region for block: B:22:0x006d  */
+        /* JADX WARN: Removed duplicated region for block: B:7:0x0013  */
+        /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:19:0x0068 -> B:21:0x006b). Please report as a decompilation issue!!! */
+        @Override // kotlinx.coroutines.flow.InterfaceC43172j
+        @Y61.l
+        /*
+            Code decompiled incorrectly, please refer to instructions dump.
+            To view partially-correct add '--show-bad-code' argument
+        */
+        public final java.lang.Object emit(T r10, @Y61.k kotlin.coroutines.Continuation<? super kotlin.G0> r11) {
+            /*
+                r9 = this;
+                boolean r0 = r11 instanceof I40.a.C0444a.C0445a
+                if (r0 == 0) goto L13
+                r0 = r11
+                I40.a$a$a r0 = (I40.a.C0444a.C0445a) r0
+                int r1 = r0.f7923r
+                r2 = -2147483648(0xffffffff80000000, float:-0.0)
+                r3 = r1 & r2
+                if (r3 == 0) goto L13
+                int r1 = r1 - r2
+                r0.f7923r = r1
+                goto L18
+            L13:
+                I40.a$a$a r0 = new I40.a$a$a
+                r0.<init>(r11)
+            L18:
+                java.lang.Object r11 = r0.f7922q
+                java.lang.Object r1 = kotlin.coroutines.intrinsics.IntrinsicsKt.getCOROUTINE_SUSPENDED()
+                int r2 = r0.f7923r
+                r3 = 2
+                r4 = 1
+                if (r2 == 0) goto L45
+                if (r2 == r4) goto L34
+                if (r2 != r3) goto L2c
+                kotlin.C42729a0.b(r11)
+                goto L7d
+            L2c:
+                java.lang.IllegalStateException r10 = new java.lang.IllegalStateException
+                java.lang.String r11 = "call to 'resume' before 'invoke' with coroutine"
+                r10.<init>(r11)
+                throw r10
+            L34:
+                int r10 = r0.f7929x
+                int r2 = r0.f7928w
+                java.lang.Object[] r5 = r0.f7927v
+                kotlinx.coroutines.flow.i[] r5 = (kotlinx.coroutines.flow.InterfaceC43160i[]) r5
+                kotlinx.coroutines.flow.j r6 = r0.f7926u
+                java.lang.Object r7 = r0.f7925t
+                kotlin.C42729a0.b(r11)
+                r11 = r7
+                goto L6b
+            L45:
+                kotlin.C42729a0.b(r11)
+                kotlinx.coroutines.flow.i[] r11 = r9.f7921c
+                int r2 = r11.length
+                kotlinx.coroutines.flow.j<T> r5 = r9.f7920b
+                r6 = 0
+                r8 = r11
+                r11 = r10
+                r10 = r2
+                r2 = r6
+                r6 = r5
+                r5 = r8
+            L54:
+                if (r2 >= r10) goto L6d
+                r7 = r5[r2]
+                r0.f7925t = r11
+                r0.f7926u = r6
+                r0.f7927v = r5
+                r0.f7928w = r2
+                r0.f7929x = r10
+                r0.f7923r = r4
+                java.lang.Object r7 = kotlinx.coroutines.flow.C43175k.y(r7, r0)
+                if (r7 != r1) goto L6b
+                return r1
+            L6b:
+                int r2 = r2 + r4
+                goto L54
+            L6d:
+                r10 = 0
+                r0.f7925t = r10
+                r0.f7926u = r10
+                r0.f7927v = r10
+                r0.f7923r = r3
+                java.lang.Object r10 = r6.emit(r11, r0)
+                if (r10 != r1) goto L7d
+                return r1
+            L7d:
+                kotlin.G0 r10 = kotlin.G0.f406611a
+                return r10
+            */
+            throw new UnsupportedOperationException("Method not decompiled: I40.a.C0444a.emit(java.lang.Object, kotlin.coroutines.Continuation):java.lang.Object");
+        }
+    }
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public a(InterfaceC43160i interfaceC43160i, Continuation continuation, InterfaceC43160i[] interfaceC43160iArr) {
+        super(2, continuation);
+        this.f7918s = interfaceC43160i;
+        this.f7919t = interfaceC43160iArr;
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @k
+    public final Continuation<G0> create(@l Object obj, @k Continuation<?> continuation) {
+        a aVar = new a(this.f7918s, continuation, this.f7919t);
+        aVar.f7917r = obj;
+        return aVar;
+    }
+
+    @Override // Y41.p
+    public final Object invoke(InterfaceC43172j<Object> interfaceC43172j, Continuation<? super G0> continuation) {
+        return ((a) create(interfaceC43172j, continuation)).invokeSuspend(G0.f406611a);
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @l
+    public final Object invokeSuspend(@k Object obj) {
+        Object coroutine_suspended = IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        int i12 = this.f7916q;
+        if (i12 == 0) {
+            C42729a0.b(obj);
+            C0444a c0444a = new C0444a((InterfaceC43172j) this.f7917r, this.f7919t);
+            this.f7916q = 1;
+            if (this.f7918s.collect(c0444a, this) == coroutine_suspended) {
+                return coroutine_suspended;
+            }
+        } else {
+            if (i12 != 1) {
+                throw new IllegalStateException("call to 'resume' before 'invoke' with coroutine");
+            }
+            C42729a0.b(obj);
+        }
+        return G0.f406611a;
+    }
+}

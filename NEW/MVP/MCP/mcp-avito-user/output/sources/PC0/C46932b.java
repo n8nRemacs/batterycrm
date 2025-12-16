@@ -1,0 +1,41 @@
+package pC0;
+
+import Ju.AbstractC14250d;
+import Ju.InterfaceC14249c;
+import Y61.k;
+import android.os.Bundle;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.deep_linking.links.DeepLink;
+import com.avito.android.deeplink_handler.view.a;
+import com.avito.android.tariff_cpt.configure.levels.deeplink.TariffCptConfigureLevelsLink;
+import ev.AbstractC40162b;
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: TariffCptConfigureLevelsHandler.kt */
+@P
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001¨\u0006\u0003"}, d2 = {"LpC0/b;", "Lev/b;", "Lcom/avito/android/tariff_cpt/configure/levels/deeplink/TariffCptConfigureLevelsLink;", "_avito_tariff-cpt_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: pC0.b, reason: case insensitive filesystem */
+/* loaded from: classes4.dex */
+public final class C46932b extends AbstractC40162b<TariffCptConfigureLevelsLink> {
+
+    /* renamed from: d, reason: collision with root package name */
+    @k
+    public final a.InterfaceC4053a f428267d;
+
+    /* renamed from: e, reason: collision with root package name */
+    @k
+    public final hC0.c f428268e;
+
+    @Inject
+    public C46932b(@k a.InterfaceC4053a interfaceC4053a, @k hC0.c cVar) {
+        this.f428267d = interfaceC4053a;
+        this.f428268e = cVar;
+    }
+
+    @Override // ev.AbstractC40162b
+    public final InterfaceC14249c.b c(Bundle bundle, DeepLink deepLink, String str) {
+        this.f428267d.R(this.f428268e.d(((TariffCptConfigureLevelsLink) deepLink).f297821b), com.avito.android.deeplink_handler.view.b.f134588l);
+        return AbstractC14250d.c.f9171c;
+    }
+}

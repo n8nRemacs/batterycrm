@@ -1,0 +1,99 @@
+package io.reactivex.rxjava3.internal.operators.flowable;
+
+import io.reactivex.rxjava3.core.AbstractC41777j;
+import io.reactivex.rxjava3.core.InterfaceC41782o;
+import io.reactivex.rxjava3.internal.subscriptions.SubscriptionHelper;
+import n41.InterfaceC44186c;
+import s41.C47998a;
+
+/* compiled from: FlowableSingleMaybe.java */
+/* renamed from: io.reactivex.rxjava3.internal.operators.flowable.y1, reason: case insensitive filesystem */
+/* loaded from: classes8.dex */
+public final class C41903y1<T> extends io.reactivex.rxjava3.core.q<T> implements InterfaceC44186c<T> {
+
+    /* compiled from: FlowableSingleMaybe.java */
+    /* renamed from: io.reactivex.rxjava3.internal.operators.flowable.y1$a */
+    public static final class a<T> implements InterfaceC41782o<T>, io.reactivex.rxjava3.disposables.d {
+
+        /* renamed from: b, reason: collision with root package name */
+        public org.reactivestreams.e f403107b;
+
+        /* renamed from: c, reason: collision with root package name */
+        public boolean f403108c;
+
+        /* renamed from: d, reason: collision with root package name */
+        public T f403109d;
+
+        public a() {
+            throw null;
+        }
+
+        @Override // org.reactivestreams.d
+        public final void K(org.reactivestreams.e eVar) {
+            if (SubscriptionHelper.i(this.f403107b, eVar)) {
+                this.f403107b = eVar;
+                throw null;
+            }
+        }
+
+        @Override // io.reactivex.rxjava3.disposables.d
+        public final void dispose() {
+            this.f403107b.cancel();
+            this.f403107b = SubscriptionHelper.f404813b;
+        }
+
+        @Override // org.reactivestreams.d
+        public final void e() {
+            if (this.f403108c) {
+                return;
+            }
+            this.f403108c = true;
+            this.f403107b = SubscriptionHelper.f404813b;
+            this.f403109d = null;
+            throw null;
+        }
+
+        @Override // io.reactivex.rxjava3.disposables.d
+        /* renamed from: i */
+        public final boolean getF318621e() {
+            return this.f403107b == SubscriptionHelper.f404813b;
+        }
+
+        @Override // org.reactivestreams.d
+        public final void onError(Throwable th2) {
+            if (this.f403108c) {
+                C47998a.b(th2);
+            } else {
+                this.f403108c = true;
+                this.f403107b = SubscriptionHelper.f404813b;
+                throw null;
+            }
+        }
+
+        @Override // org.reactivestreams.d
+        public final void onNext(T t12) {
+            if (this.f403108c) {
+                return;
+            }
+            if (this.f403109d == null) {
+                this.f403109d = t12;
+                return;
+            }
+            this.f403108c = true;
+            this.f403107b.cancel();
+            this.f403107b = SubscriptionHelper.f404813b;
+            new IllegalArgumentException("Sequence contains more than one element!");
+            throw null;
+        }
+    }
+
+    @Override // n41.InterfaceC44186c
+    public final AbstractC41777j<T> f() {
+        return new C41900x1(null, false);
+    }
+
+    @Override // io.reactivex.rxjava3.core.q
+    public final void o(io.reactivex.rxjava3.core.t<? super T> tVar) {
+        throw null;
+    }
+}

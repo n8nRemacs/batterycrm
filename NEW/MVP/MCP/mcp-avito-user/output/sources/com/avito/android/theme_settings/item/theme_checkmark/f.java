@@ -1,0 +1,36 @@
+package com.avito.android.theme_settings.item.theme_checkmark;
+
+import Y61.k;
+import jE0.InterfaceC42241a;
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: ThemeCheckmarkItemPresenter.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0018\u00002\u00020\u0001B\t\b\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/theme_settings/item/theme_checkmark/f;", "Lcom/avito/android/theme_settings/item/theme_checkmark/d;", "<init>", "()V", "_avito_settings_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes4.dex */
+public final class f implements d {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final com.jakewharton.rxrelay3.c<InterfaceC42241a.AbstractC11555a> f301360b = new com.jakewharton.rxrelay3.c<>();
+
+    @Inject
+    public f() {
+    }
+
+    @Override // TV0.d
+    public final void O5(TV0.e eVar, TV0.a aVar, int i12) {
+        h hVar = (h) eVar;
+        a aVar2 = (a) aVar;
+        hVar.setImage(aVar2.f301352d);
+        hVar.setTitle(aVar2.f301351c);
+        hVar.setChecked(aVar2.f301353e.f301368b);
+        hVar.a(new e(this, aVar2));
+    }
+
+    @Override // jE0.InterfaceC42241a
+    /* renamed from: getActions, reason: from getter */
+    public final com.jakewharton.rxrelay3.c getF301346b() {
+        return this.f301360b;
+    }
+}

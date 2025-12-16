@@ -1,0 +1,64 @@
+package io.ktor.client.plugins.websocket;
+
+import io.ktor.websocket.AbstractC41723i;
+import io.ktor.websocket.Z;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.channels.K0;
+import kotlinx.coroutines.channels.M0;
+
+/* compiled from: ClientSessions.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0000\u0018\u00002\u00020\u00012\u00020\u0002¨\u0006\u0003"}, d2 = {"Lio/ktor/client/plugins/websocket/y;", "Lio/ktor/client/plugins/websocket/w;", "Lio/ktor/websocket/Z;", "ktor-client-core"}, k = 1, mv = {1, 8, 0}, xi = 48)
+/* loaded from: classes8.dex */
+public final class y implements w, Z {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ Z f399685b;
+
+    public y(@Y61.k Z z12) {
+        this.f399685b = z12;
+    }
+
+    @Override // io.ktor.websocket.Z
+    @Y61.l
+    public final Object B(@Y61.k AbstractC41723i.b bVar, @Y61.k Continuation continuation) {
+        return this.f399685b.B(bVar, continuation);
+    }
+
+    @Override // io.ktor.websocket.Z
+    @Y61.k
+    public final K0<AbstractC41723i> D() {
+        return this.f399685b.D();
+    }
+
+    @Override // io.ktor.websocket.Z
+    @Y61.l
+    public final Object G(@Y61.k Continuation<? super G0> continuation) {
+        return this.f399685b.G(continuation);
+    }
+
+    @Override // kotlinx.coroutines.T
+    @Y61.k
+    /* renamed from: getCoroutineContext */
+    public final CoroutineContext getF115043e() {
+        return this.f399685b.getF115043e();
+    }
+
+    @Override // io.ktor.websocket.Z
+    @Y61.k
+    public final M0<AbstractC41723i> j() {
+        return this.f399685b.j();
+    }
+
+    @Override // io.ktor.websocket.Z
+    public final long p() {
+        return this.f399685b.p();
+    }
+
+    @Override // io.ktor.websocket.Z
+    public final void y(long j12) {
+        this.f399685b.y(j12);
+    }
+}

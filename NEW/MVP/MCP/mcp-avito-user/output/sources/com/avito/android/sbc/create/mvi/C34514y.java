@@ -1,0 +1,92 @@
+package com.avito.android.sbc.create.mvi;
+
+import Uo0.e;
+import com.avito.android.analytics.InterfaceC28373a;
+import com.avito.android.sbc.create.mvi.entity.CreateDiscountDispatchState;
+import kotlin.C42729a0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+import kotlin.coroutines.jvm.internal.Boxing;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+import kotlin.coroutines.jvm.internal.SuspendFunction;
+import kotlin.coroutines.jvm.internal.SuspendLambda;
+import kotlin.text.C43066x;
+import kotlinx.coroutines.flow.InterfaceC43172j;
+
+/* compiled from: PrivateStateHolder.kt */
+@kotlin.jvm.internal.s0
+@Metadata(d1 = {"\u0000\u0010\n\u0002\b\u0004\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0006\u001a\u00020\u0005\"\b\b\u0000\u0010\u0000*\u00028\u0001\"\u0004\b\u0001\u0010\u0001\"\u0004\b\u0002\u0010\u0002\"\u0004\b\u0003\u0010\u0003*\b\u0012\u0004\u0012\u00028\u00030\u0004H\u008a@¢\u0006\u0004\b\u0006\u0010\u0007¨\u0006\b"}, d2 = {"T", "ReadAccessContextT", "ValueT", "R", "Lkotlinx/coroutines/flow/j;", "Lkotlin/G0;", "<anonymous>", "(Lkotlinx/coroutines/flow/j;)V", "com/avito/android/arch/mvi/utils/s"}, k = 3, mv = {1, 9, 0})
+@DebugMetadata(c = "com.avito.android.sbc.create.mvi.CreateDiscountDispatchActor$handle$$inlined$flowWithAccessToStateFromOverloaded$13", f = "CreateDiscountDispatchActor.kt", i = {}, l = {}, m = "invokeSuspend", n = {}, s = {})
+/* renamed from: com.avito.android.sbc.create.mvi.y, reason: case insensitive filesystem */
+/* loaded from: classes3.dex */
+public final class C34514y extends SuspendLambda implements Y41.p<InterfaceC43172j<? super Uo0.f>, Continuation<? super kotlin.G0>, Object> {
+
+    /* renamed from: q, reason: collision with root package name */
+    public /* synthetic */ Object f259934q;
+
+    /* renamed from: r, reason: collision with root package name */
+    public final /* synthetic */ com.avito.android.arch.mvi.utils.o f259935r;
+
+    /* renamed from: s, reason: collision with root package name */
+    public final /* synthetic */ e.C15552g f259936s;
+
+    /* renamed from: t, reason: collision with root package name */
+    public final /* synthetic */ C34469a f259937t;
+
+    /* compiled from: PrivateStateHolder.kt */
+    @kotlin.jvm.internal.s0
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: com.avito.android.sbc.create.mvi.y$a */
+    public /* synthetic */ class a extends kotlin.jvm.internal.H implements Y41.p<Uo0.f, Continuation<? super kotlin.G0>, Object>, SuspendFunction {
+        @Override // Y41.p
+        public final Object invoke(Uo0.f fVar, Continuation<? super kotlin.G0> continuation) {
+            return ((InterfaceC43172j) this.receiver).emit(fVar, continuation);
+        }
+    }
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public C34514y(com.avito.android.arch.mvi.utils.o oVar, e.C15552g c15552g, Continuation continuation, C34469a c34469a) {
+        super(2, continuation);
+        this.f259935r = oVar;
+        this.f259936s = c15552g;
+        this.f259937t = c34469a;
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.k
+    public final Continuation<kotlin.G0> create(@Y61.l Object obj, @Y61.k Continuation<?> continuation) {
+        C34514y c34514y = new C34514y(this.f259935r, this.f259936s, continuation, this.f259937t);
+        c34514y.f259934q = obj;
+        return c34514y;
+    }
+
+    @Override // Y41.p
+    public final Object invoke(InterfaceC43172j<? super Uo0.f> interfaceC43172j, Continuation<? super kotlin.G0> continuation) {
+        return ((C34514y) create(interfaceC43172j, continuation)).invokeSuspend(kotlin.G0.f406611a);
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.l
+    public final Object invokeSuspend(@Y61.k Object obj) {
+        IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        C42729a0.b(obj);
+        InterfaceC43172j interfaceC43172j = (InterfaceC43172j) this.f259934q;
+        Object value = this.f259935r.f92114c.getValue();
+        new a(2, interfaceC43172j, InterfaceC43172j.class, "emit", "emit(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;", 0);
+        CreateDiscountDispatchState createDiscountDispatchState = (CreateDiscountDispatchState) value;
+        if (createDiscountDispatchState instanceof CreateDiscountDispatchState.DiscountDispatchDataLoaded) {
+            CreateDiscountDispatchState.DiscountDispatchDataLoaded discountDispatchDataLoaded = (CreateDiscountDispatchState.DiscountDispatchDataLoaded) createDiscountDispatchState;
+            CreateDiscountDispatchState.DiscountDispatchDataLoaded.i iVar = discountDispatchDataLoaded.f259623c;
+            CreateDiscountDispatchState.DiscountDispatchDataLoaded.i.b bVar = iVar instanceof CreateDiscountDispatchState.DiscountDispatchDataLoaded.i.b ? (CreateDiscountDispatchState.DiscountDispatchDataLoaded.i.b) iVar : null;
+            if (bVar != null && !bVar.f259715f) {
+                C34469a c34469a = this.f259937t;
+                InterfaceC28373a interfaceC28373a = c34469a.f259546g;
+                String strA = c34469a.f259549j.a();
+                Boolean boolBoxBoolean = discountDispatchDataLoaded.f259619D.f259687c ? Boxing.boxBoolean(com.avito.android.sbc.create.mvi.entity.a.a(discountDispatchDataLoaded.f259618C)) : null;
+                interfaceC28373a.c(new Oo0.p(strA, c34469a.f259554o, Boxing.boxLong(discountDispatchDataLoaded.f259622b), c34469a.D(), boolBoxBoolean, discountDispatchDataLoaded.f259627g, C43066x.z0(discountDispatchDataLoaded.f259640t), discountDispatchDataLoaded.f259623c.getF259734b(), c34469a.C()));
+            }
+        }
+        return kotlin.G0.f406611a;
+    }
+}

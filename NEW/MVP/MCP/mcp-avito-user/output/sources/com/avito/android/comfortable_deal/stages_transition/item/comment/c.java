@@ -1,0 +1,62 @@
+package com.avito.android.comfortable_deal.stages_transition.item.comment;
+
+import Y61.k;
+import Y61.l;
+import androidx.appcompat.app.r;
+import androidx.compose.runtime.C22026a;
+import androidx.compose.runtime.internal.P;
+import com.avito.conveyor_item.a;
+import eq.InterfaceC40145a;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: CommentItem.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0087\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/comfortable_deal/stages_transition/item/comment/c;", "Leq/a;", "_avito_comfortable-deal_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes12.dex */
+public final /* data */ class c implements InterfaceC40145a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @l
+    public final String f122861b;
+
+    public c(@l String str) {
+        this.f122861b = str;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof c)) {
+            return false;
+        }
+        c cVar = (c) obj;
+        cVar.getClass();
+        return L.f(this.f122861b, cVar.f122861b);
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF95530b() {
+        return a.C10492a.a(this);
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @k
+    /* renamed from: getStringId */
+    public final String getF116595b() {
+        return "comment";
+    }
+
+    public final int hashCode() {
+        int i12 = r.i(-602415743, 31, true);
+        String str = this.f122861b;
+        return i12 + (str == null ? 0 : str.hashCode());
+    }
+
+    @k
+    public final String toString() {
+        return C22026a.c(new StringBuilder("CommentItem(stringId=comment, labelIsVisible=true, value="), this.f122861b, ')');
+    }
+}

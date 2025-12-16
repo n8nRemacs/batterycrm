@@ -1,0 +1,46 @@
+package ef;
+
+import Y61.k;
+import Y61.l;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.deep_linking.links.DeepLink;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: AutoSelectConfirmationBottomSheetAction.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\n\u0002\u0018\u0002\n\u0000\bv\u0018\u00002\u00020\u0001:\u0001\u0002\u0082\u0001\u0001\u0003¨\u0006\u0004"}, d2 = {"Lef/a;", "", "a", "Lef/a$a;", "_avito_auto-select_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: ef.a, reason: case insensitive filesystem */
+/* loaded from: classes11.dex */
+public interface InterfaceC40098a {
+
+    /* compiled from: AutoSelectConfirmationBottomSheetAction.kt */
+    @P
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0087\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lef/a$a;", "Lef/a;", "_avito_auto-select_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: ef.a$a, reason: collision with other inner class name */
+    public static final /* data */ class C11099a implements InterfaceC40098a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public final DeepLink f395307a;
+
+        public C11099a(@k DeepLink deepLink) {
+            this.f395307a = deepLink;
+        }
+
+        public final boolean equals(@l Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            return (obj instanceof C11099a) && L.f(this.f395307a, ((C11099a) obj).f395307a);
+        }
+
+        public final int hashCode() {
+            return this.f395307a.hashCode();
+        }
+
+        @k
+        public final String toString() {
+            return com.avito.android.actions_sheet.a.v(new StringBuilder("DeepLinkClicked(uri="), this.f395307a, ')');
+        }
+    }
+}

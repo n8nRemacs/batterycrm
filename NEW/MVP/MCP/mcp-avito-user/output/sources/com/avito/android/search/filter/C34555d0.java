@@ -1,0 +1,10 @@
+package com.avito.android.search.filter;
+
+import kotlin.Metadata;
+
+/* compiled from: FiltersInteractor.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_search_filter_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.search.filter.d0, reason: case insensitive filesystem */
+/* loaded from: classes3.dex */
+public final class C34555d0 {
+}

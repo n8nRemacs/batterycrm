@@ -1,0 +1,10 @@
+package com.avito.android.item_map.view;
+
+import kotlin.Metadata;
+
+/* compiled from: BottomSheetDataAdapter.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_item-map_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.item_map.view.c, reason: case insensitive filesystem */
+/* loaded from: classes14.dex */
+public final class C31066c {
+}

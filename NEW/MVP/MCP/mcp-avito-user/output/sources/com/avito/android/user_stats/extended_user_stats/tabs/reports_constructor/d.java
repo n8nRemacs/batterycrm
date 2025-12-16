@@ -1,0 +1,37 @@
+package com.avito.android.user_stats.extended_user_stats.tabs.reports_constructor;
+
+import RJ0.a;
+import Y41.p;
+import android.os.Bundle;
+import android.os.Parcelable;
+import com.avito.android.user_stats.extended_user_stats.StatsConfig;
+import com.avito.android.user_stats.extended_user_stats.tabs.reports_constructor.ConstructorTabFragment;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: ConstructorTabFragment.kt */
+@Metadata(d1 = {"\u0000\u0014\n\u0002\u0010\u000e\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"", "<anonymous parameter 0>", "Landroid/os/Bundle;", "bundle", "Lkotlin/G0;", "invoke", "(Ljava/lang/String;Landroid/os/Bundle;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes5.dex */
+final class d extends N implements p<String, Bundle, G0> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ ConstructorTabFragment f317898l;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public d(ConstructorTabFragment constructorTabFragment) {
+        super(2);
+        this.f317898l = constructorTabFragment;
+    }
+
+    @Override // Y41.p
+    public final G0 invoke(String str, Bundle bundle) {
+        Parcelable parcelable = bundle.getParcelable("requestConfig");
+        if (parcelable == null) {
+            throw new IllegalArgumentException("Required value was null.");
+        }
+        ConstructorTabFragment.a aVar = ConstructorTabFragment.f317866y0;
+        this.f317898l.q5().accept(new a.w((StatsConfig) parcelable));
+        return G0.f406611a;
+    }
+}

@@ -1,0 +1,52 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class j7b {
+    public static final int a = bzc.chat_screen_message_send_error_delete_action;
+    public static final int b = bzc.chat_screen_message_send_error_resend_action_multi;
+    public static final int c = bzc.chat_screen_message_send_error_resend_action_solo;
+    public static final int d = bzc.messages_list_chat_description_view_id;
+    public static final int e = bzc.messages_list_chat_description_view_type;
+    public static final int f = bzc.messages_list_confirm_cancel;
+    public static final int g = bzc.messages_list_confirm_complaint_extremism;
+    public static final int h = bzc.messages_list_confirm_complaint_fake;
+    public static final int i = bzc.messages_list_confirm_complaint_other;
+    public static final int j = bzc.messages_list_confirm_complaint_porno;
+    public static final int k = bzc.messages_list_confirm_complaint_spam;
+    public static final int l = bzc.messages_list_confirm_complaint_threat;
+    public static final int m = bzc.messages_list_confirm_delete;
+    public static final int n = bzc.messages_list_confirm_delete_for_all;
+    public static final int o = bzc.messages_list_confirm_pin_with_notify;
+    public static final int p = bzc.messages_list_confirm_pin_without_notify;
+    public static final int q = bzc.messages_list_context_action_copy;
+    public static final int r = bzc.messages_list_context_action_copy_photo;
+    public static final int s = bzc.messages_list_context_action_delete;
+    public static final int t = bzc.messages_list_context_action_delete_for_all;
+    public static final int u = bzc.messages_list_context_action_edit;
+    public static final int v = bzc.messages_list_context_action_forward;
+    public static final int w = bzc.messages_list_context_action_mark_as_unread;
+    public static final int x = bzc.messages_list_context_action_pin;
+    public static final int y = bzc.messages_list_context_action_reply;
+    public static final int z = bzc.messages_list_context_action_report;
+    public static final int A = bzc.messages_list_context_action_save_to_gallery;
+    public static final int B = bzc.messages_list_context_action_select;
+    public static final int C = bzc.messages_list_context_action_unpin;
+    public static final int D = bzc.messages_list_context_actions_view_type;
+    public static final int E = bzc.messages_list_context_content_container;
+    public static final int F = bzc.messages_list_context_member_view_type;
+    public static final int G = bzc.messages_list_context_members_member_cell;
+    public static final int H = bzc.messages_list_context_members_member_reaction;
+    public static final int I = bzc.messages_list_context_reactions_container;
+    public static final int J = bzc.messages_list_item_alias;
+    public static final int K = bzc.messages_list_item_date;
+    public static final int L = bzc.messages_list_item_keyboard_buttons;
+    public static final int M = bzc.messages_list_item_single_image;
+    public static final int N = bzc.messages_list_item_text;
+    public static final int O = bzc.messages_list_item_title;
+    public static final int P = bzc.messages_list_item_video_duration;
+    public static final int Q = bzc.messages_list_recycler_view;
+    public static final int R = bzc.messages_list_scroll_btn;
+    public static final int S = bzc.messages_list_share_contact_for_bot_action;
+    public static final int T = bzc.messages_list_warning_link_subtitle;
+    public static final int U = bzc.messages_list_warning_link_title;
+}

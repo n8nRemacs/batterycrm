@@ -1,0 +1,128 @@
+package com.avito.android.gig_shift_action.mvi;
+
+import com.avito.android.gig.shift_action_impl.generated.api.qr_scan_v_2.Reason;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+import kotlin.jvm.internal.L;
+
+/* compiled from: GigShiftActionScreenAction.kt */
+@Metadata(d1 = {"\u0000\u001e\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0006\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b0\u0018\u00002\u00020\u0001:\u0004\u0004\u0005\u0006\u0007B\t\b\u0004¢\u0006\u0004\b\u0002\u0010\u0003\u0082\u0001\u0004\b\t\n\u000b¨\u0006\f"}, d2 = {"Lcom/avito/android/gig_shift_action/mvi/a;", "", "<init>", "()V", "a", "b", "c", "d", "Lcom/avito/android/gig_shift_action/mvi/a$a;", "Lcom/avito/android/gig_shift_action/mvi/a$b;", "Lcom/avito/android/gig_shift_action/mvi/a$c;", "Lcom/avito/android/gig_shift_action/mvi/a$d;", "_avito_gig_shift-action_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public abstract class a {
+
+    /* compiled from: GigShiftActionScreenAction.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\n\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/gig_shift_action/mvi/a$a;", "Lcom/avito/android/gig_shift_action/mvi/a;", "<init>", "()V", "_avito_gig_shift-action_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: com.avito.android.gig_shift_action.mvi.a$a, reason: collision with other inner class name */
+    public static final /* data */ class C4692a extends a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @Y61.k
+        public static final C4692a f160462a = new C4692a();
+
+        public C4692a() {
+            super(null);
+        }
+
+        public final boolean equals(@Y61.l Object obj) {
+            return this == obj || (obj instanceof C4692a);
+        }
+
+        public final int hashCode() {
+            return -1344690898;
+        }
+
+        @Y61.k
+        public final String toString() {
+            return "ClickOnPrimaryButton";
+        }
+    }
+
+    /* compiled from: GigShiftActionScreenAction.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\n\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/gig_shift_action/mvi/a$b;", "Lcom/avito/android/gig_shift_action/mvi/a;", "<init>", "()V", "_avito_gig_shift-action_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final /* data */ class b extends a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @Y61.k
+        public static final b f160463a = new b();
+
+        public b() {
+            super(null);
+        }
+
+        public final boolean equals(@Y61.l Object obj) {
+            return this == obj || (obj instanceof b);
+        }
+
+        public final int hashCode() {
+            return 1935883424;
+        }
+
+        @Y61.k
+        public final String toString() {
+            return "ClickOnSecondaryButton";
+        }
+    }
+
+    /* compiled from: GigShiftActionScreenAction.kt */
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0086\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/gig_shift_action/mvi/a$c;", "Lcom/avito/android/gig_shift_action/mvi/a;", "_avito_gig_shift-action_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final /* data */ class c extends a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @Y61.k
+        public final Reason f160464a;
+
+        public c(@Y61.k Reason reason) {
+            super(null);
+            this.f160464a = reason;
+        }
+
+        public final boolean equals(@Y61.l Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            return (obj instanceof c) && L.f(this.f160464a, ((c) obj).f160464a);
+        }
+
+        public final int hashCode() {
+            return this.f160464a.hashCode();
+        }
+
+        @Y61.k
+        public final String toString() {
+            return "OnReasonChecked(item=" + this.f160464a + ')';
+        }
+    }
+
+    /* compiled from: GigShiftActionScreenAction.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\n\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/gig_shift_action/mvi/a$d;", "Lcom/avito/android/gig_shift_action/mvi/a;", "<init>", "()V", "_avito_gig_shift-action_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final /* data */ class d extends a {
+
+        /* renamed from: a, reason: collision with root package name */
+        @Y61.k
+        public static final d f160465a = new d();
+
+        public d() {
+            super(null);
+        }
+
+        public final boolean equals(@Y61.l Object obj) {
+            return this == obj || (obj instanceof d);
+        }
+
+        public final int hashCode() {
+            return 344934810;
+        }
+
+        @Y61.k
+        public final String toString() {
+            return "Refresh";
+        }
+    }
+
+    public /* synthetic */ a(C42822w c42822w) {
+        this();
+    }
+
+    public a() {
+    }
+}

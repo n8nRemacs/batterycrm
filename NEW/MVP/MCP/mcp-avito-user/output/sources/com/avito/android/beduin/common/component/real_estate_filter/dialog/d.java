@@ -1,0 +1,51 @@
+package com.avito.android.beduin.common.component.real_estate_filter.dialog;
+
+import TV0.g;
+import Y61.k;
+import com.avito.android.R;
+import com.avito.android.beduin.common.component.select_option.dialog.OptionItem;
+import com.avito.android.beduin.common.component.select_option.dialog.e;
+import com.avito.android.beduin.common.component.select_option.dialog.f;
+import kotlin.Metadata;
+
+/* compiled from: BeduinRealEstateSelectionOptionItemBlueprint.kt */
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/beduin/common/component/real_estate_filter/dialog/d;", "LTV0/b;", "Lcom/avito/android/beduin/common/component/select_option/dialog/f;", "Lcom/avito/android/beduin/common/component/select_option/dialog/OptionItem;", "_avito_beduin_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class d implements TV0.b<f, OptionItem> {
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final e f102311a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final g.a<com.avito.android.beduin.common.component.select_option.dialog.g> f102312b = new g.a<>(R.layout.beduin_real_estate_select_option_item, c.f102310l);
+
+    public d(@k e eVar) {
+        this.f102311a = eVar;
+    }
+
+    @Override // TV0.b
+    @k
+    public final TV0.d<f, OptionItem> a() {
+        return this.f102311a;
+    }
+
+    @Override // TV0.b
+    @k
+    public final g.a<com.avito.android.beduin.common.component.select_option.dialog.g> b() {
+        return this.f102312b;
+    }
+
+    @Override // TV0.b
+    @k
+    /* renamed from: c */
+    public final String getF175463a() {
+        return "";
+    }
+
+    @Override // TV0.b
+    public final boolean d(@k TV0.a aVar) {
+        return aVar instanceof OptionItem;
+    }
+}

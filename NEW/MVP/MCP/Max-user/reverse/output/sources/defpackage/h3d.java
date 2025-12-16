@@ -1,0 +1,57 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class h3d {
+    public static int audio_record_click_to_cancel = 2131951752;
+    public static int audio_record_swipe_to_cancel = 2131951769;
+    public static int chat_screen__leave_chat_action = 2131952481;
+    public static int chat_screen__leave_chat_title = 2131952482;
+    public static int chat_screen__remove_chat_action = 2131952483;
+    public static int chat_screen__remove_chat_title = 2131952484;
+    public static int chat_screen__search_result_down_button_accessibility = 2131952485;
+    public static int chat_screen__search_result_not_found = 2131952486;
+    public static int chat_screen__search_result_success = 2131952487;
+    public static int chat_screen__search_result_up_button_accessibility = 2131952488;
+    public static int chat_screen__start_chat_with_bot = 2131952489;
+    public static int chat_screen_channel_search_hint = 2131952513;
+    public static int chat_screen_error_restricted_send_message_action = 2131952526;
+    public static int chat_screen_error_restricted_send_message_cancel = 2131952527;
+    public static int chat_screen_error_restricted_send_message_desc = 2131952528;
+    public static int chat_screen_error_restricted_send_message_title = 2131952529;
+    public static int chat_screen_file_too_big_caption = 2131952530;
+    public static int chat_screen_file_too_big_title = 2131952531;
+    public static int chat_screen_join_channel = 2131952538;
+    public static int chat_screen_join_chat = 2131952539;
+    public static int chat_screen_leave_chat = 2131952540;
+    public static int chat_screen_remove_chat = 2131952566;
+    public static int chat_screen_search_hint = 2131952573;
+    public static int chat_screen_status_mute_chat = 2131952576;
+    public static int chat_screen_status_subscribe_chat = 2131952577;
+    public static int chat_screen_status_unmute_chat = 2131952578;
+    public static int chat_screen_unblock_contact = 2131952580;
+    public static int media_bar_recent = 2131953210;
+    public static int media_bar_restricted_media_action = 2131953211;
+    public static int media_bar_restricted_media_subtitle = 2131953212;
+    public static int media_bar_restricted_media_title = 2131953213;
+    public static int media_type_picker__close_dialog__accept = 2131953281;
+    public static int media_type_picker__close_dialog__title = 2131953282;
+    public static int media_type_picker__contact = 2131953283;
+    public static int media_type_picker__file = 2131953284;
+    public static int media_type_picker__file_dialog__from_file_manager = 2131953285;
+    public static int media_type_picker__file_dialog__from_gallery = 2131953286;
+    public static int media_type_picker__file_dialog__title = 2131953287;
+    public static int media_type_picker__gallery = 2131953288;
+    public static int media_type_picker__input_hint = 2131953289;
+    public static int media_type_picker__money = 2131953290;
+    public static int media_type_picker__permissions_dialog__button = 2131953291;
+    public static int media_type_picker__permissions_dialog__camera_permission = 2131953292;
+    public static int media_type_picker__permissions_dialog__gallery_camera_subtitle = 2131953293;
+    public static int media_type_picker__permissions_dialog__gallery_camera_title = 2131953294;
+    public static int media_type_picker__permissions_dialog__gallery_subtitle = 2131953295;
+    public static int media_type_picker__permissions_dialog__gallery_title = 2131953296;
+    public static int media_type_picker__permissions_dialog__subtitle = 2131953297;
+    public static int media_type_picker__permissions_dialog__title = 2131953298;
+    public static int media_type_picker__place = 2131953299;
+    public static int media_type_picker__snack_file = 2131953300;
+    public static int media_type_picker__snack_media = 2131953301;
+}

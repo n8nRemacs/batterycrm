@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt" android:drawable="@drawable/_sticker_typing__0_res_0x7f080249">
+    <target
+        android:name="_R_G_L_4_G_T_1"
+        android:animation="@drawable/_sticker_typing__1_res_0x7f08024a"/>
+    <target
+        android:name="_R_G_L_4_G_T_1"
+        android:animation="@drawable/_sticker_typing__3_res_0x7f080260"/>
+    <target
+        android:name="_R_G_L_3_G_T_1"
+        android:animation="@drawable/_sticker_typing__5_res_0x7f080269"/>
+    <target
+        android:name="_R_G_L_3_G_T_1"
+        android:animation="@drawable/_sticker_typing__8_res_0x7f08026c"/>
+    <target
+        android:name="_R_G_L_2_G_T_1"
+        android:animation="@drawable/_sticker_typing__11_res_0x7f08024c"/>
+    <target
+        android:name="_R_G_L_2_G_T_1"
+        android:animation="@drawable/_sticker_typing__15_res_0x7f080250"/>
+    <target
+        android:name="_R_G_L_2_G_T_1"
+        android:animation="@drawable/_sticker_typing__19_res_0x7f080254"/>
+    <target
+        android:name="_R_G_L_1_G_T_1"
+        android:animation="@drawable/_sticker_typing__20_res_0x7f080256"/>
+    <target
+        android:name="_R_G_L_1_G_T_1"
+        android:animation="@drawable/_sticker_typing__24_res_0x7f08025a"/>
+    <target
+        android:name="_R_G_L_1_G_T_1"
+        android:animation="@drawable/_sticker_typing__28_res_0x7f08025e"/>
+    <target
+        android:name="_R_G_L_0_G_T_1"
+        android:animation="@drawable/_sticker_typing__29_res_0x7f08025f"/>
+    <target
+        android:name="_R_G_L_0_G_T_1"
+        android:animation="@drawable/_sticker_typing__32_res_0x7f080263"/>
+    <target
+        android:name="_R_G_L_0_G_T_1"
+        android:animation="@drawable/_sticker_typing__35_res_0x7f080266"/>
+    <target
+        android:name="time_group"
+        android:animation="@drawable/_sticker_typing__36_res_0x7f080267"/>
+</animated-vector>

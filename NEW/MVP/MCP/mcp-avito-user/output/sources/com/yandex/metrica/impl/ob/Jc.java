@@ -1,0 +1,12 @@
+package com.yandex.metrica.impl.ob;
+
+/* loaded from: classes7.dex */
+public class Jc implements Qb<Xb> {
+    @Override // com.yandex.metrica.impl.ob.Qb
+    public void a() {
+    }
+
+    @Override // com.yandex.metrica.impl.ob.Qb
+    public void a(@j.N Runnable runnable, @j.N Xb xb2) {
+    }
+}

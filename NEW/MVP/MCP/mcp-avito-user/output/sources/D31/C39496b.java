@@ -1,0 +1,24 @@
+package d31;
+
+import kotlin.jvm.internal.N;
+import sc1.o;
+
+/* renamed from: d31.b, reason: case insensitive filesystem */
+/* loaded from: classes8.dex */
+public final class C39496b extends N implements Y41.a {
+
+    /* renamed from: l, reason: collision with root package name */
+    public static final C39496b f393646l = new C39496b();
+
+    public C39496b() {
+        super(0);
+    }
+
+    @Override // Y41.a
+    public final Object invoke() {
+        if (o.a()) {
+            throw new IllegalStateException("Используйте SID.Initializer.initialize(application: Application, clientId: String) для инициализации библиотеки, прежде чем использовать методы.");
+        }
+        return org.koin.java.c.a(C39499e.class);
+    }
+}

@@ -1,0 +1,39 @@
+package o2;
+
+import com.avito.android.di.InterfaceC30272y;
+import h31.k;
+import kotlin.Metadata;
+import ye.InterfaceC50233d;
+
+/* compiled from: MergedAutoContactsPackagesMviComponent_6be286a0.kt */
+@h31.k
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0005\bg\u0018\u00002\u00020\u0001:\u0004\u0002\u0003\u0004\u0005¨\u0006\u0006"}, d2 = {"Lo2/Y;", "Lo2/f;", "a", "b", "c", "d", "_avito-apps_shared_di"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@E11.d
+@E11.c
+@InterfaceC30272y
+/* loaded from: classes10.dex */
+public interface Y extends InterfaceC44531f {
+
+    /* compiled from: MergedAutoContactsPackagesMviComponent_6be286a0.kt */
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lo2/Y$a;", "", "_avito-apps_shared_di"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    @h31.h
+    public interface a {
+    }
+
+    /* compiled from: MergedAutoContactsPackagesMviComponent_6be286a0.kt */
+    @k.b
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lo2/Y$b;", "Lye/d$a;", "_avito-apps_shared_di"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public interface b extends InterfaceC50233d.a {
+    }
+
+    /* compiled from: MergedAutoContactsPackagesMviComponent_6be286a0.kt */
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lo2/Y$c;", "Lye/d$b;", "_avito-apps_shared_di"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public interface c extends InterfaceC50233d.b {
+    }
+
+    /* compiled from: MergedAutoContactsPackagesMviComponent_6be286a0.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b'\u0018\u00002\u00020\u0001B\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lo2/Y$d;", "", "<init>", "()V", "_avito-apps_shared_di"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    @h31.h
+    public static abstract class d {
+    }
+}

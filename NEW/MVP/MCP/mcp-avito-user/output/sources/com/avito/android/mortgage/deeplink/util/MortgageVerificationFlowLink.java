@@ -1,0 +1,75 @@
+package com.avito.android.mortgage.deeplink.util;
+
+import K51.d;
+import Y61.k;
+import Y61.l;
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.deep_linking.links.DeepLink;
+import com.avito.android.deep_linking.links.InterfaceC29686l;
+import com.avito.android.mortgage.verification_flow.model.VerificationFlowArguments;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+import q50.InterfaceC47204b;
+
+/* compiled from: MortgageVerificationFlowLink.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0087\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/mortgage/deeplink/util/MortgageVerificationFlowLink;", "Lcom/avito/android/deep_linking/links/DeepLink;", "_avito_mortgage_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@d
+@InterfaceC29686l
+@InterfaceC47204b
+/* loaded from: classes15.dex */
+public final /* data */ class MortgageVerificationFlowLink extends DeepLink {
+
+    @k
+    public static final Parcelable.Creator<MortgageVerificationFlowLink> CREATOR = new a();
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final VerificationFlowArguments f198899b;
+
+    /* compiled from: MortgageVerificationFlowLink.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a implements Parcelable.Creator<MortgageVerificationFlowLink> {
+        @Override // android.os.Parcelable.Creator
+        public final MortgageVerificationFlowLink createFromParcel(Parcel parcel) {
+            return new MortgageVerificationFlowLink(VerificationFlowArguments.CREATOR.createFromParcel(parcel));
+        }
+
+        @Override // android.os.Parcelable.Creator
+        public final MortgageVerificationFlowLink[] newArray(int i12) {
+            return new MortgageVerificationFlowLink[i12];
+        }
+    }
+
+    public MortgageVerificationFlowLink(@k VerificationFlowArguments verificationFlowArguments) {
+        this.f198899b = verificationFlowArguments;
+    }
+
+    @Override // android.os.Parcelable
+    public final int describeContents() {
+        return 0;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        return (obj instanceof MortgageVerificationFlowLink) && L.f(this.f198899b, ((MortgageVerificationFlowLink) obj).f198899b);
+    }
+
+    public final int hashCode() {
+        return this.f198899b.hashCode();
+    }
+
+    @k
+    public final String toString() {
+        return "MortgageVerificationFlowLink(arguments=" + this.f198899b + ')';
+    }
+
+    @Override // android.os.Parcelable
+    public final void writeToParcel(@k Parcel parcel, int i12) {
+        this.f198899b.writeToParcel(parcel, i12);
+    }
+}

@@ -1,0 +1,35 @@
+package Dk;
+
+import Y61.l;
+import com.avito.android.remote.model.UniversalColor;
+import kotlin.Metadata;
+
+/* compiled from: BundleBadge.kt */
+@Metadata(d1 = {"\u0000\u0016\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0010\u000e\n\u0000\n\u0002\u0018\u0002\n\u0002\b\f\u0018\u00002\u00020\u0001B#\u0012\u0006\u0010\u0003\u001a\u00020\u0002\u0012\b\u0010\u0005\u001a\u0004\u0018\u00010\u0004\u0012\b\u0010\u0006\u001a\u0004\u0018\u00010\u0004¢\u0006\u0004\b\u0007\u0010\bR\u001a\u0010\u0003\u001a\u00020\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0003\u0010\t\u001a\u0004\b\n\u0010\u000bR\u001c\u0010\u0005\u001a\u0004\u0018\u00010\u00048\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0005\u0010\f\u001a\u0004\b\r\u0010\u000eR\u001c\u0010\u0006\u001a\u0004\u0018\u00010\u00048\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0006\u0010\f\u001a\u0004\b\u000f\u0010\u000e¨\u0006\u0010"}, d2 = {"LDk/b;", "", "", "title", "Lcom/avito/android/remote/model/UniversalColor;", "textColor", "backgroundColor", "<init>", "(Ljava/lang/String;Lcom/avito/android/remote/model/UniversalColor;Lcom/avito/android/remote/model/UniversalColor;)V", "Ljava/lang/String;", "a", "()Ljava/lang/String;", "Lcom/avito/android/remote/model/UniversalColor;", "getTextColor", "()Lcom/avito/android/remote/model/UniversalColor;", "getBackgroundColor", "_avito_vas-bundles_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class b {
+
+    @com.google.gson.annotations.c("backgroundColor")
+    @l
+    private final UniversalColor backgroundColor;
+
+    @com.google.gson.annotations.c("textColor")
+    @l
+    private final UniversalColor textColor;
+
+    @com.google.gson.annotations.c("title")
+    @Y61.k
+    private final String title;
+
+    public b(@Y61.k String str, @l UniversalColor universalColor, @l UniversalColor universalColor2) {
+        this.title = str;
+        this.textColor = universalColor;
+        this.backgroundColor = universalColor2;
+    }
+
+    @Y61.k
+    /* renamed from: a, reason: from getter */
+    public final String getTitle() {
+        return this.title;
+    }
+}

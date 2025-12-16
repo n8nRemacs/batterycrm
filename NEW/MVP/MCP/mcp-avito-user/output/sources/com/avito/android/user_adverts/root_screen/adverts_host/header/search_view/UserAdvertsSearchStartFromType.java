@@ -1,0 +1,45 @@
+package com.avito.android.user_adverts.root_screen.adverts_host.header.search_view;
+
+import kotlin.Metadata;
+
+/* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+/* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+/* compiled from: UserAdvertsSearchStartFromType.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0010\n\u0000\b\u0086\u0081\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00000\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/user_adverts/root_screen/adverts_host/header/search_view/UserAdvertsSearchStartFromType;", "", "_avito_user-adverts_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes5.dex */
+public final class UserAdvertsSearchStartFromType {
+
+    /* renamed from: b, reason: collision with root package name */
+    public static final UserAdvertsSearchStartFromType f312778b;
+
+    /* renamed from: c, reason: collision with root package name */
+    public static final UserAdvertsSearchStartFromType f312779c;
+
+    /* renamed from: d, reason: collision with root package name */
+    public static final /* synthetic */ UserAdvertsSearchStartFromType[] f312780d;
+
+    /* renamed from: e, reason: collision with root package name */
+    public static final /* synthetic */ kotlin.enums.a f312781e;
+
+    static {
+        UserAdvertsSearchStartFromType userAdvertsSearchStartFromType = new UserAdvertsSearchStartFromType("SEARCH_BAR", 0);
+        f312778b = userAdvertsSearchStartFromType;
+        UserAdvertsSearchStartFromType userAdvertsSearchStartFromType2 = new UserAdvertsSearchStartFromType("FILTERS", 1);
+        f312779c = userAdvertsSearchStartFromType2;
+        UserAdvertsSearchStartFromType[] userAdvertsSearchStartFromTypeArr = {userAdvertsSearchStartFromType, userAdvertsSearchStartFromType2};
+        f312780d = userAdvertsSearchStartFromTypeArr;
+        f312781e = kotlin.enums.c.a(userAdvertsSearchStartFromTypeArr);
+    }
+
+    public UserAdvertsSearchStartFromType() {
+        throw null;
+    }
+
+    public static UserAdvertsSearchStartFromType valueOf(String str) {
+        return (UserAdvertsSearchStartFromType) Enum.valueOf(UserAdvertsSearchStartFromType.class, str);
+    }
+
+    public static UserAdvertsSearchStartFromType[] values() {
+        return (UserAdvertsSearchStartFromType[]) f312780d.clone();
+    }
+}

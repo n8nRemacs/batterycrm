@@ -1,0 +1,49 @@
+package qn0;
+
+import Y61.k;
+import com.avito.android.reward_program.ab_tests.configs.ShowTicketEntryTestGroup;
+import dagger.internal.h;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+import on0.C44829c;
+import on0.InterfaceC44827a;
+import u3.l;
+
+/* compiled from: MotivationProgramAbTestsModule_ProvideShowTicketEntryTestGroupFactory.kt */
+@Metadata(d1 = {"\u0000\u0018\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\u0018\u00002\u0013\u0012\u000f\u0012\r\u0012\u0004\u0012\u00020\u00030\u0002¢\u0006\u0002\b\u00040\u0001:\u0001\u0005¨\u0006\u0006"}, d2 = {"Lqn0/c;", "Ldagger/internal/h;", "Lu3/l;", "Lcom/avito/android/reward_program/ab_tests/configs/ShowTicketEntryTestGroup;", "LX41/o;", "a", "_avito-discouraged_avito-feature_reward-program"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: qn0.c, reason: case insensitive filesystem */
+/* loaded from: classes12.dex */
+public final class C47420c implements h<l<ShowTicketEntryTestGroup>> {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public static final a f429357b = new a(null);
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final C44829c f429358a;
+
+    /* compiled from: MotivationProgramAbTestsModule_ProvideShowTicketEntryTestGroupFactory.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lqn0/c$a;", "", "<init>", "()V", "_avito-discouraged_avito-feature_reward-program"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: qn0.c$a */
+    public static final class a {
+        public /* synthetic */ a(C42822w c42822w) {
+            this();
+        }
+
+        public a() {
+        }
+    }
+
+    public C47420c(@k C44829c c44829c) {
+        this.f429358a = c44829c;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        InterfaceC44827a interfaceC44827a = (InterfaceC44827a) this.f429358a.get();
+        f429357b.getClass();
+        C47418a.f429354a.getClass();
+        return interfaceC44827a.a();
+    }
+}

@@ -1,0 +1,40 @@
+package com.avito.android.user_advert.soa_with_price;
+
+import kotlin.Metadata;
+
+/* compiled from: CloseReasonItem.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/user_advert/soa_with_price/a;", "Lcom/avito/conveyor_item/a;", "_avito_user-advert_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.user_advert.soa_with_price.a, reason: case insensitive filesystem */
+/* loaded from: classes4.dex */
+public final class C35547a implements com.avito.conveyor_item.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final String f311867b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.k
+    public final String f311868c;
+
+    /* renamed from: d, reason: collision with root package name */
+    public final boolean f311869d;
+
+    public C35547a(@Y61.k String str, @Y61.k String str2, boolean z12) {
+        this.f311867b = str;
+        this.f311868c = str2;
+        this.f311869d = z12;
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF322725b() {
+        return getF311867b().hashCode();
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @Y61.k
+    /* renamed from: getStringId, reason: from getter */
+    public final String getF311867b() {
+        return this.f311867b;
+    }
+}

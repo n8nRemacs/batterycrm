@@ -1,0 +1,38 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class y1d {
+    public static int auth_call_code_hint = 2131820544;
+    public static int auth_call_description = 2131820545;
+    public static int call_dialog_participants = 2131820546;
+    public static int call_dialog_participants_when_join = 2131820547;
+    public static int call_history_dlg_delete = 2131820548;
+    public static int delete_favorite_sticker_question = 2131820557;
+    public static int delete_recent_sticker_question = 2131820558;
+    public static int field_length_exceeded_error = 2131820561;
+    public static int folder_filtered_title_bot_plural = 2131820562;
+    public static int folder_filtered_title_channel_plural = 2131820563;
+    public static int folder_filtered_title_chat_plural = 2131820564;
+    public static int folder_filtered_title_contact_plural = 2131820565;
+    public static int folder_filtered_title_not_contact_plural = 2131820566;
+    public static int inactive_ttl = 2131820568;
+    public static int max_attach_count_error = 2131820570;
+    public static int max_favorite_sticker_sets_count_reached = 2131820571;
+    public static int max_favorite_stickers_count_reached = 2131820572;
+    public static int max_message_length_error = 2131820573;
+    public static int menu_copy_success = 2131820574;
+    public static int message_compose_forward_or_share__forwarded_messages = 2131820575;
+    public static int mutual_friends = 2131820577;
+    public static int n_contacts = 2131820578;
+    public static int phone_weight = 2131820591;
+    public static int pin_lock_wrong_code_with_attempts = 2131820596;
+    public static int question_delete_messages = 2131820604;
+    public static int results_more = 2131820605;
+    public static int selected_messages = 2131820606;
+    public static int sticker_removed_from_favorites = 2131820607;
+    public static int sticker_removed_from_recents = 2131820608;
+    public static int sticker_set_description = 2131820609;
+    public static int sticker_set_description_with_author = 2131820610;
+    public static int to_chats = 2131820611;
+    public static int you_sent_messages = 2131820659;
+}

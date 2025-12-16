@@ -1,0 +1,84 @@
+package com.avito.android.bundles.ui.recycler.item.bundle;
+
+import TV0.g;
+import Y41.p;
+import android.view.View;
+import android.view.ViewGroup;
+import com.avito.android.R;
+import com.avito.android.bundles.di.InterfaceC28903a;
+import com.avito.android.bundles.di.InterfaceC28904b;
+import javax.inject.Inject;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: VasBundleBlueprint.kt */
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/bundles/ui/recycler/item/bundle/a;", "LTV0/b;", "Lcom/avito/android/bundles/ui/recycler/item/bundle/h;", "Lcom/avito/android/bundles/ui/recycler/item/bundle/c;", "_avito_vas-bundles_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class a implements TV0.b<h, c> {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final d f108389a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final com.avito.android.util.text.a f108390b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.k
+    public final com.avito.konveyor.a f108391c;
+
+    /* renamed from: d, reason: collision with root package name */
+    @Y61.k
+    public final com.avito.konveyor.adapter.a f108392d;
+
+    /* renamed from: e, reason: collision with root package name */
+    @Y61.k
+    public final g.a<j> f108393e = new g.a<>(R.layout.vas_bundle_promoblock, new C3245a());
+
+    /* compiled from: VasBundleBlueprint.kt */
+    @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"Landroid/view/ViewGroup;", "<anonymous parameter 0>", "Landroid/view/View;", "view", "Lcom/avito/android/bundles/ui/recycler/item/bundle/j;", "invoke", "(Landroid/view/ViewGroup;Landroid/view/View;)Lcom/avito/android/bundles/ui/recycler/item/bundle/j;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    /* renamed from: com.avito.android.bundles.ui.recycler.item.bundle.a$a, reason: collision with other inner class name */
+    public static final class C3245a extends N implements p<ViewGroup, View, j> {
+        public C3245a() {
+            super(2);
+        }
+
+        @Override // Y41.p
+        public final j invoke(ViewGroup viewGroup, View view) {
+            a aVar = a.this;
+            return new j(view, aVar.f108390b, aVar.f108392d, aVar.f108391c);
+        }
+    }
+
+    @Inject
+    public a(@Y61.k d dVar, @Y61.k com.avito.android.util.text.a aVar, @Y61.k @InterfaceC28904b com.avito.konveyor.a aVar2, @InterfaceC28903a @Y61.k com.avito.konveyor.adapter.a aVar3) {
+        this.f108389a = dVar;
+        this.f108390b = aVar;
+        this.f108391c = aVar2;
+        this.f108392d = aVar3;
+    }
+
+    @Override // TV0.b
+    public final TV0.d a() {
+        return this.f108389a;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    public final g.a<j> b() {
+        return this.f108393e;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    /* renamed from: c */
+    public final String getF175463a() {
+        return "";
+    }
+
+    @Override // TV0.b
+    public final boolean d(@Y61.k TV0.a aVar) {
+        return aVar instanceof c;
+    }
+}

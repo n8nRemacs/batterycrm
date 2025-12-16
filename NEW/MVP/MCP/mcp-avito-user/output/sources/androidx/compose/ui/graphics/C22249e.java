@@ -1,0 +1,10 @@
+package androidx.compose.ui.graphics;
+
+import kotlin.Metadata;
+
+/* compiled from: AndroidColorFilter.android.kt */
+@Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0002*\f\b\u0000\u0010\u0001\"\u00020\u00002\u00020\u0000¨\u0006\u0002"}, d2 = {"Landroid/graphics/ColorFilter;", "NativeColorFilter", "ui-graphics_release"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: androidx.compose.ui.graphics.e, reason: case insensitive filesystem */
+/* loaded from: classes.dex */
+public final class C22249e {
+}

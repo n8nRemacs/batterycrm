@@ -1,0 +1,13 @@
+package com.avito.android.service_booking_calendar.day.schedule.domain;
+
+import Y61.k;
+import com.avito.android.service_booking_calendar.data.model.Day;
+import kotlin.Metadata;
+
+/* compiled from: DayItemConverter.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\b`\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/service_booking_calendar/day/schedule/domain/a;", "", "_avito_service-booking-calendar_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public interface a {
+    @k
+    DayItem a(@k Day day);
+}

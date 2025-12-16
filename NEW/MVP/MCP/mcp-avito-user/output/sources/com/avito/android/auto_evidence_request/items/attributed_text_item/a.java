@@ -1,0 +1,62 @@
+package com.avito.android.auto_evidence_request.items.attributed_text_item;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.remote.model.text.AttributedText;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: AttributedTextItem.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0086\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/auto_evidence_request/items/attributed_text_item/a;", "Lcom/avito/conveyor_item/a;", "_avito_auto-evidence-request_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final /* data */ class a implements com.avito.conveyor_item.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final String f95179b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @k
+    public final AttributedText f95180c;
+
+    public a(@k String str, @k AttributedText attributedText) {
+        this.f95179b = str;
+        this.f95180c = attributedText;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof a)) {
+            return false;
+        }
+        a aVar = (a) obj;
+        return L.f(this.f95179b, aVar.f95179b) && L.f(this.f95180c, aVar.f95180c);
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF78563b() {
+        return getF78564c().hashCode();
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @k
+    /* renamed from: getStringId, reason: from getter */
+    public final String getF78564c() {
+        return this.f95179b;
+    }
+
+    public final int hashCode() {
+        return this.f95180c.hashCode() + (this.f95179b.hashCode() * 31);
+    }
+
+    @k
+    public final String toString() {
+        StringBuilder sb2 = new StringBuilder("AttributedTextItem(stringId=");
+        sb2.append(this.f95179b);
+        sb2.append(", attributedText=");
+        return com.avito.android.actions_sheet.a.w(sb2, this.f95180c, ')');
+    }
+}

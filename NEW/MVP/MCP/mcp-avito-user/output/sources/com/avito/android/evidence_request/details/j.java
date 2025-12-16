@@ -1,0 +1,26 @@
+package com.avito.android.evidence_request.details;
+
+import io.reactivex.rxjava3.core.AbstractC41768a;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: EvidenceDetailsViewModel.kt */
+@Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0003\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002"}, d2 = {"Lio/reactivex/rxjava3/core/a;", "invoke", "()Lio/reactivex/rxjava3/core/a;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes13.dex */
+final class j extends N implements Y41.a<AbstractC41768a> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ h f148535l;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public j(h hVar) {
+        super(0);
+        this.f148535l = hVar;
+    }
+
+    @Override // Y41.a
+    public final AbstractC41768a invoke() {
+        h hVar = this.f148535l;
+        return new io.reactivex.rxjava3.internal.operators.completable.v(hVar.f148496L.a(hVar.f148500P, hVar.f148505U).j(new p(hVar)).k(new q(hVar)));
+    }
+}

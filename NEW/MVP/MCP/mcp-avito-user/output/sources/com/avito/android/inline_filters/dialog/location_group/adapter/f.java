@@ -1,0 +1,28 @@
+package com.avito.android.inline_filters.dialog.location_group.adapter;
+
+import Y61.k;
+import Y61.l;
+import android.view.View;
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: GroupFilterItemView.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/inline_filters/dialog/location_group/adapter/f;", "LTV0/e;", "_avito_inline-filters_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public interface f extends TV0.e {
+
+    /* compiled from: GroupFilterItemView.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+
+    void I(boolean z12);
+
+    void J6(@l View.OnClickListener onClickListener);
+
+    void a(@k Y41.a<G0> aVar);
+
+    void r4(@k String str, boolean z12, boolean z13);
+
+    void s7();
+}

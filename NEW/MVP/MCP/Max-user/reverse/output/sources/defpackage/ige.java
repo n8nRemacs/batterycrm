@@ -1,0 +1,80 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public final class ige {
+    public final k18 A;
+    public final k18 B;
+    public final k18 C;
+    public final k18 D;
+    public final k18 E;
+    public final k18 F;
+    public final k18 G;
+    public final k18 H;
+    public final k18 I;
+    public final k18 J;
+    public final k18 a;
+    public final k18 b;
+    public final k18 c;
+    public final k18 d;
+    public final k18 e;
+    public final k18 f;
+    public final k18 g;
+    public final k18 h;
+    public final k18 i;
+    public final k18 j;
+    public final k18 k;
+    public final k18 l;
+    public final k18 m;
+    public final k18 n;
+    public final k18 o;
+    public final k18 p;
+    public final k18 q;
+    public final k18 r;
+    public final k18 s;
+    public final k18 t;
+    public final k18 u;
+    public final k18 v;
+    public final k18 w;
+    public final k18 x;
+    public final k18 y;
+    public final k18 z;
+
+    public ige(k18 k18Var, k18 k18Var2, k18 k18Var3, k18 k18Var4, k18 k18Var5, k18 k18Var6, k18 k18Var7, k18 k18Var8, k18 k18Var9, k18 k18Var10, k18 k18Var11, k18 k18Var12, k18 k18Var13, k18 k18Var14, k18 k18Var15, k18 k18Var16, k18 k18Var17, k18 k18Var18, k18 k18Var19, k18 k18Var20, k18 k18Var21, k18 k18Var22, k18 k18Var23, k18 k18Var24, k18 k18Var25, k18 k18Var26, k18 k18Var27, k18 k18Var28, k18 k18Var29, k18 k18Var30, k18 k18Var31, k18 k18Var32, k18 k18Var33, k18 k18Var34, k18 k18Var35, k18 k18Var36) {
+        this.a = k18Var;
+        this.b = k18Var2;
+        this.c = k18Var3;
+        this.d = k18Var4;
+        this.e = k18Var5;
+        this.f = k18Var6;
+        this.g = k18Var7;
+        this.h = k18Var8;
+        this.i = k18Var9;
+        this.j = k18Var10;
+        this.k = k18Var11;
+        this.l = k18Var12;
+        this.m = k18Var13;
+        this.n = k18Var14;
+        this.o = k18Var15;
+        this.p = k18Var16;
+        this.q = k18Var17;
+        this.r = k18Var18;
+        this.s = k18Var19;
+        this.t = k18Var20;
+        this.u = k18Var21;
+        this.v = k18Var22;
+        this.w = k18Var23;
+        this.x = k18Var24;
+        this.y = k18Var25;
+        this.z = k18Var26;
+        this.A = k18Var27;
+        this.B = k18Var28;
+        this.C = k18Var29;
+        this.D = k18Var30;
+        this.E = k18Var31;
+        this.F = k18Var32;
+        this.G = k18Var33;
+        this.H = k18Var34;
+        this.I = k18Var35;
+        this.J = k18Var36;
+    }
+}

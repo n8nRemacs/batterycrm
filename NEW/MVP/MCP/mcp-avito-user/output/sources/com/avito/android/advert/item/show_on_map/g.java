@@ -1,0 +1,36 @@
+package com.avito.android.advert.item.show_on_map;
+
+import Y61.k;
+import android.content.res.Resources;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.R;
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: AdvertDetailsShowOnMapResourceProvider.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/advert/item/show_on_map/g;", "Lcom/avito/android/advert/item/show_on_map/f;", "_avito_advert-details_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes10.dex */
+public final class g implements f {
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final Resources f80197a;
+
+    @Inject
+    public g(@k Resources resources) {
+        this.f80197a = resources;
+    }
+
+    @Override // com.avito.android.advert.item.show_on_map.f
+    @k
+    public final String a() {
+        return this.f80197a.getString(R.string.advert_details_show_on_map_item);
+    }
+
+    @Override // com.avito.android.advert.item.show_on_map.f
+    @k
+    public final String b() {
+        return this.f80197a.getString(R.string.advert_details_multi_addresses_show_on_map_item);
+    }
+}

@@ -1,0 +1,40 @@
+package yv;
+
+import Y61.k;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.analytics.provider.clickstream.ParametrizedClickStreamEvent;
+import java.util.Collections;
+import java.util.Map;
+import kotlin.Metadata;
+
+/* compiled from: ClickSaveOldPriceEvent.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lyv/b;", "Lcom/avito/android/analytics/provider/clickstream/a;", "_avito_delivery-abuse_price-reduction_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes12.dex */
+public final class b implements com.avito.android.analytics.provider.clickstream.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ ParametrizedClickStreamEvent f443601b;
+
+    public b(long j12) {
+        this.f443601b = new ParametrizedClickStreamEvent(14222, 0, "Avito.Marketplace / Delivery Abuse / Клик \"Оставить цену\"", Collections.singletonMap("iid", Long.valueOf(j12)));
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    /* renamed from: getEventId */
+    public final int getF19127b() {
+        return this.f443601b.f90247b;
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    @k
+    public final Map<String, Object> getParams() {
+        return this.f443601b.f90249d;
+    }
+
+    @Override // com.avito.android.analytics.provider.clickstream.a
+    /* renamed from: getVersion */
+    public final int getF11770c() {
+        return this.f443601b.f90248c;
+    }
+}

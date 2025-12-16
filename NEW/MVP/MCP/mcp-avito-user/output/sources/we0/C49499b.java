@@ -1,0 +1,17 @@
+package wE0;
+
+import kotlin.Metadata;
+
+/* compiled from: MapTypeConverter.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\bÀ\u0002\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"LwE0/b;", "", "<init>", "()V", "_avito_timestamp-storage_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: wE0.b, reason: case insensitive filesystem */
+/* loaded from: classes4.dex */
+public final class C49499b {
+
+    /* renamed from: a, reason: collision with root package name */
+    public static final /* synthetic */ int f441336a = 0;
+
+    static {
+        new C49499b();
+    }
+}

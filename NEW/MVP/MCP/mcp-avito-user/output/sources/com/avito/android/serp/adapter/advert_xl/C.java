@@ -1,0 +1,11 @@
+package com.avito.android.serp.adapter.advert_xl;
+
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: PhoneCallView.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/serp/adapter/advert_xl/C;", "", "_avito-discouraged_avito-libs_serp-core_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public interface C {
+    boolean o(@Y61.k String str, @Y61.k Y41.a<G0> aVar, @Y61.k Y41.a<G0> aVar2);
+}

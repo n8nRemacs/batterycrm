@@ -1,0 +1,22 @@
+package com.avito.android.inline_filters;
+
+import kotlin.Metadata;
+
+/* compiled from: GetCounterAndMapButtonsUseCase.kt */
+@Metadata(d1 = {"\u0000\n\n\u0000\n\u0002\u0010\u000e\n\u0002\b\u0002\u0010\u0000\u001a\u00020\u00012\u0006\u0010\u0002\u001a\u00020\u0001H\n¢\u0006\u0002\b\u0003"}, d2 = {"<anonymous>", "", "it", "invoke"}, k = 3, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.inline_filters.m, reason: case insensitive filesystem */
+/* loaded from: classes14.dex */
+final class C31053m extends kotlin.jvm.internal.N implements Y41.l<String, String> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public static final C31053m f172318l = new C31053m();
+
+    public C31053m() {
+        super(1);
+    }
+
+    @Override // Y41.l
+    public final String invoke(String str) {
+        return str;
+    }
+}

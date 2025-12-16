@@ -1,0 +1,315 @@
+package com.avito.android.tariff_cpt.configure.forbidden;
+
+import Cd.C13243a;
+import Y61.k;
+import a90.ViewOnLayoutChangeListenerC19701a;
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.compose.runtime.internal.P;
+import androidx.fragment.app.Fragment;
+import androidx.view.InterfaceC22969B;
+import androidx.view.InterfaceC23040h0;
+import androidx.view.O0;
+import androidx.view.P0;
+import androidx.view.S0;
+import androidx.view.T0;
+import com.avito.android.R;
+import com.avito.android.analytics.screens.D;
+import com.avito.android.analytics.screens.F;
+import com.avito.android.analytics.screens.InterfaceC28477j;
+import com.avito.android.analytics.screens.s;
+import com.avito.android.analytics.screens.tracker.ScreenPerformanceTracker;
+import com.avito.android.di.C29972i;
+import com.avito.android.fresco.SimpleDraweeView;
+import com.avito.android.lib.design.button.Button;
+import com.avito.android.progress_overlay.l;
+import com.avito.android.tariff_cpt.configure.forbidden.viewmodel.g;
+import com.avito.android.ui.fragments.BaseFragment;
+import javax.inject.Inject;
+import kotlin.C42727D;
+import kotlin.InterfaceC42726C;
+import kotlin.InterfaceC43072x;
+import kotlin.LazyThreadSafetyMode;
+import kotlin.Metadata;
+import kotlin.jvm.internal.C42822w;
+import kotlin.jvm.internal.D;
+import kotlin.jvm.internal.L;
+import kotlin.jvm.internal.N;
+import kotlin.jvm.internal.m0;
+import kotlin.jvm.internal.s0;
+import z1.AbstractC50339a;
+
+/* compiled from: CptForbiddenFragment.kt */
+@P
+@s0
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0004\b\u0001\u0018\u00002\u00020\u00012\u00020\u0002:\u0001\u0005B\u0007¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0006"}, d2 = {"Lcom/avito/android/tariff_cpt/configure/forbidden/CptForbiddenFragment;", "Lcom/avito/android/ui/fragments/BaseFragment;", "Lcom/avito/android/analytics/screens/j$b;", "<init>", "()V", "a", "_avito_tariff-cpt_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@SuppressLint({"DS_TCH_BDGT_ARCHITECTURE [Forbidden]", "DS_TCH_BDGT_ARCHITECTURE [Deprecated]"})
+/* loaded from: classes4.dex */
+public final class CptForbiddenFragment extends BaseFragment implements InterfaceC28477j.b {
+
+    /* renamed from: y0, reason: collision with root package name */
+    @k
+    public static final a f297585y0 = new a(null);
+
+    /* renamed from: n0, reason: collision with root package name */
+    @Inject
+    public g.a f297586n0;
+
+    /* renamed from: o0, reason: collision with root package name */
+    @Inject
+    public ScreenPerformanceTracker f297587o0;
+
+    /* renamed from: p0, reason: collision with root package name */
+    @k
+    public final O0 f297588p0;
+
+    /* renamed from: q0, reason: collision with root package name */
+    public l f297589q0;
+
+    /* renamed from: r0, reason: collision with root package name */
+    public Toolbar f297590r0;
+
+    /* renamed from: s0, reason: collision with root package name */
+    public SimpleDraweeView f297591s0;
+
+    /* renamed from: t0, reason: collision with root package name */
+    public TextView f297592t0;
+
+    /* renamed from: u0, reason: collision with root package name */
+    public TextView f297593u0;
+
+    /* renamed from: v0, reason: collision with root package name */
+    public Button f297594v0;
+
+    /* renamed from: w0, reason: collision with root package name */
+    public ViewGroup f297595w0;
+
+    /* renamed from: x0, reason: collision with root package name */
+    public ViewGroup f297596x0;
+
+    /* compiled from: CptForbiddenFragment.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/tariff_cpt/configure/forbidden/CptForbiddenFragment$a;", "", "<init>", "()V", "_avito_tariff-cpt_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+        public /* synthetic */ a(C42822w c42822w) {
+            this();
+        }
+
+        public a() {
+        }
+    }
+
+    /* compiled from: CptForbiddenFragment.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class b implements InterfaceC23040h0, D {
+
+        /* renamed from: b, reason: collision with root package name */
+        public final /* synthetic */ Y41.l f297597b;
+
+        public b(Y41.l lVar) {
+            this.f297597b = lVar;
+        }
+
+        public final boolean equals(@Y61.l Object obj) {
+            if ((obj instanceof InterfaceC23040h0) && (obj instanceof D)) {
+                return L.f(this.f297597b, ((D) obj).getFunctionDelegate());
+            }
+            return false;
+        }
+
+        @Override // kotlin.jvm.internal.D
+        @k
+        public final InterfaceC43072x<?> getFunctionDelegate() {
+            return this.f297597b;
+        }
+
+        public final int hashCode() {
+            return this.f297597b.hashCode();
+        }
+
+        @Override // androidx.view.InterfaceC23040h0
+        public final /* synthetic */ void onChanged(Object obj) {
+            this.f297597b.invoke(obj);
+        }
+    }
+
+    /* compiled from: LazyViewModelFactory.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0006\u001a\u00020\u0002\"\n\b\u0000\u0010\u0001\u0018\u0001*\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Landroidx/lifecycle/M0;", "T", "Landroidx/lifecycle/P0$c;", "invoke", "()Landroidx/lifecycle/P0$c;", "Cd/o", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class c extends N implements Y41.a<P0.c> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ Y41.a f297598l;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public c(Y41.a aVar) {
+            super(0);
+            this.f297598l = aVar;
+        }
+
+        @Override // Y41.a
+        public final P0.c invoke() {
+            return new C13243a(this.f297598l);
+        }
+    }
+
+    /* compiled from: FragmentViewModelLazy.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0006\u001a\u00020\u0002\"\n\b\u0000\u0010\u0001\u0018\u0001*\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Landroidx/lifecycle/M0;", "VM", "Landroidx/fragment/app/Fragment;", "invoke", "()Landroidx/fragment/app/Fragment;", "Cd/i", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class d extends N implements Y41.a<Fragment> {
+        public d() {
+            super(0);
+        }
+
+        @Override // Y41.a
+        public final Fragment invoke() {
+            return CptForbiddenFragment.this;
+        }
+    }
+
+    /* compiled from: FragmentViewModelLazy.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0006\u001a\u00020\u0002\"\n\b\u0000\u0010\u0001\u0018\u0001*\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Landroidx/lifecycle/M0;", "VM", "Landroidx/lifecycle/T0;", "invoke", "()Landroidx/lifecycle/T0;", "Cd/j", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class e extends N implements Y41.a<T0> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ d f297600l;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public e(d dVar) {
+            super(0);
+            this.f297600l = dVar;
+        }
+
+        @Override // Y41.a
+        public final T0 invoke() {
+            return (T0) this.f297600l.invoke();
+        }
+    }
+
+    /* compiled from: FragmentViewModelLazy.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0006\u001a\u00020\u0002\"\n\b\u0000\u0010\u0001\u0018\u0001*\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Landroidx/lifecycle/M0;", "VM", "Landroidx/lifecycle/S0;", "invoke", "()Landroidx/lifecycle/S0;", "Cd/k", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class f extends N implements Y41.a<S0> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ Object f297601l;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public f(InterfaceC42726C interfaceC42726C) {
+            super(0);
+            this.f297601l = interfaceC42726C;
+        }
+
+        /* JADX WARN: Type inference failed for: r0v0, types: [java.lang.Object, kotlin.C] */
+        @Override // Y41.a
+        public final S0 invoke() {
+            return ((T0) this.f297601l.getValue()).getF42820b();
+        }
+    }
+
+    /* compiled from: FragmentViewModelLazy.kt */
+    @s0
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0004\u0010\u0006\u001a\u00020\u0002\"\n\b\u0000\u0010\u0001\u0018\u0001*\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Landroidx/lifecycle/M0;", "VM", "Lz1/a;", "invoke", "()Lz1/a;", "Cd/l", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class g extends N implements Y41.a<AbstractC50339a> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ Object f297602l;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public g(InterfaceC42726C interfaceC42726C) {
+            super(0);
+            this.f297602l = interfaceC42726C;
+        }
+
+        /* JADX WARN: Type inference failed for: r0v0, types: [java.lang.Object, kotlin.C] */
+        @Override // Y41.a
+        public final AbstractC50339a invoke() {
+            T0 t02 = (T0) this.f297602l.getValue();
+            InterfaceC22969B interfaceC22969B = t02 instanceof InterfaceC22969B ? (InterfaceC22969B) t02 : null;
+            return interfaceC22969B != null ? interfaceC22969B.getDefaultViewModelCreationExtras() : AbstractC50339a.C12939a.f443748b;
+        }
+    }
+
+    /* compiled from: CptForbiddenFragment.kt */
+    @Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0003\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002"}, d2 = {"Lcom/avito/android/tariff_cpt/configure/forbidden/viewmodel/g;", "invoke", "()Lcom/avito/android/tariff_cpt/configure/forbidden/viewmodel/g;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class h extends N implements Y41.a<com.avito.android.tariff_cpt.configure.forbidden.viewmodel.g> {
+        public h() {
+            super(0);
+        }
+
+        @Override // Y41.a
+        public final com.avito.android.tariff_cpt.configure.forbidden.viewmodel.g invoke() {
+            CptForbiddenFragment cptForbiddenFragment = CptForbiddenFragment.this;
+            Bundle arguments = cptForbiddenFragment.getArguments();
+            String string = arguments != null ? arguments.getString("tariff_cpt_extra_remote_context") : null;
+            g.a aVar = cptForbiddenFragment.f297586n0;
+            return (aVar != null ? aVar : null).a(string);
+        }
+    }
+
+    public CptForbiddenFragment() {
+        super(R.layout.cpt_forbidden_fragment);
+        c cVar = new c(new h());
+        InterfaceC42726C interfaceC42726CB = C42727D.b(LazyThreadSafetyMode.f406616d, new e(new d()));
+        this.f297588p0 = new O0(m0.f406844a.b(com.avito.android.tariff_cpt.configure.forbidden.viewmodel.g.class), new f(interfaceC42726CB), cVar, new g(interfaceC42726CB));
+    }
+
+    @Override // androidx.fragment.app.Fragment
+    @Y61.l
+    public final View onCreateView(@k LayoutInflater layoutInflater, @Y61.l ViewGroup viewGroup, @Y61.l Bundle bundle) {
+        ScreenPerformanceTracker screenPerformanceTracker = this.f297587o0;
+        if (screenPerformanceTracker == null) {
+            screenPerformanceTracker = null;
+        }
+        screenPerformanceTracker.e();
+        return super.onCreateView(layoutInflater, viewGroup, bundle);
+    }
+
+    @Override // com.avito.android.ui.fragments.BaseFragment, androidx.fragment.app.Fragment
+    public final void onViewCreated(@k View view, @Y61.l Bundle bundle) {
+        super.onViewCreated(view, bundle);
+        this.f297589q0 = new l((ViewGroup) view.findViewById(R.id.cpt_forbidden_container), R.id.cpt_forbidden_content_container, null, 0, 0, 28, null);
+        this.f297590r0 = (Toolbar) view.findViewById(R.id.cpt_forbidden_toolbar);
+        this.f297591s0 = (SimpleDraweeView) view.findViewById(R.id.cpt_forbidden_image);
+        this.f297592t0 = (TextView) view.findViewById(R.id.cpt_forbidden_text_title);
+        this.f297593u0 = (TextView) view.findViewById(R.id.cpt_forbidden_text_subtitle);
+        this.f297594v0 = (Button) view.findViewById(R.id.cpt_forbidden_button);
+        this.f297595w0 = (ViewGroup) view.findViewById(R.id.cpt_forbidden_bottom_block);
+        this.f297596x0 = (ViewGroup) view.findViewById(R.id.cpt_forbidden_content);
+        Toolbar toolbar = this.f297590r0;
+        if (toolbar == null) {
+            toolbar = null;
+        }
+        toolbar.setNavigationOnClickListener(new com.avito.android.services_transportation_widget.dialog.h(this, 24));
+        l lVar = this.f297589q0;
+        if (lVar == null) {
+            lVar = null;
+        }
+        lVar.f231600j = new com.avito.android.tariff_cpt.configure.forbidden.b(this);
+        ViewGroup viewGroup = this.f297595w0;
+        if (viewGroup == null) {
+            viewGroup = null;
+        }
+        viewGroup.addOnLayoutChangeListener(new ViewOnLayoutChangeListenerC19701a(this, 20));
+        ((com.avito.android.tariff_cpt.configure.forbidden.viewmodel.g) this.f297588p0.getValue()).f297642Q.observe(getViewLifecycleOwner(), new b(new com.avito.android.tariff_cpt.configure.forbidden.a(this)));
+        ScreenPerformanceTracker screenPerformanceTracker = this.f297587o0;
+        (screenPerformanceTracker != null ? screenPerformanceTracker : null).d();
+    }
+
+    @Override // com.avito.android.ui.fragments.BaseFragment
+    public final void p5(@Y61.l Bundle bundle) {
+        com.avito.android.analytics.screens.D.f90335a.getClass();
+        F fA2 = D.a.a();
+        com.avito.android.tariff_cpt.configure.forbidden.di.d.a().a((com.avito.android.tariff_cpt.common.di.d) C29972i.a(C29972i.b(this), Object.class), cv.c.b(this), s.c(this)).a(this);
+        ScreenPerformanceTracker screenPerformanceTracker = this.f297587o0;
+        if (screenPerformanceTracker == null) {
+            screenPerformanceTracker = null;
+        }
+        screenPerformanceTracker.a(fA2.b());
+    }
+}

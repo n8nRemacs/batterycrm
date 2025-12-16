@@ -1,0 +1,123 @@
+package com.avito.beduin.v2.repository.environment.interactions;
+
+import Y41.l;
+import Y41.p;
+import Y61.k;
+import com.avito.beduin.v2.engine.C36272i;
+import com.avito.beduin.v2.repository.environment.h;
+import com.avito.beduin.v2.repository.environment.j;
+import kotlin.C42729a0;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+import kotlin.coroutines.jvm.internal.SuspendLambda;
+import kotlin.jvm.internal.N;
+import kotlinx.coroutines.channels.F0;
+import kotlinx.coroutines.channels.I0;
+
+/* compiled from: EnvironmentRepositoryObserveInteractionHandler.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0003\u001a\u00020\u0002*\b\u0012\u0004\u0012\u00020\u00010\u0000H\u008a@¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"Lkotlinx/coroutines/channels/I0;", "Lcom/avito/beduin/v2/engine/field/d;", "Lkotlin/G0;", "<anonymous>", "(Lkotlinx/coroutines/channels/I0;)V"}, k = 3, mv = {1, 9, 0})
+@DebugMetadata(c = "com.avito.beduin.v2.repository.environment.interactions.EnvironmentRepositoryObserveInteractionHandler$observeData$1", f = "EnvironmentRepositoryObserveInteractionHandler.kt", i = {}, l = {21}, m = "invokeSuspend", n = {}, s = {})
+/* loaded from: classes5.dex */
+final class d extends SuspendLambda implements p<I0<? super com.avito.beduin.v2.engine.field.d>, Continuation<? super G0>, Object> {
+
+    /* renamed from: q, reason: collision with root package name */
+    public int f338244q;
+
+    /* renamed from: r, reason: collision with root package name */
+    public /* synthetic */ Object f338245r;
+
+    /* renamed from: s, reason: collision with root package name */
+    public final /* synthetic */ e f338246s;
+
+    /* renamed from: t, reason: collision with root package name */
+    public final /* synthetic */ C36272i f338247t;
+
+    /* compiled from: EnvironmentRepositoryObserveInteractionHandler.kt */
+    @Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0003\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002"}, d2 = {"Lkotlin/G0;", "invoke", "()V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class a extends N implements Y41.a<G0> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ HV0.c f338248l;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public a(HV0.c cVar) {
+            super(0);
+            this.f338248l = cVar;
+        }
+
+        @Override // Y41.a
+        public final G0 invoke() {
+            this.f338248l.dispose();
+            return G0.f406611a;
+        }
+    }
+
+    /* compiled from: EnvironmentRepositoryObserveInteractionHandler.kt */
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0005\u001a\u00020\u00022\u0006\u0010\u0001\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"Lcom/avito/beduin/v2/repository/environment/h;", "it", "Lkotlin/G0;", "invoke", "(Lcom/avito/beduin/v2/repository/environment/h;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class b extends N implements l<h, G0> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ I0<com.avito.beduin.v2.engine.field.d> f338249l;
+
+        /* renamed from: m, reason: collision with root package name */
+        public final /* synthetic */ C36272i f338250m;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        public b(C36272i c36272i, I0 i02) {
+            super(1);
+            this.f338249l = i02;
+            this.f338250m = c36272i;
+        }
+
+        @Override // Y41.l
+        public final G0 invoke(h hVar) {
+            this.f338249l.w(j.a(hVar, this.f338250m));
+            return G0.f406611a;
+        }
+    }
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public d(e eVar, C36272i c36272i, Continuation<? super d> continuation) {
+        super(2, continuation);
+        this.f338246s = eVar;
+        this.f338247t = c36272i;
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @k
+    public final Continuation<G0> create(@Y61.l Object obj, @k Continuation<?> continuation) {
+        d dVar = new d(this.f338246s, this.f338247t, continuation);
+        dVar.f338245r = obj;
+        return dVar;
+    }
+
+    @Override // Y41.p
+    public final Object invoke(I0<? super com.avito.beduin.v2.engine.field.d> i02, Continuation<? super G0> continuation) {
+        return ((d) create(i02, continuation)).invokeSuspend(G0.f406611a);
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.l
+    public final Object invokeSuspend(@k Object obj) {
+        Object coroutine_suspended = IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        int i12 = this.f338244q;
+        if (i12 == 0) {
+            C42729a0.b(obj);
+            I0 i02 = (I0) this.f338245r;
+            a aVar = new a(this.f338246s.f338251c.c(new b(this.f338247t, i02)));
+            this.f338244q = 1;
+            if (F0.a(i02, aVar, this) == coroutine_suspended) {
+                return coroutine_suspended;
+            }
+        } else {
+            if (i12 != 1) {
+                throw new IllegalStateException("call to 'resume' before 'invoke' with coroutine");
+            }
+            C42729a0.b(obj);
+        }
+        return G0.f406611a;
+    }
+}

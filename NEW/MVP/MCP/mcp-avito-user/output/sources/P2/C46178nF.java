@@ -1,0 +1,26 @@
+package p2;
+
+import do0.InterfaceC39770d;
+import javax.inject.Singleton;
+import kotlin.Metadata;
+
+/* compiled from: com_avito_android_safedeal_storage_preferences_SafeDealShowDialogPreferencesImpl_SafeDealShowDialogPreferences_Singleton_BindingModule_ee9e5636_365faf01.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_safedeal-storage_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: p2.nF, reason: case insensitive filesystem */
+/* loaded from: classes10.dex */
+public final class C46178nF {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<InterfaceC39770d> f426725a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<Singleton> f426726b;
+
+    static {
+        kotlin.jvm.internal.n0 n0Var = kotlin.jvm.internal.m0.f406844a;
+        f426725a = n0Var.b(InterfaceC39770d.class);
+        f426726b = n0Var.b(Singleton.class);
+    }
+}

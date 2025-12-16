@@ -38,7 +38,12 @@
       "WebFetch(domain:openrouter.ai)",
       "Bash(node --version)",
       "Bash(npx --version:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(\"/c/Users/User/AppData/Local/Android/Sdk/platform-tools/adb.exe\" devices)",
+      "Bash(/c/tools/jadx/bin/jadx.bat:*)",
+      "Bash(export JAVA_HOME=\"/c/Program Files/Android/Android Studio/jbr\":*)",
+      "Bash(/c/tools/jadx/bin/jadx:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

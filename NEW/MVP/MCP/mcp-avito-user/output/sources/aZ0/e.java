@@ -1,0 +1,14 @@
+package aZ0;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/* JADX WARN: Method from annotation default annotation not found: value */
+/* compiled from: DoNotCall.java */
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.CLASS)
+/* loaded from: classes6.dex */
+public @interface e {
+}

@@ -1,0 +1,80 @@
+package kotlinx.serialization.json.internal;
+
+import java.util.Iterator;
+import kotlin.Metadata;
+import kotlinx.serialization.KSerializer;
+import kotlinx.serialization.json.AbstractC43443a;
+
+/* compiled from: JsonIterator.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010(\n\u0000\b\u0002\u0018\u0000*\u0004\b\u0000\u0010\u00012\b\u0012\u0004\u0012\u00028\u00000\u0002¨\u0006\u0003"}, d2 = {"Lkotlinx/serialization/json/internal/F;", "T", "", "kotlinx-serialization-json"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes8.dex */
+final class F<T> implements Iterator<T>, Z41.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final AbstractC43443a f413002b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.k
+    public final f0 f413003c;
+
+    /* renamed from: d, reason: collision with root package name */
+    @Y61.k
+    public final KSerializer f413004d;
+
+    /* renamed from: e, reason: collision with root package name */
+    public boolean f413005e = true;
+
+    /* renamed from: f, reason: collision with root package name */
+    public boolean f413006f;
+
+    public F(@Y61.k AbstractC43443a abstractC43443a, @Y61.k f0 f0Var, @Y61.k KSerializer kSerializer) {
+        this.f413002b = abstractC43443a;
+        this.f413003c = f0Var;
+        this.f413004d = kSerializer;
+    }
+
+    @Override // java.util.Iterator
+    public final boolean hasNext() {
+        if (this.f413006f) {
+            return false;
+        }
+        f0 f0Var = this.f413003c;
+        if (f0Var.v() != 9) {
+            if (f0Var.v() != 10 || this.f413006f) {
+                return true;
+            }
+            f0Var.r((byte) 9, true);
+            throw null;
+        }
+        this.f413006f = true;
+        f0Var.g((byte) 9);
+        if (f0Var.v() != 10) {
+            if (f0Var.v() == 8) {
+                AbstractC43450a.q(f0Var, "There is a start of the new array after the one parsed to sequence. ARRAY_WRAPPED mode doesn't merge consecutive arrays.\nIf you need to parse a stream of arrays, please use WHITESPACE_SEPARATED mode instead.", 0, null, 6);
+                throw null;
+            }
+            f0Var.o();
+        }
+        return false;
+    }
+
+    @Override // java.util.Iterator
+    public final T next() {
+        boolean z12 = this.f413005e;
+        f0 f0Var = this.f413003c;
+        if (z12) {
+            this.f413005e = false;
+        } else {
+            f0Var.h(',');
+        }
+        WriteMode writeMode = WriteMode.f413034d;
+        KSerializer kSerializer = this.f413004d;
+        return (T) new i0(this.f413002b, writeMode, f0Var, kSerializer.getF412706c(), null).m(kSerializer);
+    }
+
+    @Override // java.util.Iterator
+    public final void remove() {
+        throw new UnsupportedOperationException("Operation is not supported for read-only collection");
+    }
+}

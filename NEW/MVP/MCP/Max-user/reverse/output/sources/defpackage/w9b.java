@@ -1,0 +1,56 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class w9b {
+    public static final int a = vuc.chat_common_background_fileType_archiveBadge;
+    public static final int b = vuc.chat_common_background_fileType_archiveBkg;
+    public static final int c = vuc.chat_common_background_fileType_archiveElement;
+    public static final int d = vuc.chat_common_background_fileType_archiveIcon;
+    public static final int e = vuc.chat_common_background_fileType_dataBadge;
+    public static final int f = vuc.chat_common_background_fileType_dataBkg;
+    public static final int g = vuc.chat_common_background_fileType_dataElement;
+    public static final int h = vuc.chat_common_background_fileType_dataIcon;
+    public static final int i = vuc.chat_common_background_fileType_imageBadge;
+    public static final int j = vuc.chat_common_background_fileType_imageBkg;
+    public static final int k = vuc.chat_common_background_fileType_imageElement;
+    public static final int l = vuc.chat_common_background_fileType_imageIcon;
+    public static final int m = vuc.chat_common_background_fileType_musicBadge;
+    public static final int n = vuc.chat_common_background_fileType_musicBkg;
+    public static final int o = vuc.chat_common_background_fileType_musicElement;
+    public static final int p = vuc.chat_common_background_fileType_musicIcon;
+    public static final int q = vuc.chat_common_background_fileType_presentationBadge;
+    public static final int r = vuc.chat_common_background_fileType_presentationBkg;
+    public static final int s = vuc.chat_common_background_fileType_presentationElement;
+    public static final int t = vuc.chat_common_background_fileType_presentationIcon;
+    public static final int u = vuc.chat_common_background_fileType_programBadge;
+    public static final int v = vuc.chat_common_background_fileType_programBkg;
+    public static final int w = vuc.chat_common_background_fileType_programElement;
+    public static final int x = vuc.chat_common_background_fileType_programIcon;
+    public static final int y = vuc.chat_common_background_fileType_textBadge;
+    public static final int z = vuc.chat_common_background_fileType_textBkg;
+    public static final int A = vuc.chat_common_background_fileType_textElement;
+    public static final int B = vuc.chat_common_background_fileType_textIcon;
+    public static final int C = vuc.chat_common_background_fileType_unknownBadge;
+    public static final int D = vuc.chat_common_background_fileType_unknownBkg;
+    public static final int E = vuc.chat_common_background_fileType_unknownElement;
+    public static final int F = vuc.chat_common_background_fileType_unknownIcon;
+    public static final int G = vuc.chat_common_background_fileType_videoBadge;
+    public static final int H = vuc.chat_common_background_fileType_videoBkg;
+    public static final int I = vuc.chat_common_background_fileType_videoElement;
+    public static final int J = vuc.chat_common_background_fileType_videoIcon;
+    public static final int K = vuc.chat_common_text_fileType;
+    public static final int L = vuc.global_background_accent_neutral;
+    public static final int M = vuc.global_background_accent_neutralFade;
+    public static final int N = vuc.global_background_accent_neutralFadeSecondary;
+    public static final int O = vuc.global_background_surfaceCard;
+    public static final int P = vuc.global_icon_contrastStatic;
+    public static final int Q = vuc.global_icon_negative;
+    public static final int R = vuc.global_icon_primary;
+    public static final int S = vuc.global_icon_tertiary;
+    public static final int T = vuc.global_icon_themed;
+    public static final int U = vuc.global_states_text_disabled_primary;
+    public static final int V = vuc.global_text_negative;
+    public static final int W = vuc.global_text_positive;
+    public static final int X = vuc.global_text_primary;
+    public static final int Y = vuc.global_text_secondary;
+}

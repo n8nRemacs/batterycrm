@@ -1,0 +1,48 @@
+package com.avito.android.remote.model.vertical_main;
+
+import Y61.k;
+import com.google.gson.annotations.c;
+import kotlin.Metadata;
+import kotlin.enums.a;
+
+/* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+/* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+/* compiled from: FeaturedWidget.kt */
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0010\n\u0002\b\u0004\b\u0086\u0081\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00000\u0001B\u0007\b\u0002¢\u0006\u0002\u0010\u0002j\u0002\b\u0003j\u0002\b\u0004¨\u0006\u0005"}, d2 = {"Lcom/avito/android/remote/model/vertical_main/TabsStyle;", "", "(Ljava/lang/String;I)V", "CHIPS", "TABS", "_avito-discouraged_api-models_models"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes17.dex */
+public final class TabsStyle {
+    private static final /* synthetic */ a $ENTRIES;
+    private static final /* synthetic */ TabsStyle[] $VALUES;
+
+    @c("chips")
+    public static final TabsStyle CHIPS = new TabsStyle("CHIPS", 0);
+
+    @c("tabs")
+    public static final TabsStyle TABS = new TabsStyle("TABS", 1);
+
+    private static final /* synthetic */ TabsStyle[] $values() {
+        return new TabsStyle[]{CHIPS, TABS};
+    }
+
+    static {
+        TabsStyle[] tabsStyleArr$values = $values();
+        $VALUES = tabsStyleArr$values;
+        $ENTRIES = kotlin.enums.c.a(tabsStyleArr$values);
+    }
+
+    private TabsStyle(String str, int i12) {
+    }
+
+    @k
+    public static a<TabsStyle> getEntries() {
+        return $ENTRIES;
+    }
+
+    public static TabsStyle valueOf(String str) {
+        return (TabsStyle) Enum.valueOf(TabsStyle.class, str);
+    }
+
+    public static TabsStyle[] values() {
+        return (TabsStyle[]) $VALUES.clone();
+    }
+}

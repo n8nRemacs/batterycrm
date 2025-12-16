@@ -1,0 +1,10 @@
+package com.avito.android.profile_settings_extended;
+
+import kotlin.Metadata;
+
+/* compiled from: ExtendedProfileSettingsFragment.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_profile-management_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.profile_settings_extended.s, reason: case insensitive filesystem */
+/* loaded from: classes16.dex */
+public final class C33505s {
+}

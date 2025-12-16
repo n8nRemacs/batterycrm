@@ -1,0 +1,13 @@
+package com.avito.android.checkout.mvi;
+
+import com.avito.android.checkout.mvi.entity.CheckoutInternalAction;
+import kotlin.Metadata;
+import xo.C49974c;
+import xo.InterfaceC49972a;
+import xo.InterfaceC49973b;
+
+/* compiled from: CheckoutFeatureBuilder.kt */
+@Metadata(d1 = {"\u0000\u001a\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0000\u0018\u00002\u001a\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u0003\u0012\u0004\u0012\u00020\u0004\u0012\u0004\u0012\u00020\u00050\u0001¨\u0006\u0006"}, d2 = {"Lcom/avito/android/checkout/mvi/l;", "Lcom/avito/android/arch/mvi/q;", "Lxo/a;", "Lcom/avito/android/checkout/mvi/entity/CheckoutInternalAction;", "Lxo/c;", "Lxo/b;", "_avito_checkout_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes12.dex */
+public final class l extends com.avito.android.arch.mvi.q<InterfaceC49972a, CheckoutInternalAction, C49974c, InterfaceC49973b> {
+}

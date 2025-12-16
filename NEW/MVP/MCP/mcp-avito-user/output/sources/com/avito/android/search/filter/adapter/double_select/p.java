@@ -1,0 +1,37 @@
+package com.avito.android.search.filter.adapter.double_select;
+
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: DoubleSelectItemView.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/search/filter/adapter/double_select/p;", "LTV0/e;", "_avito_search_filter_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public interface p extends TV0.e {
+
+    /* compiled from: DoubleSelectItemView.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+
+    void Ec(@Y61.l String str);
+
+    void FX(@Y61.k Y41.a aVar);
+
+    void G6(@Y61.l String str);
+
+    void PP(@Y61.l String str);
+
+    void XF(@Y61.l String str);
+
+    void cs();
+
+    void ct(@Y61.k Y41.a aVar);
+
+    void j30(@Y61.k Y41.a<G0> aVar);
+
+    void jy();
+
+    void setTitle(@Y61.k String str);
+
+    void wn(@Y61.k Y41.a<G0> aVar);
+}

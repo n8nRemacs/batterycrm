@@ -1,0 +1,78 @@
+package com.avito.android.loyalty.ui.items.image;
+
+import Y61.k;
+import Y61.l;
+import androidx.appcompat.app.r;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.remote.model.UniversalImage;
+import j.U;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: ImageItem.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0080\b\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/loyalty/ui/items/image/a;", "Lcom/avito/conveyor_item/a;", "_avito_loyalty_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public final /* data */ class a implements com.avito.conveyor_item.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final String f183680b;
+
+    /* renamed from: c, reason: collision with root package name */
+    public final int f183681c;
+
+    /* renamed from: d, reason: collision with root package name */
+    public final int f183682d;
+
+    /* renamed from: e, reason: collision with root package name */
+    @k
+    public final UniversalImage f183683e;
+
+    public a(@k String str, @U int i12, @U int i13, @k UniversalImage universalImage) {
+        this.f183680b = str;
+        this.f183681c = i12;
+        this.f183682d = i13;
+        this.f183683e = universalImage;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof a)) {
+            return false;
+        }
+        a aVar = (a) obj;
+        return L.f(this.f183680b, aVar.f183680b) && this.f183681c == aVar.f183681c && this.f183682d == aVar.f183682d && L.f(this.f183683e, aVar.f183683e);
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF78563b() {
+        return getF145250b().hashCode();
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @k
+    /* renamed from: getStringId, reason: from getter */
+    public final String getF145250b() {
+        return this.f183680b;
+    }
+
+    public final int hashCode() {
+        return this.f183683e.hashCode() + r.e(this.f183682d, r.e(this.f183681c, this.f183680b.hashCode() * 31, 31), 31);
+    }
+
+    @k
+    public final String toString() {
+        StringBuilder sb2 = new StringBuilder("ImageItem(stringId=");
+        sb2.append(this.f183680b);
+        sb2.append(", height=");
+        sb2.append(this.f183681c);
+        sb2.append(", width=");
+        sb2.append(this.f183682d);
+        sb2.append(", image=");
+        return com.avito.android.advert.item.delivery_suggests.l.s(sb2, this.f183683e, ')');
+    }
+}

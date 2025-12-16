@@ -1,0 +1,26 @@
+package p2;
+
+import javax.inject.Singleton;
+import kotlin.Metadata;
+import ot.InterfaceC44938d;
+
+/* compiled from: com_avito_android_cv_actualization_intent_JsxCvActualizationIntentFactoryImpl_JsxCvActualizationIntentFactory_Singleton_BindingModule_578eba3d_52727c25.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_job_cv-actualization_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: p2.o9, reason: case insensitive filesystem */
+/* loaded from: classes10.dex */
+public final class C46227o9 {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<InterfaceC44938d> f426823a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<Singleton> f426824b;
+
+    static {
+        kotlin.jvm.internal.n0 n0Var = kotlin.jvm.internal.m0.f406844a;
+        f426823a = n0Var.b(InterfaceC44938d.class);
+        f426824b = n0Var.b(Singleton.class);
+    }
+}

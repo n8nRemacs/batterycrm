@@ -1,0 +1,51 @@
+package defpackage;
+
+import kotlin.coroutines.Continuation;
+
+/* loaded from: classes2.dex */
+public final class tu9 extends dtf implements sm6 {
+    public /* synthetic */ Object X;
+    public final /* synthetic */ z41 Y;
+    public final /* synthetic */ vu9 Z;
+    public int o;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public tu9(z41 z41Var, Continuation continuation, vu9 vu9Var) {
+        super(2, continuation);
+        this.Y = z41Var;
+        this.Z = vu9Var;
+    }
+
+    @Override // defpackage.sm6
+    public final Object invoke(Object obj, Object obj2) {
+        return ((tu9) l((z26) obj, (Continuation) obj2)).n(qqg.a);
+    }
+
+    @Override // defpackage.ij0
+    public final Continuation l(Object obj, Continuation continuation) {
+        tu9 tu9Var = new tu9(this.Y, continuation, this.Z);
+        tu9Var.X = obj;
+        return tu9Var;
+    }
+
+    @Override // defpackage.ij0
+    public final Object n(Object obj) {
+        int i = this.o;
+        if (i == 0) {
+            g8j.b(obj);
+            ld2 ld2Var = new ld2((z26) this.X, this.Z, 6);
+            this.o = 1;
+            Object objD = this.Y.d(ld2Var, this);
+            g84 g84Var = g84.a;
+            if (objD == g84Var) {
+                return g84Var;
+            }
+        } else {
+            if (i != 1) {
+                throw new IllegalStateException("call to 'resume' before 'invoke' with coroutine");
+            }
+            g8j.b(obj);
+        }
+        return qqg.a;
+    }
+}

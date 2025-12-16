@@ -1,0 +1,26 @@
+package RP;
+
+import Y61.k;
+import com.avito.android.job.cv_info_actualization.generated.api.v_1__job_cv_actualization_save.CvActualizationSaveRequestAttributesItem;
+import com.avito.android.remote.model.Navigation;
+import com.google.gson.annotations.c;
+import java.util.List;
+import kotlin.Metadata;
+
+/* compiled from: V1JobCvActualizationSaveRequest.kt */
+@Metadata(d1 = {"\u0000\u001a\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\t\n\u0002\b\n\u0018\u00002\u00020\u0001B\u001f\u0012\u000e\u0010\u0004\u001a\n\u0012\u0006\u0012\u0004\u0018\u00010\u00030\u0002\u0012\u0006\u0010\u0006\u001a\u00020\u0005¢\u0006\u0004\b\u0007\u0010\bR\"\u0010\u0004\u001a\n\u0012\u0006\u0012\u0004\u0018\u00010\u00030\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0004\u0010\t\u001a\u0004\b\n\u0010\u000bR\u001a\u0010\u0006\u001a\u00020\u00058\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0006\u0010\f\u001a\u0004\b\r\u0010\u000e¨\u0006\u000f"}, d2 = {"LRP/a;", "", "", "Lcom/avito/android/job/cv_info_actualization/generated/api/v_1__job_cv_actualization_save/CvActualizationSaveRequestAttributesItem;", Navigation.ATTRIBUTES, "", "cvId", "<init>", "(Ljava/util/List;J)V", "Ljava/util/List;", "getAttributes", "()Ljava/util/List;", "J", "getCvId", "()J", "_avito_job_cv-info-actualization_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public final class a {
+
+    @c(Navigation.ATTRIBUTES)
+    @k
+    private final List<CvActualizationSaveRequestAttributesItem> attributes;
+
+    @c("cvId")
+    private final long cvId;
+
+    public a(@k List<CvActualizationSaveRequestAttributesItem> list, long j12) {
+        this.attributes = list;
+        this.cvId = j12;
+    }
+}

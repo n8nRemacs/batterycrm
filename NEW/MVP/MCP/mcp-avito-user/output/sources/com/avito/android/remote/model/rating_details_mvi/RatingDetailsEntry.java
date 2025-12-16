@@ -1,0 +1,10 @@
+package com.avito.android.remote.model.rating_details_mvi;
+
+import android.os.Parcelable;
+import kotlin.Metadata;
+
+/* compiled from: RatingDetailsEntry.kt */
+@Metadata(d1 = {"\u0000J\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bv\u0018\u00002\u00020\u0001\u0082\u0001\u0010\u0002\u0003\u0004\u0005\u0006\u0007\b\t\n\u000b\f\r\u000e\u000f\u0010\u0011¨\u0006\u0012"}, d2 = {"Lcom/avito/android/remote/model/rating_details_mvi/RatingDetailsEntry;", "Landroid/os/Parcelable;", "Lcom/avito/android/remote/model/rating_details_mvi/ActionEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/BadgeScoreEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/ButtonEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/BuyerReviewEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/InfoEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/ModelReviewEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/OldSearchParametersEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/PhotoGalleryEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/RatingAspectsEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/RatingLLMSummaryEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/RatingStatisticEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/RatingStatisticWithScoreEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/RatingSummaryEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/ReviewEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/SearchParametersEntry;", "Lcom/avito/android/remote/model/rating_details_mvi/TextEntry;", "_avito-discouraged_avito-network_rating-details"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes17.dex */
+public interface RatingDetailsEntry extends Parcelable {
+}

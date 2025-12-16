@@ -1,0 +1,55 @@
+package com.yandex.metrica.impl.ob;
+
+/* renamed from: com.yandex.metrica.impl.ob.kc, reason: case insensitive filesystem */
+/* loaded from: classes7.dex */
+public class C38926kc extends Pb {
+
+    /* renamed from: com.yandex.metrica.impl.ob.kc$a */
+    public class a implements InterfaceC38827gc {
+        public a() {
+        }
+
+        @Override // com.yandex.metrica.impl.ob.InterfaceC38827gc
+        public void a(long j12) {
+            C38926kc.this.f379162a.j(j12);
+        }
+
+        @Override // com.yandex.metrica.impl.ob.InterfaceC38827gc
+        public long getLastAttemptTimeSeconds() {
+            return C38926kc.this.f379162a.e(0L);
+        }
+    }
+
+    public C38926kc(@j.N Cc cc2, @j.N C38774e9 c38774e9) {
+        this(cc2, c38774e9, new G1());
+    }
+
+    @Override // com.yandex.metrica.impl.ob.Pb
+    @j.N
+    public InterfaceC38827gc a() {
+        return new a();
+    }
+
+    @Override // com.yandex.metrica.impl.ob.Pb
+    @j.N
+    public String b() {
+        return "network";
+    }
+
+    @Override // com.yandex.metrica.impl.ob.Pb
+    @j.N
+    public String c() {
+        return "lbs";
+    }
+
+    @j.k0
+    public C38926kc(@j.N Cc cc2, @j.N C38774e9 c38774e9, @j.N G1 g12) {
+        super(cc2, c38774e9, g12);
+    }
+
+    @Override // com.yandex.metrica.impl.ob.Pb
+    @j.N
+    public InterfaceC39291zd a(@j.N C39267yd c39267yd) {
+        return this.f379164c.a(c39267yd);
+    }
+}

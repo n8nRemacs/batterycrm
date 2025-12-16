@@ -1,0 +1,24 @@
+package wq;
+
+import Y61.k;
+import com.avito.android.analytics.screens.tracker.InterfaceC28481c;
+import com.avito.android.di.InterfaceC29971h;
+import com.avito.android.util.R0;
+import kotlin.Metadata;
+import xq.InterfaceC49982a;
+
+/* compiled from: ComfortableDealInviteDependencies.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lwq/c;", "Lcom/avito/android/di/h;", "_avito_comfortable-deal-invite_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@C11.c
+/* renamed from: wq.c, reason: case insensitive filesystem */
+/* loaded from: classes12.dex */
+public interface InterfaceC49671c extends InterfaceC29971h {
+    @k
+    InterfaceC49982a Xe();
+
+    @k
+    InterfaceC28481c b();
+
+    @k
+    R0 c();
+}

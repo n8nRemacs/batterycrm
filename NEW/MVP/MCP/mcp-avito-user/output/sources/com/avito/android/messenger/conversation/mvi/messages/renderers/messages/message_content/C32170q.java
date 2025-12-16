@@ -1,0 +1,78 @@
+package com.avito.android.messenger.conversation.mvi.messages.renderers.messages.message_content;
+
+import androidx.compose.runtime.C22039c2;
+import androidx.compose.runtime.InterfaceC22132o;
+import androidx.compose.runtime.InterfaceC22181t;
+import androidx.compose.ui.v;
+import com.avito.android.messenger.conversation.T1;
+import com.avito.android.messenger.conversation.mvi.messages.h0;
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: ImageMessageFromAvitoContentRenderer.kt */
+@androidx.compose.runtime.internal.P
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÇ\u0002\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lcom/avito/android/messenger/conversation/mvi/messages/renderers/messages/message_content/q;", "Lcom/avito/android/messenger/conversation/mvi/messages/renderers/messages/message_content/b;", "<init>", "()V", "_avito_messenger_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: com.avito.android.messenger.conversation.mvi.messages.renderers.messages.message_content.q, reason: case insensitive filesystem */
+/* loaded from: classes15.dex */
+public final class C32170q extends AbstractC32155b {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final C32170q f193414a = new C32170q();
+
+    /* compiled from: ImageMessageFromAvitoContentRenderer.kt */
+    @Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0003\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002"}, d2 = {"Lkotlin/G0;", "invoke", "()V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    /* renamed from: com.avito.android.messenger.conversation.mvi.messages.renderers.messages.message_content.q$a */
+    public static final class a extends kotlin.jvm.internal.N implements Y41.a<G0> {
+
+        /* renamed from: l, reason: collision with root package name */
+        public final /* synthetic */ Y41.l<com.avito.android.messenger.conversation.mvi.messages.h0, G0> f193415l;
+
+        /* renamed from: m, reason: collision with root package name */
+        public final /* synthetic */ T1.d f193416m;
+
+        /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+        /* JADX WARN: Multi-variable type inference failed */
+        public a(Y41.l<? super com.avito.android.messenger.conversation.mvi.messages.h0, G0> lVar, T1.d dVar) {
+            super(0);
+            this.f193415l = lVar;
+            this.f193416m = dVar;
+        }
+
+        @Override // Y41.a
+        public final G0 invoke() {
+            T1.d dVar = this.f193416m;
+            this.f193415l.invoke(new h0.i(dVar.f189168c, dVar.f189180o, dVar.f189181p, dVar.f189182q));
+            return G0.f406611a;
+        }
+    }
+
+    @Override // com.avito.android.messenger.conversation.mvi.messages.renderers.messages.message_content.AbstractC32155b
+    @InterfaceC22132o
+    @InterfaceC22181t
+    public final void a(@Y61.k T1.d dVar, @Y61.k Y41.l lVar, @Y61.k v.a aVar, @Y61.l androidx.compose.runtime.A a12, int i12) {
+        int i13;
+        androidx.compose.runtime.B bE2 = a12.E(-1339003481);
+        if ((i12 & 14) == 0) {
+            i13 = (bE2.B(dVar) ? 4 : 2) | i12;
+        } else {
+            i13 = i12;
+        }
+        if ((i13 & 11) == 2 && bE2.c()) {
+            bE2.f();
+        } else {
+            com.avito.android.messenger.conversation.mvi.messages.composables.messages.message_content.image_message.i iVar = dVar.f189156A;
+            com.avito.android.messenger.conversation.mvi.messages.composables.messages.message_content.image_message.f.a(iVar != null ? iVar.f192516a : null, iVar != null ? iVar.f192517b : null, false, null, false, bE2, 456, 24);
+        }
+        C22039c2 c22039c2Z = bE2.Z();
+        if (c22039c2Z != null) {
+            c22039c2Z.f38184d = new C32169p(this, dVar, lVar, aVar, i12);
+        }
+    }
+
+    @Override // com.avito.android.messenger.conversation.mvi.messages.renderers.messages.message_content.AbstractC32155b
+    @Y61.k
+    public final Y41.a b(@Y61.k Y41.l lVar, @Y61.k T1.d dVar) {
+        return new a(lVar, dVar);
+    }
+}

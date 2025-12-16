@@ -1,0 +1,22 @@
+package com.avito.android.publish.slots.cpa_ddu_upload;
+
+import Y41.p;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.Q;
+import kotlin.jvm.internal.H;
+
+/* compiled from: CpaReassignmentSlotItemPresenter.kt */
+@Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes16.dex */
+final /* synthetic */ class f extends H implements p<String, Boolean, G0> {
+    @Override // Y41.p
+    public final G0 invoke(String str, Boolean bool) {
+        Boolean bool2 = bool;
+        bool2.booleanValue();
+        i iVar = (i) this.receiver;
+        iVar.getClass();
+        iVar.f243356c.accept(new Q<>(str, bool2));
+        return G0.f406611a;
+    }
+}

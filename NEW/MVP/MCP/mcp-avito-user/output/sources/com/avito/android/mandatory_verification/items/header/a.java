@@ -1,0 +1,15 @@
+package com.avito.android.mandatory_verification.items.header;
+
+import kotlin.Metadata;
+
+/* compiled from: MandatoryVerificationHeaderItemBlueprint.kt */
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/mandatory_verification/items/header/a;", "LTV0/b;", "Lcom/avito/android/mandatory_verification/items/header/j;", "Lcom/avito/android/mandatory_verification/items/header/MandatoryVerificationHeaderItem;", "_avito_mandatory-verification-items_public"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public interface a extends TV0.b<j, MandatoryVerificationHeaderItem> {
+
+    /* compiled from: MandatoryVerificationHeaderItemBlueprint.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: com.avito.android.mandatory_verification.items.header.a$a, reason: collision with other inner class name */
+    public static final class C5422a {
+    }
+}

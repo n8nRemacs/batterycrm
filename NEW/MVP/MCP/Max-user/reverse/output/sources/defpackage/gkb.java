@@ -1,0 +1,53 @@
+package defpackage;
+
+import android.hardware.camera2.params.OutputConfiguration;
+import android.view.Surface;
+import java.util.Objects;
+
+/* loaded from: classes.dex */
+public class gkb {
+    public final Object a;
+
+    public gkb(Object obj) {
+        this.a = obj;
+    }
+
+    public Object a() {
+        Object obj = this.a;
+        z5j.b(obj instanceof fkb);
+        return ((fkb) obj).a;
+    }
+
+    public String b() {
+        return ((fkb) this.a).b;
+    }
+
+    public final Surface c() {
+        return ((OutputConfiguration) a()).getSurface();
+    }
+
+    public void d(long j) {
+        ((fkb) this.a).c = j;
+    }
+
+    public void e(int i) {
+    }
+
+    public final boolean equals(Object obj) {
+        if (!(obj instanceof gkb)) {
+            return false;
+        }
+        return Objects.equals(this.a, ((gkb) obj).a);
+    }
+
+    public void f(String str) {
+        ((fkb) this.a).b = str;
+    }
+
+    public void g(long j) {
+    }
+
+    public final int hashCode() {
+        return this.a.hashCode();
+    }
+}

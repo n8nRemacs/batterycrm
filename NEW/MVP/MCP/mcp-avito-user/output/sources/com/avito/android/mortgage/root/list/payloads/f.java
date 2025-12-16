@@ -1,0 +1,25 @@
+package com.avito.android.mortgage.root.list.payloads;
+
+/* compiled from: MortgageRootBankPayloadProvider_Factory.java */
+@dagger.internal.e
+@dagger.internal.x
+@dagger.internal.y
+/* loaded from: classes15.dex */
+public final class f implements dagger.internal.h<e> {
+
+    /* compiled from: MortgageRootBankPayloadProvider_Factory.java */
+    public static final class a {
+
+        /* renamed from: a, reason: collision with root package name */
+        public static final f f202902a = new f();
+    }
+
+    public static f a() {
+        return a.f202902a;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        return new e();
+    }
+}

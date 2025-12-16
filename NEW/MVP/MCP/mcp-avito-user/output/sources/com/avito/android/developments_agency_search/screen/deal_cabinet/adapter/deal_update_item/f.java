@@ -1,0 +1,16 @@
+package com.avito.android.developments_agency_search.screen.deal_cabinet.adapter.deal_update_item;
+
+import dagger.internal.x;
+import dagger.internal.y;
+
+/* compiled from: DealUpdateItemPresenter_Factory.java */
+@dagger.internal.e
+@y
+@x
+/* loaded from: classes13.dex */
+public final class f implements dagger.internal.h<d> {
+    @Override // javax.inject.Provider
+    public final Object get() {
+        throw null;
+    }
+}

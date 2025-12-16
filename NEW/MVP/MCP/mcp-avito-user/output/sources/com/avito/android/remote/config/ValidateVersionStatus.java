@@ -1,0 +1,56 @@
+package com.avito.android.remote.config;
+
+import kotlin.Metadata;
+import kotlin.enums.c;
+
+/* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+/* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+/* compiled from: ValidateVersionStatus.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0010\n\u0000\b\u0086\u0081\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00000\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/remote/config/ValidateVersionStatus;", "", "_avito-discouraged_api-models_models"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes17.dex */
+public final class ValidateVersionStatus {
+
+    /* renamed from: b, reason: collision with root package name */
+    public static final ValidateVersionStatus f253346b;
+
+    /* renamed from: c, reason: collision with root package name */
+    public static final ValidateVersionStatus f253347c;
+
+    /* renamed from: d, reason: collision with root package name */
+    public static final ValidateVersionStatus f253348d;
+
+    /* renamed from: e, reason: collision with root package name */
+    public static final ValidateVersionStatus f253349e;
+
+    /* renamed from: f, reason: collision with root package name */
+    public static final /* synthetic */ ValidateVersionStatus[] f253350f;
+
+    /* renamed from: g, reason: collision with root package name */
+    public static final /* synthetic */ kotlin.enums.a f253351g;
+
+    static {
+        ValidateVersionStatus validateVersionStatus = new ValidateVersionStatus("NO_UPDATE", 0);
+        f253346b = validateVersionStatus;
+        ValidateVersionStatus validateVersionStatus2 = new ValidateVersionStatus("UPDATE_PROPOSAL", 1);
+        f253347c = validateVersionStatus2;
+        ValidateVersionStatus validateVersionStatus3 = new ValidateVersionStatus("UPDATE_REQUIRED", 2);
+        f253348d = validateVersionStatus3;
+        ValidateVersionStatus validateVersionStatus4 = new ValidateVersionStatus("DEVICE_NOT_SUPPORTED", 3);
+        f253349e = validateVersionStatus4;
+        ValidateVersionStatus[] validateVersionStatusArr = {validateVersionStatus, validateVersionStatus2, validateVersionStatus3, validateVersionStatus4};
+        f253350f = validateVersionStatusArr;
+        f253351g = c.a(validateVersionStatusArr);
+    }
+
+    public ValidateVersionStatus() {
+        throw null;
+    }
+
+    public static ValidateVersionStatus valueOf(String str) {
+        return (ValidateVersionStatus) Enum.valueOf(ValidateVersionStatus.class, str);
+    }
+
+    public static ValidateVersionStatus[] values() {
+        return (ValidateVersionStatus[]) f253350f.clone();
+    }
+}

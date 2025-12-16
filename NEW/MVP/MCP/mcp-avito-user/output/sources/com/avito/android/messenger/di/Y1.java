@@ -1,0 +1,24 @@
+package com.avito.android.messenger.di;
+
+import com.avito.android.util.InterfaceC35745a5;
+import kotlin.Metadata;
+
+/* compiled from: MessengerSyncModule.kt */
+@Metadata(d1 = {"\u0000\b\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0003\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0001\u0010\u0002"}, d2 = {"Lio/reactivex/rxjava3/core/H;", "invoke", "()Lio/reactivex/rxjava3/core/H;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* loaded from: classes15.dex */
+final class Y1 extends kotlin.jvm.internal.N implements Y41.a<io.reactivex.rxjava3.core.H> {
+
+    /* renamed from: l, reason: collision with root package name */
+    public final /* synthetic */ InterfaceC35745a5 f195728l;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public Y1(InterfaceC35745a5 interfaceC35745a5) {
+        super(0);
+        this.f195728l = interfaceC35745a5;
+    }
+
+    @Override // Y41.a
+    public final io.reactivex.rxjava3.core.H invoke() {
+        return this.f195728l.a();
+    }
+}

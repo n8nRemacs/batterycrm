@@ -1,0 +1,19 @@
+package com.avito.android.messenger.conversation.adapter;
+
+import androidx.compose.runtime.internal.P;
+import kotlin.Metadata;
+
+/* compiled from: LocationMessages.kt */
+@P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/messenger/conversation/adapter/C;", "", "_avito_messenger_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes15.dex */
+public final class C {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final String f189255a;
+
+    public C(@Y61.k String str) {
+        this.f189255a = str;
+    }
+}

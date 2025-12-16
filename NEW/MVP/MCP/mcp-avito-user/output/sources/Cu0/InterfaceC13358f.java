@@ -1,0 +1,13 @@
+package Cu0;
+
+import kotlin.Metadata;
+
+/* compiled from: ServiceOrderWidgetItemPromoStorage.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"LCu0/f;", "", "_avito_service-order-widget_public"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: Cu0.f, reason: case insensitive filesystem */
+/* loaded from: classes3.dex */
+public interface InterfaceC13358f {
+    void a();
+
+    boolean b();
+}

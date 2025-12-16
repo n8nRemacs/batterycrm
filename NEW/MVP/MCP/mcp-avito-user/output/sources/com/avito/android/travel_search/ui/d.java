@@ -1,0 +1,54 @@
+package com.avito.android.travel_search.ui;
+
+import com.avito.android.travel_search.ui.TravelSearchFragment;
+import kotlin.C42729a0;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+import kotlin.coroutines.jvm.internal.SuspendLambda;
+import vF0.InterfaceC49206a;
+
+/* compiled from: TravelSearchFragment.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0010\u0003\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0003\u001a\u00020\u00022\u0006\u0010\u0001\u001a\u00020\u0000H\u008a@¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"", "error", "Lkotlin/G0;", "<anonymous>", "(Ljava/lang/Throwable;)V"}, k = 3, mv = {1, 9, 0})
+@DebugMetadata(c = "com.avito.android.travel_search.ui.TravelSearchFragment$setupObservers$4", f = "TravelSearchFragment.kt", i = {}, l = {}, m = "invokeSuspend", n = {}, s = {})
+/* loaded from: classes4.dex */
+final class d extends SuspendLambda implements Y41.p<Throwable, Continuation<? super G0>, Object> {
+
+    /* renamed from: q, reason: collision with root package name */
+    public /* synthetic */ Object f303236q;
+
+    /* renamed from: r, reason: collision with root package name */
+    public final /* synthetic */ TravelSearchFragment f303237r;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public d(TravelSearchFragment travelSearchFragment, Continuation<? super d> continuation) {
+        super(2, continuation);
+        this.f303237r = travelSearchFragment;
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.k
+    public final Continuation<G0> create(@Y61.l Object obj, @Y61.k Continuation<?> continuation) {
+        d dVar = new d(this.f303237r, continuation);
+        dVar.f303236q = obj;
+        return dVar;
+    }
+
+    @Override // Y41.p
+    public final Object invoke(Throwable th2, Continuation<? super G0> continuation) {
+        return ((d) create(th2, continuation)).invokeSuspend(G0.f406611a);
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.l
+    public final Object invokeSuspend(@Y61.k Object obj) {
+        IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        C42729a0.b(obj);
+        Throwable th2 = (Throwable) this.f303236q;
+        TravelSearchFragment.a aVar = TravelSearchFragment.f303202F0;
+        this.f303237r.r5().accept(new InterfaceC49206a.g(th2));
+        return G0.f406611a;
+    }
+}

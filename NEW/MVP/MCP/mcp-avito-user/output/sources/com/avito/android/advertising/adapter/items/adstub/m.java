@@ -1,0 +1,83 @@
+package com.avito.android.advertising.adapter.items.adstub;
+
+import TV0.g;
+import android.content.res.Resources;
+import android.view.View;
+import android.view.ViewGroup;
+import com.avito.android.R;
+import com.avito.android.advertising.adapter.CommercialBannerItem;
+import com.avito.android.advertising.adapter.items.AdViewType;
+import com.avito.android.advertising.ui.AdStyle;
+import javax.inject.Inject;
+import kotlin.Metadata;
+import kotlin.jvm.internal.N;
+
+/* compiled from: NotLoadAdStubBigGridNewBlueprint.kt */
+@Metadata(d1 = {"\u0000\u0012\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u000e\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u00030\u0001¨\u0006\u0004"}, d2 = {"Lcom/avito/android/advertising/adapter/items/adstub/m;", "LTV0/b;", "LEb/c;", "Lcom/avito/android/advertising/adapter/CommercialBannerItem;", "_avito_advertising_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class m implements TV0.b<Eb.c, CommercialBannerItem> {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public final s f86960a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public final com.avito.android.advertising.a f86961b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @Y61.k
+    public final g.a<Eb.c> f86962c = new g.a<>(R.layout.not_load_ad_stub_big_grid, new a());
+
+    /* compiled from: NotLoadAdStubBigGridNewBlueprint.kt */
+    @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0007\u001a\u00020\u00042\u0006\u0010\u0001\u001a\u00020\u00002\u0006\u0010\u0003\u001a\u00020\u0002H\n¢\u0006\u0004\b\u0005\u0010\u0006"}, d2 = {"Landroid/view/ViewGroup;", "<anonymous parameter 0>", "Landroid/view/View;", "view", "LEb/c;", "invoke", "(Landroid/view/ViewGroup;Landroid/view/View;)LEb/c;", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+    public static final class a extends N implements Y41.p<ViewGroup, View, Eb.c> {
+        public a() {
+            super(2);
+        }
+
+        @Override // Y41.p
+        public final Eb.c invoke(ViewGroup viewGroup, View view) throws Resources.NotFoundException {
+            Eb.c cVar = new Eb.c(view, AdStyle.f88537b, null, 4, null);
+            if (m.this.f86961b.a()) {
+                cVar.B80(1.5f);
+            }
+            return cVar;
+        }
+    }
+
+    @Inject
+    public m(@Y61.k s sVar, @Y61.k com.avito.android.advertising.a aVar) {
+        this.f86960a = sVar;
+        this.f86961b = aVar;
+    }
+
+    @Override // TV0.b
+    public final TV0.d a() {
+        return this.f86960a;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    public final g.a<Eb.c> b() {
+        return this.f86962c;
+    }
+
+    @Override // TV0.b
+    @Y61.k
+    /* renamed from: c */
+    public final String getF175463a() {
+        return "";
+    }
+
+    @Override // TV0.b
+    public final boolean d(@Y61.k TV0.a aVar) {
+        if (aVar instanceof CommercialBannerItem) {
+            CommercialBannerItem commercialBannerItem = (CommercialBannerItem) aVar;
+            if (commercialBannerItem.getHasNotLoadedAd() && !commercialBannerItem.getDisplayType().isInformative() && commercialBannerItem.getAdViewType() == AdViewType.f86910d && !commercialBannerItem.isMediaX2()) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

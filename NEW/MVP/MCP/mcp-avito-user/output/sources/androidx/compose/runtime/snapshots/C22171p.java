@@ -1,0 +1,10 @@
+package androidx.compose.runtime.snapshots;
+
+import kotlin.Metadata;
+
+/* compiled from: SnapshotContextElement.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"runtime_release"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: androidx.compose.runtime.snapshots.p, reason: case insensitive filesystem */
+/* loaded from: classes.dex */
+public final class C22171p {
+}

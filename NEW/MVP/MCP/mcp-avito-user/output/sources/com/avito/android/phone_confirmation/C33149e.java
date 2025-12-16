@@ -1,0 +1,23 @@
+package com.avito.android.phone_confirmation;
+
+import com.avito.android.phone_confirmation.state.PhoneConfirmationTime;
+import kotlin.Metadata;
+
+/* compiled from: PhoneConfirmationInteractor.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\u0010\u0005\u001a\u00020\u00022\u0006\u0010\u0001\u001a\u00020\u0000H\n¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"Lcom/avito/android/phone_confirmation/state/PhoneConfirmationTime;", "it", "Lkotlin/G0;", "accept", "(Lcom/avito/android/phone_confirmation/state/PhoneConfirmationTime;)V", "<anonymous>"}, k = 3, mv = {1, 9, 0})
+/* renamed from: com.avito.android.phone_confirmation.e, reason: case insensitive filesystem */
+/* loaded from: classes15.dex */
+final class C33149e<T> implements l41.g {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ C33146b f215930b;
+
+    public C33149e(C33146b c33146b) {
+        this.f215930b = c33146b;
+    }
+
+    @Override // l41.g
+    public final void accept(Object obj) {
+        this.f215930b.f215899f.b((PhoneConfirmationTime) obj);
+    }
+}

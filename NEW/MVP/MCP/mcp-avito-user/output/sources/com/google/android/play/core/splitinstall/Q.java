@@ -1,0 +1,11 @@
+package com.google.android.play.core.splitinstall;
+
+/* compiled from: com.google.android.play:feature-delivery@@2.0.1 */
+/* loaded from: classes6.dex */
+public final class Q {
+    public Q() {
+    }
+
+    public /* synthetic */ Q(I i12) {
+    }
+}

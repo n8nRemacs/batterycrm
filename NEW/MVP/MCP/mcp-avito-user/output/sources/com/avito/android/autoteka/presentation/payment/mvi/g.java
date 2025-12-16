@@ -1,0 +1,81 @@
+package com.avito.android.autoteka.presentation.payment.mvi;
+
+import Nf.InterfaceC14568a;
+import com.avito.android.autoteka.items.payment.PaymentItem;
+import com.avito.android.autoteka.presentation.payment.mvi.entity.AutotekaPaymentInternalAction;
+import com.avito.android.autoteka.presentation.payment.mvi.entity.AutotekaPaymentState;
+import com.avito.android.remote.autoteka.model.ContestAgreement;
+import kotlin.C42729a0;
+import kotlin.G0;
+import kotlin.Metadata;
+import kotlin.coroutines.Continuation;
+import kotlin.coroutines.intrinsics.IntrinsicsKt;
+import kotlin.coroutines.jvm.internal.DebugMetadata;
+import kotlin.coroutines.jvm.internal.SuspendLambda;
+import kotlinx.coroutines.flow.InterfaceC43172j;
+
+/* compiled from: AutotekaPaymentActor.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0003\u001a\u00020\u0002*\b\u0012\u0004\u0012\u00020\u00010\u0000H\u008a@¢\u0006\u0004\b\u0003\u0010\u0004"}, d2 = {"Lkotlinx/coroutines/flow/j;", "Lcom/avito/android/autoteka/presentation/payment/mvi/entity/AutotekaPaymentInternalAction;", "Lkotlin/G0;", "<anonymous>", "(Lkotlinx/coroutines/flow/j;)V"}, k = 3, mv = {1, 9, 0})
+@DebugMetadata(c = "com.avito.android.autoteka.presentation.payment.mvi.AutotekaPaymentActor$process$7", f = "AutotekaPaymentActor.kt", i = {}, l = {157}, m = "invokeSuspend", n = {}, s = {})
+/* loaded from: classes11.dex */
+final class g extends SuspendLambda implements Y41.p<InterfaceC43172j<? super AutotekaPaymentInternalAction>, Continuation<? super G0>, Object> {
+
+    /* renamed from: q, reason: collision with root package name */
+    public int f97469q;
+
+    /* renamed from: r, reason: collision with root package name */
+    public /* synthetic */ Object f97470r;
+
+    /* renamed from: s, reason: collision with root package name */
+    public final /* synthetic */ AutotekaPaymentState f97471s;
+
+    /* renamed from: t, reason: collision with root package name */
+    public final /* synthetic */ InterfaceC14568a f97472t;
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    public g(AutotekaPaymentState autotekaPaymentState, InterfaceC14568a interfaceC14568a, Continuation<? super g> continuation) {
+        super(2, continuation);
+        this.f97471s = autotekaPaymentState;
+        this.f97472t = interfaceC14568a;
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.k
+    public final Continuation<G0> create(@Y61.l Object obj, @Y61.k Continuation<?> continuation) {
+        g gVar = new g(this.f97471s, this.f97472t, continuation);
+        gVar.f97470r = obj;
+        return gVar;
+    }
+
+    @Override // Y41.p
+    public final Object invoke(InterfaceC43172j<? super AutotekaPaymentInternalAction> interfaceC43172j, Continuation<? super G0> continuation) {
+        return ((g) create(interfaceC43172j, continuation)).invokeSuspend(G0.f406611a);
+    }
+
+    @Override // kotlin.coroutines.jvm.internal.BaseContinuationImpl
+    @Y61.l
+    public final Object invokeSuspend(@Y61.k Object obj) {
+        Object coroutine_suspended = IntrinsicsKt.getCOROUTINE_SUSPENDED();
+        int i12 = this.f97469q;
+        if (i12 == 0) {
+            C42729a0.b(obj);
+            InterfaceC43172j interfaceC43172j = (InterfaceC43172j) this.f97470r;
+            AutotekaPaymentState autotekaPaymentState = this.f97471s;
+            if (autotekaPaymentState instanceof AutotekaPaymentState.Success) {
+                PaymentItem paymentItem = ((AutotekaPaymentState.Success) autotekaPaymentState).f97463e;
+                ContestAgreement contestAgreement = paymentItem.f96847m;
+                AutotekaPaymentInternalAction.Success success = new AutotekaPaymentInternalAction.Success(PaymentItem.a(paymentItem, null, contestAgreement != null ? ContestAgreement.a(contestAgreement, ((InterfaceC14568a.C0753a) this.f97472t).f11684a) : null, 2047));
+                this.f97469q = 1;
+                if (interfaceC43172j.emit(success, this) == coroutine_suspended) {
+                    return coroutine_suspended;
+                }
+            }
+        } else {
+            if (i12 != 1) {
+                throw new IllegalStateException("call to 'resume' before 'invoke' with coroutine");
+            }
+            C42729a0.b(obj);
+        }
+        return G0.f406611a;
+    }
+}

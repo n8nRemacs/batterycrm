@@ -1,0 +1,54 @@
+package com.avito.android.gig.slot_impl.generated.api.slot_v_7;
+
+import Y61.k;
+import Y61.l;
+import androidx.compose.runtime.internal.P;
+import com.avito.android.gig.slot_impl.generated.api.slot_v_7.SlotWarningV3;
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.r;
+import com.google.gson.stream.a;
+import com.google.gson.stream.c;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: SlotWarningV3PresetTypeAdapterFactory.kt */
+@P
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0004\b\u0007\u0018\u00002\u00020\u0001:\u0001\u0004B\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0005"}, d2 = {"Lcom/avito/android/gig/slot_impl/generated/api/slot_v_7/SlotWarningV3PresetTypeAdapterFactory;", "Lcom/google/gson/r;", "<init>", "()V", "SlotWarningV3PresetTypeAdapter", "_avito_gig_slot-screen_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public final class SlotWarningV3PresetTypeAdapterFactory implements r {
+
+    /* compiled from: SlotWarningV3PresetTypeAdapterFactory.kt */
+    @P
+    @Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001¨\u0006\u0003"}, d2 = {"Lcom/avito/android/gig/slot_impl/generated/api/slot_v_7/SlotWarningV3PresetTypeAdapterFactory$SlotWarningV3PresetTypeAdapter;", "Lcom/google/gson/TypeAdapter;", "Lcom/avito/android/gig/slot_impl/generated/api/slot_v_7/SlotWarningV3$Preset;", "_avito_gig_slot-screen_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public static final class SlotWarningV3PresetTypeAdapter extends TypeAdapter<SlotWarningV3.Preset> {
+
+        /* renamed from: a, reason: collision with root package name */
+        @k
+        public final TypeAdapter<SlotWarningV3.Preset> f159499a;
+
+        public SlotWarningV3PresetTypeAdapter(@k TypeAdapter<SlotWarningV3.Preset> typeAdapter) {
+            this.f159499a = typeAdapter;
+        }
+
+        @Override // com.google.gson.TypeAdapter
+        public final SlotWarningV3.Preset read(a aVar) {
+            SlotWarningV3.Preset preset = this.f159499a.read(aVar);
+            return preset == null ? SlotWarningV3.Preset.WarmGray : preset;
+        }
+
+        @Override // com.google.gson.TypeAdapter
+        public final void write(c cVar, SlotWarningV3.Preset preset) {
+            this.f159499a.write(cVar, preset);
+        }
+    }
+
+    @Override // com.google.gson.r
+    @l
+    public final <T> TypeAdapter<T> a(@k Gson gson, @k com.google.gson.reflect.a<T> aVar) {
+        if (L.f(aVar.getRawType(), SlotWarningV3.Preset.class)) {
+            return new SlotWarningV3PresetTypeAdapter(gson.h(this, com.google.gson.reflect.a.get(SlotWarningV3.Preset.class)));
+        }
+        return null;
+    }
+}

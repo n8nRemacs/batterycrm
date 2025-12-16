@@ -1,0 +1,25 @@
+package com.avito.android.tariff_lf.edit_info.item.edit_package.realty_plus;
+
+import Y61.k;
+import java.util.List;
+import kotlin.G0;
+import kotlin.Metadata;
+
+/* compiled from: RealtyPlusEditPackageItemView.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/tariff_lf/edit_info/item/edit_package/realty_plus/h;", "LTV0/e;", "_avito_tariff-lf_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes4.dex */
+public interface h extends TV0.e {
+
+    /* compiled from: RealtyPlusEditPackageItemView.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+
+    void H5(@k List<TC0.a> list);
+
+    void V(@k String str);
+
+    void a(@k Y41.a<G0> aVar);
+
+    void h80(@k String str);
+}

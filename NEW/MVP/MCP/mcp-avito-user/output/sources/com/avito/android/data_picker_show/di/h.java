@@ -1,0 +1,28 @@
+package com.avito.android.data_picker_show.di;
+
+import dagger.internal.x;
+import dagger.internal.y;
+
+/* compiled from: DataPickerShowLinkResultConverter_Factory.java */
+@dagger.internal.e
+@x
+@y
+/* loaded from: classes12.dex */
+public final class h implements dagger.internal.h<f> {
+
+    /* compiled from: DataPickerShowLinkResultConverter_Factory.java */
+    public static final class a {
+
+        /* renamed from: a, reason: collision with root package name */
+        public static final h f132550a = new h();
+    }
+
+    public static h a() {
+        return a.f132550a;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        return new f();
+    }
+}

@@ -1,0 +1,29 @@
+package com.avito.android.item_price_history.presentation.items.skeleton;
+
+import dagger.internal.h;
+import dagger.internal.x;
+import dagger.internal.y;
+
+/* compiled from: ItemPriceHistorySkeletonPresenter_Factory.java */
+@dagger.internal.e
+@x
+@y
+/* loaded from: classes14.dex */
+public final class d implements h<c> {
+
+    /* compiled from: ItemPriceHistorySkeletonPresenter_Factory.java */
+    public static final class a {
+
+        /* renamed from: a, reason: collision with root package name */
+        public static final d f173776a = new d();
+    }
+
+    public static d a() {
+        return a.f173776a;
+    }
+
+    @Override // javax.inject.Provider
+    public final Object get() {
+        return new c();
+    }
+}

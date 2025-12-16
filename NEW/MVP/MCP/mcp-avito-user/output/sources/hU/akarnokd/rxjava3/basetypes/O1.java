@@ -1,0 +1,108 @@
+package hu.akarnokd.rxjava3.basetypes;
+
+import io.reactivex.rxjava3.exceptions.CompositeException;
+import io.reactivex.rxjava3.internal.subscriptions.SubscriptionHelper;
+import java.util.concurrent.atomic.AtomicReference;
+
+/* compiled from: SoloOnErrorResumeNext.java */
+/* loaded from: classes8.dex */
+final class O1<T> extends AbstractC41073l1<T> {
+
+    /* compiled from: SoloOnErrorResumeNext.java */
+    public static final class a<T> extends o41.f<T> implements org.reactivestreams.d<T> {
+
+        /* renamed from: f, reason: collision with root package name */
+        public static final /* synthetic */ int f397601f = 0;
+        private static final long serialVersionUID = -7631998337002592538L;
+
+        /* renamed from: d, reason: collision with root package name */
+        public final a<T>.C11291a f397602d;
+
+        /* renamed from: e, reason: collision with root package name */
+        public org.reactivestreams.e f397603e;
+
+        /* compiled from: SoloOnErrorResumeNext.java */
+        /* renamed from: hu.akarnokd.rxjava3.basetypes.O1$a$a, reason: collision with other inner class name */
+        public final class C11291a extends AtomicReference<org.reactivestreams.e> implements org.reactivestreams.d<T> {
+            private static final long serialVersionUID = 5161815655607865861L;
+
+            public C11291a() {
+            }
+
+            @Override // org.reactivestreams.d
+            public final void K(org.reactivestreams.e eVar) {
+                if (SubscriptionHelper.f(this, eVar)) {
+                    eVar.request(Long.MAX_VALUE);
+                }
+            }
+
+            @Override // org.reactivestreams.d
+            public final void e() {
+                a.this.e();
+            }
+
+            @Override // org.reactivestreams.d
+            public final void onError(Throwable th2) {
+                int i12 = a.f397601f;
+                a.this.f419376b.onError(th2);
+            }
+
+            @Override // org.reactivestreams.d
+            public final void onNext(T t12) {
+                a.this.f419377c = t12;
+            }
+        }
+
+        public a(org.reactivestreams.d dVar) {
+            super(dVar);
+            this.f397602d = new C11291a();
+        }
+
+        @Override // org.reactivestreams.d
+        public final void K(org.reactivestreams.e eVar) {
+            if (SubscriptionHelper.i(this.f397603e, eVar)) {
+                this.f397603e = eVar;
+                this.f419376b.K(this);
+                eVar.request(Long.MAX_VALUE);
+            }
+        }
+
+        @Override // o41.f, org.reactivestreams.e
+        public final void cancel() {
+            super.cancel();
+            this.f397603e.cancel();
+            SubscriptionHelper.a(this.f397602d);
+        }
+
+        @Override // org.reactivestreams.d
+        public final void e() {
+            T t12 = this.f419377c;
+            if (t12 != null) {
+                l(t12);
+            } else {
+                this.f419376b.e();
+            }
+        }
+
+        @Override // org.reactivestreams.d
+        public final void onError(Throwable th2) {
+            try {
+                throw null;
+            } catch (Throwable th3) {
+                io.reactivex.rxjava3.exceptions.a.a(th3);
+                this.f419376b.onError(new CompositeException(th2, th3));
+            }
+        }
+
+        @Override // org.reactivestreams.d
+        public final void onNext(T t12) {
+            this.f419377c = t12;
+        }
+    }
+
+    @Override // hu.akarnokd.rxjava3.basetypes.AbstractC41073l1
+    public final void a(org.reactivestreams.d<? super T> dVar) {
+        new a(dVar);
+        throw null;
+    }
+}

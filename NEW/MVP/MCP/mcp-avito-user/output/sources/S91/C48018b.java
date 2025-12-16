@@ -1,0 +1,36 @@
+package s91;
+
+import Y61.l;
+import com.avito.android.remote.model.Navigation;
+import com.avito.android.remote.model.category_parameters.HiddenParameter;
+import kotlin.Metadata;
+
+/* compiled from: GetFloatingEntryPointApiResponse.kt */
+@Metadata(d1 = {"\u0000\u0016\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0002\b\n\u0018\u00002\u00020\u0001B\u0019\u0012\b\u0010\u0003\u001a\u0004\u0018\u00010\u0002\u0012\u0006\u0010\u0005\u001a\u00020\u0004¢\u0006\u0004\b\u0006\u0010\u0007R\u001c\u0010\u0003\u001a\u0004\u0018\u00010\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0003\u0010\b\u001a\u0004\b\t\u0010\nR\u001a\u0010\u0005\u001a\u00020\u00048\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0005\u0010\u000b\u001a\u0004\b\f\u0010\r¨\u0006\u000e"}, d2 = {"Ls91/b;", "", "Ls91/a;", Navigation.CONFIG, "", HiddenParameter.TYPE, "<init>", "(Ls91/a;Z)V", "Ls91/a;", "a", "()Ls91/a;", "Z", "b", "()Z", "_avito_reward-bug-entry_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* renamed from: s91.b, reason: case insensitive filesystem */
+/* loaded from: classes9.dex */
+public final class C48018b {
+
+    @com.google.gson.annotations.c(Navigation.CONFIG)
+    @l
+    private final C48017a config;
+
+    @com.google.gson.annotations.c(HiddenParameter.TYPE)
+    private final boolean hidden;
+
+    public C48018b(@l C48017a c48017a, boolean z12) {
+        this.config = c48017a;
+        this.hidden = z12;
+    }
+
+    @l
+    /* renamed from: a, reason: from getter */
+    public final C48017a getConfig() {
+        return this.config;
+    }
+
+    /* renamed from: b, reason: from getter */
+    public final boolean getHidden() {
+        return this.hidden;
+    }
+}

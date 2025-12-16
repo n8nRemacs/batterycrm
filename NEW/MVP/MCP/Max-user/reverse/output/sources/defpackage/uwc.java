@@ -1,0 +1,51 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class uwc {
+    public static int add_24 = 2131231438;
+    public static int call_24 = 2131231486;
+    public static int call_fill_16 = 2131231488;
+    public static int calls_avd = 2131231491;
+    public static int cancel_10 = 2131231493;
+    public static int cancel_outline_28 = 2131231494;
+    public static int chat_24 = 2131231500;
+    public static int check_24 = 2131231506;
+    public static int contact_24 = 2131231546;
+    public static int contacts_avd = 2131231549;
+    public static int copy_24 = 2131231550;
+    public static int download_24 = 2131231580;
+    public static int edit_outline_24 = 2131231589;
+    public static int file_24 = 2131231706;
+    public static int forward_24 = 2131231967;
+    public static int ic_add_16 = 2131231992;
+    public static int ic_arrow_left_outline_28 = 2131232040;
+    public static int ic_cancel_filled_24 = 2131232114;
+    public static int ic_cancel_outline_24 = 2131232115;
+    public static int ic_cancel_outline_28 = 2131232116;
+    public static int ic_channel_outline_28 = 2131232121;
+    public static int ic_check_filled_24 = 2131232129;
+    public static int ic_delete_filled_apart_24 = 2131232185;
+    public static int ic_delete_filled_cut_out_24 = 2131232186;
+    public static int ic_done_28 = 2131232195;
+    public static int ic_heart_fill_24 = 2131232306;
+    public static int ic_heart_outline_24 = 2131232307;
+    public static int ic_mention_24 = 2131232367;
+    public static int ic_message_filled_28 = 2131232375;
+    public static int ic_more_vertical_filled_16 = 2131232403;
+    public static int ic_next_16 = 2131232545;
+    public static int ic_online_24 = 2131232557;
+    public static int ic_phone_28 = 2131232573;
+    public static int ic_search_outline_16 = 2131232636;
+    public static int ic_settings_filled_28 = 2131232653;
+    public static int ic_stub_outline_24 = 2131232692;
+    public static int ic_swap_24 = 2131232697;
+    public static int ic_users_28 = 2131232729;
+    public static int ic_users_outline_28 = 2131232730;
+    public static int link_24 = 2131232802;
+    public static int media_24 = 2131232912;
+    public static int microphone_on_24 = 2131232926;
+    public static int setting_24 = 2131233110;
+    public static int settings_outline_24 = 2131233111;
+    public static int share_24_android = 2131233112;
+    public static int support_24 = 2131233134;
+}

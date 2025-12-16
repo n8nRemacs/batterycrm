@@ -1,0 +1,15 @@
+package com.avito.android.search.filter;
+
+import com.avito.android.remote.model.filters_parameter.ParametersTree;
+import kotlin.Metadata;
+
+/* compiled from: ParametersTreeWithAdditional.kt */
+@Metadata(d1 = {"\u0000\u000e\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u00012\u00020\u0002¨\u0006\u0003"}, d2 = {"Lcom/avito/android/search/filter/ParametersTreeWithAdditional;", "Lcom/avito/android/remote/model/filters_parameter/ParametersTree;", "Lcom/avito/android/search/filter/a;", "_avito_search_filter_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public interface ParametersTreeWithAdditional extends ParametersTree, InterfaceC34534a {
+
+    /* compiled from: ParametersTreeWithAdditional.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a {
+    }
+}

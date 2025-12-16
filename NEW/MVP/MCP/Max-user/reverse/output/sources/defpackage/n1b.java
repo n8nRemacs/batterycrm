@@ -1,0 +1,54 @@
+package defpackage;
+
+/* loaded from: classes2.dex */
+public abstract class n1b {
+    public static final int a = h3d.chat_screen__leave_chat_action;
+    public static final int b = h3d.chat_screen__leave_chat_title;
+    public static final int c = h3d.chat_screen__remove_chat_action;
+    public static final int d = h3d.chat_screen__remove_chat_title;
+    public static final int e = h3d.chat_screen__search_result_down_button_accessibility;
+    public static final int f = h3d.chat_screen__search_result_not_found;
+    public static final int g = h3d.chat_screen__search_result_success;
+    public static final int h = h3d.chat_screen__search_result_up_button_accessibility;
+    public static final int i = h3d.chat_screen__start_chat_with_bot;
+    public static final int j = h3d.chat_screen_channel_search_hint;
+    public static final int k = h3d.chat_screen_error_restricted_send_message_action;
+    public static final int l = h3d.chat_screen_error_restricted_send_message_cancel;
+    public static final int m = h3d.chat_screen_error_restricted_send_message_desc;
+    public static final int n = h3d.chat_screen_error_restricted_send_message_title;
+    public static final int o = h3d.chat_screen_file_too_big_caption;
+    public static final int p = h3d.chat_screen_file_too_big_title;
+    public static final int q = h3d.chat_screen_join_channel;
+    public static final int r = h3d.chat_screen_join_chat;
+    public static final int s = h3d.chat_screen_leave_chat;
+    public static final int t = h3d.chat_screen_remove_chat;
+    public static final int u = h3d.chat_screen_search_hint;
+    public static final int v = h3d.chat_screen_status_mute_chat;
+    public static final int w = h3d.chat_screen_status_subscribe_chat;
+    public static final int x = h3d.chat_screen_status_unmute_chat;
+    public static final int y = h3d.chat_screen_unblock_contact;
+    public static final int z = h3d.media_bar_restricted_media_action;
+    public static final int A = h3d.media_bar_restricted_media_subtitle;
+    public static final int B = h3d.media_bar_restricted_media_title;
+    public static final int C = h3d.media_type_picker__close_dialog__accept;
+    public static final int D = h3d.media_type_picker__close_dialog__title;
+    public static final int E = h3d.media_type_picker__contact;
+    public static final int F = h3d.media_type_picker__file;
+    public static final int G = h3d.media_type_picker__file_dialog__from_file_manager;
+    public static final int H = h3d.media_type_picker__file_dialog__from_gallery;
+    public static final int I = h3d.media_type_picker__file_dialog__title;
+    public static final int J = h3d.media_type_picker__gallery;
+    public static final int K = h3d.media_type_picker__input_hint;
+    public static final int L = h3d.media_type_picker__money;
+    public static final int M = h3d.media_type_picker__permissions_dialog__button;
+    public static final int N = h3d.media_type_picker__permissions_dialog__camera_permission;
+    public static final int O = h3d.media_type_picker__permissions_dialog__gallery_camera_subtitle;
+    public static final int P = h3d.media_type_picker__permissions_dialog__gallery_camera_title;
+    public static final int Q = h3d.media_type_picker__permissions_dialog__gallery_subtitle;
+    public static final int R = h3d.media_type_picker__permissions_dialog__gallery_title;
+    public static final int S = h3d.media_type_picker__permissions_dialog__subtitle;
+    public static final int T = h3d.media_type_picker__permissions_dialog__title;
+    public static final int U = h3d.media_type_picker__place;
+    public static final int V = h3d.media_type_picker__snack_file;
+    public static final int W = h3d.media_type_picker__snack_media;
+}

@@ -1,0 +1,14 @@
+package androidx.compose.ui.layout;
+
+import androidx.annotation.RestrictTo;
+import kotlin.InterfaceC42830m;
+import kotlin.Metadata;
+
+/* compiled from: TestModifierUpdater.kt */
+@androidx.compose.runtime.internal.P
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Landroidx/compose/ui/layout/b1;", "", "ui_release"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@InterfaceC42830m
+@RestrictTo
+/* loaded from: classes.dex */
+public final class b1 {
+}

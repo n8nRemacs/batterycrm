@@ -1,0 +1,23 @@
+package U01;
+
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSession;
+
+/* loaded from: classes7.dex */
+public class a implements HostnameVerifier {
+    @Override // javax.net.ssl.HostnameVerifier
+    public final boolean verify(String str, SSLSession sSLSession) throws CertificateParsingException {
+        try {
+            X509Certificate x509Certificate = (X509Certificate) sSLSession.getPeerCertificates()[0];
+            x509Certificate.getSubjectDN().getName();
+            d.a(str, x509Certificate, false);
+            return true;
+        } catch (SSLException e12) {
+            e12.getMessage();
+            return false;
+        }
+    }
+}

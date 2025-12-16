@@ -1,0 +1,28 @@
+package com.avito.android.sx_address.address_video_verification.di;
+
+import Y61.k;
+import android.content.ContentResolver;
+import android.content.res.Resources;
+import com.avito.android.di.B;
+import com.avito.android.sx_address.SxAddressVideoVerificationParams;
+import com.avito.android.sx_address.address_video_verification.SxAddressVideoVerificationFragment;
+import h31.d;
+import kotlin.Metadata;
+
+/* compiled from: SxAddressVideoVerificationComponent.kt */
+@B
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\ba\u0018\u00002\u00020\u0001:\u0001\u0002¨\u0006\u0003"}, d2 = {"Lcom/avito/android/sx_address/address_video_verification/di/b;", "", "a", "_avito_sx-address_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+@h31.d
+/* loaded from: classes4.dex */
+public interface b {
+
+    /* compiled from: SxAddressVideoVerificationComponent.kt */
+    @d.b
+    @Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0000\bg\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/sx_address/address_video_verification/di/b$a;", "", "_avito_sx-address_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+    public interface a {
+        @k
+        b a(@h31.b @k SxAddressVideoVerificationParams sxAddressVideoVerificationParams, @h31.b @k Resources resources, @h31.b @k ContentResolver contentResolver, @k c cVar);
+    }
+
+    void a(@k SxAddressVideoVerificationFragment sxAddressVideoVerificationFragment);
+}

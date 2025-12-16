@@ -1,0 +1,28 @@
+package com.avito.beduin.v2.component.gridlayout.android_view;
+
+import Y61.k;
+import com.avito.beduin.v2.component.common.Orientation;
+import com.avito.beduin.v2.component.gridlayout.state.s;
+import com.avito.beduin.v2.render.android_view.A;
+import com.avito.beduin.v2.render.android_view.InterfaceC36343m;
+import com.avito.beduin.v2.render.android_view.n;
+import kotlin.Metadata;
+
+/* compiled from: GridLayoutComponentFactory.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\bÆ\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0003\u0010\u0004¨\u0006\u0005"}, d2 = {"Lcom/avito/beduin/v2/component/gridlayout/android_view/g;", "Lcom/avito/beduin/v2/render/android_view/n;", "Lcom/avito/beduin/v2/component/gridlayout/state/c;", "<init>", "()V", "android-view_release"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes5.dex */
+public final class g extends n<com.avito.beduin.v2.component.gridlayout.state.c> {
+    static {
+        new g();
+    }
+
+    public g() {
+        super(s.f335878c);
+    }
+
+    @Override // com.avito.beduin.v2.render.android_view.n
+    @k
+    public final InterfaceC36343m b(@k A a12) {
+        return new e(a12, Orientation.f335659b);
+    }
+}

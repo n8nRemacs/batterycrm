@@ -1,0 +1,14 @@
+package io.ktor.utils.io.core.internal;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import kotlin.Metadata;
+import kotlin.RequiresOptIn;
+
+/* compiled from: Unsafe.kt */
+@RequiresOptIn
+@Retention(RetentionPolicy.RUNTIME)
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u001b\n\u0002\b\u0003\b\u0087\u0002\u0018\u00002\u00020\u0001B\u0007¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Lio/ktor/utils/io/core/internal/d;", "", "<init>", "()V", "ktor-io"}, k = 1, mv = {1, 8, 0}, xi = 48)
+/* loaded from: classes8.dex */
+public @interface d {
+}

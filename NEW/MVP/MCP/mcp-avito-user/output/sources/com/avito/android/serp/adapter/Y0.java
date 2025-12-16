@@ -1,0 +1,16 @@
+package com.avito.android.serp.adapter;
+
+import kotlin.Metadata;
+
+/* compiled from: SerpSpanProvider.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/serp/adapter/Y0;", "Lcom/avito/android/serp/adapter/g1;", "_avito-discouraged_avito-libs_serp-core_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public interface Y0 extends g1 {
+    int a();
+
+    void c(@Y61.k UV0.a<? extends i1> aVar);
+
+    void e(int i12);
+
+    void f(@Y61.l com.avito.android.ui.adapter.f fVar);
+}

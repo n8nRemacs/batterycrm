@@ -1,0 +1,24 @@
+package com.avito.android.iac_avcalls.impl_module.platform.avcalls;
+
+import Y61.k;
+import com.avito.android.iac_avcalls.public_module.analytics.AvCallsFunnelEventsObserver;
+import kotlin.Metadata;
+import kotlinx.coroutines.flow.e2;
+
+/* compiled from: AvCallsProvider.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\bf\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/iac_avcalls/impl_module/platform/avcalls/a;", "Lcom/avito/android/iac_avcalls/public_module/analytics/AvCallsFunnelEventsObserver;", "_avito_iac-avcalls_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes13.dex */
+public interface a extends AvCallsFunnelEventsObserver {
+
+    /* compiled from: AvCallsProvider.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    /* renamed from: com.avito.android.iac_avcalls.impl_module.platform.avcalls.a$a, reason: collision with other inner class name */
+    public static final class C4806a {
+    }
+
+    @k
+    com.avito.avcalls.a c();
+
+    @k
+    e2 f();
+}

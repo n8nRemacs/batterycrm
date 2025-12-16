@@ -1,0 +1,46 @@
+package com.avito.android.player.router;
+
+import Y61.k;
+import Y61.l;
+import android.app.Application;
+import android.content.Intent;
+import com.avito.android.L;
+import com.avito.android.player.PlayerAnalyticsParameters;
+import com.avito.android.player.view.PlayerActivity;
+import com.avito.android.rec.ScreenSource;
+import com.squareup.anvil.annotations.ContributesBinding;
+import javax.inject.Inject;
+import kotlin.Metadata;
+
+/* compiled from: PlayerIntentFactoryImpl.kt */
+@ContributesBinding
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0007\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/player/router/e;", "Lcom/avito/android/player/router/d;", "_avito_player_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes14.dex */
+public final class e implements d {
+
+    /* renamed from: a, reason: collision with root package name */
+    @k
+    public final Application f220228a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final L f220229b;
+
+    @Inject
+    public e(@k Application application, @k L l12) {
+        this.f220228a = application;
+        this.f220229b = l12;
+    }
+
+    @Override // com.avito.android.player.router.d
+    @k
+    public final Intent a(@k String str, @l String str2, @l String str3, @l String str4, @k ScreenSource screenSource, @l Integer num, @l PlayerAnalyticsParameters playerAnalyticsParameters) {
+        new PlayerActivity.b();
+        Intent intentPutExtra = new Intent(this.f220228a, (Class<?>) PlayerActivity.class).putExtra("player_url", str).putExtra("player_slug", str2).putExtra("player_block_type", str3).putExtra("player_session", str4).putExtra("player_screen_source", screenSource);
+        if (num != null) {
+            intentPutExtra.putExtra("player_resize_mode", num.intValue());
+        }
+        intentPutExtra.putExtra("analyrics_parameters", playerAnalyticsParameters);
+        return intentPutExtra;
+    }
+}

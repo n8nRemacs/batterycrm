@@ -1,0 +1,24 @@
+package p2;
+
+import javax.inject.Singleton;
+import kotlin.Metadata;
+
+/* compiled from: com_avito_android_user_address_deeplink_UserAddressIntentFactoryImpl_UserAddressIntentFactory_Singleton_BindingModule_305281b8_5c57e3c4.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_user-address_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes10.dex */
+public final class QN {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<com.avito.android.user_address.deeplink.n> f424207a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<Singleton> f424208b;
+
+    static {
+        kotlin.jvm.internal.n0 n0Var = kotlin.jvm.internal.m0.f406844a;
+        f424207a = n0Var.b(com.avito.android.user_address.deeplink.n.class);
+        f424208b = n0Var.b(Singleton.class);
+    }
+}

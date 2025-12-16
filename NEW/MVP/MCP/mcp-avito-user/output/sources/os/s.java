@@ -1,0 +1,91 @@
+package os;
+
+import androidx.compose.runtime.internal.P;
+import java.util.List;
+import kotlin.Metadata;
+
+/* compiled from: Api1CpaCjmCpxPromoGeoGetDataPostResponse.kt */
+@P
+@Metadata(d1 = {"\u00002\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000e\n\u0002\b\u0018\b\u0007\u0018\u00002\u00020\u0001BK\u0012\u0006\u0010\u0003\u001a\u00020\u0002\u0012\b\u0010\u0005\u001a\u0004\u0018\u00010\u0004\u0012\u0006\u0010\u0007\u001a\u00020\u0006\u0012\u0006\u0010\t\u001a\u00020\b\u0012\f\u0010\f\u001a\b\u0012\u0004\u0012\u00020\u000b0\n\u0012\b\u0010\u000e\u001a\u0004\u0018\u00010\r\u0012\b\u0010\u000f\u001a\u0004\u0018\u00010\r¢\u0006\u0004\b\u0010\u0010\u0011R\u001a\u0010\u0003\u001a\u00020\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0003\u0010\u0012\u001a\u0004\b\u0013\u0010\u0014R\u001c\u0010\u0005\u001a\u0004\u0018\u00010\u00048\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0005\u0010\u0015\u001a\u0004\b\u0016\u0010\u0017R\u001a\u0010\u0007\u001a\u00020\u00068\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0007\u0010\u0018\u001a\u0004\b\u0019\u0010\u001aR\u001a\u0010\t\u001a\u00020\b8\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\t\u0010\u001b\u001a\u0004\b\u001c\u0010\u001dR \u0010\f\u001a\b\u0012\u0004\u0012\u00020\u000b0\n8\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\f\u0010\u001e\u001a\u0004\b\u001f\u0010 R\u001c\u0010\u000e\u001a\u0004\u0018\u00010\r8\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u000e\u0010!\u001a\u0004\b\"\u0010#R\u001c\u0010\u000f\u001a\u0004\u0018\u00010\r8\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u000f\u0010!\u001a\u0004\b$\u0010#¨\u0006%"}, d2 = {"Los/s;", "", "Los/k;", "hint", "Los/m;", "icon", "Los/v;", "input", "Los/z;", "slider", "", "Los/A;", "steps", "", "subTitle", "title", "<init>", "(Los/k;Los/m;Los/v;Los/z;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V", "Los/k;", "a", "()Los/k;", "Los/m;", "b", "()Los/m;", "Los/v;", "c", "()Los/v;", "Los/z;", "d", "()Los/z;", "Ljava/util/List;", "e", "()Ljava/util/List;", "Ljava/lang/String;", "f", "()Ljava/lang/String;", "g", "_avito_cpx-promo-geo_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes12.dex */
+public final class s {
+
+    @com.google.gson.annotations.c("hint")
+    @Y61.k
+    private final k hint;
+
+    @com.google.gson.annotations.c("icon")
+    @Y61.l
+    private final m icon;
+
+    @com.google.gson.annotations.c("input")
+    @Y61.k
+    private final v input;
+
+    @com.google.gson.annotations.c("slider")
+    @Y61.k
+    private final z slider;
+
+    @com.google.gson.annotations.c("steps")
+    @Y61.k
+    private final List<C44929A> steps;
+
+    @com.google.gson.annotations.c("subTitle")
+    @Y61.l
+    private final String subTitle;
+
+    @com.google.gson.annotations.c("title")
+    @Y61.l
+    private final String title;
+
+    public s(@Y61.k k kVar, @Y61.l m mVar, @Y61.k v vVar, @Y61.k z zVar, @Y61.k List<C44929A> list, @Y61.l String str, @Y61.l String str2) {
+        this.hint = kVar;
+        this.icon = mVar;
+        this.input = vVar;
+        this.slider = zVar;
+        this.steps = list;
+        this.subTitle = str;
+        this.title = str2;
+    }
+
+    @Y61.k
+    /* renamed from: a, reason: from getter */
+    public final k getHint() {
+        return this.hint;
+    }
+
+    @Y61.l
+    /* renamed from: b, reason: from getter */
+    public final m getIcon() {
+        return this.icon;
+    }
+
+    @Y61.k
+    /* renamed from: c, reason: from getter */
+    public final v getInput() {
+        return this.input;
+    }
+
+    @Y61.k
+    /* renamed from: d, reason: from getter */
+    public final z getSlider() {
+        return this.slider;
+    }
+
+    @Y61.k
+    public final List<C44929A> e() {
+        return this.steps;
+    }
+
+    @Y61.l
+    /* renamed from: f, reason: from getter */
+    public final String getSubTitle() {
+        return this.subTitle;
+    }
+
+    @Y61.l
+    /* renamed from: g, reason: from getter */
+    public final String getTitle() {
+        return this.title;
+    }
+}

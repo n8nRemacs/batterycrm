@@ -1,0 +1,25 @@
+package p2;
+
+import kotlin.Metadata;
+import z50.InterfaceC50375a;
+
+/* compiled from: com_avito_android_vas_performance_screens_stickers_buy_di_StickersBuyFragmentMappingsModule_a2e8242d.kt */
+@Metadata(d1 = {"\u0000\u0002\n\u0000¨\u0006\u0000"}, d2 = {"_avito_vas-performance_impl"}, k = 2, mv = {1, 9, 0}, xi = 48)
+/* renamed from: p2.yP, reason: case insensitive filesystem */
+/* loaded from: classes10.dex */
+public final class C46792yP {
+
+    /* renamed from: a, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<com.avito.android.vas_performance.screens.stickers.buy.di.h> f427955a;
+
+    /* renamed from: b, reason: collision with root package name */
+    @Y61.k
+    public static final kotlin.reflect.d<InterfaceC50375a> f427956b;
+
+    static {
+        kotlin.jvm.internal.n0 n0Var = kotlin.jvm.internal.m0.f406844a;
+        f427955a = n0Var.b(com.avito.android.vas_performance.screens.stickers.buy.di.h.class);
+        f427956b = n0Var.b(InterfaceC50375a.class);
+    }
+}

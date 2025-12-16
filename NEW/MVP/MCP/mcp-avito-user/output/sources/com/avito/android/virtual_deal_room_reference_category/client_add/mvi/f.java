@@ -1,0 +1,14 @@
+package com.avito.android.virtual_deal_room_reference_category.client_add.mvi;
+
+import com.avito.android.arch.mvi.q;
+import kotlin.Metadata;
+import rO0.C47580d;
+import rO0.InterfaceC47577a;
+import rO0.InterfaceC47578b;
+import rO0.InterfaceC47579c;
+
+/* compiled from: ClientAddFeatureBuilder.kt */
+@Metadata(d1 = {"\u0000\u001a\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\u0000\u0018\u00002\u001a\u0012\u0004\u0012\u00020\u0002\u0012\u0004\u0012\u00020\u0003\u0012\u0004\u0012\u00020\u0004\u0012\u0004\u0012\u00020\u00050\u0001¨\u0006\u0006"}, d2 = {"Lcom/avito/android/virtual_deal_room_reference_category/client_add/mvi/f;", "Lcom/avito/android/arch/mvi/q;", "LrO0/a;", "LrO0/b;", "LrO0/d;", "LrO0/c;", "_avito_virtual-deal-room-reference-category_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes5.dex */
+public final class f extends q<InterfaceC47577a, InterfaceC47578b, C47580d, InterfaceC47579c> {
+}

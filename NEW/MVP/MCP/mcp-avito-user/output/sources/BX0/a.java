@@ -1,0 +1,16 @@
+package BX0;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/* compiled from: ClassKey.java */
+@Target({ElementType.METHOD})
+@AX0.f
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+/* loaded from: classes10.dex */
+public @interface a {
+}

@@ -1,0 +1,24 @@
+package com.avito.android.advertising.ui.buzzoola.premium;
+
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import kotlin.Metadata;
+
+/* compiled from: AdBuzzoolaPremiumV1View.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\b\n\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/advertising/ui/buzzoola/premium/c;", "Landroid/view/GestureDetector$SimpleOnGestureListener;", "_avito_advertising_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes11.dex */
+public final class c extends GestureDetector.SimpleOnGestureListener {
+
+    /* renamed from: b, reason: collision with root package name */
+    public final /* synthetic */ h f88631b;
+
+    public c(h hVar) {
+        this.f88631b = hVar;
+    }
+
+    @Override // android.view.GestureDetector.SimpleOnGestureListener, android.view.GestureDetector.OnGestureListener
+    public final boolean onSingleTapUp(@Y61.k MotionEvent motionEvent) {
+        this.f88631b.f88642l.performClick();
+        return true;
+    }
+}

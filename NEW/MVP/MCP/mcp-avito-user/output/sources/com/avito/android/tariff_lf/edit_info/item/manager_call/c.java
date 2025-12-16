@@ -1,0 +1,53 @@
+package com.avito.android.tariff_lf.edit_info.item.manager_call;
+
+import Y61.k;
+import Y61.l;
+import com.avito.android.deep_linking.links.DeepLink;
+import kotlin.Metadata;
+
+/* compiled from: ManagerCallItem.kt */
+@Metadata(d1 = {"\u0000\n\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u0018\u00002\u00020\u0001¨\u0006\u0002"}, d2 = {"Lcom/avito/android/tariff_lf/edit_info/item/manager_call/c;", "Lcom/avito/conveyor_item/a;", "_avito_tariff-lf_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes4.dex */
+public final class c implements com.avito.conveyor_item.a {
+
+    /* renamed from: b, reason: collision with root package name */
+    @k
+    public final String f299014b;
+
+    /* renamed from: c, reason: collision with root package name */
+    @k
+    public final String f299015c;
+
+    /* renamed from: d, reason: collision with root package name */
+    @l
+    public final String f299016d;
+
+    /* renamed from: e, reason: collision with root package name */
+    @k
+    public final String f299017e;
+
+    /* renamed from: f, reason: collision with root package name */
+    @k
+    public final DeepLink f299018f;
+
+    public c(@k String str, @k String str2, @l String str3, @k String str4, @k DeepLink deepLink) {
+        this.f299014b = str;
+        this.f299015c = str2;
+        this.f299016d = str3;
+        this.f299017e = str4;
+        this.f299018f = deepLink;
+    }
+
+    @Override // TV0.a
+    /* renamed from: getId */
+    public final long getF207369c() {
+        return -1200514494;
+    }
+
+    @Override // com.avito.conveyor_item.a
+    @k
+    /* renamed from: getStringId */
+    public final String getF291445k() {
+        return "manager_call_item";
+    }
+}

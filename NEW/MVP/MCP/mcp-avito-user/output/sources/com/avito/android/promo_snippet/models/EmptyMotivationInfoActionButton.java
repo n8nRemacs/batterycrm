@@ -1,0 +1,66 @@
+package com.avito.android.promo_snippet.models;
+
+import K51.d;
+import Y61.k;
+import Y61.l;
+import android.os.Parcel;
+import android.os.Parcelable;
+import com.avito.android.deep_linking.links.DeepLink;
+import com.avito.android.remote.model.messenger.context_actions.ContextActionHandler;
+import com.avito.android.remote.model.text.TooltipAttribute;
+import com.google.gson.annotations.c;
+import kotlin.Metadata;
+
+/* compiled from: GigPromoSnippetWidget.kt */
+@d
+@Metadata(d1 = {"\u0000\u0016\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0010\u000e\n\u0000\n\u0002\u0018\u0002\n\u0002\b\f\b\u0007\u0018\u00002\u00020\u0001B!\u0012\u0006\u0010\u0003\u001a\u00020\u0002\u0012\u0006\u0010\u0005\u001a\u00020\u0004\u0012\b\u0010\u0006\u001a\u0004\u0018\u00010\u0002¢\u0006\u0004\b\u0007\u0010\bR\u001a\u0010\u0003\u001a\u00020\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0003\u0010\t\u001a\u0004\b\n\u0010\u000bR\u001a\u0010\u0005\u001a\u00020\u00048\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0005\u0010\f\u001a\u0004\b\r\u0010\u000eR\u001c\u0010\u0006\u001a\u0004\u0018\u00010\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0006\u0010\t\u001a\u0004\b\u000f\u0010\u000b¨\u0006\u0010"}, d2 = {"Lcom/avito/android/promo_snippet/models/EmptyMotivationInfoActionButton;", "Landroid/os/Parcelable;", "", "title", "Lcom/avito/android/deep_linking/links/DeepLink;", TooltipAttribute.PARAM_DEEP_LINK, ContextActionHandler.Link.URL, "<init>", "(Ljava/lang/String;Lcom/avito/android/deep_linking/links/DeepLink;Ljava/lang/String;)V", "Ljava/lang/String;", "getTitle", "()Ljava/lang/String;", "Lcom/avito/android/deep_linking/links/DeepLink;", "getUri", "()Lcom/avito/android/deep_linking/links/DeepLink;", "getUrl", "_avito_gig_promo-snippet_public"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes16.dex */
+public final class EmptyMotivationInfoActionButton implements Parcelable {
+
+    @k
+    public static final Parcelable.Creator<EmptyMotivationInfoActionButton> CREATOR = new a();
+
+    @c("title")
+    @k
+    private final String title;
+
+    @c(TooltipAttribute.PARAM_DEEP_LINK)
+    @k
+    private final DeepLink uri;
+
+    @c(ContextActionHandler.Link.URL)
+    @l
+    private final String url;
+
+    /* compiled from: GigPromoSnippetWidget.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a implements Parcelable.Creator<EmptyMotivationInfoActionButton> {
+        @Override // android.os.Parcelable.Creator
+        public final EmptyMotivationInfoActionButton createFromParcel(Parcel parcel) {
+            return new EmptyMotivationInfoActionButton(parcel.readString(), (DeepLink) parcel.readParcelable(EmptyMotivationInfoActionButton.class.getClassLoader()), parcel.readString());
+        }
+
+        @Override // android.os.Parcelable.Creator
+        public final EmptyMotivationInfoActionButton[] newArray(int i12) {
+            return new EmptyMotivationInfoActionButton[i12];
+        }
+    }
+
+    public EmptyMotivationInfoActionButton(@k String str, @k DeepLink deepLink, @l String str2) {
+        this.title = str;
+        this.uri = deepLink;
+        this.url = str2;
+    }
+
+    @Override // android.os.Parcelable
+    public final int describeContents() {
+        return 0;
+    }
+
+    @Override // android.os.Parcelable
+    public final void writeToParcel(@k Parcel parcel, int i12) {
+        parcel.writeString(this.title);
+        parcel.writeParcelable(this.uri, i12);
+        parcel.writeString(this.url);
+    }
+}

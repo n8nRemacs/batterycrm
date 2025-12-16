@@ -1,0 +1,75 @@
+package com.avito.android.service_booking.remote.timeslots;
+
+import K51.d;
+import Y61.k;
+import Y61.l;
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.compose.foundation.H;
+import com.google.gson.annotations.c;
+import java.util.List;
+import kotlin.Metadata;
+import kotlin.jvm.internal.L;
+
+/* compiled from: ServiceBookingTimeslotsResult.kt */
+@d
+@Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0010 \n\u0002\u0010\u000e\n\u0002\b\u0007\b\u0087\b\u0018\u00002\u00020\u0001B\u0015\u0012\f\u0010\u0004\u001a\b\u0012\u0004\u0012\u00020\u00030\u0002¢\u0006\u0004\b\u0005\u0010\u0006R \u0010\u0004\u001a\b\u0012\u0004\u0012\u00020\u00030\u00028\u0006X\u0087\u0004¢\u0006\f\n\u0004\b\u0004\u0010\u0007\u001a\u0004\b\b\u0010\t¨\u0006\n"}, d2 = {"Lcom/avito/android/service_booking/remote/timeslots/ServiceBookingTimeslotsResult;", "Landroid/os/Parcelable;", "", "", "slots", "<init>", "(Ljava/util/List;)V", "Ljava/util/List;", "c", "()Ljava/util/List;", "_avito_service-booking_impl"}, k = 1, mv = {1, 9, 0}, xi = 48)
+/* loaded from: classes3.dex */
+public final /* data */ class ServiceBookingTimeslotsResult implements Parcelable {
+
+    @k
+    public static final Parcelable.Creator<ServiceBookingTimeslotsResult> CREATOR = new a();
+
+    @c("slots")
+    @k
+    private final List<String> slots;
+
+    /* compiled from: ServiceBookingTimeslotsResult.kt */
+    @Metadata(k = 3, mv = {1, 9, 0}, xi = 48)
+    public static final class a implements Parcelable.Creator<ServiceBookingTimeslotsResult> {
+        @Override // android.os.Parcelable.Creator
+        public final ServiceBookingTimeslotsResult createFromParcel(Parcel parcel) {
+            return new ServiceBookingTimeslotsResult(parcel.createStringArrayList());
+        }
+
+        @Override // android.os.Parcelable.Creator
+        public final ServiceBookingTimeslotsResult[] newArray(int i12) {
+            return new ServiceBookingTimeslotsResult[i12];
+        }
+    }
+
+    public ServiceBookingTimeslotsResult(@k List<String> list) {
+        this.slots = list;
+    }
+
+    @k
+    public final List<String> c() {
+        return this.slots;
+    }
+
+    @Override // android.os.Parcelable
+    public final int describeContents() {
+        return 0;
+    }
+
+    public final boolean equals(@l Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        return (obj instanceof ServiceBookingTimeslotsResult) && L.f(this.slots, ((ServiceBookingTimeslotsResult) obj).slots);
+    }
+
+    public final int hashCode() {
+        return this.slots.hashCode();
+    }
+
+    @k
+    public final String toString() {
+        return H.p(new StringBuilder("ServiceBookingTimeslotsResult(slots="), this.slots, ')');
+    }
+
+    @Override // android.os.Parcelable
+    public final void writeToParcel(@k Parcel parcel, int i12) {
+        parcel.writeStringList(this.slots);
+    }
+}

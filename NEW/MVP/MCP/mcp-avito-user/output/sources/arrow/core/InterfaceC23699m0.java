@@ -1,0 +1,19 @@
+package arrow.core;
+
+import kotlin.Metadata;
+
+/* compiled from: FunctionK.kt */
+@Metadata(d1 = {"\u0000\u0010\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\bf\u0018\u0000*\u0004\b\u0000\u0010\u0001*\u0004\b\u0001\u0010\u00022\u00020\u0003:\u0001\u0004¨\u0006\u0005"}, d2 = {"Larrow/core/m0;", "F", "G", "", "a", "arrow-core"}, k = 1, mv = {1, 4, 0})
+/* renamed from: arrow.core.m0, reason: case insensitive filesystem */
+/* loaded from: classes10.dex */
+public interface InterfaceC23699m0<F, G> {
+
+    /* compiled from: FunctionK.kt */
+    @Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001B\t\b\u0002¢\u0006\u0004\b\u0002\u0010\u0003¨\u0006\u0004"}, d2 = {"Larrow/core/m0$a;", "", "<init>", "()V", "arrow-core"}, k = 1, mv = {1, 4, 0})
+    /* renamed from: arrow.core.m0$a */
+    public static final class a {
+        static {
+            new a();
+        }
+    }
+}
