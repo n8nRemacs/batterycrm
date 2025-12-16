@@ -42,113 +42,112 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 16 December 2025, 20:00 (UTC+4)
+## Last session: 17 December 2025, 00:10 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### 1. Миграция серверов
+### 1. Реструктуризация Android Messager
 
-**RU Server (45.144.177.128):**
-- Остановлены и удалены все MCP серверы
-- Оставлены только: neo4j, redis, marzban (VPN)
+- Перенесли все файлы из `NEW/MVP/` в `NEW/MVP/Android Messager/`
+- Консолидировали tunnel-proxy в mobile-server
+- Удалили дубликаты
 
-**NEW Server (155.212.221.189):**
-- Развёрнуты все сервисы для мессенджера
-- Docker network `eldoleado` создана
+### 2. Создан ROADMAP.md
 
-### 2. Tunnel Proxy — Архитектура защиты от банов
+Файл: `NEW/MVP/Android Messager/ROADMAP.md`
 
-**Проблема:** Мессенджеры банят серверные IP и определяют ботов по TLS fingerprint.
+Содержит:
+- ✅ Полная архитектура (диаграмма)
+- ✅ Deployment checklist для VPS (tunnel-server)
+- ✅ Deployment checklist для Termux (mobile-server)
+- ✅ .env примеры для обоих компонентов
+- ✅ Nginx config для WSS
+- ✅ Все API endpoints с примерами curl
+- ✅ External APIs (Telegram, Avito, VK, WhatsApp)
+- ✅ Три режима работы (messenger/proxy/both)
+- ✅ Database tables (PostgreSQL + Neo4j)
+- ✅ Security checklist
+- ✅ Monitoring и Troubleshooting
 
-**Решение:** HTTP запросы выполняются на Android устройстве.
+### 3. Добавлен proxy_fetch
+
+- ProxyManager для балансировки между телефонами
+- proxy_fetch handler для прямых HTTP запросов через мобильный IP
+- Поддержка wifi_only для клиентских прокси
+
+### 4. Git коммит
 
 ```
-Android App (TunnelService)
-    │
-    │ WebSocket (мобильный IP + Android TLS fingerprint)
-    ▼
-tunnel-server:8765 ◄──── MCP серверы (POST /proxy)
-    │
-    ├── avito-messenger-api:8766
-    ├── vk-community-api:8767
-    └── max-bot-api:8768
+Android Messager: restructure and add ROADMAP
+
+- Move all MVP components into Android Messager folder
+- Add client proxy (proxy_fetch) for price scraping via mobile IP
+- Add ROADMAP.md with deployment guide, API docs, architecture
+- Remove duplicate tunnel-proxy folder (consolidated into mobile-server)
+- Add ProxyManager for load balancing across phone nodes
 ```
-
-**Что это даёт:**
-- ✅ Мобильный IP (не серверный/datacenter)
-- ✅ Android TLS fingerprint (OkHttp, не Python/aiohttp)
-- ✅ Реальный Device ID
-- ✅ Вся логика на сервере, телефон только прокси
-
-### 3. Компоненты созданы
-
-**tunnel-server** (на VPS):
-- WebSocket сервер для подключения Android
-- HTTP API `/proxy` для MCP серверов
-- Маршрутизация запросов через подключенные устройства
-
-**TunnelService.kt** (в Android приложении):
-- Foreground Service с уведомлением
-- Подключается к tunnel-server по WebSocket
-- Выполняет HTTP запросы через OkHttp (Android TLS!)
-- Поддержка бинарных данных, таймаутов, заголовков
-
-### 4. Развёрнутые сервисы на NEW (155.212.221.189)
-
-| Сервис | Порт | Описание |
-|--------|------|----------|
-| tunnel-server | 8765 | WebSocket + HTTP API |
-| avito-messenger-api | 8766 | Avito MCP |
-| vk-community-api | 8767 | VK MCP |
-| max-bot-api | 8768 | MAX MCP |
-| android-api | 8780 | API для приложения |
-| redis | 6379 | Redis |
 
 ---
 
 ## Current system state
 
-**NEW Server (155.212.221.189):**
-- ✅ tunnel-server работает, ждёт подключения Android
-- ✅ Все MCP серверы запущены
-- ✅ android-api готов
-- ✅ redis работает
+**Код:**
+- ✅ tunnel-server структура готова
+- ✅ mobile-server структура готова
+- ✅ ROADMAP.md создан
+- ⏳ Нужно дописать код tunnel-server
+- ⏳ Нужно дописать код mobile-server
 
-**RU Server (45.144.177.128):**
-- ✅ neo4j работает
-- ✅ redis работает
-- ✅ marzban (VPN) работает
-
-**Android App:**
-- ✅ TunnelService обновлён для внешних HTTP
-- ⏳ Нужно настроить Tunnel URL в приложении
-- ⏳ Нужно пересобрать APK
-
-**n8n (185.221.214.83):**
-- ⏳ Нужно активировать API_Android_* workflows
+**Серверы:**
+- ✅ RU (45.144.177.128): neo4j, redis, marzban
+- ✅ n8n (185.221.214.83): postgresql, n8n
+- ⏳ NEW (155.212.221.189): требуется деплой tunnel-server
 
 ---
 
-## NEXT STEPS
+## NEXT STEPS (для следующей сессии)
 
-1. **Настроить Android приложение:**
-   - Tunnel URL: `ws://155.212.221.189:8765/ws`
-   - Tunnel Secret: `Mi31415926pSss!`
+### Phase 1: Backend (tunnel-server) — ПРИОРИТЕТ
 
-2. **Пересобрать APK** с новым TunnelService
+1. **Доработать tunnel-server код:**
+   - `tunnel-server/app/main.py` — WebSocket hub
+   - `tunnel-server/app/input/proxy_manager.py` — ProxyManager
+   - API endpoints: `/ws`, `/api/send`, `/api/proxy/fetch`
 
-3. **Включить TunnelService** в приложении
+2. **Деплой на VPS:**
+   - SSH to 155.212.221.189
+   - Docker setup
+   - Nginx + SSL
 
-4. **Проверить подключение:**
-   ```bash
-   curl http://155.212.221.189:8765/devices
-   ```
+### Phase 2: Mobile Client (mobile-server)
 
-5. **Активировать n8n workflows**
+1. **Доработать mobile-server код:**
+   - WebSocket клиент
+   - proxy_fetch handler
+   - Channel handlers (Telegram, Avito)
 
-6. **Тестировать** отправку сообщений через мобильный IP
+2. **Тест в Termux:**
+   - Создать .env
+   - Запустить и проверить подключение
+
+### Phase 3: Android App
+
+1. **Обновить TunnelService**
+2. **Собрать APK**
+3. **End-to-end тестирование**
+
+---
+
+## Key files to look at
+
+| File | What |
+|------|------|
+| `NEW/MVP/Android Messager/ROADMAP.md` | Полный роадмап и API |
+| `NEW/MVP/Android Messager/tunnel-server/` | Бэкенд код |
+| `NEW/MVP/Android Messager/mobile-server/` | Клиент для телефона |
+| `Start.md` | Контекст для старта сессии |
 
 ---
 
@@ -156,6 +155,5 @@ tunnel-server:8765 ◄──── MCP серверы (POST /proxy)
 
 1. `git pull`
 2. Read `Start.md`
-3. Настроить Tunnel URL в Android приложении
-4. Пересобрать и установить APK
-5. Включить TunnelService и проверить подключение
+3. Read `NEW/MVP/Android Messager/ROADMAP.md`
+4. Начать с Phase 1: tunnel-server backend
