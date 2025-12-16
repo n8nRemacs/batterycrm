@@ -19,6 +19,7 @@ from app.config import settings
 from app.input import api_router, webhook_router, manager
 from app.input.webhooks import set_webhook_handler
 from app.input.api import set_orchestrator
+from app.input.proxy_manager import proxy_manager
 from app.pipeline import PipelineOrchestrator
 
 # Configure logging
@@ -55,6 +56,10 @@ async def lifespan(app: FastAPI):
 
     # Set up handlers
     manager.set_incoming_handler(handle_incoming_message)
+    manager.set_proxy_response_handler(handle_proxy_response)
+    manager.set_proxy_status_handler(handle_proxy_status)
+    manager.set_proxy_register_handler(handle_proxy_register)
+    manager.set_disconnect_handler(handle_disconnect)
     set_webhook_handler(handle_webhook)
     set_orchestrator(orchestrator)  # For API routes
 
@@ -122,10 +127,10 @@ async def websocket_endpoint(
             await manager.handle_message(server_id, data)
 
     except WebSocketDisconnect:
-        manager.disconnect(server_id)
+        await manager.disconnect(server_id)
     except Exception as e:
         logger.error(f"WebSocket error for {server_id}: {e}")
-        manager.disconnect(server_id)
+        await manager.disconnect(server_id)
 
 
 # === Handlers ===
@@ -165,6 +170,69 @@ async def handle_webhook(source: str, data: dict):
 
     except Exception as e:
         logger.error(f"Error processing webhook: {e}")
+
+
+async def handle_proxy_response(request_id: str, data: dict):
+    """Handle proxy response from phone"""
+    try:
+        proxy_manager.handle_response(request_id, data)
+        logger.debug(f"Proxy response handled: {request_id}")
+    except Exception as e:
+        logger.error(f"Error handling proxy response: {e}")
+
+
+async def handle_proxy_status(server_id: str, data: dict):
+    """Handle proxy status update from phone"""
+    try:
+        is_wifi = data.get("is_wifi", False)
+        battery_level = data.get("battery_level", 100)
+        proxy_manager.update_node_status(server_id, is_wifi, battery_level)
+        logger.debug(f"Proxy status updated: {server_id} wifi={is_wifi} battery={battery_level}")
+    except Exception as e:
+        logger.error(f"Error handling proxy status: {e}")
+
+
+async def handle_disconnect(server_id: str):
+    """Handle tunnel disconnection"""
+    try:
+        # Unregister proxy node
+        proxy_manager.unregister_node(server_id)
+        logger.info(f"Proxy node unregistered on disconnect: {server_id}")
+    except Exception as e:
+        logger.error(f"Error handling disconnect: {e}")
+
+
+async def handle_proxy_register(server_id: str, data: dict):
+    """Handle proxy node registration on hello"""
+    from app.models import ProxyNodeType
+
+    try:
+        tenant_id = data.get("tenant_id")
+        if not tenant_id:
+            logger.warning(f"No tenant_id in hello from {server_id}, skipping proxy registration")
+            return
+
+        # Check if http_proxy is in services
+        services = data.get("services", [])
+        if "http_proxy" not in services:
+            logger.debug(f"Tunnel {server_id} does not support http_proxy")
+            return
+
+        node_type_str = data.get("node_type", "operator")
+        node_type = ProxyNodeType.CLIENT if node_type_str == "client" else ProxyNodeType.OPERATOR
+
+        node = proxy_manager.register_node(
+            server_id=server_id,
+            node_type=node_type,
+            tenant_id=tenant_id,
+            wifi_only=data.get("wifi_only", True),
+            max_requests_per_hour=data.get("max_requests_per_hour", 5)
+        )
+
+        logger.info(f"Auto-registered proxy node: {node.node_id}")
+
+    except Exception as e:
+        logger.error(f"Error registering proxy node: {e}")
 
 
 # === Background Tasks ===

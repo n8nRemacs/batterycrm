@@ -34,6 +34,7 @@ class TunnelProxy:
         self.running = False
         self.reconnect_delay = config.RECONNECT_DELAY
         self.connected = False
+        self._status_task: Optional[asyncio.Task] = None
         self.stats = {
             "requests_handled": 0,
             "errors": 0,
@@ -96,19 +97,34 @@ class TunnelProxy:
             # Send hello message
             await self.send_hello()
 
+            # Start status update loop
+            self._status_task = asyncio.create_task(self._status_update_loop())
+
             # Listen for messages
-            async for message in ws:
-                await self.handle_message(message)
+            try:
+                async for message in ws:
+                    await self.handle_message(message)
+            finally:
+                # Cancel status task on disconnect
+                if self._status_task:
+                    self._status_task.cancel()
+                    self._status_task = None
 
     async def send_hello(self):
-        """Send hello/registration message"""
+        """Send hello/registration message with proxy settings"""
         hello = {
             "action": "hello",
             "server_id": config.SERVER_ID,
             "services": list(config.SERVICES.keys()),
+            # Proxy settings for auto-registration
+            "tenant_id": config.TENANT_ID,
+            "node_type": config.NODE_TYPE,
+            "wifi_only": config.WIFI_ONLY,
+            "max_requests_per_hour": config.MAX_REQUESTS_PER_HOUR,
             "timestamp": datetime.now().isoformat()
         }
         await self.send(hello)
+        logger.info(f"Sent hello: tenant={config.TENANT_ID}, type={config.NODE_TYPE}")
 
     async def handle_message(self, raw: str):
         """Handle incoming message from server"""
@@ -262,8 +278,10 @@ class TunnelProxy:
 
             response = await self.http_client.request(**request_kwargs)
 
+            # Send proxy_response (distinct from http_request response)
             await self.send({
                 "id": msg_id,
+                "action": "proxy_response",
                 "status": response.status_code,
                 "headers": dict(response.headers),
                 "body": response.text,
@@ -272,7 +290,7 @@ class TunnelProxy:
 
             self.stats["requests_handled"] += 1
             self.stats["proxy_fetches"] = self.stats.get("proxy_fetches", 0) + 1
-            logger.debug(f"Proxy fetch {msg_id}: {method} {url} -> {response.status_code}")
+            logger.info(f"Proxy fetch {msg_id}: {method} {url} -> {response.status_code}")
 
         except httpx.TimeoutException:
             await self.send_error(msg_id, "Request timeout")
@@ -342,6 +360,84 @@ class TunnelProxy:
             "data": data,
             "timestamp": datetime.now().isoformat()
         })
+
+    async def _status_update_loop(self):
+        """Periodically send proxy_status to server"""
+        while self.connected and self.running:
+            try:
+                await asyncio.sleep(config.STATUS_UPDATE_INTERVAL)
+                await self.send_proxy_status()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Status update error: {e}")
+
+    async def send_proxy_status(self):
+        """Send current device status for proxy decisions"""
+        is_wifi, battery_level = self._get_device_status()
+
+        await self.send({
+            "action": "proxy_status",
+            "server_id": config.SERVER_ID,
+            "is_wifi": is_wifi,
+            "battery_level": battery_level,
+            "timestamp": datetime.now().isoformat()
+        })
+        logger.debug(f"Sent proxy_status: wifi={is_wifi}, battery={battery_level}")
+
+    def _get_device_status(self) -> tuple:
+        """
+        Get device wifi and battery status.
+
+        On Termux/Android, this can be obtained via:
+        - termux-wifi-connectioninfo
+        - termux-battery-status
+
+        For now, returns defaults. Override for actual implementation.
+        """
+        # TODO: Implement actual status detection
+        # On Termux:
+        #   import subprocess
+        #   wifi_info = subprocess.run(['termux-wifi-connectioninfo'], capture_output=True)
+        #   battery_info = subprocess.run(['termux-battery-status'], capture_output=True)
+
+        # Default: assume wifi and full battery
+        is_wifi = True
+        battery_level = 100
+
+        # Try to detect on Linux/Android
+        try:
+            import subprocess
+            # Check if we're on Termux
+            result = subprocess.run(
+                ['termux-wifi-connectioninfo'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                import json
+                wifi_data = json.loads(result.stdout)
+                is_wifi = wifi_data.get("supplicant_state") == "COMPLETED"
+        except:
+            pass
+
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['termux-battery-status'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                import json
+                battery_data = json.loads(result.stdout)
+                battery_level = battery_data.get("percentage", 100)
+        except:
+            pass
+
+        return is_wifi, battery_level
 
 
 # Global instance

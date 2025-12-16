@@ -26,6 +26,13 @@ class TunnelConnection:
         self.secret = secret
         self.connected_at = datetime.utcnow()
         self.services: list[str] = []
+
+        # Proxy settings (populated from hello message)
+        self.tenant_id: Optional[str] = None
+        self.node_type: str = "operator"  # "operator" or "client"
+        self.wifi_only: bool = True
+        self.max_requests_per_hour: int = 5
+
         self.stats = {
             "messages_received": 0,
             "messages_sent": 0,
@@ -81,10 +88,30 @@ class WebSocketManager:
     def __init__(self):
         self.connections: Dict[str, TunnelConnection] = {}
         self._incoming_handler: Optional[Callable[[str, dict], Awaitable[None]]] = None
+        self._proxy_response_handler: Optional[Callable[[str, dict], Awaitable[None]]] = None
+        self._proxy_status_handler: Optional[Callable[[str, dict], Awaitable[None]]] = None
+        self._proxy_register_handler: Optional[Callable[[str, dict], Awaitable[None]]] = None
+        self._disconnect_handler: Optional[Callable[[str], Awaitable[None]]] = None
 
     def set_incoming_handler(self, handler: Callable[[str, dict], Awaitable[None]]):
         """Set handler for incoming messages from phones"""
         self._incoming_handler = handler
+
+    def set_proxy_response_handler(self, handler: Callable[[str, dict], Awaitable[None]]):
+        """Set handler for proxy responses"""
+        self._proxy_response_handler = handler
+
+    def set_proxy_status_handler(self, handler: Callable[[str, dict], Awaitable[None]]):
+        """Set handler for proxy status updates"""
+        self._proxy_status_handler = handler
+
+    def set_disconnect_handler(self, handler: Callable[[str], Awaitable[None]]):
+        """Set handler for disconnections"""
+        self._disconnect_handler = handler
+
+    def set_proxy_register_handler(self, handler: Callable[[str, dict], Awaitable[None]]):
+        """Set handler for proxy node registration (on hello)"""
+        self._proxy_register_handler = handler
 
     async def connect(self, websocket: WebSocket, server_id: str, secret: str) -> TunnelConnection:
         """Accept new tunnel connection"""
@@ -104,11 +131,18 @@ class WebSocketManager:
         logger.info(f"Tunnel connected: {server_id}")
         return conn
 
-    def disconnect(self, server_id: str):
+    async def disconnect(self, server_id: str):
         """Remove tunnel connection"""
         if server_id in self.connections:
             del self.connections[server_id]
             logger.info(f"Tunnel disconnected: {server_id}")
+
+            # Notify disconnect handler
+            if self._disconnect_handler:
+                try:
+                    await self._disconnect_handler(server_id)
+                except Exception as e:
+                    logger.error(f"Disconnect handler error: {e}")
 
     def get_connection(self, server_id: str) -> Optional[TunnelConnection]:
         """Get connection by server_id"""
@@ -139,7 +173,15 @@ class WebSocketManager:
         if action == "hello":
             # Registration message
             conn.services = data.get("services", [])
+            conn.tenant_id = data.get("tenant_id")
+            conn.node_type = data.get("node_type", "operator")
+            conn.wifi_only = data.get("wifi_only", True)
+            conn.max_requests_per_hour = data.get("max_requests_per_hour", 5)
             logger.info(f"Tunnel {server_id} registered with services: {conn.services}")
+
+            # Notify proxy registration handler
+            if self._proxy_register_handler:
+                await self._proxy_register_handler(server_id, data)
 
         elif action == "incoming":
             # Incoming message from client
@@ -149,6 +191,17 @@ class WebSocketManager:
         elif action == "pong":
             # Ping response, ignore
             pass
+
+        elif action == "proxy_response":
+            # Response from proxy_fetch request
+            request_id = data.get("id")
+            if request_id and self._proxy_response_handler:
+                await self._proxy_response_handler(request_id, data)
+
+        elif action == "proxy_status":
+            # Proxy node status update (wifi, battery)
+            if self._proxy_status_handler:
+                await self._proxy_status_handler(server_id, data)
 
         else:
             logger.warning(f"Unknown action from {server_id}: {action}")

@@ -8,12 +8,21 @@ TUNNEL_URL = os.getenv("TUNNEL_URL", "wss://tunnel.eldoleado.ru/ws")
 TUNNEL_SECRET = os.getenv("TUNNEL_SECRET", "")
 SERVER_ID = os.getenv("SERVER_ID", "phone_1")
 
+# Tenant/Proxy settings
+TENANT_ID = os.getenv("TENANT_ID", "")
+NODE_TYPE = os.getenv("NODE_TYPE", "operator")  # "operator" or "client"
+WIFI_ONLY = os.getenv("WIFI_ONLY", "true").lower() == "true"
+MAX_REQUESTS_PER_HOUR = int(os.getenv("MAX_REQUESTS_PER_HOUR", 5))
+
 # Reconnection
 RECONNECT_DELAY = int(os.getenv("RECONNECT_DELAY", 5))
 MAX_RECONNECT_DELAY = int(os.getenv("MAX_RECONNECT_DELAY", 60))
 
 # HTTP client
 HTTP_TIMEOUT = int(os.getenv("HTTP_TIMEOUT", 30))
+
+# Status update interval (seconds)
+STATUS_UPDATE_INTERVAL = int(os.getenv("STATUS_UPDATE_INTERVAL", 60))
 
 # Local services
 SERVICES = {
