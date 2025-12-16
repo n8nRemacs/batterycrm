@@ -40,6 +40,7 @@ class TunnelService : Service() {
         private const val TAG = "TunnelService"
         private const val NOTIFICATION_ID = 2001
         private const val CHANNEL_ID = "tunnel_service_channel"
+        private const val STATUS_UPDATE_INTERVAL_MS = 60_000L // 1 minute
 
         const val ACTION_START = "com.eldoleado.app.tunnel.START"
         const val ACTION_STOP = "com.eldoleado.app.tunnel.STOP"
@@ -67,6 +68,7 @@ class TunnelService : Service() {
     private var webSocket: WebSocket? = null
     private var isConnected = false
     private var reconnectJob: Job? = null
+    private var statusUpdateJob: Job? = null
     private val requestCounter = AtomicLong(0)
     private val activeRequests = AtomicLong(0)
 
@@ -120,7 +122,6 @@ class TunnelService : Service() {
     private fun connect() {
         val tunnelUrl = sessionManager.getTunnelUrl()
         val tunnelSecret = sessionManager.getTunnelSecret()
-        val operatorId = sessionManager.getOperatorId()
 
         if (tunnelUrl.isNullOrBlank()) {
             Log.e(TAG, "Tunnel URL not configured")
@@ -128,29 +129,30 @@ class TunnelService : Service() {
             return
         }
 
-        // Build WebSocket URL with auth params
+        // Generate server_id from device info
+        val serverId = "${Build.MODEL}_${Build.ID}".replace(" ", "_")
+
+        // Build WebSocket URL with auth params (matches tunnel-server protocol)
         val wsUrl = buildString {
             append(tunnelUrl)
             append(if (tunnelUrl.contains("?")) "&" else "?")
-            append("operator_id=$operatorId")
-            append("&device_id=${Build.ID}")
-            append("&device_model=${Build.MODEL}")
-            append("&android_version=${Build.VERSION.RELEASE}")
+            append("server_id=$serverId")
+            append("&secret=$tunnelSecret")
         }
 
         val request = Request.Builder()
             .url(wsUrl)
-            .header("Authorization", "Bearer $tunnelSecret")
             .header("X-Device-Id", Build.ID)
             .header("X-Device-Model", Build.MODEL)
             .build()
 
         webSocket = httpClient.newWebSocket(request, TunnelWebSocketListener())
-        Log.i(TAG, "Connecting to tunnel server...")
+        Log.i(TAG, "Connecting to tunnel server as $serverId...")
     }
 
     private fun disconnect() {
         reconnectJob?.cancel()
+        statusUpdateJob?.cancel()
         webSocket?.close(1000, "Service stopped")
         webSocket = null
         isConnected = false
@@ -174,8 +176,11 @@ class TunnelService : Service() {
             isConnected = true
             updateNotification("Подключено ✓")
 
-            // Send device info
-            sendDeviceInfo()
+            // Send hello message with proxy settings
+            sendHello()
+
+            // Start periodic status updates
+            startStatusUpdates()
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
@@ -208,16 +213,96 @@ class TunnelService : Service() {
         }
     }
 
-    private fun sendDeviceInfo() {
-        val info = JSONObject().apply {
-            put("action", "device_info")
+    /**
+     * Send hello message with proxy settings for auto-registration.
+     */
+    private fun sendHello() {
+        val serverId = "${Build.MODEL}_${Build.ID}".replace(" ", "_")
+        val tenantId = sessionManager.getTenantId() ?: ""
+        val nodeType = if (sessionManager.getAppMode() == SessionManager.MODE_CLIENT) "client" else "operator"
+
+        val hello = JSONObject().apply {
+            put("action", "hello")
+            put("server_id", serverId)
+            put("services", JSONArray(listOf("http_proxy")))  // We support http_proxy
+            put("tenant_id", tenantId)
+            put("node_type", nodeType)
+            put("wifi_only", true)  // Only use on WiFi by default
+            put("max_requests_per_hour", 10)
             put("device_id", Build.ID)
             put("device_model", Build.MODEL)
             put("manufacturer", Build.MANUFACTURER)
             put("android_version", Build.VERSION.RELEASE)
-            put("sdk_version", Build.VERSION.SDK_INT)
+            put("timestamp", System.currentTimeMillis())
         }
-        webSocket?.send(info.toString())
+        webSocket?.send(hello.toString())
+        Log.i(TAG, "Sent hello: tenant=$tenantId, type=$nodeType, server_id=$serverId")
+    }
+
+    /**
+     * Start periodic status updates.
+     */
+    private fun startStatusUpdates() {
+        statusUpdateJob?.cancel()
+        statusUpdateJob = serviceScope.launch {
+            while (isConnected) {
+                delay(STATUS_UPDATE_INTERVAL_MS)
+                if (isConnected) {
+                    sendProxyStatus()
+                }
+            }
+        }
+    }
+
+    /**
+     * Send proxy_status with WiFi and battery info.
+     */
+    private fun sendProxyStatus() {
+        val isWifi = isOnWifi()
+        val batteryLevel = getBatteryLevel()
+
+        val status = JSONObject().apply {
+            put("action", "proxy_status")
+            put("server_id", "${Build.MODEL}_${Build.ID}".replace(" ", "_"))
+            put("is_wifi", isWifi)
+            put("battery_level", batteryLevel)
+            put("timestamp", System.currentTimeMillis())
+        }
+        webSocket?.send(status.toString())
+        Log.d(TAG, "Sent proxy_status: wifi=$isWifi, battery=$batteryLevel")
+    }
+
+    /**
+     * Check if device is on WiFi.
+     */
+    private fun isOnWifi(): Boolean {
+        return try {
+            val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val network = connectivityManager.activeNetwork
+                val capabilities = connectivityManager.getNetworkCapabilities(network)
+                capabilities?.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) == true
+            } else {
+                @Suppress("DEPRECATION")
+                connectivityManager.activeNetworkInfo?.type == android.net.ConnectivityManager.TYPE_WIFI
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking WiFi: ${e.message}")
+            true // Assume WiFi if can't check
+        }
+    }
+
+    /**
+     * Get battery level percentage.
+     */
+    private fun getBatteryLevel(): Int {
+        return try {
+            val batteryManager = getSystemService(Context.BATTERY_SERVICE) as android.os.BatteryManager
+            batteryManager.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting battery: ${e.message}")
+            100 // Assume full if can't check
+        }
     }
 
     /**
@@ -242,7 +327,8 @@ class TunnelService : Service() {
             val action = json.optString("action", "")
 
             when (action) {
-                "http" -> handleHttpRequest(id, json)
+                "http", "http_request" -> handleHttpRequest(id, json)
+                "proxy_fetch" -> handleProxyFetch(id, json)
                 "ping" -> sendPong(id)
                 "status" -> sendStatus(id)
                 else -> {
@@ -382,6 +468,127 @@ class TunnelService : Service() {
             activeRequests.decrementAndGet()
             updateNotification(if (isConnected) "Подключено ✓" else "Отключено")
         }
+    }
+
+    /**
+     * Handle proxy_fetch request - direct URL fetch via mobile IP.
+     * Used for price scraping and external API requests.
+     *
+     * Format from body field:
+     * {
+     *   "url": "https://example.com",
+     *   "method": "GET",
+     *   "headers": {},
+     *   "body": null,
+     *   "timeout": 30
+     * }
+     */
+    private suspend fun handleProxyFetch(id: String, json: JSONObject) {
+        val requestNum = requestCounter.incrementAndGet()
+        activeRequests.incrementAndGet()
+
+        // proxy_fetch has request details in "body" field
+        val bodyObj = json.optJSONObject("body") ?: json
+        val url = bodyObj.optString("url", "")
+        val method = bodyObj.optString("method", "GET").uppercase()
+        val headersJson = bodyObj.optJSONObject("headers")
+        val requestBody = bodyObj.optString("body", "")
+        val timeout = bodyObj.optInt("timeout", 30)
+
+        if (url.isEmpty()) {
+            sendProxyError(id, "Missing URL")
+            activeRequests.decrementAndGet()
+            return
+        }
+
+        Log.i(TAG, "[$requestNum] Proxy fetch: $method $url")
+        updateNotification("Proxy: ${activeRequests.get()}")
+
+        try {
+            val requestBuilder = Request.Builder().url(url)
+
+            // Add headers
+            headersJson?.keys()?.forEach { key ->
+                val value = headersJson.getString(key)
+                if (!key.equals("Content-Length", ignoreCase = true) &&
+                    !key.equals("Host", ignoreCase = true)) {
+                    requestBuilder.addHeader(key, value)
+                }
+            }
+
+            // Prepare body
+            val body: RequestBody? = if (requestBody.isNotEmpty()) {
+                val contentType = headersJson?.optString("Content-Type", "application/json")
+                    ?: "application/json"
+                requestBody.toRequestBody(contentType.toMediaType())
+            } else null
+
+            // Set method
+            when (method) {
+                "GET" -> requestBuilder.get()
+                "HEAD" -> requestBuilder.head()
+                "POST" -> requestBuilder.post(body ?: "".toRequestBody(null))
+                "PUT" -> requestBuilder.put(body ?: "".toRequestBody(null))
+                "DELETE" -> if (body != null) requestBuilder.delete(body) else requestBuilder.delete()
+                "PATCH" -> requestBuilder.patch(body ?: "".toRequestBody(null))
+                else -> requestBuilder.method(method, body)
+            }
+
+            // Create client with custom timeout
+            val client = httpClient.newBuilder()
+                .readTimeout(timeout.toLong(), TimeUnit.SECONDS)
+                .build()
+
+            val request = requestBuilder.build()
+
+            withContext(Dispatchers.IO) {
+                client.newCall(request).execute().use { response ->
+                    val responseBody = response.body?.string() ?: ""
+
+                    // Build response headers
+                    val responseHeaders = JSONObject()
+                    response.headers.forEach { (name, value) ->
+                        responseHeaders.put(name, value)
+                    }
+
+                    // Send proxy_response (distinct action for proxy manager)
+                    val responseJson = JSONObject().apply {
+                        put("id", id)
+                        put("action", "proxy_response")
+                        put("status", response.code)
+                        put("headers", responseHeaders)
+                        put("body", responseBody)
+                        put("url", response.request.url.toString())
+                    }
+
+                    Log.i(TAG, "[$requestNum] Proxy response: ${response.code}")
+                    sendResponse(responseJson.toString())
+                }
+            }
+
+        } catch (e: IOException) {
+            Log.e(TAG, "[$requestNum] Proxy network error: ${e.message}")
+            sendProxyError(id, "Network error: ${e.message}")
+        } catch (e: Exception) {
+            Log.e(TAG, "[$requestNum] Proxy error: ${e.message}")
+            sendProxyError(id, e.message ?: "Unknown error")
+        } finally {
+            activeRequests.decrementAndGet()
+            updateNotification(if (isConnected) "Подключено ✓" else "Отключено")
+        }
+    }
+
+    /**
+     * Send proxy error response with proxy_response action.
+     */
+    private fun sendProxyError(id: String, error: String) {
+        val response = JSONObject().apply {
+            put("id", id)
+            put("action", "proxy_response")
+            put("status", 500)
+            put("error", error)
+        }
+        sendResponse(response.toString())
     }
 
     private fun sendPong(id: String) {
