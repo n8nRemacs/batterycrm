@@ -42,62 +42,113 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 16 December 2025, 17:45 (UTC+4)
+## Last session: 16 December 2025, 20:00 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### 1. Android App — Dialogs UI
-- Создан `DialogEntity.kt` — сущность диалога
-- Создан `DialogsAdapter.kt` — адаптер с жирным шрифтом для непрочитанных
-- Создан `item_dialog.xml` — layout элемента списка
-- Обновлён `MainActivity.kt` — переключено на диалоги
-- Обновлены ресурсы: colors.xml, bottom_navigation_menu.xml, activity_main.xml
-- Кнопки AI режима отключены (серые)
-- **APK собран успешно:** `app/build/outputs/apk/debug/app-debug.apk`
+### 1. Миграция серверов
 
-### 2. TunnelService
-- Скопирован `TunnelService.kt` в root app
-- Обновлён `SessionManager.kt` с поддержкой app modes (client/server/both)
+**RU Server (45.144.177.128):**
+- Остановлены и удалены все MCP серверы
+- Оставлены только: neo4j, redis, marzban (VPN)
 
-### 3. MCP SSH Server
-- Создан `MCP/mcp-ssh/server.py` — MCP сервер для SSH
-- Настроены серверы: ru, fi, n8n, new (155.212.221.189)
-- Добавлен в `~/.claude/claude_desktop_config.json`
+**NEW Server (155.212.221.189):**
+- Развёрнуты все сервисы для мессенджера
+- Docker network `eldoleado` создана
 
-### 4. Инфраструктура
-- Проверен n8n (185.221.214.83) — воркфлоу импортированы
-- Проверен android-api на 45.144.177.128
+### 2. Tunnel Proxy — Архитектура защиты от банов
+
+**Проблема:** Мессенджеры банят серверные IP и определяют ботов по TLS fingerprint.
+
+**Решение:** HTTP запросы выполняются на Android устройстве.
+
+```
+Android App (TunnelService)
+    │
+    │ WebSocket (мобильный IP + Android TLS fingerprint)
+    ▼
+tunnel-server:8765 ◄──── MCP серверы (POST /proxy)
+    │
+    ├── avito-messenger-api:8766
+    ├── vk-community-api:8767
+    └── max-bot-api:8768
+```
+
+**Что это даёт:**
+- ✅ Мобильный IP (не серверный/datacenter)
+- ✅ Android TLS fingerprint (OkHttp, не Python/aiohttp)
+- ✅ Реальный Device ID
+- ✅ Вся логика на сервере, телефон только прокси
+
+### 3. Компоненты созданы
+
+**tunnel-server** (на VPS):
+- WebSocket сервер для подключения Android
+- HTTP API `/proxy` для MCP серверов
+- Маршрутизация запросов через подключенные устройства
+
+**TunnelService.kt** (в Android приложении):
+- Foreground Service с уведомлением
+- Подключается к tunnel-server по WebSocket
+- Выполняет HTTP запросы через OkHttp (Android TLS!)
+- Поддержка бинарных данных, таймаутов, заголовков
+
+### 4. Развёрнутые сервисы на NEW (155.212.221.189)
+
+| Сервис | Порт | Описание |
+|--------|------|----------|
+| tunnel-server | 8765 | WebSocket + HTTP API |
+| avito-messenger-api | 8766 | Avito MCP |
+| vk-community-api | 8767 | VK MCP |
+| max-bot-api | 8768 | MAX MCP |
+| android-api | 8780 | API для приложения |
+| redis | 6379 | Redis |
 
 ---
 
 ## Current system state
 
+**NEW Server (155.212.221.189):**
+- ✅ tunnel-server работает, ждёт подключения Android
+- ✅ Все MCP серверы запущены
+- ✅ android-api готов
+- ✅ redis работает
+
+**RU Server (45.144.177.128):**
+- ✅ neo4j работает
+- ✅ redis работает
+- ✅ marzban (VPN) работает
+
 **Android App:**
-- ✅ Диалоги UI готов
-- ✅ APK собран
-- ⏳ API эндпойнты в n8n нужно активировать
+- ✅ TunnelService обновлён для внешних HTTP
+- ⏳ Нужно настроить Tunnel URL в приложении
+- ⏳ Нужно пересобрать APK
 
-**Servers:**
-- 45.144.177.128 — neo4j, redis, MCP серверы (будут перенесены)
-- 155.212.221.189 — новый сервер для мессенджера (пустой)
-- 185.221.214.83 — n8n (воркфлоу есть, нужно активировать)
-
-**MCP SSH:**
-- ✅ Создан
-- ⏳ Нужен перезапуск Claude Code
+**n8n (185.221.214.83):**
+- ⏳ Нужно активировать API_Android_* workflows
 
 ---
 
 ## NEXT STEPS
 
-1. **Перезапустить Claude Code** — активировать MCP SSH
-2. **Миграция серверов:**
-   - Оставить на 45.144.177.128: neo4j, redis
-   - Перенести на 155.212.221.189: все MCP серверы, android-api
-3. **Активировать n8n воркфлоу** — API_Android_Auth и другие
-4. **Тест Android приложения**
+1. **Настроить Android приложение:**
+   - Tunnel URL: `ws://155.212.221.189:8765/ws`
+   - Tunnel Secret: `Mi31415926pSss!`
+
+2. **Пересобрать APK** с новым TunnelService
+
+3. **Включить TunnelService** в приложении
+
+4. **Проверить подключение:**
+   ```bash
+   curl http://155.212.221.189:8765/devices
+   ```
+
+5. **Активировать n8n workflows**
+
+6. **Тестировать** отправку сообщений через мобильный IP
 
 ---
 
@@ -105,5 +156,6 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 1. `git pull`
 2. Read `Start.md`
-3. Перезапустить Claude Code для MCP SSH
-4. Продолжить миграцию серверов
+3. Настроить Tunnel URL в Android приложении
+4. Пересобрать и установить APK
+5. Включить TunnelService и проверить подключение
