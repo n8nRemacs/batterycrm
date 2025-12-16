@@ -42,50 +42,44 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 17 December 2025, 01:35 (UTC+4)
+## Last session: 17 December 2025, 02:30 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### 1. tunnel-server — WebSocket Hub + ProxyManager ✅
+### 1. Phase 4 Architecture Design ✅
 
-- Доработали `tunnel-server/app/main.py` — интеграция с ProxyManager
-- Доработали `websocket_manager.py` — обработчики proxy_response, proxy_status, hello
-- TunnelConnection расширен полями: tenant_id, node_type, wifi_only, max_requests_per_hour
-- Auto-registration proxy nodes при hello с http_proxy service
+Спроектировали n8n интеграцию:
+- Входящие сообщения: Phone → tunnel-server → n8n webhook → Neo4j
+- Исходящие сообщения: Оператор → tunnel-server → n8n → Phone → API
+- Media downloads через proxy_fetch (мобильный IP)
+- Batching через Redis (TTL 3 сек)
 
-### 2. mobile-server — Proxy Protocol ✅
+### 2. Транскрипция и нормализация ✅
 
-- Обновили `tunnel_proxy/proxy.py`:
-  - send_hello() с tenant_id, node_type, services
-  - proxy_response action для proxy_fetch ответов
-  - _status_update_loop() — периодические proxy_status
-  - _get_device_status() — WiFi/battery через Termux API
-- Обновили `config.py` — TENANT_ID, NODE_TYPE, WIFI_ONLY, STATUS_UPDATE_INTERVAL
-- Обновили `.env.example`
+- Входящие аудио: Whisper API (в n8n)
+- Исходящие аудио: Android SpeechRecognizer
+- Нормализация текста: OpenRouter (дешёвая модель)
 
-### 3. Android TunnelService ✅
+### 3. Neo4j Schema Design ✅
 
-- Обновили протокол подключения (server_id вместо operator_id)
-- sendHello() с tenant_id, node_type, device info
-- startStatusUpdates() + sendProxyStatus() — WiFi/battery updates
-- handleProxyFetch() — proxy_fetch через мобильный IP
-- isOnWifi(), getBatteryLevel() — нативные методы Android
+- Client (phone, name)
+- ChannelAccount (type, external_id, chat_id)
+- Message (text, direction, timestamp)
+- Связи: HAS_ACCOUNT, SENT, RECEIVED
 
-### 4. Docker Deployment на 155.212.221.189 ✅
+### 4. Omnichannel UI Concept ✅
 
-- Создали Dockerfile, docker-compose.yml, deploy.sh, .dockerignore
-- Задеплоили tunnel-server на 155.212.221.189:8800
-- Health check: `curl http://155.212.221.189:8800/api/health` → OK
+- Кнопки выбора канала: [TG ✓] [Avito ✗] [MAX ○] [📞]
+- Один клиент = несколько каналов
+- Кнопка звонка через ACTION_DIAL
 
-### 5. ROADMAP.md обновлён ✅
+### 5. Documentation Updates ✅
 
-- Phase 1 (tunnel-server): ✅ DEPLOYED
-- Phase 3 (Android): ✅ PROTOCOL READY
-- Добавлен раздел "Implemented Features"
-- Добавлена таблица WebSocket Protocol
-- Обновлены Quick Start Commands
+- ROADMAP.md — Phase 4 с детальным описанием
+- Start.md — приоритеты на завтра
+- Stop.md — итоги сессии
 
 ---
 
@@ -109,38 +103,24 @@ curl http://155.212.221.189:8800/api/health
 
 ---
 
-## NEXT STEPS (для следующей сессии)
+## NEXT STEPS (Phase 4: n8n Integration)
 
-### Phase 2: Mobile Client — ПРИОРИТЕТ
+### 1. tunnel-server: n8n интеграция
+- [ ] Forward incoming messages → n8n webhook
+- [ ] `/api/send` endpoint для отправки сообщений
+- [ ] Push to Android via WebSocket
 
-**Вариант A: Termux**
-```bash
-pkg install python
-cd mobile-server
-cp .env.example .env
-nano .env  # TUNNEL_URL=ws://155.212.221.189:8800/ws, TENANT_ID
-pip install -r requirements.txt
-python -m tunnel_proxy.proxy
-```
+### 2. n8n Workflows
+- [ ] `ELO_Incoming_Message` — приём → Neo4j → Push
+- [ ] `ELO_Outgoing_Draft` — нормализация текста
+- [ ] `ELO_Outgoing_Send` — отправка через tunnel
+- [ ] `ELO_Audio_Transcribe` — Whisper транскрипция
 
-**Вариант B: Android App**
-1. Open `app_original` in Android Studio
-2. Configure tunnel URL in SessionManager
-3. Build APK
-4. Install and test
-
-### Phase 3: End-to-End Testing
-
-1. Подключить телефон к tunnel-server
-2. Проверить `/api/servers` — должен показать подключённый телефон
-3. Отправить proxy_fetch через API
-4. Проверить получение ответа
-
-### Phase 4: SSL/WSS (опционально)
-
-1. Nginx reverse proxy на tunnel сервере
-2. Let's Encrypt сертификат
-3. WSS вместо WS
+### 3. Android App (app_original)
+- [ ] Экран "Клиенты" (список диалогов)
+- [ ] Кнопки выбора канала [TG] [Avito] [MAX] [📞]
+- [ ] Кнопка звонка (ACTION_DIAL)
+- [ ] SpeechRecognizer для голосового ввода
 
 ---
 

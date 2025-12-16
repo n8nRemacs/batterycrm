@@ -444,4 +444,204 @@ curl http://155.212.221.189:8800/api/servers
 | tunnel-server | ✅ Running | 155.212.221.189:8800 |
 | mobile-server | ✅ Code ready | Needs Termux setup |
 | Android app | ✅ Protocol ready | Needs build + deploy |
+| n8n integration | ⬜ Pending | Next phase |
 | SSL/WSS | ⬜ Pending | Need nginx reverse proxy |
+
+---
+
+## NEXT: n8n Integration & Messaging Flow
+
+### Phase 4: n8n Backend (ПРИОРИТЕТ)
+
+#### 4.1 Message Flow Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              ВХОДЯЩЕЕ СООБЩЕНИЕ                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Клиент (Telegram/Avito/MAX)
+    │
+    ▼
+Phone (Termux) получает сообщение
+    │
+    │ Если голос → отправить на транскрипцию
+    │
+    ▼
+tunnel-server → POST n8n webhook
+    │
+    ▼
+n8n Workflow:
+  1. Определить tenant
+  2. Найти/создать Client в Neo4j
+  3. Скачать медиа через proxy_fetch (IP телефона)
+  4. Whisper транскрипция (если аудио)
+  5. Сохранить Message в Neo4j
+  6. Batching (3 сек, Redis)
+  7. Push в Android App оператора
+    │
+    ▼
+Оператор видит сообщение в app_original
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              ИСХОДЯЩЕЕ СООБЩЕНИЕ                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Оператор в Android App
+    │
+    │ Голос → Android SpeechRecognizer (локально)
+    │ Текст → как есть
+    │
+    ▼
+tunnel-server → n8n webhook
+    │
+    ▼
+n8n Workflow:
+  1. Нормализация текста (OpenRouter, дешёвая модель)
+     - Исправить опечатки
+     - Пунктуация
+  2. Вернуть draft в Android App
+    │
+    ▼
+Оператор видит исправленный текст
+    │
+    │ [Отправить] или [Редактировать]
+    │
+    ▼
+n8n Workflow:
+  1. Сохранить Message в Neo4j
+  2. Отправить через tunnel → Phone → API мессенджера
+    │
+    ▼
+Клиент получает сообщение
+```
+
+#### 4.2 Neo4j Schema
+
+```cypher
+// Клиент (один на tenant, может иметь несколько каналов)
+(:Client {
+  id: "uuid",
+  tenant_id: "tenant_1",
+  name: "Иван Петров",
+  phone: "+79001234567",
+  created_at: timestamp(),
+  last_seen: timestamp()
+})
+
+// Аккаунты в каналах (омниканальность)
+(:ChannelAccount {
+  channel: "telegram",        // telegram, avito, max
+  external_id: "123456789",   // chat_id в мессенджере
+  username: "@ivan_petrov"
+})
+
+// Связи
+(client)-[:HAS_ACCOUNT]->(channel_account)
+
+// Сообщение
+(:Message {
+  id: "uuid",
+  tenant_id: "tenant_1",
+  text: "Текст сообщения",
+  direction: "in",            // in = от клиента, out = от оператора
+  channel: "telegram",        // через какой канал
+  has_audio: false,
+  audio_url: null,
+  transcription: null,
+  created_at: timestamp()
+})
+
+// Связи сообщений
+(client)-[:SENT]->(message)       // входящее
+(client)-[:RECEIVED]->(message)   // исходящее
+```
+
+#### 4.3 Омниканальность
+
+Один клиент может писать с разных каналов. В UI переписки:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ← Иван Петров                                                  │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ [TG ✓] [Avito ✗] [MAX ○] [📞]  +7 900 123-45-67        │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│     ↑         ↑        ↑      ↑                                 │
+│     │         │        │      └── звонок (если есть номер)      │
+│     │         │        └── доступен, но не выбран               │
+│     │         └── недоступен (нет аккаунта)                     │
+│     └── выбран для ответа                                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Правила каналов:**
+| Канал | Можно отправить если |
+|-------|---------------------|
+| Telegram | Есть chat_id или @username |
+| Avito | Только ответ на существующий диалог |
+| MAX | Есть номер телефона |
+| Звонок 📞 | Есть номер телефона (ACTION_DIAL) |
+
+#### 4.4 Технологии
+
+| Задача | Технология |
+|--------|------------|
+| Транскрипция входящих (аудио) | Whisper API (n8n) |
+| Транскрипция исходящих (голос оператора) | Android SpeechRecognizer |
+| Нормализация текста | OpenRouter (дешёвая модель) |
+| Batching | Redis (TTL 3 сек) |
+| Push в Android | WebSocket через tunnel-server |
+
+#### 4.5 TODO: n8n Workflows
+
+| Workflow | Описание | Статус |
+|----------|----------|--------|
+| `ELO_Incoming_Message` | Приём сообщения → Neo4j → Push | ⬜ |
+| `ELO_Outgoing_Draft` | Нормализация текста → return draft | ⬜ |
+| `ELO_Outgoing_Send` | Сохранить → отправить через tunnel | ⬜ |
+| `ELO_Media_Download` | Скачать медиа через proxy_fetch | ⬜ |
+| `ELO_Audio_Transcribe` | Whisper транскрипция | ⬜ |
+
+#### 4.6 TODO: tunnel-server
+
+| Задача | Статус |
+|--------|--------|
+| Forward incoming → n8n webhook | ⬜ |
+| `/api/send` endpoint | ⬜ |
+| Push to Android via WebSocket | ⬜ |
+
+#### 4.7 TODO: Android App (app_original)
+
+| Задача | Статус |
+|--------|--------|
+| Экран "Клиенты" (список диалогов) | ⬜ |
+| Кнопки выбора канала в переписке | ⬜ |
+| Кнопка звонка 📞 (ACTION_DIAL) | ⬜ |
+| Получение push через WebSocket | ⬜ |
+| SpeechRecognizer для голосового ввода | ⬜ |
+| Отображение транскрипции под аудио | ⬜ |
+
+---
+
+## Client Identification Flow
+
+```
+Входящее сообщение от (channel, external_id)
+    │
+    ▼
+Найти ChannelAccount?
+    │
+    ├── ДА → взять Client
+    │
+    └── НЕТ → Есть номер телефона в сообщении?
+              │
+              ├── ДА → Найти Client по phone?
+              │        │
+              │        ├── ДА → привязать новый ChannelAccount
+              │        │
+              │        └── НЕТ → создать Client + ChannelAccount
+              │
+              └── НЕТ → создать Client + ChannelAccount
+```
