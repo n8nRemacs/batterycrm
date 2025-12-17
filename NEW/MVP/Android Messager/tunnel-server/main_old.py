@@ -20,10 +20,6 @@ from app.input import api_router, webhook_router, manager
 from app.input.webhooks import set_webhook_handler
 from app.input.api import set_orchestrator
 from app.input.proxy_manager import proxy_manager
-from app.input.tunnel_in import tunnel_in
-from app.input.tunnel_out import tunnel_out
-from app.input.message_router import message_router
-from app.input.operator_connector import operator_connector
 from app.pipeline import PipelineOrchestrator
 
 # Configure logging
@@ -67,14 +63,6 @@ async def lifespan(app: FastAPI):
     set_webhook_handler(handle_webhook)
     set_orchestrator(orchestrator)  # For API routes
 
-    # Set up IN/OUT message flow
-    # TunnelIN → MessageRouter
-    tunnel_in.set_router(message_router.route)
-
-    # MessageRouter outputs
-    message_router.set_to_operator_handler(operator_connector.push_to_operator)
-    message_router.set_to_client_handler(tunnel_out.send_message)
-
     # Start background tasks
     health_task = asyncio.create_task(health_check_loop())
 
@@ -85,10 +73,6 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down...")
     health_task.cancel()
-
-    # Close HTTP clients
-    await tunnel_in.close()
-    await message_router.close()
 
     # Close database connections
     # if pg_pool:
@@ -149,96 +133,28 @@ async def websocket_endpoint(
         await manager.disconnect(server_id)
 
 
-@app.websocket("/ws/operator")
-async def operator_websocket_endpoint(
-    websocket: WebSocket,
-    operator_id: str = Query(...),
-    tenant_id: str = Query(...),
-    token: str = Query(...)
-):
-    """
-    WebSocket endpoint for Android operator apps.
-
-    Operators connect here to receive:
-    - new_message: incoming client messages
-    - show_draft: normalized drafts for approval
-    """
-    # TODO: Validate token against database
-
-    conn = await operator_connector.connect(
-        websocket=websocket,
-        operator_id=operator_id,
-        tenant_id=tenant_id
-    )
-
-    try:
-        while True:
-            data = await websocket.receive_json()
-            await handle_operator_message(operator_id, data)
-
-    except WebSocketDisconnect:
-        await operator_connector.disconnect(operator_id)
-    except Exception as e:
-        logger.error(f"Operator WebSocket error for {operator_id}: {e}")
-        await operator_connector.disconnect(operator_id)
-
-
 # === Handlers ===
 
 async def handle_incoming_message(server_id: str, data: dict):
-    """
-    Handle incoming message from tunnel.
+    """Handle incoming message from tunnel"""
+    if not orchestrator:
+        logger.error("Orchestrator not initialized")
+        return
 
-    Uses new pipeline: TunnelIN → Transcribe → Batch → Router
-    """
     try:
-        await tunnel_in.process(server_id, data)
+        service = data.get("service", "unknown")
+        message_data = data.get("data", {})
+
+        result = await orchestrator.process_incoming(
+            server_id=server_id,
+            channel=service,
+            data=message_data
+        )
+
+        logger.info(f"Processed incoming from {service}: {result.message.id}")
+
     except Exception as e:
         logger.error(f"Error processing incoming message: {e}")
-
-
-async def handle_operator_message(operator_id: str, data: dict):
-    """
-    Handle message from operator app.
-
-    Actions:
-    - send: Operator typed message → normalize → show draft
-    - approve: Operator approved draft → send to client
-    """
-    action = data.get("action")
-
-    try:
-        if action == "send":
-            # New message from operator → route for normalization
-            message = {
-                "id": data.get("id"),
-                "channel": data.get("channel"),
-                "chat_id": data.get("chat_id"),
-                "text": data.get("text"),
-                "server_id": data.get("server_id"),
-                "direction": "out",
-                "status": "draft"  # Needs normalization
-            }
-            await message_router.route(message)
-
-        elif action == "approve":
-            # Approved message → send to client
-            message = {
-                "id": data.get("id"),
-                "channel": data.get("channel"),
-                "chat_id": data.get("chat_id"),
-                "text": data.get("final_text", data.get("text")),
-                "server_id": data.get("server_id"),
-                "direction": "out",
-                "status": "approved"
-            }
-            await message_router.route(message)
-
-        else:
-            logger.warning(f"Unknown operator action: {action}")
-
-    except Exception as e:
-        logger.error(f"Error handling operator message: {e}")
 
 
 async def handle_webhook(source: str, data: dict):

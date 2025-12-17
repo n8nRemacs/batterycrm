@@ -80,6 +80,19 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Operator WebSocket Service -->
+        <service
+            android:name=".operator.OperatorWebSocketService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Operator Activity -->
+        <activity
+            android:name=".operator.OperatorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- Call Receiver -->
         <receiver
             android:name=".callrecording.CallReceiver"

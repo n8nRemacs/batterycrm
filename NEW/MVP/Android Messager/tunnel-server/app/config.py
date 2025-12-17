@@ -45,10 +45,11 @@ class RedisSettings(BaseSettings):
 
 
 class AICoreSettings(BaseSettings):
-    enabled: bool = Field(default=False)
-    transcription_url: str = Field(default="http://localhost:8900/transcribe")
-    normalization_url: str = Field(default="http://localhost:8900/normalize")
-    timeout: int = Field(default=30)
+    enabled: bool = Field(default=True)
+    # n8n webhooks
+    in_app_url: str = Field(default="https://n8n.n8nsrv.ru/webhook/in-app")
+    router_url: str = Field(default="https://n8n.n8nsrv.ru/webhook/router")
+    timeout: int = Field(default=60)
 
     class Config:
         env_prefix = "AI_CORE_"

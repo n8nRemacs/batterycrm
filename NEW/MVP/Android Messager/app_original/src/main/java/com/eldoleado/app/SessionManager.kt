@@ -65,6 +65,8 @@ class SessionManager(context: Context) {
     
     fun getSessionToken(): String? = prefs.getString(KEY_SESSION_TOKEN, null)
 
+    fun getAuthToken(): String? = prefs.getString(KEY_SESSION_TOKEN, null)
+
     fun saveAiMode(mode: String) {
         prefs.edit().putString(KEY_AI_MODE, mode).apply()
     }
