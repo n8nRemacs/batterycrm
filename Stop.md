@@ -42,85 +42,91 @@ git add -A && git commit -m "Session update: brief description" && git push
 
 ---
 
-## Last session: 17 December 2025, 02:30 (UTC+4)
+## Last session: 17 December 2025, 13:20 (UTC+4)
 
 ---
 
 ## What's done in this session
 
-### 1. Phase 4 Architecture Design ✅
+### 1. tunnel-server: IN/OUT Connectors ✅
 
-Спроектировали n8n интеграцию:
-- Входящие сообщения: Phone → tunnel-server → n8n webhook → Neo4j
-- Исходящие сообщения: Оператор → tunnel-server → n8n → Phone → API
-- Media downloads через proxy_fetch (мобильный IP)
-- Batching через Redis (TTL 3 сек)
+Создали полную архитектуру коннекторов:
+- `tunnel_in.py` — приём сообщений от телефонов, батчинг, Whisper
+- `tunnel_out.py` — отправка сообщений на телефоны
+- `message_router.py` — маршрутизация через n8n
+- `operator_connector.py` — WebSocket для операторов `/ws/operator`
 
-### 2. Транскрипция и нормализация ✅
+### 2. n8n Workflows ✅
 
-- Входящие аудио: Whisper API (в n8n)
-- Исходящие аудио: Android SpeechRecognizer
-- Нормализация текста: OpenRouter (дешёвая модель)
+Созданы и импортированы:
+- `ELO_In_App` — транскрипция аудио (Whisper API) + media download через proxy_fetch
+- `ELO_Message_Router` — роутинг сообщений + нормализация текста (OpenRouter/Gemini)
+- JSON файлы в `tunnel-server/n8n/`
 
-### 3. Neo4j Schema Design ✅
+### 3. Android Operator UI ✅
 
-- Client (phone, name)
-- ChannelAccount (type, external_id, chat_id)
-- Message (text, direction, timestamp)
-- Связи: HAS_ACCOUNT, SENT, RECEIVED
+Полный UI для оператора:
+- `OperatorActivity` — главное activity
+- `OperatorWebSocketService` — foreground service с WebSocket
+- `ChatsListFragment` + `ChatsAdapter` — список чатов
+- `ChatFragment` + `MessagesAdapter` — переписка
+- `DraftApprovalDialog` — утверждение нормализованного текста
+- `ChatsRepository` — singleton для состояния (LiveData)
+- `ChatModels.kt` — Channel, Chat, ChatMessage, DraftMessage
+- Все layouts и drawables
 
-### 4. Omnichannel UI Concept ✅
+### 4. Documentation ✅
 
-- Кнопки выбора канала: [TG ✓] [Avito ✗] [MAX ○] [📞]
-- Один клиент = несколько каналов
-- Кнопка звонка через ACTION_DIAL
+- `NEW/Schema_messagers.md` — полная документация системы (1200+ строк)
+- Все API endpoints, WebSocket протоколы
+- Message flow диаграммы (incoming, outgoing, audio)
+- Data models (Kotlin + Python)
+- Security, troubleshooting
 
-### 5. Documentation Updates ✅
+### 5. Scripts ✅
 
-- ROADMAP.md — Phase 4 с детальным описанием
-- Start.md — приоритеты на завтра
-- Stop.md — итоги сессии
+- `start.sh` — обновлён с поддержкой Docker
+- `stop.sh` — создан для graceful shutdown
 
 ---
 
 ## Current system state
 
 **Код:**
-- ✅ tunnel-server полностью готов и задеплоен
-- ✅ mobile-server готов к использованию в Termux
-- ✅ Android TunnelService готов к сборке APK
+- ✅ tunnel-server с полной архитектурой IN/OUT
+- ✅ n8n workflows (ELO_In_App, ELO_Message_Router)
+- ✅ Android Operator UI полностью готов
+- ✅ Документация Schema_messagers.md
 
 **Серверы:**
-- ✅ RU (45.144.177.128): neo4j, redis, marzban
-- ✅ n8n (185.221.214.83): postgresql, n8n
-- ✅ **TUNNEL (155.212.221.189): tunnel-server:8800 RUNNING**
+- ✅ Finnish (217.145.79.27): tunnel-server, mcp-telegram, mcp-whatsapp
+- ✅ RU (45.144.177.128): mcp-avito, mcp-max, neo4j, redis
+- ✅ n8n (185.221.214.83): postgresql, n8n с workflows
 
-**Проверка:**
-```bash
-curl http://155.212.221.189:8800/api/health
-# {"status":"ok","tunnels_connected":0,"version":"1.0.0"}
+**Архитектура:**
+```
+Phone (Server) ──► tunnel-server ──► n8n (Whisper, OpenRouter)
+                        │
+                        ▼
+              Operator App (Client)
 ```
 
 ---
 
-## NEXT STEPS (Phase 4: n8n Integration)
+## NEXT STEPS
 
-### 1. tunnel-server: n8n интеграция
-- [ ] Forward incoming messages → n8n webhook
-- [ ] `/api/send` endpoint для отправки сообщений
-- [ ] Push to Android via WebSocket
+### 1. Интеграция с MainActivity
+- [ ] Добавить кнопку перехода в OperatorActivity
+- [ ] Показывать только в Client mode
 
-### 2. n8n Workflows
-- [ ] `ELO_Incoming_Message` — приём → Neo4j → Push
-- [ ] `ELO_Outgoing_Draft` — нормализация текста
-- [ ] `ELO_Outgoing_Send` — отправка через tunnel
-- [ ] `ELO_Audio_Transcribe` — Whisper транскрипция
+### 2. Тестирование полного flow
+- [ ] Телефон в Server mode → tunnel-server
+- [ ] Оператор в Client mode → tunnel-server
+- [ ] Проверить incoming/outgoing/audio
 
-### 3. Android App (app_original)
-- [ ] Экран "Клиенты" (список диалогов)
-- [ ] Кнопки выбора канала [TG] [Avito] [MAX] [📞]
-- [ ] Кнопка звонка (ACTION_DIAL)
-- [ ] SpeechRecognizer для голосового ввода
+### 3. Деплой обновлений
+- [ ] Обновить tunnel-server на Finnish
+- [ ] Проверить n8n workflows работают
 
 ---
 
@@ -128,10 +134,10 @@ curl http://155.212.221.189:8800/api/health
 
 | File | What |
 |------|------|
-| `NEW/MVP/Android Messager/ROADMAP.md` | Полный роадмап и API |
-| `NEW/MVP/Android Messager/tunnel-server/` | Бэкенд (DEPLOYED) |
-| `NEW/MVP/Android Messager/mobile-server/` | Клиент для Termux |
-| `NEW/MVP/Android Messager/app_original/` | Android App |
+| `NEW/Schema_messagers.md` | **Полная документация системы** |
+| `NEW/MVP/Android Messager/tunnel-server/` | Бэкенд (connectors, n8n) |
+| `NEW/MVP/Android Messager/tunnel-server/n8n/` | n8n workflows JSON |
+| `NEW/MVP/Android Messager/app_original/.../operator/` | Android Operator UI |
 | `Start.md` | Контекст для старта сессии |
 
 ---
@@ -140,5 +146,5 @@ curl http://155.212.221.189:8800/api/health
 
 1. `git pull`
 2. Read `Start.md`
-3. Read `NEW/MVP/Android Messager/ROADMAP.md`
-4. Подключить телефон (Termux или APK)
+3. Read `NEW/Schema_messagers.md` для понимания архитектуры
+4. Интеграция с MainActivity или тестирование
