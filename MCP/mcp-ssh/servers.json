@@ -16,7 +16,7 @@
       "host": "185.221.214.83",
       "user": "root",
       "port": 22,
-      "key_path": "C:/Users/User/.ssh/id_ed25519"
+      "password": "Mi31415926pS"
     },
     "new": {
       "host": "155.212.221.189",

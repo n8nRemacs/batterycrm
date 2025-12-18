@@ -21,6 +21,16 @@ interface ApiService {
     @POST("android/logout")
     fun logout(): Call<ApiResponse>
 
+    // Dialogs
+    @GET("android/dialogs")
+    fun getDialogs(@Query("session_token") sessionToken: String): Call<DialogsResponse>
+
+    @GET("android-messages/android/dialogs/{dialog_id}/messages")
+    fun getChatMessages(
+        @Path("dialog_id") dialogId: String,
+        @Query("session_token") sessionToken: String
+    ): Call<ChatMessagesResponse>
+
     // Appeals
     @GET("api/operator/appeals/list")
     fun getAppealsList(
@@ -401,4 +411,49 @@ data class RepairResponse(
     val success: Boolean,
     val repair: AppealRepairDto? = null,
     val error: String? = null
+)
+
+// ========== DIALOGS DTOs ==========
+
+data class DialogsResponse(
+    val success: Boolean,
+    val dialogs: List<DialogDto>? = null,
+    val error: String? = null
+)
+
+data class DialogDto(
+    val id: String,
+    val client_name: String?,
+    val client_phone: String?,
+    val channel: String,
+    val chat_id: String?,
+    val last_message_text: String?,
+    val last_message_time: Long?,
+    val last_message_is_voice: Boolean?,
+    val unread_count: Int?
+)
+
+data class ChatMessagesResponse(
+    val success: Boolean,
+    val dialog: ChatDialogDto?,
+    val messages: List<ChatMessageDto>?,
+    val error: String? = null
+)
+
+data class ChatDialogDto(
+    val id: String?,
+    val client_name: String?,
+    val client_phone: String?,
+    val channel: String?,
+    val chat_id: String?
+)
+
+data class ChatMessageDto(
+    val id: String?,
+    val text: String?,
+    val direction: String?,  // "in" or "out"
+    val sender_type: String?,
+    val sender_name: String?,
+    val timestamp: Long?,
+    val media: Any? = null
 )

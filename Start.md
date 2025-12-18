@@ -14,7 +14,7 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**17 December 2025, 22:50 (MSK, UTC+3)**
+**18 December 2025, 14:25 (MSK, UTC+3)**
 
 ---
 
@@ -24,45 +24,47 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 Мобильное приложение для операторов сервисных центров. Общение с клиентами через разные мессенджеры (Telegram, WhatsApp, Avito, MAX) из одного интерфейса.
 
 ### Текущий статус
-- ✅ **Login + Roles** — выбор режима (client/server/both) на экране входа
-- ✅ **Database** — создана таблица `elo_t_operator_devices` с app_mode
-- ✅ **Auth Workflow** — `API_Android_Auth_ELO.json` для elo_ таблиц
-- ✅ **Android UI** — Login с RadioGroup для выбора режима
+- ✅ **Login + Roles** — работает (client/server/both)
+- ✅ **Auth API** — `ELO_API_Android_Auth` в n8n
+- ✅ **Dialogs API** — `ELO_API_Android_Dialogs` в n8n
+- ✅ **Messages API** — `ELO_API_Android_Messages` в n8n
+- ✅ **ChatActivity** — новый экран чата (открывается, загружает сообщения)
 - ✅ **tunnel-server** — работает на 155.212.221.189:8800
-- ⬜ **Dialogs API** — mock data, нужен реальный endpoint
+- ⬜ **Тестовые сообщения** — нужно добавить в elo_t_messages
 - 🔄 **Channel Setup** — UI готов, backend частично
 
 ---
 
-## Что сделано в текущей сессии (17.12.2025)
+## Что сделано в текущей сессии (18.12.2025)
 
-### 1. Login + Roles System ✅
-- Три режима: `client` (оператор), `server` (только сервер), `both` (оба)
-- `LoginActivity.kt` — RadioGroup для выбора режима
-- `activity_login.xml` — UI с описанием каждого режима
-- `LoginRequest.app_mode` — передаётся на сервер
-- `SessionManager` — сохраняет режим в SharedPreferences
+### 1. Auth API ✅
+- Импортирован `API_Android_Auth_ELO.json` в n8n
+- Создан тестовый оператор: `admin@test.local` / `test123`
+- Протестирован логин — работает
 
-### 2. Database Schema ✅
-- Создана таблица `elo_t_operator_devices`:
-  - `app_mode` (client/server/both)
-  - `tunnel_url`, `tunnel_secret`
-  - `session_token`, `fcm_token`
-  - Связь с `elo_t_operators` и `elo_t_tenants`
+### 2. Dialogs API ✅
+- Создан workflow `ELO_API_Android_Dialogs`
+- Endpoint: `GET /android/dialogs?session_token=...`
+- Возвращает список диалогов оператора
+- Тестовые данные: 3 диалога (Telegram, WhatsApp, Avito)
 
-### 3. Auth Workflow ✅
-- `API_Android_Auth_ELO.json` — использует elo_ таблицы
-- Возвращает: `app_mode`, `tunnel_url`, `tunnel_secret`
-- Автогенерация `tunnel_secret` для server/both режимов
-- **Требуется:** импорт в n8n
+### 3. Messages API ✅
+- Создан workflow `ELO_API_Android_Messages`
+- Endpoint: `GET /android-messages/android/dialogs/:dialog_id/messages`
+- Возвращает сообщения диалога
 
-### 4. Documentation ✅
-- Обновлён `ROADMAP.md` с полным описанием:
-  - Архитектура системы
-  - API endpoints
-  - Файловая структура
-  - Проблемы и решения
-  - Next steps
+### 4. ChatActivity ✅
+- Новый экран для просмотра чата
+- Заменил старый AppealDetailActivity
+- Загружает сообщения с сервера
+- Layout: header + messages list + input
+
+### 5. Android App Updates
+- `ApiService.kt` — добавлены endpoints для dialogs и messages
+- `MainActivity.kt` — загружает диалоги с API (не mock)
+- `ChatActivity.kt` — новый экран чата
+- `ChatMessagesAdapter.kt` — адаптер для сообщений
+- Layouts: `activity_chat.xml`, `item_chat_message.xml`
 
 ---
 
@@ -71,28 +73,21 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    n8n SERVER (185.221.214.83)                   │
-│  Webhooks: android/auth/login → ELO_API_Android_Auth            │
-│  Database: elo_t_operators, elo_t_operator_devices              │
+│  Webhooks:                                                       │
+│  - android/auth/login     → ELO_API_Android_Auth                │
+│  - android/dialogs        → ELO_API_Android_Dialogs             │
+│  - android-messages/...   → ELO_API_Android_Messages            │
 └─────────────────────────────────────────────────────────────────┘
                               │ HTTPS
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    ANDROID APP (Eldoleado)                       │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │  Mode: client         Mode: both         Mode: server    │   │
-│  │  ┌─────────────┐     ┌─────────────┐    ┌─────────────┐ │   │
-│  │  │ Messenger   │     │ Messenger   │    │ TunnelSvc   │ │   │
-│  │  │ UI only     │     │ + Tunnel    │    │ only        │ │   │
-│  │  └─────────────┘     └─────────────┘    └─────────────┘ │   │
+│  │  LoginActivity → MainActivity → ChatActivity              │   │
+│  │  - Dialogs list from API                                  │   │
+│  │  - Messages from API                                      │   │
+│  │  - TunnelService for server/both modes                    │   │
 │  └──────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-                              │ WebSocket (server/both)
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              tunnel-server (155.212.221.189:8800)                │
-│  - Приём сообщений из каналов (Telegram, Avito, MAX)            │
-│  - Proxy через мобильный IP                                     │
-│  - Forwarding в n8n                                             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -100,21 +95,37 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 
 ## NEXT STEPS
 
-### Priority 1: Test Auth Flow
-1. [ ] Импортировать `API_Android_Auth_ELO.json` в n8n
-2. [ ] Создать тестового оператора в `elo_t_operators`
-3. [ ] Протестировать логин с curl
-4. [ ] Протестировать логин из Android app
+### Priority 1: Add Test Messages
+```sql
+-- Добавить тестовые сообщения в elo_t_messages
+INSERT INTO elo_t_messages (tenant_id, dialog_id, client_id, direction_id, actor_type, content, timestamp)
+VALUES (...);
+```
 
-### Priority 2: Dialogs API
-1. [ ] Создать workflow `ELO_API_Android_Dialogs`
-2. [ ] Endpoint: `GET /android/dialogs?operator_id={uuid}`
-3. [ ] Подключить в MainActivity вместо mock data
+### Priority 2: Send Message API
+- Создать endpoint для отправки сообщений
+- `POST /android/dialogs/:dialog_id/messages`
 
 ### Priority 3: Channel Setup Backend
-1. [ ] Telegram Bot verification API
-2. [ ] Avito sessid validation
-3. [ ] WhatsApp (решить: Baileys/Wappi/WebView)
+- Telegram Bot verification
+- Avito sessid validation
+- WhatsApp integration
+
+---
+
+## Тестовые данные
+
+### Оператор
+- Email: `admin@test.local`
+- Password: `test123`
+- Tenant: `Test Repair Shop`
+
+### Диалоги (в БД)
+| Клиент | Канал | Chat ID |
+|--------|-------|---------|
+| Иван Петров | Telegram | 123456789 |
+| Алексей Козлов | Avito | avito_chat_555 |
+| Мария Сидорова | WhatsApp | 79007654321 |
 
 ---
 
@@ -134,18 +145,21 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ```bash
 # Build Android app
 export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"
-cd /c/Users/User/Eldoleado && ./gradlew.bat assembleDebug
+cd /c/Users/User/Documents/Eldoleado && ./gradlew.bat assembleDebug
 
-# Check tunnel-server
-curl http://155.212.221.189:8800/api/health
+# Install on emulator
+adb install -r app/build/outputs/apk/debug/app-debug.apk
 
-# Test login (after workflow import)
+# Test login
 curl -X POST https://n8n.n8nsrv.ru/webhook/android/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"login":"test@test.com","password":"test","app_mode":"client"}'
+  -d '{"login":"admin@test.local","password":"test123","app_mode":"both"}'
+
+# Test dialogs
+curl "https://n8n.n8nsrv.ru/webhook/android/dialogs?session_token=YOUR_TOKEN"
 
 # Database access
-ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * FROM elo_t_operators;'"
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * FROM elo_t_dialogs;'"
 ```
 
 ---
@@ -154,11 +168,13 @@ ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * F
 
 | Файл | Описание |
 |------|----------|
-| `NEW/MVP/Android Messager/ROADMAP.md` | **Полная документация (обновлено!)** |
-| `NEW/workflows/API/API_Android_Auth_ELO.json` | Auth workflow для импорта |
-| `app/src/main/java/.../LoginActivity.kt` | Логин с выбором режима |
-| `app/src/main/java/.../SessionManager.kt` | Хранение app_mode |
-| `app/src/main/res/layout/activity_login.xml` | UI логина |
+| `NEW/MVP/Android Messager/ROADMAP.md` | Полная документация |
+| `NEW/workflows/API/API_Android_Auth_ELO.json` | Auth workflow |
+| `NEW/workflows/API/API_Android_Dialogs.json` | Dialogs workflow |
+| `NEW/workflows/API/API_Android_Messages.json` | Messages workflow |
+| `app/src/main/java/.../ChatActivity.kt` | Экран чата |
+| `app/src/main/java/.../MainActivity.kt` | Главный экран |
+| `app/src/main/java/.../api/ApiService.kt` | API endpoints |
 
 ---
 

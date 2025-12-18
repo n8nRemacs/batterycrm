@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.eldoleado.app.adapters.DialogsAdapter
 import com.eldoleado.app.data.database.entities.DialogEntity
 import com.eldoleado.app.api.ApiResponse
+import com.eldoleado.app.api.DialogsResponse
 import com.eldoleado.app.api.RetrofitClient
 import com.eldoleado.app.callrecording.CallRecordingPreferences
 import com.eldoleado.app.callrecording.CallRecordingService
@@ -220,46 +221,50 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadDialogs() {
-        // TODO: Load from server via API
-        // For now, show empty list or mock data
-        val mockDialogs = listOf(
-            DialogEntity(
-                id = "1",
-                clientName = "Иван Петров",
-                clientPhone = "+7 999 123-45-67",
-                channel = "telegram",
-                chatId = "123456",
-                lastMessageText = "Здравствуйте, у меня не работает экран",
-                lastMessageTime = System.currentTimeMillis() - 3600000,
-                unreadCount = 2
-            ),
-            DialogEntity(
-                id = "2",
-                clientName = "Мария Сидорова",
-                clientPhone = "+7 999 765-43-21",
-                channel = "whatsapp",
-                chatId = "789012",
-                lastMessageText = "Спасибо за помощь!",
-                lastMessageTime = System.currentTimeMillis() - 86400000,
-                unreadCount = 0
-            ),
-            DialogEntity(
-                id = "3",
-                clientName = null,
-                clientPhone = "+7 999 111-22-33",
-                channel = "avito",
-                chatId = "345678",
-                lastMessageText = "",
-                lastMessageTime = System.currentTimeMillis() - 172800000,
-                lastMessageIsVoice = true,
-                unreadCount = 1
-            )
-        )
-        dialogsAdapter.updateDialogs(mockDialogs)
+        val sessionToken = sessionManager.getSessionToken()
+        if (sessionToken.isNullOrBlank()) {
+            Log.w("MainActivity", "No session token, cannot load dialogs")
+            return
+        }
+
+        RetrofitClient.getApiService(this).getDialogs(sessionToken)
+            .enqueue(object : Callback<DialogsResponse> {
+                override fun onResponse(call: Call<DialogsResponse>, response: Response<DialogsResponse>) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val dialogs = response.body()?.dialogs?.map { dto ->
+                            DialogEntity(
+                                id = dto.id,
+                                clientName = dto.client_name,
+                                clientPhone = dto.client_phone,
+                                channel = dto.channel,
+                                chatId = dto.chat_id ?: "",
+                                lastMessageText = dto.last_message_text ?: "",
+                                lastMessageTime = dto.last_message_time ?: 0L,
+                                lastMessageIsVoice = dto.last_message_is_voice ?: false,
+                                unreadCount = dto.unread_count ?: 0
+                            )
+                        } ?: emptyList()
+
+                        dialogsAdapter.updateDialogs(dialogs)
+                        Log.i("MainActivity", "Loaded ${dialogs.size} dialogs")
+                    } else if (response.code() == 401) {
+                        Log.w("MainActivity", "Session expired")
+                        sessionManager.clearSession()
+                        navigateToLogin()
+                    } else {
+                        Log.e("MainActivity", "Failed to load dialogs: ${response.code()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<DialogsResponse>, t: Throwable) {
+                    Log.e("MainActivity", "Error loading dialogs: ${t.message}")
+                }
+            })
     }
 
     private fun openChat(dialog: DialogEntity) {
-        val intent = Intent(this, AppealDetailActivity::class.java)
+        Log.i("MainActivity", "Opening dialog: ${dialog.id}, channel: ${dialog.channel}, client: ${dialog.clientName}")
+        val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("dialog_id", dialog.id)
         intent.putExtra("chat_id", dialog.chatId)
         intent.putExtra("channel", dialog.channel)
