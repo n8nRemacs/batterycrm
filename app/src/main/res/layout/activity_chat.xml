@@ -95,24 +95,47 @@
         android:orientation="horizontal"
         android:padding="8dp"
         android:background="@android:color/white"
-        android:elevation="8dp">
+        android:elevation="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Audio Record Button -->
+        <ImageButton
+            android:id="@+id/btnAudio"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_mic"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Record Audio"
+            app:tint="@color/colorPrimary" />
 
         <EditText
             android:id="@+id/inputMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
             android:hint="Сообщение..."
             android:background="@drawable/bg_input_message"
             android:padding="12dp"
             android:maxLines="4"
             android:inputType="textMultiLine" />
 
+        <!-- Normalize Button -->
+        <ImageButton
+            android:id="@+id/btnNormalize"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_normalize"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Normalize text"
+            app:tint="@color/colorPrimary" />
+
+        <!-- Send Button -->
         <ImageButton
             android:id="@+id/btnSend"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:src="@drawable/ic_send"
             android:background="@drawable/bg_send_button"
             android:contentDescription="Send"

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Magic wand / auto-fix icon -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M7.5,5.6L10,7L8.6,4.5L10,2L7.5,3.4L5,2L6.4,4.5L5,7L7.5,5.6ZM19.5,15.4L17,14L18.4,16.5L17,19L19.5,17.6L22,19L20.6,16.5L22,14L19.5,15.4ZM22,2L20.6,4.5L22,7L19.5,5.6L17,7L18.4,4.5L17,2L19.5,3.4L22,2ZM14.37,7.29C14.57,7.1 14.57,6.77 14.37,6.58L13.42,5.63C13.23,5.44 12.9,5.44 12.71,5.63L3.71,14.63C3.32,15.02 3.32,15.65 3.71,16.04L7.96,20.29C8.35,20.68 8.98,20.68 9.37,20.29L18.37,11.29C18.57,11.1 18.57,10.77 18.37,10.58L17.42,9.63C17.23,9.44 16.9,9.44 16.71,9.63L9.37,17L7,14.63L14.37,7.29Z"/>
+</vector>

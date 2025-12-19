@@ -16,11 +16,16 @@ import java.util.*
 
 class ChatMessagesAdapter : RecyclerView.Adapter<ChatMessagesAdapter.MessageViewHolder>() {
 
-    private var messages: List<ChatMessageDto> = emptyList()
+    private var messages: MutableList<ChatMessageDto> = mutableListOf()
 
     fun setMessages(newMessages: List<ChatMessageDto>) {
-        messages = newMessages
+        messages = newMessages.toMutableList()
         notifyDataSetChanged()
+    }
+
+    fun addMessage(message: ChatMessageDto) {
+        messages.add(message)
+        notifyItemInserted(messages.size - 1)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {

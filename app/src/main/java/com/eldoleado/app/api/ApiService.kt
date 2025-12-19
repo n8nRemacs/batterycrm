@@ -31,6 +31,18 @@ interface ApiService {
         @Query("session_token") sessionToken: String
     ): Call<ChatMessagesResponse>
 
+    @POST("android-send-message/android-messages/android/dialogs/{dialog_id}/messages")
+    fun sendChatMessage(
+        @Path("dialog_id") dialogId: String,
+        @Body request: SendChatMessageRequest
+    ): Call<SendChatMessageResponse>
+
+    @POST("android-normalize/android/dialogs/{dialog_id}/normalize")
+    fun normalizeDialogText(
+        @Path("dialog_id") dialogId: String,
+        @Body request: NormalizeDialogRequest
+    ): Call<NormalizeDialogResponse>
+
     // Appeals
     @GET("api/operator/appeals/list")
     fun getAppealsList(
@@ -456,4 +468,32 @@ data class ChatMessageDto(
     val sender_name: String?,
     val timestamp: Long?,
     val media: Any? = null
+)
+
+// ========== SEND MESSAGE DTOs ==========
+
+data class SendChatMessageRequest(
+    val session_token: String,
+    val text: String,
+    val media_type: String? = null,  // "voice", "image", etc.
+    val media_data: String? = null   // base64 encoded
+)
+
+data class SendChatMessageResponse(
+    val success: Boolean,
+    val message: ChatMessageDto? = null,
+    val error: String? = null
+)
+
+// ========== NORMALIZE DTOs ==========
+
+data class NormalizeDialogRequest(
+    val session_token: String,
+    val text: String
+)
+
+data class NormalizeDialogResponse(
+    val success: Boolean,
+    val normalized_text: String? = null,
+    val error: String? = null
 )
