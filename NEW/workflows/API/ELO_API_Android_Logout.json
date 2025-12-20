@@ -1,0 +1,533 @@
+{
+  "updatedAt": "2025-12-20T17:10:22.072Z",
+  "createdAt": "2025-12-17T18:20:44.950Z",
+  "id": "j9VlTpdXIdlfBZhO",
+  "name": "ELO_API_Android_Logout",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android/logout",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "ba11760b-cabb-4706-9c23-7a5bae38ad48",
+      "name": "Webhook - Logout",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        -32
+      ],
+      "webhookId": "android-logout"
+    },
+    {
+      "parameters": {
+        "jsCode": "const headers = $json.headers || {};\nlet token = null;\n\n// Try Authorization: Bearer <token>\nconst authHeader = headers.authorization || headers.Authorization || '';\nif (authHeader.startsWith('Bearer ')) {\n  token = authHeader.substring(7);\n} else if (authHeader.startsWith('bearer ')) {\n  token = authHeader.substring(7);\n}\n\n// Try X-Session-Token\nif (!token) {\n  token = headers['x-session-token'] || headers['X-Session-Token'];\n}\n\nreturn { session_token: token || null };"
+      },
+      "id": "060973f4-10ca-461c-9ef5-bde7dc1d2b18",
+      "name": "Parse Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "token-exists",
+              "leftValue": "={{ $json.session_token }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a4cc0357-a566-49d3-a837-a0c79d585f87",
+      "name": "IF - Token Provided",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\nRETURNING operator_id;",
+        "options": {}
+      },
+      "id": "857e46e6-d887-4726-8d2f-7322fd7da496",
+      "name": "Delete Device Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        96,
+        -144
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first()?.json;\n\nconst hasResult = \n  (Array.isArray(input) && input.length > 0 && input[0]?.operator_id) ||\n  (input?.operator_id);\n\nif (hasResult) {\n  return { \n    success: true, \n    message: 'Logged out successfully' \n  };\n} else {\n  return { \n    success: true,\n    message: 'Already logged out'\n  };\n}"
+      },
+      "id": "82ffd145-3d32-4130-99fb-89641234eb0d",
+      "name": "Check Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "ada48c95-0374-45a7-b51d-a2417e021b5d",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: 'Token not provided' } }}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "65c0f60a-ab12-4256-ba4f-631c22067355",
+      "name": "Response - No Token",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Logout": {
+      "main": [
+        [
+          {
+            "node": "Parse Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Token": {
+      "main": [
+        [
+          {
+            "node": "IF - Token Provided",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Token Provided": {
+      "main": [
+        [
+          {
+            "node": "Delete Device Session",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - No Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Device Session": {
+      "main": [
+        [
+          {
+            "node": "Check Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Result": {
+      "main": [
+        [
+          {
+            "node": "Response - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e859163d-2c90-40ce-9e0a-eec323bcdb3b",
+  "activeVersionId": "e859163d-2c90-40ce-9e0a-eec323bcdb3b",
+  "versionCounter": 8,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-17T18:20:44.956Z",
+      "createdAt": "2025-12-17T18:20:44.956Z",
+      "role": "workflow:owner",
+      "workflowId": "j9VlTpdXIdlfBZhO",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-19",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:58:34.844Z",
+      "createdAt": "2025-11-23T03:58:34.844Z",
+      "id": "0yzk30hhaSzkl8bF",
+      "name": "API"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-20T17:10:22.073Z",
+    "createdAt": "2025-12-20T17:10:22.073Z",
+    "versionId": "e859163d-2c90-40ce-9e0a-eec323bcdb3b",
+    "workflowId": "j9VlTpdXIdlfBZhO",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "android/logout",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "ba11760b-cabb-4706-9c23-7a5bae38ad48",
+        "name": "Webhook - Logout",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -560,
+          -32
+        ],
+        "webhookId": "android-logout"
+      },
+      {
+        "parameters": {
+          "jsCode": "const headers = $json.headers || {};\nlet token = null;\n\n// Try Authorization: Bearer <token>\nconst authHeader = headers.authorization || headers.Authorization || '';\nif (authHeader.startsWith('Bearer ')) {\n  token = authHeader.substring(7);\n} else if (authHeader.startsWith('bearer ')) {\n  token = authHeader.substring(7);\n}\n\n// Try X-Session-Token\nif (!token) {\n  token = headers['x-session-token'] || headers['X-Session-Token'];\n}\n\nreturn { session_token: token || null };"
+        },
+        "id": "060973f4-10ca-461c-9ef5-bde7dc1d2b18",
+        "name": "Parse Token",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -352,
+          -32
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "token-exists",
+                "leftValue": "={{ $json.session_token }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "a4cc0357-a566-49d3-a837-a0c79d585f87",
+        "name": "IF - Token Provided",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -128,
+          -32
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "DELETE FROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\nRETURNING operator_id;",
+          "options": {}
+        },
+        "id": "857e46e6-d887-4726-8d2f-7322fd7da496",
+        "name": "Delete Device Session",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          96,
+          -144
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const input = $input.first()?.json;\n\nconst hasResult = \n  (Array.isArray(input) && input.length > 0 && input[0]?.operator_id) ||\n  (input?.operator_id);\n\nif (hasResult) {\n  return { \n    success: true, \n    message: 'Logged out successfully' \n  };\n} else {\n  return { \n    success: true,\n    message: 'Already logged out'\n  };\n}"
+        },
+        "id": "82ffd145-3d32-4130-99fb-89641234eb0d",
+        "name": "Check Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          304,
+          -144
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "ada48c95-0374-45a7-b51d-a2417e021b5d",
+        "name": "Response - Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          512,
+          -32
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { success: false, error: 'Token not provided' } }}",
+          "options": {
+            "responseCode": 400,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "65c0f60a-ab12-4256-ba4f-631c22067355",
+        "name": "Response - No Token",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          96,
+          80
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook - Logout": {
+        "main": [
+          [
+            {
+              "node": "Parse Token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Token": {
+        "main": [
+          [
+            {
+              "node": "IF - Token Provided",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Token Provided": {
+        "main": [
+          [
+            {
+              "node": "Delete Device Session",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Response - No Token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete Device Session": {
+        "main": [
+          [
+            {
+              "node": "Check Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Result": {
+        "main": [
+          [
+            {
+              "node": "Response - Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
+}

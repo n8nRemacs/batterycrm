@@ -1,0 +1,661 @@
+{
+  "updatedAt": "2025-12-20T17:09:42.784Z",
+  "createdAt": "2025-12-17T18:19:32.143Z",
+  "id": "yW11VXCx1UCfJqXd",
+  "name": "ELO_API_Android_Register_FCM",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android-register-fcm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "56260b5f-d1e2-453f-a415-e5856fc892c1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1264,
+        160
+      ],
+      "webhookId": "android-register-fcm"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body || {};\nconst deviceInfo = body.device_info || null;\nconst deviceId = deviceInfo?.device_id || null;\nconst deviceInfoJson = deviceInfo ? JSON.stringify(deviceInfo) : null;\n\nreturn {\n  operator_id: body.operator_id?.trim() || '',\n  session_token: body.session_token?.trim() || '',\n  fcm_token: body.fcm_token?.trim() || '',\n  device_info: deviceInfo,\n  device_id: deviceId,\n  device_info_json: deviceInfoJson\n};"
+      },
+      "id": "a74e43ed-2081-4f7f-9676-1e6158e5c779",
+      "name": "Parse Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.session_token }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "={{ $json.fcm_token }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "43b54681-eda4-439a-84c1-c395c253e0b7",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, operator_id, tenant_id, device_type \nFROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "93e2f2fe-1039-4ec7-ad2e-1808a78df3fa",
+      "name": "Find Device by Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        48
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "device-found",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f1849af-e9c2-4cb7-a762-abfe3b7a4847",
+      "name": "Check Device Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const deviceData = $('Find Device by Session').first().json;\nconst parsedData = $('Parse Body').first().json;\n\nreturn {\n  device_id_db: deviceData.id,\n  operator_id: deviceData.operator_id,\n  tenant_id: deviceData.tenant_id,\n  session_token: parsedData.session_token,\n  fcm_token: parsedData.fcm_token,\n  device_id: parsedData.device_id,\n  device_info_json: parsedData.device_info_json\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "98927e46-2e85-4b65-9455-94301c927e57",
+      "name": "Prepare Update Data"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE operator_devices\nSET \n  fcm_token = '{{ $json.fcm_token }}',\n  device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n  device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n  last_active_at = NOW()\nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nRETURNING id, operator_id;",
+        "options": {}
+      },
+      "id": "8ab2a60c-2017-4544-93cc-6a3d0bc70aec",
+      "name": "Update FCM Token",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        -64
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'FCM token registered', operator_id: $json.operator_id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "099d0d12-1aa9-4802-8407-89d666638388",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: 'invalid_session_token' } }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "03dcf48d-07e3-411a-bf1d-19a78c5b268a",
+      "name": "Response - Invalid Session",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: false, error: 'missing_required_fields' } }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "d1ac8008-f5bb-4689-bb38-c48d60ad32bc",
+      "name": "Response - Missing Fields",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -592,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Body": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Find Device by Session",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - Missing Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Device by Session": {
+      "main": [
+        [
+          {
+            "node": "Check Device Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Device Exists": {
+      "main": [
+        [
+          {
+            "node": "Prepare Update Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - Invalid Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Update Data": {
+      "main": [
+        [
+          {
+            "node": "Update FCM Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update FCM Token": {
+      "main": [
+        [
+          {
+            "node": "Response - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
+  "activeVersionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
+  "versionCounter": 8,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-17T18:19:32.151Z",
+      "createdAt": "2025-12-17T18:19:32.151Z",
+      "role": "workflow:owner",
+      "workflowId": "yW11VXCx1UCfJqXd",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-19",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:58:34.844Z",
+      "createdAt": "2025-11-23T03:58:34.844Z",
+      "id": "0yzk30hhaSzkl8bF",
+      "name": "API"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-20T17:09:42.785Z",
+    "createdAt": "2025-12-20T17:09:42.785Z",
+    "versionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
+    "workflowId": "yW11VXCx1UCfJqXd",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "android-register-fcm",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "56260b5f-d1e2-453f-a415-e5856fc892c1",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1264,
+          160
+        ],
+        "webhookId": "android-register-fcm"
+      },
+      {
+        "parameters": {
+          "jsCode": "const body = $input.item.json.body || {};\nconst deviceInfo = body.device_info || null;\nconst deviceId = deviceInfo?.device_id || null;\nconst deviceInfoJson = deviceInfo ? JSON.stringify(deviceInfo) : null;\n\nreturn {\n  operator_id: body.operator_id?.trim() || '',\n  session_token: body.session_token?.trim() || '',\n  fcm_token: body.fcm_token?.trim() || '',\n  device_info: deviceInfo,\n  device_id: deviceId,\n  device_info_json: deviceInfoJson\n};"
+        },
+        "id": "a74e43ed-2081-4f7f-9676-1e6158e5c779",
+        "name": "Parse Body",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1056,
+          160
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $json.session_token }}",
+                "operation": "isNotEmpty"
+              },
+              {
+                "value1": "={{ $json.fcm_token }}",
+                "operation": "isNotEmpty"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "43b54681-eda4-439a-84c1-c395c253e0b7",
+        "name": "Validate Input",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -864,
+          160
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, operator_id, tenant_id, device_type \nFROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nLIMIT 1;",
+          "options": {}
+        },
+        "id": "93e2f2fe-1039-4ec7-ad2e-1808a78df3fa",
+        "name": "Find Device by Session",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -656,
+          48
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "device-found",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "4f1849af-e9c2-4cb7-a762-abfe3b7a4847",
+        "name": "Check Device Exists",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -448,
+          48
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const deviceData = $('Find Device by Session').first().json;\nconst parsedData = $('Parse Body').first().json;\n\nreturn {\n  device_id_db: deviceData.id,\n  operator_id: deviceData.operator_id,\n  tenant_id: deviceData.tenant_id,\n  session_token: parsedData.session_token,\n  fcm_token: parsedData.fcm_token,\n  device_id: parsedData.device_id,\n  device_info_json: parsedData.device_info_json\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -240,
+          -64
+        ],
+        "id": "98927e46-2e85-4b65-9455-94301c927e57",
+        "name": "Prepare Update Data"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE operator_devices\nSET \n  fcm_token = '{{ $json.fcm_token }}',\n  device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n  device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n  last_active_at = NOW()\nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nRETURNING id, operator_id;",
+          "options": {}
+        },
+        "id": "8ab2a60c-2017-4544-93cc-6a3d0bc70aec",
+        "name": "Update FCM Token",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -32,
+          -64
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { success: true, message: 'FCM token registered', operator_id: $json.operator_id } }}",
+          "options": {
+            "responseCode": 200
+          }
+        },
+        "id": "099d0d12-1aa9-4802-8407-89d666638388",
+        "name": "Response - Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          176,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { success: false, error: 'invalid_session_token' } }}",
+          "options": {
+            "responseCode": 401
+          }
+        },
+        "id": "03dcf48d-07e3-411a-bf1d-19a78c5b268a",
+        "name": "Response - Invalid Session",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          -240,
+          160
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ { success: false, error: 'missing_required_fields' } }}",
+          "options": {
+            "responseCode": 400
+          }
+        },
+        "id": "d1ac8008-f5bb-4689-bb38-c48d60ad32bc",
+        "name": "Response - Missing Fields",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          -592,
+          304
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Parse Body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Body": {
+        "main": [
+          [
+            {
+              "node": "Validate Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Input": {
+        "main": [
+          [
+            {
+              "node": "Find Device by Session",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Response - Missing Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Device by Session": {
+        "main": [
+          [
+            {
+              "node": "Check Device Exists",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Device Exists": {
+        "main": [
+          [
+            {
+              "node": "Prepare Update Data",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Response - Invalid Session",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Update Data": {
+        "main": [
+          [
+            {
+              "node": "Update FCM Token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update FCM Token": {
+        "main": [
+          [
+            {
+              "node": "Response - Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
+}

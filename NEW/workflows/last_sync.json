@@ -1,0 +1,822 @@
+{
+  "timestamp": "2025-12-20T21:32:40.467426",
+  "synced": [
+    {
+      "name": "ELO_In_Phone",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_Phone.json"
+    },
+    {
+      "name": "ELO_API_Android_Dialogs",
+      "folder": "API",
+      "file": "ELO_API_Android_Dialogs.json"
+    },
+    {
+      "name": "ELO_Graph_Query",
+      "folder": "Graph Contour",
+      "file": "ELO_Graph_Query.json"
+    },
+    {
+      "name": "ELO_API_Android_Messages",
+      "folder": "API",
+      "file": "ELO_API_Android_Messages.json"
+    },
+    {
+      "name": "ELO_Core_Graph_Writer",
+      "folder": "AI Contour",
+      "file": "ELO_Core_Graph_Writer.json"
+    },
+    {
+      "name": "ELO_Input_Batcher",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_Input_Batcher.json"
+    },
+    {
+      "name": "ELO_In_Avito",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_Avito.json"
+    },
+    {
+      "name": "ELO_AI_Extract",
+      "folder": "AI Contour",
+      "file": "ELO_AI_Extract.json"
+    },
+    {
+      "name": "ELO_API_Android_Send_Message",
+      "folder": "API",
+      "file": "ELO_API_Android_Send_Message.json"
+    },
+    {
+      "name": "ELO_Out_MAX",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_MAX.json"
+    },
+    {
+      "name": "ELO_Core_Context_Builder",
+      "folder": "AI Contour",
+      "file": "ELO_Core_Context_Builder.json"
+    },
+    {
+      "name": "ELO_Out_Router",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_Router.json"
+    },
+    {
+      "name": "ELO_Core_AI_Test_Stub",
+      "folder": "AI Contour",
+      "file": "ELO_Core_AI_Test_Stub.json"
+    },
+    {
+      "name": "ELO_Message_Router",
+      "folder": "",
+      "file": "ELO_Message_Router.json"
+    },
+    {
+      "name": "ELO_API_Android_Auth",
+      "folder": "API",
+      "file": "ELO_API_Android_Auth.json"
+    },
+    {
+      "name": "ELO_Out_Telegram",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_Telegram.json"
+    },
+    {
+      "name": "ELO_Core_Stage_Manager",
+      "folder": "AI Contour",
+      "file": "ELO_Core_Stage_Manager.json"
+    },
+    {
+      "name": "ELO_Context_Collector",
+      "folder": "AI Contour",
+      "file": "ELO_Context_Collector.json"
+    },
+    {
+      "name": "ELO_Client_Resolve",
+      "folder": "Client Contour",
+      "file": "ELO_Client_Resolve.json"
+    },
+    {
+      "name": "ELO_In_WhatsApp",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_WhatsApp.json"
+    },
+    {
+      "name": "ELO_In_MAX",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_MAX.json"
+    },
+    {
+      "name": "ELO_Out_Avito",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_Avito.json"
+    },
+    {
+      "name": "ELO_In_App",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_App.json"
+    },
+    {
+      "name": "ELO_Out_VK",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_VK.json"
+    },
+    {
+      "name": "ELO_Input_Processor",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_Input_Processor.json"
+    },
+    {
+      "name": "ELO_Core_Triggers_Checker",
+      "folder": "AI Contour",
+      "file": "ELO_Core_Triggers_Checker.json"
+    },
+    {
+      "name": "ELO_Executor",
+      "folder": "AI Contour",
+      "file": "ELO_Executor.json"
+    },
+    {
+      "name": "ELO_Core_AI_Derive",
+      "folder": "AI Contour",
+      "file": "ELO_Core_AI_Derive.json"
+    },
+    {
+      "name": "ELO_Out_WhatsApp",
+      "folder": "Chanel Contour/ELO_Out",
+      "file": "ELO_Out_WhatsApp.json"
+    },
+    {
+      "name": "ELO_API_Android_Logout",
+      "folder": "API",
+      "file": "ELO_API_Android_Logout.json"
+    },
+    {
+      "name": "ELO_In_VK",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_VK.json"
+    },
+    {
+      "name": "ELO_API_Android_Normalize",
+      "folder": "API",
+      "file": "ELO_API_Android_Normalize.json"
+    },
+    {
+      "name": "ELO_Input_Ingest",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_Input_Ingest.json"
+    },
+    {
+      "name": "ELO_Decision",
+      "folder": "AI Contour",
+      "file": "ELO_Decision.json"
+    },
+    {
+      "name": "ELO_In_Form",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_Form.json"
+    },
+    {
+      "name": "ELO_In_Telegram",
+      "folder": "Chanel Contour/ELO_In",
+      "file": "ELO_In_Telegram.json"
+    },
+    {
+      "name": "ELO_Core_Response_Generator",
+      "folder": "AI Contour",
+      "file": "ELO_Core_Response_Generator.json"
+    },
+    {
+      "name": "ELO_API_Android_Register_FCM",
+      "folder": "API",
+      "file": "ELO_API_Android_Register_FCM.json"
+    }
+  ],
+  "skipped": [
+    {
+      "name": "Profi RAG",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Appeals_List",
+      "reason": "Archived"
+    },
+    {
+      "name": "ParcTGmain",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Device_Create",
+      "reason": "Archived"
+    },
+    {
+      "name": "Блок Прием Лидов (старый)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Out Processor 1",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 4",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Normalize",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM Блок Расчет стоимости",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT OUT VK",
+      "reason": "Archived"
+    },
+    {
+      "name": "Bat IN All Channels",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "SCRM1",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "STCrm Manual Orchestrator (Normalize Operator Reply)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "БЛОК 3 - Обработка обращений (фоновая)",
+      "reason": "Archived"
+    },
+    {
+      "name": "Tool - Определить тип обращения (AI Agent)",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Normalize",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 1 - Main Router",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 8",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Universal Worker 7",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 1",
+      "reason": "Archived"
+    },
+    {
+      "name": "Api_Voice_Uploader",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Appeal_Detail",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Universal Worker 1",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Auth_old",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Message Router",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Short Link Manager",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN WhatsApp",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Out Processor 6",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 6",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Appeal Router",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Take_Appeal",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Universal Worker 4",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Notifier",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Telegram Bot Handler",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Queue Processor",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Repair_Delete",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Send_Promo",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM Voice Pipeline (Whisper Transcribe)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Operator Response Handler 3 - Text Voice Normalize",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 1",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Neo4j Sync",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM Блок Прием Лидов",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Appeal Manager",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Reject",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 2",
+      "reason": "Archived"
+    },
+    {
+      "name": "My workflow",
+      "reason": "Archived"
+    },
+    {
+      "name": "RAG copy",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM OUT.WhatsApp (Adapter)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "My workflow 3",
+      "reason": "Archived"
+    },
+    {
+      "name": "ELO_Core_Dialog_Engine",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT_FCM_Sender",
+      "reason": "Archived"
+    },
+    {
+      "name": "My workflow 2",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 4 - Media Direct",
+      "reason": "Archived"
+    },
+    {
+      "name": "Calculate Repair Cost",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM OUT.Telegram (Adapter)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Logout",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Client Resolver",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN Form",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Manage_Devices",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 1 - Main Router",
+      "reason": "Archived"
+    },
+    {
+      "name": "Get Price Profi",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM Assist Orchestrator (Draft/Approve/Edit)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "My workflow 6",
+      "reason": "Archived"
+    },
+    {
+      "name": "Profi Загрузка данных",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT OUT MAX",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Repair_Create",
+      "reason": "Archived"
+    },
+    {
+      "name": "NAFFAS Загрузка данных",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM Routing Policy (маршрутизация ответов)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Out Processor 4",
+      "reason": "Archived"
+    },
+    {
+      "name": "Pars TG pars",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT AI Universal Worker 2",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN Avito",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Neo4j Touchpoint Register",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Register_FCM",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Auth",
+      "reason": "Archived"
+    },
+    {
+      "name": "Profi_Price",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Out Processor 2",
+      "reason": "Archived"
+    },
+    {
+      "name": "Tool - Извлечь бренд и модель (AI Agent)",
+      "reason": "Archived"
+    },
+    {
+      "name": "Tool - Build Appeal Meta",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 10",
+      "reason": "Archived"
+    },
+    {
+      "name": "БЛОК 2 - Прием лидов расширенная",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Manage_Repairs",
+      "reason": "Archived"
+    },
+    {
+      "name": "Normalize Price",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Batch Debouncer 3",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT OUT WhatsApp",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 7",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 9",
+      "reason": "Archived"
+    },
+    {
+      "name": "Идеальный Авито с батчером",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "Assist Orchestrator",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT IN Phone",
+      "reason": "Archived"
+    },
+    {
+      "name": "Avito",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "Обработка дисплеи Samsung профи",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM Блок Оператор Бот",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Fingerprint Tracker",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 3 - Text Voice Normalize",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Task Dispatcher",
+      "reason": "Archived"
+    },
+    {
+      "name": "Telegramm Message Work",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN VK",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 2 - Approve",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM IN.Avito (Adapter)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Avito Token Refresher",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN MAX",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Device_Update",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Universal Worker 3",
+      "reason": "Archived"
+    },
+    {
+      "name": "API Android Update Settings",
+      "reason": "Archived"
+    },
+    {
+      "name": "Tool - Определить чья запчасть (AI Agent)",
+      "reason": "Archived"
+    },
+    {
+      "name": "Seek tool",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM Auto Orchestrator (с политикой безопасности)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "ELO_API_Android_SendMessage",
+      "reason": "Archived"
+    },
+    {
+      "name": "ELO_Core_Tenant_Resolver",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Neo4j Context Builder",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Operator_Send_Response",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Neo4j CRUD",
+      "reason": "Archived"
+    },
+    {
+      "name": "My workflow 4",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Completeness Checker",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Batch Debouncer 5",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT OUT Avito",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Reject",
+      "reason": "Archived"
+    },
+    {
+      "name": "ELO_Core_Batcher",
+      "reason": "Archived"
+    },
+    {
+      "name": "SrCRM Central Processor (Router)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "список моделей",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "Bat INPUT Universal",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT Disambiguation Handler",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Device_Delete",
+      "reason": "Archived"
+    },
+    {
+      "name": "ELO_Core_Ingest",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Client Response Sender",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT_IN_Telegram",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Repair_Update",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Universal Worker 6",
+      "reason": "Archived"
+    },
+    {
+      "name": "StCRM Notifications (автоматические рассылки)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT_Tenant_Resolver",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Out Processor 3",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Operator Response Handler 5 - Send Normalized",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Neo4j Touchpoint Tracker",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Out Processor 5",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Manage_Repairs",
+      "reason": "Archived"
+    },
+    {
+      "name": "Profi Загрузка данных copy",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Send_Promo",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT IN Avito",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT OUT Telegram",
+      "reason": "Archived"
+    },
+    {
+      "name": "Bat IN All Channels v3 (with Queue)",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "BAT AI Universal Worker 5",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT Client Creator",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Manage_Devices",
+      "reason": "Archived"
+    },
+    {
+      "name": "Operator Bot",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Appeals_List",
+      "reason": "Archived"
+    },
+    {
+      "name": "1. Ядро",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "API_Android_Take_Appeal",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Auth",
+      "reason": "Archived"
+    },
+    {
+      "name": "API_Android_Update_Appeal_Mode",
+      "reason": "Archived"
+    },
+    {
+      "name": "BAT AI Appeal Router",
+      "reason": "Archived"
+    },
+    {
+      "name": "Поиск ЗИП",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "Tool - Определить тип ремонта (AI Agent)",
+      "reason": "Archived"
+    },
+    {
+      "name": "VektorPrompt",
+      "reason": "No ELO tag"
+    },
+    {
+      "name": "StCRM Calendar — Запись на ремонт (SCRM-34)",
+      "reason": "No ELO tag"
+    }
+  ],
+  "errors": []
+}

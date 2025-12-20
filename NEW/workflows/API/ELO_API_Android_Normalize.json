@@ -1,0 +1,581 @@
+{
+  "updatedAt": "2025-12-20T17:10:08.229Z",
+  "createdAt": "2025-12-19T08:32:05.137Z",
+  "id": "nsMrS7SmpsxutrfN",
+  "name": "ELO_API_Android_Normalize",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android/dialogs/:dialog_id/normalize",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "8dee676f-9bcb-4577-8d49-ef051ba83be3",
+      "name": "Webhook - Normalize",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -944,
+        48
+      ],
+      "webhookId": "android-normalize"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT od.operator_id, od.tenant_id\nFROM elo_t_operator_devices od\nWHERE od.session_token = '{{ $json.body.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "e46986b7-9b7e-4880-a2cf-22fae6efe755",
+      "name": "Postgres - Validate Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -720,
+        48
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "session-valid",
+              "leftValue": "={{ $json.operator_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d354a7e5-d678-4741-8dcb-c02d201ea58b",
+      "name": "IF - Session Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "HTTP-Referer",
+              "value": "https://eldoleado.ru"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Ты помощник оператора сервисного центра по ремонту телефонов. Твоя задача - нормализовать текст сообщения оператора:\\n1. Исправить орфографические и грамматические ошибки\\n2. Сделать текст более вежливым и профессиональным\\n3. Сохранить смысл и ключевую информацию\\n4. Убрать лишние слова-паразиты\\n5. Отвечай ТОЛЬКО нормализованным текстом, без пояснений\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Webhook - Normalize').item.json.body.text) }}\n    }\n  ],\n  \"max_tokens\": 500,\n  \"temperature\": 0.3\n}",
+        "options": {}
+      },
+      "id": "ad439d0a-bffd-4e2e-af1a-7d856271992e",
+      "name": "OpenRouter - Normalize",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        -64
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "ameOTCcGgTm3hbtM",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst normalizedText = response.choices?.[0]?.message?.content || '';\n\nreturn {\n  normalized_text: normalizedText.trim()\n};"
+      },
+      "id": "f6e1954e-ac9c-4f4c-b378-025ca0910245",
+      "name": "Extract Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"normalized_text\": {{ JSON.stringify($json.normalized_text) }}\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "9c4b56d9-77c4-4fdb-b75f-2648d846f3e0",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "dad7685f-47fd-4841-8de8-a134accba62b",
+      "name": "Response - Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        144
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Normalize": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Validate Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Validate Session": {
+      "main": [
+        [
+          {
+            "node": "IF - Session Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Session Valid": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter - Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter - Normalize": {
+      "main": [
+        [
+          {
+            "node": "Extract Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Response": {
+      "main": [
+        [
+          {
+            "node": "Response - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "06835b1b-13b3-40a8-852b-eb5a9b93d5be",
+  "activeVersionId": "06835b1b-13b3-40a8-852b-eb5a9b93d5be",
+  "versionCounter": 6,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-19T08:32:05.146Z",
+      "createdAt": "2025-12-19T08:32:05.146Z",
+      "role": "workflow:owner",
+      "workflowId": "nsMrS7SmpsxutrfN",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-19",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:58:34.844Z",
+      "createdAt": "2025-11-23T03:58:34.844Z",
+      "id": "0yzk30hhaSzkl8bF",
+      "name": "API"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-20T17:10:08.230Z",
+    "createdAt": "2025-12-20T17:10:08.230Z",
+    "versionId": "06835b1b-13b3-40a8-852b-eb5a9b93d5be",
+    "workflowId": "nsMrS7SmpsxutrfN",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "android/dialogs/:dialog_id/normalize",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "8dee676f-9bcb-4577-8d49-ef051ba83be3",
+        "name": "Webhook - Normalize",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -944,
+          48
+        ],
+        "webhookId": "android-normalize"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT od.operator_id, od.tenant_id\nFROM elo_t_operator_devices od\nWHERE od.session_token = '{{ $json.body.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+          "options": {}
+        },
+        "id": "e46986b7-9b7e-4880-a2cf-22fae6efe755",
+        "name": "Postgres - Validate Session",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -720,
+          48
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "session-valid",
+                "leftValue": "={{ $json.operator_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "d354a7e5-d678-4741-8dcb-c02d201ea58b",
+        "name": "IF - Session Valid",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -496,
+          48
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://openrouter.ai/api/v1/chat/completions",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "openRouterApi",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "HTTP-Referer",
+                "value": "https://eldoleado.ru"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Ты помощник оператора сервисного центра по ремонту телефонов. Твоя задача - нормализовать текст сообщения оператора:\\n1. Исправить орфографические и грамматические ошибки\\n2. Сделать текст более вежливым и профессиональным\\n3. Сохранить смысл и ключевую информацию\\n4. Убрать лишние слова-паразиты\\n5. Отвечай ТОЛЬКО нормализованным текстом, без пояснений\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($('Webhook - Normalize').item.json.body.text) }}\n    }\n  ],\n  \"max_tokens\": 500,\n  \"temperature\": 0.3\n}",
+          "options": {}
+        },
+        "id": "ad439d0a-bffd-4e2e-af1a-7d856271992e",
+        "name": "OpenRouter - Normalize",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -272,
+          -64
+        ],
+        "credentials": {
+          "openRouterApi": {
+            "id": "ameOTCcGgTm3hbtM",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nconst normalizedText = response.choices?.[0]?.message?.content || '';\n\nreturn {\n  normalized_text: normalizedText.trim()\n};"
+        },
+        "id": "f6e1954e-ac9c-4f4c-b378-025ca0910245",
+        "name": "Extract Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -48,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": true,\n  \"normalized_text\": {{ JSON.stringify($json.normalized_text) }}\n}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "9c4b56d9-77c4-4fdb-b75f-2648d846f3e0",
+        "name": "Response - Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          176,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+          "options": {
+            "responseCode": 401,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "dad7685f-47fd-4841-8de8-a134accba62b",
+        "name": "Response - Unauthorized",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          -272,
+          144
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook - Normalize": {
+        "main": [
+          [
+            {
+              "node": "Postgres - Validate Session",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postgres - Validate Session": {
+        "main": [
+          [
+            {
+              "node": "IF - Session Valid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Session Valid": {
+        "main": [
+          [
+            {
+              "node": "OpenRouter - Normalize",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Response - Unauthorized",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter - Normalize": {
+        "main": [
+          [
+            {
+              "node": "Extract Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Response": {
+        "main": [
+          [
+            {
+              "node": "Response - Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
+}

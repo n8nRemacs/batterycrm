@@ -1,0 +1,621 @@
+{
+  "updatedAt": "2025-12-20T17:09:59.100Z",
+  "createdAt": "2025-12-19T08:32:18.873Z",
+  "id": "6twQI6tVin73BcN1",
+  "name": "ELO_API_Android_Send_Message",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android-messages/android/dialogs/:dialog_id/messages",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "f5f1d3f1-1c9c-4068-b084-1dc872268bad",
+      "name": "Webhook - Send Message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        64
+      ],
+      "webhookId": "android-send-message"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT od.operator_id, od.tenant_id, o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON od.operator_id = o.id\nWHERE od.session_token = '{{ $json.body.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "14333c11-eeda-49f3-95a9-424f9f921f98",
+      "name": "Postgres - Validate Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -752,
+        64
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "session-valid",
+              "leftValue": "={{ $json.operator_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b084ea85-0720-417e-96b8-430a7f094772",
+      "name": "IF - Session Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  d.id as dialog_id,\n  d.tenant_id,\n  d.client_id,\n  d.external_chat_id as chat_id,\n  LOWER(ch.name) as channel,\n  c.name as client_name,\n  c.phone as client_phone\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nJOIN elo_channels ch ON d.channel_id = ch.id\nWHERE d.id = '{{ $('Webhook - Send Message').item.json.params.dialog_id }}'::uuid\n  AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "8b05371b-305d-4379-b221-ac05b028dabf",
+      "name": "Postgres - Get Dialog Info",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -304,
+        -48
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO elo_t_messages (\n  tenant_id,\n  dialog_id,\n  client_id,\n  direction_id,\n  message_type_id,\n  actor_type,\n  actor_id,\n  content,\n  media,\n  timestamp\n) VALUES (\n  '{{ $('Postgres - Get Dialog Info').item.json.tenant_id }}'::uuid,\n  '{{ $('Postgres - Get Dialog Info').item.json.dialog_id }}'::uuid,\n  '{{ $('Postgres - Get Dialog Info').item.json.client_id }}'::uuid,\n  2,\n  {{ $('Webhook - Send Message').item.json.body.media_type === 'voice' ? 2 : 1 }},\n  'operator',\n  '{{ $('Postgres - Validate Session').item.json.operator_id }}'::uuid,\n  '{{ $('Webhook - Send Message').item.json.body.text.replace(/'/g, \"''\") }}',\n  '{{ $('Webhook - Send Message').item.json.body.media_data ? JSON.stringify({type: $('Webhook - Send Message').item.json.body.media_type, data: $('Webhook - Send Message').item.json.body.media_data}) : '{}' }}'::jsonb,\n  NOW()\n)\nRETURNING id, content as text, 'out' as direction, 'operator' as sender_type, \n  '{{ $('Postgres - Validate Session').item.json.operator_name }}' as sender_name,\n  EXTRACT(EPOCH FROM timestamp)::bigint * 1000 as timestamp;",
+        "options": {}
+      },
+      "id": "e3f786d0-e2f9-496d-9501-823a06cb9a29",
+      "name": "Postgres - Insert Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        -48
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const dialogInfo = $('Postgres - Get Dialog Info').first().json;\nconst message = $('Postgres - Insert Message').first().json;\nconst body = $('Webhook - Send Message').first().json.body;\n\n// Prepare data for channel sending\nreturn {\n  channel: dialogInfo.channel,\n  chat_id: dialogInfo.chat_id,\n  text: body.text,\n  media_type: body.media_type || null,\n  media_data: body.media_data || null,\n  message: {\n    id: message.id,\n    text: message.text,\n    direction: message.direction,\n    sender_type: message.sender_type,\n    sender_name: message.sender_name,\n    timestamp: message.timestamp\n  }\n};"
+      },
+      "id": "9a884047-191f-4670-9c13-6febddbf0643",
+      "name": "Prepare Channel Send",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": {{ JSON.stringify($json.message) }}\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a0badcdb-b035-4b10-9edc-065e42e4aeee",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "62d1a107-a4a2-4882-83dd-222be0ed7012",
+      "name": "Response - Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Send Message": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Validate Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Validate Session": {
+      "main": [
+        [
+          {
+            "node": "IF - Session Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Session Valid": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Get Dialog Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Get Dialog Info": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Insert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Insert Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Channel Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Channel Send": {
+      "main": [
+        [
+          {
+            "node": "Response - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "ffc81b4f-d666-4d05-8148-481bc710c176",
+  "activeVersionId": "ffc81b4f-d666-4d05-8148-481bc710c176",
+  "versionCounter": 6,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-19T08:32:18.879Z",
+      "createdAt": "2025-12-19T08:32:18.879Z",
+      "role": "workflow:owner",
+      "workflowId": "6twQI6tVin73BcN1",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-19",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:58:34.844Z",
+      "createdAt": "2025-11-23T03:58:34.844Z",
+      "id": "0yzk30hhaSzkl8bF",
+      "name": "API"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-20T17:09:59.101Z",
+    "createdAt": "2025-12-20T17:09:59.101Z",
+    "versionId": "ffc81b4f-d666-4d05-8148-481bc710c176",
+    "workflowId": "6twQI6tVin73BcN1",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "android-messages/android/dialogs/:dialog_id/messages",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "f5f1d3f1-1c9c-4068-b084-1dc872268bad",
+        "name": "Webhook - Send Message",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -976,
+          64
+        ],
+        "webhookId": "android-send-message"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT od.operator_id, od.tenant_id, o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON od.operator_id = o.id\nWHERE od.session_token = '{{ $json.body.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+          "options": {}
+        },
+        "id": "14333c11-eeda-49f3-95a9-424f9f921f98",
+        "name": "Postgres - Validate Session",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -752,
+          64
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "session-valid",
+                "leftValue": "={{ $json.operator_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "b084ea85-0720-417e-96b8-430a7f094772",
+        "name": "IF - Session Valid",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -528,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n  d.id as dialog_id,\n  d.tenant_id,\n  d.client_id,\n  d.external_chat_id as chat_id,\n  LOWER(ch.name) as channel,\n  c.name as client_name,\n  c.phone as client_phone\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nJOIN elo_channels ch ON d.channel_id = ch.id\nWHERE d.id = '{{ $('Webhook - Send Message').item.json.params.dialog_id }}'::uuid\n  AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\nLIMIT 1;",
+          "options": {}
+        },
+        "id": "8b05371b-305d-4379-b221-ac05b028dabf",
+        "name": "Postgres - Get Dialog Info",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -304,
+          -48
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO elo_t_messages (\n  tenant_id,\n  dialog_id,\n  client_id,\n  direction_id,\n  message_type_id,\n  actor_type,\n  actor_id,\n  content,\n  media,\n  timestamp\n) VALUES (\n  '{{ $('Postgres - Get Dialog Info').item.json.tenant_id }}'::uuid,\n  '{{ $('Postgres - Get Dialog Info').item.json.dialog_id }}'::uuid,\n  '{{ $('Postgres - Get Dialog Info').item.json.client_id }}'::uuid,\n  2,\n  {{ $('Webhook - Send Message').item.json.body.media_type === 'voice' ? 2 : 1 }},\n  'operator',\n  '{{ $('Postgres - Validate Session').item.json.operator_id }}'::uuid,\n  '{{ $('Webhook - Send Message').item.json.body.text.replace(/'/g, \"''\") }}',\n  '{{ $('Webhook - Send Message').item.json.body.media_data ? JSON.stringify({type: $('Webhook - Send Message').item.json.body.media_type, data: $('Webhook - Send Message').item.json.body.media_data}) : '{}' }}'::jsonb,\n  NOW()\n)\nRETURNING id, content as text, 'out' as direction, 'operator' as sender_type, \n  '{{ $('Postgres - Validate Session').item.json.operator_name }}' as sender_name,\n  EXTRACT(EPOCH FROM timestamp)::bigint * 1000 as timestamp;",
+          "options": {}
+        },
+        "id": "e3f786d0-e2f9-496d-9501-823a06cb9a29",
+        "name": "Postgres - Insert Message",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -80,
+          -48
+        ],
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const dialogInfo = $('Postgres - Get Dialog Info').first().json;\nconst message = $('Postgres - Insert Message').first().json;\nconst body = $('Webhook - Send Message').first().json.body;\n\n// Prepare data for channel sending\nreturn {\n  channel: dialogInfo.channel,\n  chat_id: dialogInfo.chat_id,\n  text: body.text,\n  media_type: body.media_type || null,\n  media_data: body.media_data || null,\n  message: {\n    id: message.id,\n    text: message.text,\n    direction: message.direction,\n    sender_type: message.sender_type,\n    sender_name: message.sender_name,\n    timestamp: message.timestamp\n  }\n};"
+        },
+        "id": "9a884047-191f-4670-9c13-6febddbf0643",
+        "name": "Prepare Channel Send",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          144,
+          -48
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": true,\n  \"message\": {{ JSON.stringify($json.message) }}\n}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "a0badcdb-b035-4b10-9edc-065e42e4aeee",
+        "name": "Response - Success",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          368,
+          -48
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+          "options": {
+            "responseCode": 401,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "62d1a107-a4a2-4882-83dd-222be0ed7012",
+        "name": "Response - Unauthorized",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          -304,
+          160
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook - Send Message": {
+        "main": [
+          [
+            {
+              "node": "Postgres - Validate Session",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postgres - Validate Session": {
+        "main": [
+          [
+            {
+              "node": "IF - Session Valid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF - Session Valid": {
+        "main": [
+          [
+            {
+              "node": "Postgres - Get Dialog Info",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Response - Unauthorized",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postgres - Get Dialog Info": {
+        "main": [
+          [
+            {
+              "node": "Postgres - Insert Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postgres - Insert Message": {
+        "main": [
+          [
+            {
+              "node": "Prepare Channel Send",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Channel Send": {
+        "main": [
+          [
+            {
+              "node": "Response - Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
+}
