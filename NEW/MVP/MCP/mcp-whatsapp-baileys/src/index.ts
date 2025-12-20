@@ -36,6 +36,7 @@ const config = {
   sessionsDir: process.env.SESSIONS_DIR || path.join(__dirname, '../sessions'),
   redisUrl: process.env.REDIS_URL,
   defaultWebhookUrl: process.env.DEFAULT_WEBHOOK_URL,
+  defaultProxyUrl: process.env.DEFAULT_PROXY_URL,
   apiKey: process.env.API_KEY,
   // Alert settings
   alertTelegramBotToken: process.env.ALERT_TELEGRAM_BOT_TOKEN,
@@ -62,6 +63,7 @@ const sessionManager = new SessionManager({
   sessionsDir: config.sessionsDir,
   redisUrl: config.redisUrl,
   defaultWebhookUrl: config.defaultWebhookUrl,
+  defaultProxyUrl: config.defaultProxyUrl,
 });
 
 // Express app
@@ -241,6 +243,28 @@ app.get('/sessions/:sessionId/status', authMiddleware, (req, res) => {
     status: client.getStatus(),
     info: client.getSessionInfo(),
   });
+});
+
+// Request pairing code (alternative to QR)
+app.post('/sessions/:sessionId/pair', authMiddleware, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { phone } = req.body;
+
+    if (!phone) {
+      return sendError(res, 'Phone number is required');
+    }
+
+    const client = sessionManager.getSession(sessionId);
+    if (!client) {
+      return sendError(res, 'Session not found', 404);
+    }
+
+    const code = await client.requestPairingCode(phone);
+    sendResponse(res, { code, phone });
+  } catch (err: any) {
+    sendError(res, err.message);
+  }
 });
 
 // Disconnect session

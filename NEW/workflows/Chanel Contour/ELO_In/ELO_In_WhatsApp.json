@@ -1,35 +1,81 @@
 {
-  "name": "ELO_In_WhatsApp",
-  "active": true,
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "whatsapp",
+        "path": "whatsapp-incoming",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "6c0afab1-a6e2-4d31-b80e-4e4bcc364fa2",
+      "id": "21e3b107-fdf9-4909-9a45-e12f2ade948e",
       "name": "WhatsApp Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
       "position": [
-        -864,
-        112
+        -1456,
+        320
       ],
       "webhookId": "whatsapp-webhook"
     },
     {
       "parameters": {
-        "jsCode": "const event = $input.first().json;\n\n// WAPPI API webhook format\nconst chatId = event.chatId || event.chat_id;\nconst sender = event.sender || event.from;\nconst messageText = event.text || event.body || '';\nconst messageId = event.messageId || event.id || Date.now().toString();\nconst timestamp = event.timestamp ? new Date(event.timestamp * 1000).toISOString() : new Date().toISOString();\n\n// Извлекаем номер телефона из chatId (формат: 79991234567@c.us)\nlet phone = chatId.split('@')[0];\nif (phone && !phone.startsWith('+')) {\n  phone = '+' + phone;\n}\n\n// Проверяем медиа\nconst media = event.media || {};\nconst hasPhoto = media.type === 'image' || (event.hasMedia && event.media?.mimetype?.startsWith('image/'));\nconst hasVoice = media.type === 'audio' || media.type === 'voice' || event.media?.mimetype?.startsWith('audio/');\nconst hasVideo = media.type === 'video' || event.media?.mimetype?.startsWith('video/');\nconst hasDocument = media.type === 'document' || event.media?.mimetype === 'application/pdf';\n\nconst urls = [];\nlet photoUrl = null;\nlet voiceUrl = null;\nlet videoUrl = null;\n\n// WAPPI предоставляет прямые ссылки на медиа\nif (media.url) {\n  urls.push(media.url);\n  if (hasPhoto) photoUrl = media.url;\n  if (hasVoice) voiceUrl = media.url;\n  if (hasVideo) videoUrl = media.url;\n}\n\n// Альтернативный формат для совместимости\nif (event.mediaUrl) {\n  urls.push(event.mediaUrl);\n  if (hasPhoto && !photoUrl) photoUrl = event.mediaUrl;\n  if (hasVoice && !voiceUrl) voiceUrl = event.mediaUrl;\n  if (hasVideo && !videoUrl) videoUrl = event.mediaUrl;\n}\n\nreturn {\n  has_voice: hasVoice,\n  voice_url: voiceUrl,\n  raw_event: event,\n  chat_id: chatId,\n  phone: phone,\n  message_text: messageText,\n  message_id: messageId,\n  timestamp: timestamp,\n  sender_name: event.senderName || event.pushname || null,\n  has_photo: hasPhoto,\n  photo_url: photoUrl,\n  has_video: hasVideo,\n  video_url: videoUrl,\n  has_document: hasDocument,\n  urls: urls\n};"
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-message",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "message",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "cf70854f-bd22-4020-9a24-e7c0c95e3b6c",
+      "id": "2c993461-e0e7-464b-acb1-7b8c59bc3530",
+      "name": "Is Message?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1264,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"skipped\": true, \"event\": $json.event } }}",
+        "options": {}
+      },
+      "id": "b8878308-0611-4d2d-a851-67876bca3998",
+      "name": "Skip Non-Message",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst event = input.body || input;\n\n// Detect provider: Baileys or WAPPI\nconst isBaileys = event.event === 'message' && event.data;\nconst data = isBaileys ? event.data : event;\n\n// Extract fields based on provider\nlet chatId, phone, messageText, messageId, timestamp, senderName;\nlet hasPhoto = false, hasVoice = false, hasVideo = false, hasDocument = false;\nlet photoUrl = null, voiceUrl = null, videoUrl = null;\nconst urls = [];\n\nif (isBaileys) {\n  // Baileys format\n  chatId = data.from + '@s.whatsapp.net';\n  phone = '+' + data.from;\n  messageText = data.text || data.caption || '';\n  messageId = data.messageId;\n  timestamp = data.timestamp ? new Date(data.timestamp).toISOString() : new Date().toISOString();\n  senderName = data.fromName;\n  \n  // Media types\n  const msgType = data.type;\n  hasPhoto = msgType === 'image';\n  hasVoice = msgType === 'audio';\n  hasVideo = msgType === 'video';\n  hasDocument = msgType === 'document';\n  \n  if (data.mediaUrl) {\n    urls.push(data.mediaUrl);\n    if (hasPhoto) photoUrl = data.mediaUrl;\n    if (hasVoice) voiceUrl = data.mediaUrl;\n    if (hasVideo) videoUrl = data.mediaUrl;\n  }\n} else {\n  // WAPPI format (legacy)\n  chatId = event.chatId || event.chat_id;\n  const sender = event.sender || event.from;\n  messageText = event.text || event.body || '';\n  messageId = event.messageId || event.id || Date.now().toString();\n  timestamp = event.timestamp ? new Date(event.timestamp * 1000).toISOString() : new Date().toISOString();\n  phone = chatId ? chatId.split('@')[0] : sender;\n  if (phone && !phone.startsWith('+')) phone = '+' + phone;\n  senderName = event.senderName || event.pushname || null;\n  \n  const media = event.media || {};\n  hasPhoto = media.type === 'image' || event.media?.mimetype?.startsWith('image/');\n  hasVoice = media.type === 'audio' || media.type === 'voice' || event.media?.mimetype?.startsWith('audio/');\n  hasVideo = media.type === 'video' || event.media?.mimetype?.startsWith('video/');\n  hasDocument = media.type === 'document' || event.media?.mimetype === 'application/pdf';\n  \n  if (media.url) {\n    urls.push(media.url);\n    if (hasPhoto) photoUrl = media.url;\n    if (hasVoice) voiceUrl = media.url;\n    if (hasVideo) videoUrl = media.url;\n  }\n}\n\n// Extract session_id for Baileys (used as profile_id for tenant lookup)\nconst sessionId = event.sessionId || data.sessionId || 'eldoleado_main';\n\nreturn {\n  provider: isBaileys ? 'baileys' : 'wappi',\n  session_id: sessionId,\n  has_voice: hasVoice,\n  voice_url: voiceUrl,\n  raw_event: event,\n  chat_id: chatId,\n  phone: phone,\n  message_text: messageText,\n  message_id: messageId,\n  timestamp: timestamp,\n  sender_name: senderName,\n  has_photo: hasPhoto,\n  photo_url: photoUrl,\n  has_video: hasVideo,\n  video_url: videoUrl,\n  has_document: hasDocument,\n  urls: urls\n};"
+      },
+      "id": "4d4a2c74-554f-492d-8b53-f4e660931ee1",
       "name": "Extract WhatsApp Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -656,
-        112
+        -1072,
+        320
       ]
     },
     {
@@ -43,13 +89,13 @@
           ]
         }
       },
-      "id": "ed0d8d4b-f1c5-4c79-ab66-c809d95eaa37",
+      "id": "e8a40277-bf28-4f53-b12f-44900a16209f",
       "name": "Has Voice?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -432,
-        112
+        -848,
+        320
       ]
     },
     {
@@ -63,13 +109,13 @@
           }
         }
       },
-      "id": "ca48afee-dd4f-45bb-b629-ffd423179943",
+      "id": "e95b8580-c6fc-41ca-941d-48510ba29f6c",
       "name": "Download Voice",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        -208,
-        0
+        -624,
+        208
       ]
     },
     {
@@ -81,10 +127,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        16,
-        0
+        -400,
+        208
       ],
-      "id": "40afe54b-5196-4f9a-b5bf-6c75e839c4d7",
+      "id": "8b7db0dc-4ed9-4329-9f77-6b998a5317f5",
       "name": "Transcribe Voice",
       "credentials": {
         "openAiApi": {
@@ -95,69 +141,41 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $('Extract WhatsApp Data').first().json;\nconst transcription = $input.first().json.text;\n\nlet messageText = data.message_text;\nif (transcription) {\n  messageText = (messageText ? messageText + '\\n\\n' : '') + transcription;\n}\n\nreturn {\n  channel: 'whatsapp',\n  external_user_id: data.phone?.replace(/\\+/g, ''),\n  external_chat_id: data.chat_id,\n  \n  text: messageText,\n  timestamp: data.timestamp,\n  \n  client_phone: data.phone,\n  client_name: data.sender_name,\n  client_email: null,\n  \n  media: {\n    has_voice: true,\n    voice_transcribed_text: transcription,\n    has_images: data.has_photo,\n    images: data.has_photo ? [{ url: data.photo_url }] : [],\n    has_video: data.has_video,\n    videos: data.has_video ? [{ url: data.video_url }] : [],\n    has_document: data.has_document\n  },\n  \n  meta: {\n    external_message_id: data.message_id,\n    ad_channel: 'whatsapp',\n    ad_id: null,\n    original_media_type: 'voice',\n    raw: data.raw_event,\n    provider: 'wappi'\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
+        "jsCode": "const data = $('Extract WhatsApp Data').first().json;\nconst transcription = $input.first().json.text;\n\nlet messageText = data.message_text;\nif (transcription) {\n  messageText = (messageText ? messageText + '\\n\\n' : '') + transcription;\n}\n\nreturn {\n  channel: 'whatsapp',\n  profile_id: data.session_id,\n  external_user_id: data.phone?.replace(/\\+/g, ''),\n  external_chat_id: data.chat_id,\n  \n  text: messageText,\n  timestamp: data.timestamp,\n  \n  client_phone: data.phone,\n  client_name: data.sender_name,\n  client_email: null,\n  \n  media: {\n    has_voice: true,\n    voice_transcribed_text: transcription,\n    has_images: data.has_photo,\n    images: data.has_photo ? [{ url: data.photo_url }] : [],\n    has_video: data.has_video,\n    videos: data.has_video ? [{ url: data.video_url }] : [],\n    has_document: data.has_document\n  },\n  \n  meta: {\n    external_message_id: data.message_id,\n    ad_channel: 'whatsapp',\n    ad_id: null,\n    original_media_type: 'voice',\n    raw: data.raw_event,\n    provider: data.provider || 'baileys'\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
       },
-      "id": "568a9a3f-8934-4617-9e39-7f757a15eca2",
+      "id": "07d603d1-8064-4f9a-a4d1-212084ccefbd",
       "name": "Normalize with Voice",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const data = $input.first().json;\n\nreturn {\n  channel: 'whatsapp',\n  external_user_id: data.phone?.replace(/\\+/g, ''),\n  external_chat_id: data.chat_id,\n  \n  text: data.message_text,\n  timestamp: data.timestamp,\n  \n  client_phone: data.phone,\n  client_name: data.sender_name,\n  client_email: null,\n  \n  media: {\n    has_voice: false,\n    voice_transcribed_text: null,\n    has_images: data.has_photo,\n    images: data.has_photo ? [{ url: data.photo_url }] : [],\n    has_video: data.has_video,\n    videos: data.has_video ? [{ url: data.video_url }] : [],\n    has_document: data.has_document\n  },\n  \n  meta: {\n    external_message_id: data.message_id,\n    ad_channel: 'whatsapp',\n    ad_id: null,\n    original_media_type: data.has_photo ? 'photo' : data.has_video ? 'video' : 'text',\n    raw: data.raw_event,\n    provider: 'wappi'\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
-      },
-      "id": "c909f50f-9246-4d49-bde8-c794b1cb788d",
-      "name": "Normalize without Voice",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -208,
+        -176,
         208
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "rRO6sxLqiCdgvLZz",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/rRO6sxLqiCdgvLZz",
-          "cachedResultName": "ELO_Core_Tenant_Resolver"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
+        "jsCode": "const data = $input.first().json;\n\nreturn {\n  channel: 'whatsapp',\n  profile_id: data.session_id,\n  external_user_id: data.phone?.replace(/\\+/g, ''),\n  external_chat_id: data.chat_id,\n  \n  text: data.message_text,\n  timestamp: data.timestamp,\n  \n  client_phone: data.phone,\n  client_name: data.sender_name,\n  client_email: null,\n  \n  media: {\n    has_voice: false,\n    voice_transcribed_text: null,\n    has_images: data.has_photo,\n    images: data.has_photo ? [{ url: data.photo_url }] : [],\n    has_video: data.has_video,\n    videos: data.has_video ? [{ url: data.video_url }] : [],\n    has_document: data.has_document\n  },\n  \n  meta: {\n    external_message_id: data.message_id,\n    ad_channel: 'whatsapp',\n    ad_id: null,\n    original_media_type: data.has_photo ? 'photo' : data.has_video ? 'video' : 'text',\n    raw: data.raw_event,\n    provider: data.provider || 'baileys'\n  },\n  \n  prefilled_data: {\n    model: null,\n    parts_owner: null\n  }\n};"
       },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
+      "id": "31069778-bedf-4f95-aa65-d853247c74cc",
+      "name": "Normalize without Voice",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        464,
-        112
-      ],
-      "id": "1eef9d59-66b3-4674-bd86-489df8db51c0",
-      "name": "Execute Tenant Resolver"
+        -624,
+        416
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Подготавливаем сообщение для Redis очереди\nconst data = $input.first().json;\n\nreturn {\n  message_json: JSON.stringify(data),\n  batch_key: `${data.channel}:${data.external_chat_id}`\n};"
+        "jsCode": "// Prepare message for Redis queue (batcher will handle DB writes)\nconst data = $input.first().json;\n\nreturn {\n  message_json: JSON.stringify(data),\n  batch_key: `${data.channel}:${data.external_chat_id}`\n};"
       },
-      "id": "fb10530d-b04e-482e-a27d-be6cad48aee0",
+      "id": "997f29f3-a685-49de-99a4-71a500494dd7",
       "name": "Prepare for Queue",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        112
+        48,
+        320
       ]
     },
     {
@@ -167,13 +185,13 @@
         "messageData": "={{ $json.message_json }}",
         "tail": true
       },
-      "id": "31da9709-1005-4aeb-8bf6-c9c37463cb60",
+      "id": "31e9b30b-cdcf-45ec-b46d-5d1a0100d152",
       "name": "Push to Queue",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        896,
-        112
+        272,
+        320
       ],
       "credentials": {
         "redis": {
@@ -185,16 +203,16 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { \"success\": true, \"queued\": true, \"batch_key\": $('Prepare for Queue').item.json.batch_key } }}",
+        "responseBody": "={{ { \"success\": true, \"queued\": true, \"batch_key\": $json.batch_key } }}",
         "options": {}
       },
-      "id": "4be8d7f5-173e-416f-aa90-c0a35216d792",
+      "id": "bf22acf6-bb9e-4fb1-9b99-8df286a96893",
       "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1120,
-        112
+        496,
+        320
       ]
     }
   ],
@@ -203,7 +221,25 @@
       "main": [
         [
           {
+            "node": "Is Message?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Message?": {
+      "main": [
+        [
+          {
             "node": "Extract WhatsApp Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Non-Message",
             "type": "main",
             "index": 0
           }
@@ -265,7 +301,7 @@
       "main": [
         [
           {
-            "node": "Execute Tenant Resolver",
+            "node": "Prepare for Queue",
             "type": "main",
             "index": 0
           }
@@ -273,17 +309,6 @@
       ]
     },
     "Normalize without Voice": {
-      "main": [
-        [
-          {
-            "node": "Execute Tenant Resolver",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Tenant Resolver": {
       "main": [
         [
           {
@@ -317,21 +342,47 @@
       ]
     }
   },
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {
+    "WhatsApp Trigger": [
+      {
+        "headers": {
+          "host": "n8n.n8nsrv.ru",
+          "user-agent": "axios/1.13.2",
+          "content-length": "368",
+          "accept": "application/json, text/plain, */*",
+          "accept-encoding": "gzip, compress, deflate, br",
+          "content-type": "application/json",
+          "via": "1.1 Caddy",
+          "x-forwarded-for": "217.145.79.27",
+          "x-forwarded-host": "n8n.n8nsrv.ru",
+          "x-forwarded-proto": "https"
+        },
+        "params": {},
+        "query": {},
+        "body": {
+          "event": "message",
+          "sessionId": "eldoleado_main",
+          "sessionHash": "f209755183150c5a",
+          "timestamp": 1766234827738,
+          "data": {
+            "sessionId": "eldoleado_main",
+            "sessionHash": "f209755183150c5a",
+            "messageId": "3A88DDF03548E059B635",
+            "from": "79997253777",
+            "fromName": "Дмитрий",
+            "to": "79997253777",
+            "isGroup": false,
+            "timestamp": 1766234827000,
+            "type": "text",
+            "text": "Привет дима"
+          }
+        },
+        "webhookUrl": "https://n8n.n8nsrv.ru/webhook/whatsapp-incoming",
+        "executionMode": "production"
+      }
+    ]
   },
-  "tags": [
-    {
-      "updatedAt": "2025-11-23T03:59:12.594Z",
-      "createdAt": "2025-11-23T03:59:12.594Z",
-      "name": "Eldoleado"
-    },
-    {
-      "updatedAt": "2025-11-23T04:03:40.721Z",
-      "createdAt": "2025-11-23T04:03:40.721Z",
-      "name": "In"
-    }
-  ],
-  "updatedAt": "2025-12-05T09:45:47.000Z",
-  "createdAt": "2025-10-14T06:51:32.248Z"
+  "meta": {
+    "instanceId": "8ae77ca901b15c37bb42b26ea9b5a21b78217dd557a563108d875a64964c49bb"
+  }
 }

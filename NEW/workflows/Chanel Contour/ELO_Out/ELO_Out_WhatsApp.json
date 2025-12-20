@@ -1,6 +1,6 @@
 {
   "name": "ELO_Out_WhatsApp",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "parameters": {},
@@ -8,56 +8,19 @@
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
-      "position": [
-        -384,
-        16
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://wappi.pro/api/sync/message/send",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"chatId\": \"{{ $json.out_message.external_chat_id }}\",\n  \"text\": \"{{ $json.out_message.message_text }}\"\n}",
-        "options": {}
-      },
-      "id": "d1f26b25-bd03-4887-9b29-c0381527e403",
-      "name": "Send WhatsApp Message",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        -160,
-        16
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const response = $input.first().json;\n\nif (!response.sent) {\n  console.error('WhatsApp send failed:', response);\n}\n\nconst inMessage = $('Execute Workflow Trigger').first().json;\n\n// Определяем тип touchpoint\nconst actionSource = inMessage.out_message?.action_source || '';\nconst touchpointDirection = (actionSource === 'promo' || actionSource === 'greeting' || actionSource === 'broadcast') ? 'promo' : 'outbound';\n\nreturn {\n  ...inMessage,\n  whatsapp_response: response,\n  message_id: response.messageId || Date.now().toString(),\n  sent_at: new Date().toISOString(),\n  touchpoint_direction: touchpointDirection\n};"
-      },
-      "id": "c7623091-c36b-4843-b74c-868f80d77a11",
-      "name": "Process WhatsApp Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        64,
-        16
-      ]
+      "position": [-480, 112]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.appeal_id }}'::uuid,\n  'agent',\n  '{{ $json.out_message.message_text }}',\n  'whatsapp',\n  (SELECT id FROM channels WHERE code = 'whatsapp' LIMIT 1),\n  '{{ $json.message_id }}',\n  '{{ $json.out_message.external_chat_id }}'\nRETURNING *;",
+        "query": "SELECT \n  ca.credentials->>'session_id' as session_id,\n  ca.account_id,\n  ca.account_name\nFROM elo_t_channel_accounts ca\nWHERE ca.tenant_id = '{{ $json.out_message.tenant_id }}'::uuid\n  AND ca.channel_id = 2\n  AND ca.is_active = true\nLIMIT 1;",
         "options": {}
       },
-      "id": "e25d32ee-5c20-4669-8cf1-e7cec3556b74",
-      "name": "Save Message History",
+      "id": "get-whatsapp-session",
+      "name": "Get WhatsApp Session",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.4,
-      "position": [
-        288,
-        16
-      ],
+      "typeVersion": 2.6,
+      "position": [-256, 112],
       "credentials": {
         "postgres": {
           "id": "n2SyhP9QhMnp1ryk",
@@ -67,23 +30,116 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-session",
+              "leftValue": "={{ $json.session_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-session-exists",
+      "name": "IF Session Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-32, 112]
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "https://n8n.n8nsrv.ru/webhook/neo4j/touchpoint/register",
+        "url": "http://217.145.79.27:8766/messages/text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  client_id: $('Process WhatsApp Response').item.json.out_message.client_id,\n  appeal_id: $('Process WhatsApp Response').item.json.out_message.appeal_id,\n  channel: 'whatsapp',\n  direction: $('Process WhatsApp Response').item.json.touchpoint_direction,\n  type: 'message',\n  tenant_id: $('Process WhatsApp Response').item.json.out_message.tenant_id,\n  creates_entity: false\n}) }}",
+        "jsonBody": "={\n  \"sessionId\": \"{{ $('Get WhatsApp Session').item.json.session_id }}\",\n  \"to\": \"{{ $('Execute Workflow Trigger').item.json.out_message.external_chat_id }}\",\n  \"text\": \"{{ $('Execute Workflow Trigger').item.json.out_message.message_text.replace(/\"/g, '\\\\\"').replace(/\\n/g, '\\\\n') }}\"\n}",
         "options": {
-          "timeout": 5000
+          "timeout": 30000
         }
       },
-      "id": "1eab701a-c893-47f3-bedc-656e21c17a4a",
-      "name": "Register Touchpoint",
+      "id": "send-whatsapp-baileys",
+      "name": "Send via Baileys",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        512,
-        16
-      ]
+      "typeVersion": 4.1,
+      "position": [192, 16]
+    },
+    {
+      "parameters": {
+        "jsCode": "const trigger = $('Execute Workflow Trigger').first().json;\nconst sessionData = $('Get WhatsApp Session').first().json;\nconst response = $input.first().json;\n\n// Check if send was successful\nconst success = response.success === true;\nconst messageId = response.data?.messageId || Date.now().toString();\n\n// Determine touchpoint direction\nconst actionSource = trigger.out_message?.action_source || '';\nconst touchpointDirection = ['promo', 'greeting', 'broadcast'].includes(actionSource) ? 'promo' : 'outbound';\n\nreturn {\n  ...trigger,\n  baileys_response: response,\n  message_id: messageId,\n  sent_at: new Date().toISOString(),\n  touchpoint_direction: touchpointDirection,\n  send_success: success,\n  session_id: sessionData.session_id\n};"
+      },
+      "id": "process-baileys-response",
+      "name": "Process Baileys Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [416, 16]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO elo_t_messages (\n  tenant_id, dialog_id, client_id, direction_id, actor_type, actor_id,\n  content, external_message_id, timestamp\n)\nVALUES (\n  '{{ $json.out_message.tenant_id }}'::uuid,\n  '{{ $json.out_message.dialog_id }}'::uuid,\n  '{{ $json.out_message.client_id }}'::uuid,\n  2,\n  '{{ $json.out_message.actor_type || \"operator\" }}',\n  {{ $json.out_message.actor_id ? \"'\" + $json.out_message.actor_id + \"'::uuid\" : \"NULL\" }},\n  '{{ $json.out_message.message_text.replace(/'/g, \"''\") }}',\n  '{{ $json.message_id }}',\n  NOW()\n)\nRETURNING id;",
+        "options": {}
+      },
+      "id": "save-outbound-message",
+      "name": "Save Outbound Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [640, 16],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE elo_t_dialogs SET\n  last_message_at = NOW(),\n  last_operator_message_at = NOW(),\n  updated_at = NOW()\nWHERE id = '{{ $('Execute Workflow Trigger').item.json.out_message.dialog_id }}'::uuid;",
+        "options": {}
+      },
+      "id": "update-dialog-timestamp",
+      "name": "Update Dialog Timestamp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [864, 16],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return error - no WhatsApp session configured\nconst trigger = $('Execute Workflow Trigger').first().json;\n\nreturn {\n  success: false,\n  error: 'No active WhatsApp session found for tenant',\n  tenant_id: trigger.out_message?.tenant_id,\n  out_message: trigger.out_message\n};"
+      },
+      "id": "no-session-error",
+      "name": "No Session Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [192, 208]
     }
   ],
   "connections": {
@@ -91,40 +147,69 @@
       "main": [
         [
           {
-            "node": "Send WhatsApp Message",
+            "node": "Get WhatsApp Session",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Send WhatsApp Message": {
+    "Get WhatsApp Session": {
       "main": [
         [
           {
-            "node": "Process WhatsApp Response",
+            "node": "IF Session Exists",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Process WhatsApp Response": {
+    "IF Session Exists": {
       "main": [
         [
           {
-            "node": "Save Message History",
+            "node": "Send via Baileys",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Session Error",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save Message History": {
+    "Send via Baileys": {
       "main": [
         [
           {
-            "node": "Register Touchpoint",
+            "node": "Process Baileys Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Baileys Response": {
+      "main": [
+        [
+          {
+            "node": "Save Outbound Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outbound Message": {
+      "main": [
+        [
+          {
+            "node": "Update Dialog Timestamp",
             "type": "main",
             "index": 0
           }
@@ -147,6 +232,6 @@
       "name": "Out"
     }
   ],
-  "updatedAt": "2025-12-03T18:02:00.000Z",
+  "updatedAt": "2025-12-20T10:00:00.000Z",
   "createdAt": "2025-10-14T06:46:15.597Z"
 }

@@ -797,6 +797,21 @@ END:VCARD`;
     throw new Error('No media provided (mediaUrl or mediaBase64 required)');
   }
 
+  // Request pairing code (alternative to QR)
+  async requestPairingCode(phoneNumber: string): Promise<string> {
+    if (!this.socket) {
+      throw new Error('Socket not initialized');
+    }
+
+    // Format phone number (remove + and spaces)
+    const formattedPhone = phoneNumber.replace(/[^0-9]/g, '');
+
+    logger.info(`Requesting pairing code for ${formattedPhone}`);
+    const code = await this.socket.requestPairingCode(formattedPhone);
+    logger.info(`Pairing code: ${code}`);
+    return code;
+  }
+
   // Disconnect
   async disconnect(): Promise<void> {
     if (this.socket) {

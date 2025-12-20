@@ -14,113 +14,130 @@ After git pull — REREAD this file from the beginning (Start.md), starting from
 ---
 
 ## Last update date and time
-**20 December 2025, 09:00 (MSK, UTC+3)**
+**20 December 2025, 15:50 (MSK, UTC+3)**
 
 ---
 
-## Проект: Android Messager — Омниканальный мессенджер
+## Текущая задача: WhatsApp → Android
 
-### Что это
-Мобильное приложение для операторов сервисных центров. Общение с клиентами через разные мессенджеры (Telegram, WhatsApp, Avito, MAX) из одного интерфейса.
+### Цель
+Входящие сообщения WhatsApp должны отображаться в Android приложении.
 
-### Текущий статус
-- ✅ **Login + Roles** — работает (client/server/both)
-- ✅ **Auth API** — `ELO_API_Android_Auth` в n8n
-- ✅ **Dialogs API** — `ELO_API_Android_Dialogs` в n8n
-- ✅ **Messages API** — `ELO_API_Android_Messages` в n8n
-- ✅ **ChatActivity** — полноценный экран чата
-- ✅ **tunnel-server** — работает на 155.212.221.189:8800
-- ✅ **WhatsApp** — Baileys + резидентный proxy работает!
-- ❌ **Telegram** — токен слетает при переустановке
-- ❌ **Avito** — неправильная страница авторизации
-- ❌ **MAX** — требует QR, но API не поддерживает
-
----
-
-## WhatsApp — РЕШЕНО (20.12.2025)
-
-### Проблема была
-- nodejs-mobile в APK — WebSocket зависал (datacenter IP блокируются WhatsApp)
-- Серверный Baileys без proxy — тоже блокировка (405, 408 ошибки)
-
-### Решение
-**Baileys + резидентный proxy (geonix.com)**
-
-### Как работает
+### Статус
 ```
-mcp-whatsapp-baileys (localhost:3003)
+WhatsApp → Baileys → ELO_In_WhatsApp → Redis → Batcher → ELO_Client_Resolve → AI_Stub
+     ✓         ✓            ✓             ✓        ✓              ✓              ✓
+                                                                   │
+                                                          НО: message не сохраняется в БД!
+```
+
+### Проблема
+Android читает сообщения из `elo_t_messages`, но **никто туда не пишет**.
+
+---
+
+## NEXT STEP: Изучить полную цепочку
+
+### Нужно найти и изучить:
+
+1. **Batcher** — какой workflow? что делает с данными?
+2. **ELO_Core_Ingest** — что происходит после Client_Resolve?
+3. **Где INSERT INTO elo_t_messages?** — кто должен сохранять?
+
+### Текущий flow (с вопросами):
+
+```
+ELO_In_WhatsApp
+    │ RPUSH queue:incoming
+    ▼
+Redis Queue
+    │ BRPOP
+    ▼
+??? Batcher ???          ← Какой workflow? Где он?
     │
-    ├── Baileys @whiskeysockets/baileys (latest)
-    ├── socks-proxy-agent → резидентный proxy
-    └── HTTP API:
-          POST /sessions — создать сессию
-          GET  /sessions/:id/qr — получить QR
-          GET  /sessions/:id/status — статус
-          POST /messages/text — отправить сообщение
-```
-
-### Proxy данные (geonix.com, 1GB до 20.01.2026)
-```
-socks5://4bac75b003ba6c8f:1Cl0A5wm@res.geonix.com:10000
-```
-
-### Запуск локально
-```bash
-cd /c/Users/User/Eldoleado/NEW/MVP/MCP/mcp-whatsapp-baileys
-npm install
-npm run build
-PORT=3003 npm start
-```
-
-### Создать сессию и отправить сообщение
-```bash
-# Создать сессию с proxy
-curl -X POST http://localhost:3003/sessions \
-  -H "Content-Type: application/json" \
-  -d '{"sessionId": "wa-proxy", "proxyUrl": "socks5://4bac75b003ba6c8f:1Cl0A5wm@res.geonix.com:10000"}'
-
-# Получить QR (сохранить как PNG)
-curl http://localhost:3003/sessions/wa-proxy/qr
-
-# Отправить сообщение (через node для UTF-8)
-node -e "const http=require('http');const data=JSON.stringify({sessionId:'wa-proxy',to:'79991234567',text:'Привет!'});const req=http.request({hostname:'localhost',port:3003,path:'/messages/text',method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data)}},res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>console.log(d))});req.write(data);req.end()"
+    ▼
+ELO_Client_Resolve       ← Создаёт client + dialog, НО НЕ message
+    │ HTTP POST
+    ▼
+??? ELO_Core_Ingest ???  ← Что делает?
+    │
+    ▼
+ELO_Core_AI_Test_Stub    ← Заглушка AI
+    │
+    ▼
+??? ← КТО СОХРАНЯЕТ MESSAGE? КТО УВЕДОМЛЯЕТ ОПЕРАТОРА?
 ```
 
 ---
 
-## Другие каналы
+## Что уже сделано
 
-| Канал | Проблема | Решение |
-|-------|----------|---------|
-| **Telegram** | Токен слетает при переустановке | Сохранять на сервере |
-| **Avito** | Неправильная страница авторизации | Исправить WebView |
-| **MAX** | Требует QR, но API не поддерживает | Использовать bot token |
+### 1. ELO_In_WhatsApp — исправлен
+- ✅ Фильтр message events (отсекает presence)
+- ✅ Извлечение session_id из Baileys
+- ✅ profile_id добавляется в данные
+
+### 2. WhatsApp Channel Account — создан
+```sql
+tenant_id: 11111111-1111-1111-1111-111111111111 (Test Repair Shop)
+account_id: eldoleado_main
+channel_id: 2 (whatsapp)
+```
+
+### 3. ELO_Client_Resolve — исправлен
+- ✅ DB Get Tenant берёт sessionId из `meta.raw.sessionId`
+- ✅ Находит tenant для WhatsApp
 
 ---
 
-## Ключевые файлы
+## Baileys Session
 
-| Файл | Описание |
-|------|----------|
-| `NEW/MVP/MCP/mcp-whatsapp-baileys/` | WhatsApp сервер (Baileys + proxy) |
-| `NEW/MVP/Android Messager/ROADMAP.md` | Документация Android Messenger |
-| `app/` | Android приложение |
+**Server:** 217.145.79.27:8766
+**Session ID:** eldoleado_main
+**Phone:** 79171708077 (Ремакс)
+**Status:** connected
+**Webhook:** https://n8n.n8nsrv.ru/webhook/whatsapp-incoming
+
+---
+
+## Key Files
+
+| File | Description |
+|------|-------------|
+| `NEW/workflows/Chanel Contour/ELO_In/ELO_In_WhatsApp.json` | Incoming WhatsApp messages |
+| `NEW/workflows/Chanel Contour/ELO_Out/ELO_Out_WhatsApp.json` | Outgoing WhatsApp messages |
+| `NEW/workflows/Client Contour/ELO_Client_Resolve.json` | Resolve tenant/client/dialog |
+| `NEW/workflows/API/API_Android_Dialogs.json` | Android dialogs API |
+| `NEW/workflows/API/API_Android_Messages.json` | Android messages API |
 
 ---
 
 ## Quick Commands
 
 ```bash
-# WhatsApp server
-cd /c/Users/User/Eldoleado/NEW/MVP/MCP/mcp-whatsapp-baileys
-PORT=3003 npm start
+# Check Redis queue
+ssh root@185.221.214.83 "docker exec n8n-redis redis-cli LRANGE queue:incoming 0 5"
 
-# Build Android
-export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"
-cd /c/Users/User/Eldoleado && ./gradlew.bat assembleDebug
+# Check Baileys logs
+ssh root@217.145.79.27 "docker logs mcp-whatsapp-baileys --tail 50"
 
-# Install Android
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+# Check Baileys sessions
+curl http://217.145.79.27:8766/sessions
+
+# Database query
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * FROM elo_t_messages LIMIT 5;'"
+```
+
+---
+
+## Database Tables (Android reads from)
+
+```sql
+-- Dialogs (ELO_Client_Resolve создаёт ✓)
+SELECT * FROM elo_t_dialogs WHERE tenant_id = '11111111-1111-1111-1111-111111111111';
+
+-- Messages (ПУСТО - никто не пишет ✗)
+SELECT * FROM elo_t_messages WHERE dialog_id = '...';
 ```
 
 ---

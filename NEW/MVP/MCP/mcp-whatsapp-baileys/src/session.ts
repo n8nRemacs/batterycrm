@@ -231,6 +231,7 @@ export class SessionManager {
           sessionId,
           sessionsDir: this.sessionsDir,
           webhookUrl,
+          proxyUrl: this.defaultProxyUrl,
           onConnected: async (info) => {
             logger.info(`Restored session ${sessionId} connected`);
             await this.saveSessionToRedis(sessionId, info);
@@ -239,6 +240,12 @@ export class SessionManager {
             if (reason === 'logged_out') {
               await this.deleteSession(sessionId);
             }
+          },
+          onMessage: async (message) => {
+            logger.info(`Message received in restored session ${sessionId} from ${message.from}`);
+          },
+          onCall: async (call) => {
+            logger.info(`Call received in restored session ${sessionId} from ${call.from}`);
           },
         });
 
