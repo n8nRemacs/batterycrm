@@ -515,7 +515,6 @@ class WhatsAppSetupActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         pollJob?.cancel()
-        nodeJSBridge.stop()
         super.onDestroy()
     }
 }
