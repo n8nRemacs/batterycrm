@@ -38,8 +38,18 @@ credentials.json
 # Android build
 app/build/
 app/.gradle/
+app/.cxx/
 *.apk
 *.aab
+
+# Node.js mobile
+nodejs-mobile-temp/
+nodejs-mobile.zip
+termux-baileys/
+
+# Windows artifacts
+nul
+localhost
 
 # Gradle
 .gradle/
