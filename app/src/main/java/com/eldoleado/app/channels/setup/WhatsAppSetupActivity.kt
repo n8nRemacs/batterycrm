@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.eldoleado.app.R
 import com.eldoleado.app.SessionManager
 import com.eldoleado.app.channels.ChannelCredentialsManager
-// NodeJSBridge removed - using cloud Baileys only
+import com.eldoleado.app.nodejs.NodeJSBridge
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
@@ -40,17 +40,18 @@ class WhatsAppSetupActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "WhatsAppSetupActivity"
-        // Cloud Baileys server (Finnish server)
-        private const val BAILEYS_URL = "http://217.145.79.27:8766"
-        private const val REMOTE_BAILEYS_URL = BAILEYS_URL // alias for compatibility
-        private const val LOCAL_BAILEYS_URL = "http://127.0.0.1:3000" // dead code, kept for compilation
+        // Local Node.js server (embedded Baileys)
+        private const val LOCAL_BAILEYS_URL = "http://127.0.0.1:3000"
+        // Fallback to Finnish server if local doesn't work
+        private const val REMOTE_BAILEYS_URL = "http://217.145.79.27:8766"
         private const val QR_POLL_INTERVAL = 3000L // 3 seconds
         private const val QR_TIMEOUT = 120000L // 120 seconds
     }
 
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
     private lateinit var sessionManager: SessionManager
-    private var useLocalBaileys = false // always false - local nodejs removed
+    private lateinit var nodeJSBridge: NodeJSBridge
+    private var useLocalBaileys = true
 
     // Views
     private lateinit var btnBack: ImageView
@@ -76,18 +77,26 @@ class WhatsAppSetupActivity : AppCompatActivity() {
 
         channelCredentialsManager = ChannelCredentialsManager(this)
         sessionManager = SessionManager(this)
+        nodeJSBridge = NodeJSBridge(this)
 
         initViews()
         setupListeners()
-        startCloudBaileysConnect()
+        startLocalBaileysAndConnect()
     }
 
-    private fun startCloudBaileysConnect() {
+    private fun startLocalBaileysAndConnect() {
         showQrLoading()
-        statusText.text = "Подключение к WhatsApp сервису..."
+        statusText.text = "Запуск WhatsApp сервиса..."
 
-        // Connect to cloud Baileys server
+        // Start embedded Node.js with Baileys
+        if (!nodeJSBridge.isRunning()) {
+            nodeJSBridge.start()
+        }
+
+        // Wait for Node.js to start and then request QR
         CoroutineScope(Dispatchers.IO).launch {
+            // Give Node.js time to start
+            delay(5000)
 
             // Check if local server is available
             val isLocalAvailable = checkLocalServer()
@@ -107,8 +116,18 @@ class WhatsAppSetupActivity : AppCompatActivity() {
     }
 
     private fun checkLocalServer(): Boolean {
-        // Local nodejs-mobile removed - always use cloud Baileys
-        return false
+        return try {
+            val url = URL("$LOCAL_BAILEYS_URL/status")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 3000
+            connection.readTimeout = 3000
+            val responseCode = connection.responseCode
+            responseCode == 200
+        } catch (e: Exception) {
+            Log.w(TAG, "Local server check failed: ${e.message}")
+            false
+        }
     }
 
     private fun requestQrFromLocal() {
@@ -244,8 +263,11 @@ class WhatsAppSetupActivity : AppCompatActivity() {
         }
 
         btnRefreshQr.setOnClickListener {
-            // Always use cloud Baileys
-            createSessionAndRequestQr()
+            if (useLocalBaileys) {
+                requestQrFromLocal()
+            } else {
+                createSessionAndRequestQr()
+            }
         }
 
         btnDone.setOnClickListener {
@@ -515,6 +537,7 @@ class WhatsAppSetupActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         pollJob?.cancel()
+        nodeJSBridge.stop()
         super.onDestroy()
     }
 }

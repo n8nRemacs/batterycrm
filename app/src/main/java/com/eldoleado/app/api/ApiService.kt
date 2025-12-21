@@ -25,19 +25,19 @@ interface ApiService {
     @GET("android/dialogs")
     fun getDialogs(@Query("session_token") sessionToken: String): Call<DialogsResponse>
 
-    @GET("android/messages")
+    @GET("android-messages/android/dialogs/{dialog_id}/messages")
     fun getChatMessages(
-        @Query("dialog_id") dialogId: String,
+        @Path("dialog_id") dialogId: String,
         @Query("session_token") sessionToken: String
     ): Call<ChatMessagesResponse>
 
-    @POST("android-messages/android/dialogs/{dialog_id}/messages")
+    @POST("android-send-message/android-messages/android/dialogs/{dialog_id}/messages")
     fun sendChatMessage(
         @Path("dialog_id") dialogId: String,
         @Body request: SendChatMessageRequest
     ): Call<SendChatMessageResponse>
 
-    @POST("android/normalize")
+    @POST("android-normalize/android/dialogs/{dialog_id}/normalize")
     fun normalizeDialogText(
         @Path("dialog_id") dialogId: String,
         @Body request: NormalizeDialogRequest

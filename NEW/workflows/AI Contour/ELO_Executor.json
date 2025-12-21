@@ -1,40 +1,29 @@
 {
-  "updatedAt": "2025-12-20T17:14:11.250Z",
-  "createdAt": "2025-12-15T17:28:36.615Z",
-  "id": "i6LnKuEIUETjrNBl",
   "name": "ELO_Executor",
-  "description": null,
-  "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {
+        "method": "POST",
         "path": "elo-executor",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "f32e0906-8abc-4212-b797-4a83565aae64",
+      "id": "webhook-trigger",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [
-        -288,
-        -80
-      ],
+      "position": [250, 300],
       "webhookId": "elo-executor"
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json.body || $input.first().json;\n\n// Validate required fields\nif (!input.context) {\n  throw new Error('Missing required field: context');\n}\nif (!input.prompt) {\n  throw new Error('Missing required field: prompt');\n}\n\n// Build agent instruction from prompt\nconst context = input.context;\nconst prompt = input.prompt;\n\nreturn {\n  context: context,\n  prompt: prompt,\n  agent_input: `${prompt.instruction}\n\nContext:\n- Client: ${context.client?.name || 'Unknown'}\n- Device: ${context.lines?.[0]?.slots?.device?.brand || ''} ${context.lines?.[0]?.slots?.device?.model || ''}\n- Symptom: ${context.lines?.[0]?.slots?.symptom || 'Not specified'}\n- Diagnosis: ${context.lines?.[0]?.slots?.diagnosis?.code || 'Pending'}\n- Price: ${context.lines?.[0]?.slots?.price?.amount || 'TBD'}\n- Stage: ${context.current_stage}\n- Triggers: ${context.triggers_fired?.map(t => t.trigger_id).join(', ') || 'None'}\n\nUse the available tools to:\n1. Generate response text based on the instruction\n2. Write context to graph (Neo4j)\n3. Format the response for the channel\n\nReturn the final response object.`\n};"
       },
-      "id": "a665f5c0-dda9-4daf-bf77-ab272788ba6b",
+      "id": "prepare-input",
       "name": "Prepare Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        -64,
-        -80
-      ]
+      "position": [470, 300]
     },
     {
       "parameters": {
@@ -42,71 +31,63 @@
           "systemMessage": "You are an executor for a phone repair service chatbot.\n\nYour job is to execute the instructions from the decision layer using the available tools.\n\nAvailable tools:\n- generate_text: Generate response text using AI based on prompt and context\n- write_graph: Write/update data in Neo4j graph database\n- get_price: Get price for a specific repair from database\n- format_response: Format response for specific channel (telegram, whatsapp, etc)\n\nFollow the instructions exactly. Use tools as needed to complete the task.\n\nReturn a response object with: {text, buttons (optional), metadata}"
         }
       },
-      "id": "46d80796-b914-49de-89c9-dd7d9d149aae",
+      "id": "ai-agent",
       "name": "AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.6,
-      "position": [
-        160,
-        -80
-      ]
+      "position": [690, 300]
     },
     {
       "parameters": {
-        "model": "qwen/qwen3-4b:free",
+        "model": "qwen/qwen3-30b-a3b:free",
         "options": {
-          "maxTokens": 1500,
-          "temperature": 0.3
+          "temperature": 0.3,
+          "maxTokens": 1500
         }
       },
-      "id": "4c285c5f-ba34-4f55-ae89-bdcdaf9ce30c",
+      "id": "openrouter-llm",
       "name": "OpenRouter LLM",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
-      "position": [
-        -240,
-        112
-      ],
+      "position": [690, 500],
       "credentials": {
         "openRouterApi": {
-          "id": "ameOTCcGgTm3hbtM",
-          "name": "OpenRouter account"
+          "id": "openrouter-api",
+          "name": "OpenRouter API"
         }
       }
     },
     {
       "parameters": {
+        "name": "generate_text",
+        "description": "Generate response text using AI. Input: {prompt: string, context: object}. Returns: {text: string}",
         "method": "POST",
         "url": "https://n8n.n8nsrv.ru/webhook/elo-core-response-generator",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ context: $fromAI('context', 'The context object'), goal: $fromAI('goal', 'Response goal like ask_device, present_offer') }) }}"
       },
-      "id": "818541fc-f262-427e-b149-4664f27ce8b4",
+      "id": "tool-generate",
       "name": "Generate Text Tool",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
-      "position": [
-        32,
-        128
-      ]
+      "position": [470, 500]
     },
     {
       "parameters": {
+        "name": "write_graph",
+        "description": "Write context data to Neo4j graph. Input: {context: object, write_mode: 'full' or 'incremental'}. Returns: {success: boolean, writes: object}",
         "method": "POST",
         "url": "https://n8n.n8nsrv.ru/webhook/elo-core-graph-writer",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ context: $fromAI('context', 'The context object to write'), write_mode: $fromAI('write_mode', 'Write mode: full or incremental', 'incremental') }) }}"
       },
-      "id": "ce244346-2ea4-456c-b5e6-e8777e7356e1",
+      "id": "tool-graph",
       "name": "Write Graph Tool",
       "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
       "typeVersion": 1.1,
-      "position": [
-        224,
-        128
-      ]
+      "position": [580, 500]
     },
     {
       "parameters": {
@@ -114,14 +95,11 @@
         "description": "Get price for repair from database. Input: {brand: string, model: string, repair_action: string}. Returns: {price_min, price_max, currency}",
         "jsCode": "// Direct PostgreSQL query for price\nconst brand = $fromAI('brand', 'Device brand');\nconst model = $fromAI('model', 'Device model');\nconst repair = $fromAI('repair_action', 'Repair action code');\n\n// This would be a SQL query in real implementation\nreturn {\n  price_min: 3000,\n  price_max: 5000,\n  currency: 'RUB',\n  note: 'Price lookup - implement with PostgreSQL node'\n};"
       },
-      "id": "cb5df279-ad7f-4782-a11b-0aba4a47b052",
+      "id": "tool-price",
       "name": "Get Price Tool",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1,
-      "position": [
-        416,
-        128
-      ]
+      "position": [800, 500]
     },
     {
       "parameters": {
@@ -129,27 +107,21 @@
         "description": "Format response for specific channel. Input: {text: string, buttons: array, channel: string}. Returns formatted response",
         "jsCode": "const text = $fromAI('text', 'Response text');\nconst buttons = $fromAI('buttons', 'Array of button objects', []);\nconst channel = $fromAI('channel', 'Channel type: telegram, whatsapp, etc', 'telegram');\n\nlet formatted = { text };\n\nif (buttons && buttons.length > 0) {\n  switch(channel) {\n    case 'telegram':\n      formatted.reply_markup = {\n        inline_keyboard: buttons.map(b => [{ text: b.text, callback_data: b.callback_data || b.text }])\n      };\n      break;\n    case 'whatsapp':\n      formatted.buttons = buttons.map(b => ({ type: 'reply', reply: { id: b.callback_data, title: b.text } }));\n      break;\n    default:\n      formatted.buttons = buttons;\n  }\n}\n\nreturn formatted;"
       },
-      "id": "7fc8f9f4-da37-4980-8013-cc33deaee4e5",
+      "id": "tool-format",
       "name": "Format Response Tool",
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1,
-      "position": [
-        592,
-        128
-      ]
+      "position": [910, 500]
     },
     {
       "parameters": {
         "jsCode": "const agentOutput = $input.first().json;\nconst inputData = $('Prepare Input').first().json;\nconst context = inputData.context;\n\n// Build final response\nconst response = {\n  tenant_id: context.tenant_id,\n  dialog_id: context.dialog_id,\n  channel_id: context.channel_id,\n  external_chat_id: context.external_chat_id,\n  \n  message: {\n    text: agentOutput.text || agentOutput.response?.text || 'No response generated',\n    buttons: agentOutput.buttons || agentOutput.response?.buttons || [],\n    metadata: {\n      stage: context.current_stage,\n      trace_id: context.trace_id\n    }\n  },\n  \n  context_updated: true,\n  trace_id: context.trace_id\n};\n\nreturn response;"
       },
-      "id": "0319938c-1fcb-49ee-90a7-7aad6ec562e9",
+      "id": "build-response",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        592,
-        -80
-      ]
+      "position": [910, 300]
     },
     {
       "parameters": {
@@ -157,14 +129,11 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "7e8e50d2-fb7e-4377-9931-9f8e9c736306",
+      "id": "respond-webhook",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [
-        800,
-        -80
-      ]
+      "position": [1130, 300]
     }
   ],
   "connections": {
@@ -268,76 +237,17 @@
       ]
     }
   },
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "versionId": "",
   "meta": {
-    "templateCredsSetupCompleted": true
+    "instanceId": ""
   },
-  "pinData": {},
-  "versionId": "6de6ef34-d7af-4bda-bacd-b453d26dbc4c",
-  "activeVersionId": null,
-  "versionCounter": 5,
-  "triggerCount": 0,
-  "shared": [
-    {
-      "updatedAt": "2025-12-15T17:28:36.623Z",
-      "createdAt": "2025-12-15T17:28:36.623Z",
-      "role": "workflow:owner",
-      "workflowId": "i6LnKuEIUETjrNBl",
-      "projectId": "x7frUSUEowDAk8Dt",
-      "project": {
-        "updatedAt": "2025-08-25T18:57:22.218Z",
-        "createdAt": "2025-08-25T08:16:18.805Z",
-        "id": "x7frUSUEowDAk8Dt",
-        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "updatedAt": "2025-08-25T08:16:18.805Z",
-            "createdAt": "2025-08-25T08:16:18.805Z",
-            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
-            "projectId": "x7frUSUEowDAk8Dt",
-            "user": {
-              "updatedAt": "2025-12-20T04:36:02.000Z",
-              "createdAt": "2025-08-25T08:16:17.784Z",
-              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
-              "email": "dk@n8nsrv.ru",
-              "firstName": "Dmitriy",
-              "lastName": "Remacs",
-              "personalizationAnswers": null,
-              "settings": {
-                "userActivated": true,
-                "easyAIWorkflowOnboarded": true,
-                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
-                "userActivatedAt": 1756286438389
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-12-19",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
   "tags": [
     {
-      "updatedAt": "2025-12-12T08:39:41.170Z",
-      "createdAt": "2025-12-12T08:39:41.170Z",
-      "id": "8dihLRJvdhkW2kZ1",
-      "name": "AI"
-    },
-    {
-      "updatedAt": "2025-12-09T18:50:08.518Z",
-      "createdAt": "2025-12-09T18:50:08.518Z",
-      "id": "tMSCjbvPU3xrNUqz",
-      "name": "ELO"
+      "name": "ELO_Core_AI"
     }
-  ],
-  "activeVersion": null
+  ]
 }

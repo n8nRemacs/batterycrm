@@ -1,75 +1,77 @@
-# Stop Session - 2025-12-21 00:10
+# Stop Session - 2025-12-21 23:30
 
 ## Что сделано сегодня
 
-### 1. Упрощён экран логина
-- Убран выбор режима (Оператор/Сервер/Оба)
-- Теперь только режим "Оператор" (MODE_CLIENT)
-- Файлы: `activity_login.xml`, `LoginActivity.kt`
+### 1. Создана Redis Queue архитектура для исходящих сообщений
 
-### 2. Исправлена загрузка сообщений в диалогах
-**Проблема:** 404 ошибка при открытии диалога - "Ошибка загрузки"
+**Проблема:** HTTP вызовы между n8n воркфлоу не работали стабильно (Invalid JSON, timeout)
 
-**Причина:** n8n не поддерживает динамические path параметры (`:dialog_id`) в production webhooks
+**Решение:** Каждый канал имеет свою Redis очередь:
+```
+Android App
+    │
+    ▼
+ELO_API_Android_Send_Message (RPUSH по channel_id)
+    │
+    ├─► queue:outgoing:telegram  ─► ELO_Out_Telegram (poll каждые 3 сек)
+    ├─► queue:outgoing:whatsapp  ─► ELO_Out_WhatsApp (poll каждые 3 сек)
+    ├─► queue:outgoing:avito     ─► ELO_Out_Avito (poll каждые 3 сек)
+    ├─► queue:outgoing:vk        ─► ELO_Out_VK (poll каждые 3 сек)
+    └─► queue:outgoing:max       ─► ELO_Out_MAX (poll каждые 3 сек)
+```
 
-**Решение:**
-- Изменён webhook path: `android/dialogs/:dialog_id/messages` → `android/messages`
-- Изменён ApiService.kt: `@Path("dialog_id")` → `@Query("dialog_id")`
-- Исправлены SQL запросы в n8n: `$json.params.dialog_id` → `$json.query.dialog_id`
-
-### 3. Создана связь Оператор ↔ Канал
-**Проблема:** Диалоги не назначались оператору (assigned_operator_id = NULL)
-
-**Решение:**
-- Создана таблица `elo_t_operator_channels` (связь оператор-канал)
-- Добавлен столбец `channel_account_id` в `elo_t_dialogs`
-- Обновлены существующие диалоги с назначением оператора
-
-### 4. Исправлено дублирование текста сообщений
-**Проблема:** Текст сохранялся как "Привет\n\nПривет" (конкатенация батча)
-
-**Причина:** WhatsApp Baileys батчит сообщения, Validate Input конкатенирует тексты
-
-**Решение:**
-- В Save Incoming Message изменено: `$json.text` → `$json.meta.raw.data.text`
+**Преимущества:**
+- Каждый канал независим
+- Нет проблем с HTTP вызовами между n8n воркфлоу
+- Легко масштабировать
+- Можно перезапускать отдельные каналы
 
 ---
 
-## Файлы изменены
+### 2. Созданные файлы n8n (JSON для импорта)
 
-### Android App
-- `app/src/main/res/layout/activity_login.xml` - убран RadioGroup выбора режима
-- `app/src/main/java/com/eldoleado/app/LoginActivity.kt` - всегда MODE_CLIENT
-- `app/src/main/java/com/eldoleado/app/api/ApiService.kt` - messages endpoint fix
+**API:**
+- `NEW/workflows/API/ELO_API_Android_Send_Message_v4_channel_queues.json`
+  - Webhook: `POST /android/messages/send`
+  - Принимает: `session_token`, `dialog_id`, `text` в body
+  - RPUSH в `queue:outgoing:{channel}` по channel_id из диалога
 
-### База данных
-```sql
--- Новая таблица
-CREATE TABLE elo_t_operator_channels (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    operator_id UUID NOT NULL REFERENCES elo_t_operators(id),
-    channel_account_id UUID NOT NULL REFERENCES elo_t_channel_accounts(id),
-    is_primary BOOLEAN DEFAULT false,
-    max_concurrent_dialogs INT DEFAULT 50,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMPTZ DEFAULT now(),
-    UNIQUE(operator_id, channel_account_id)
-);
+**Out-воркфлоу (все с Schedule Trigger + Redis LPOP):**
+| Файл | Очередь |
+|------|---------|
+| `ELO_Out_WhatsApp_v2.json` | queue:outgoing:whatsapp |
+| `ELO_Out_Telegram_v2.json` | queue:outgoing:telegram |
+| `ELO_Out_Avito_v2.json` | queue:outgoing:avito |
+| `ELO_Out_VK_v2.json` | queue:outgoing:vk |
+| `ELO_Out_MAX_v2.json` | queue:outgoing:max |
 
--- Новый столбец
-ALTER TABLE elo_t_dialogs ADD COLUMN channel_account_id UUID;
-```
+**Путь:** `NEW/workflows/Channel Contour/ELO_Out/`
 
-### n8n Workflows (изменены вручную)
-- **ELO_API_Android_Messages:**
-  - Webhook path: `android/messages`
-  - SQL: `$json.query.dialog_id` вместо `$json.params.dialog_id`
+---
 
-- **ELO_Client_Resolve:**
-  - Save Incoming Message: `$json.meta.raw.data.text` вместо `$json.text`
+### 3. Документация
 
-### Документация
-- `NEW/N8N_SQL_FIXES.md` - документация по SQL фиксам для n8n
+- `NEW/N8N_REDIS_IMPORT.md` — полная инструкция по импорту всех воркфлоу
+- `NEW/IMPLEMENTATION_PLAN.md` — план реализации всех 3 приоритетов
+
+---
+
+### 4. Импортировано в n8n
+
+Пользователь импортировал все воркфлоу:
+- ELO_Out_WhatsApp (v2 с Redis)
+- ELO_Out_Telegram (v2 с Redis)
+- ELO_Out_Avito (v2 с Redis)
+- ELO_Out_VK (v2 с Redis)
+- ELO_Out_MAX (v2 с Redis)
+- ELO_API_Android_Send_Message (v4 с channel queues)
+
+---
+
+## Можно удалить из n8n
+
+- `ELO_Out_Router` — больше не нужен (каждый Out сам читает свою очередь)
+- `ELO_Out_Processor` — не нужен (создавался для единой очереди)
 
 ---
 
@@ -80,10 +82,14 @@ ALTER TABLE elo_t_dialogs ADD COLUMN channel_account_id UUID;
 - Загрузка списка диалогов
 - Загрузка сообщений в диалоге
 - Сохранение входящих сообщений (без дублирования)
+- Redis queue архитектура (импортирована)
 
-**Не работает:**
-- Нормализация текста (webhook с `:dialog_id`)
-- Отправка сообщений (не проверялось)
+**Нужно протестировать:**
+- Отправка сообщений через новую Redis архитектуру
+
+**Не сделано:**
+- Приоритет 1: Нормализация текста (webhook с body вместо path params)
+- Приоритет 3: Автоназначение оператора для новых диалогов
 
 ---
 
@@ -91,4 +97,5 @@ ALTER TABLE elo_t_dialogs ADD COLUMN channel_account_id UUID;
 
 - **Тестовый оператор:** Test Admin (22222222-2222-2222-2222-222222222222)
 - **Session token:** 85bc5364-7765-4562-be9e-02d899bb575e
-- **Тестовый диалог:** cff56064-1fc3-4152-8e64-6e0266a87bf6 (Дмитрий, WhatsApp)
+- **Тестовый диалог:** cff56064-1fc3-4152-8e64-6e0266a87bf6 (Дмитрий, WhatsApp, channel_id=2)
+- **WhatsApp Baileys:** 217.145.79.27:8766, session: eldoleado_main

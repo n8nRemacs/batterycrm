@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-20T17:10:15.658Z",
+  "updatedAt": "2025-12-20T19:55:39.547Z",
   "createdAt": "2025-12-18T11:15:39.467Z",
   "id": "2uj0zqoqbSRd0iue",
   "name": "ELO_API_Android_Messages",
@@ -9,7 +9,7 @@
   "nodes": [
     {
       "parameters": {
-        "path": "android/dialogs/:dialog_id/messages",
+        "path": "android/messages",
         "responseMode": "responseNode",
         "options": {
           "allowedOrigins": "*"
@@ -84,7 +84,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n  d.id as dialog_id,\n  c.name as client_name,\n  c.phone as client_phone,\n  LOWER(ch.name) as channel,\n  d.external_chat_id as chat_id\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nJOIN elo_channels ch ON d.channel_id = ch.id\nWHERE d.id = '{{ $('Webhook - Get Messages').item.json.params.dialog_id }}'::uuid\n  AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\nLIMIT 1;",
+        "query": "SELECT\n    d.id as dialog_id,\n    c.name as client_name,\n    c.phone as client_phone,\n    LOWER(ch.name) as channel,\n    d.external_chat_id as chat_id\n  FROM elo_t_dialogs d\n  JOIN elo_t_clients c ON d.client_id = c.id\n  JOIN elo_channels ch ON d.channel_id = ch.id\n  WHERE d.id = '{{ $('Webhook - Get Messages').item.json.query.dialog_id }}'::uuid\n    AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\n  LIMIT 1;",
         "options": {}
       },
       "id": "c45ab15b-fcae-4d6e-8a65-2ee6ad35842c",
@@ -106,7 +106,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n  m.id,\n  m.content as text,\n  m.direction_id,\n  CASE WHEN m.direction_id = 1 THEN 'in' ELSE 'out' END as direction,\n  m.actor_type as sender_type,\n  CASE \n    WHEN m.actor_type = 'client' THEN (SELECT name FROM elo_t_clients WHERE id = m.client_id)\n    WHEN m.actor_type = 'operator' THEN (SELECT name FROM elo_t_operators WHERE id = m.actor_id)\n    WHEN m.actor_type = 'ai' THEN 'AI'\n    ELSE m.actor_type\n  END as sender_name,\n  m.message_type_id,\n  m.media,\n  EXTRACT(EPOCH FROM m.timestamp)::bigint * 1000 as timestamp\nFROM elo_t_messages m\nWHERE m.dialog_id = '{{ $('Webhook - Get Messages').item.json.params.dialog_id }}'::uuid\nORDER BY m.timestamp ASC\nLIMIT 100;",
+        "query": "SELECT\n    m.id,\n    m.content as text,\n    m.direction_id,\n    CASE WHEN m.direction_id = 1 THEN 'in' ELSE 'out' END as direction,\n    m.actor_type as sender_type,\n    CASE\n      WHEN m.actor_type = 'client' THEN (SELECT name FROM elo_t_clients WHERE id = m.client_id)\n      WHEN m.actor_type = 'operator' THEN (SELECT name FROM elo_t_operators WHERE id = m.actor_id)\n      WHEN m.actor_type = 'ai' THEN 'AI'\n      ELSE m.actor_type\n    END as sender_name,\n    m.message_type_id,\n    m.media,\n    EXTRACT(EPOCH FROM m.timestamp)::bigint * 1000 as timestamp\n  FROM elo_t_messages m\n  WHERE m.dialog_id = '{{ $('Webhook - Get Messages').item.json.query.dialog_id }}'::uuid\n  ORDER BY m.timestamp ASC\n  LIMIT 100;",
         "options": {}
       },
       "id": "c6e04cc6-44fe-47f7-9ab0-0756eb571567",
@@ -277,10 +277,38 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
-  "versionId": "e84f0f7a-04f0-46eb-becb-f62c9f74f1ab",
-  "activeVersionId": "e84f0f7a-04f0-46eb-becb-f62c9f74f1ab",
-  "versionCounter": 6,
+  "pinData": {
+    "Webhook - Get Messages": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.n8nsrv.ru",
+            "user-agent": "curl/8.17.0",
+            "accept": "*/*",
+            "via": "1.1 Caddy",
+            "x-forwarded-for": "176.100.126.94",
+            "x-forwarded-host": "n8n.n8nsrv.ru",
+            "x-forwarded-proto": "https",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {
+            "dialog_id": "cff56064-1fc3-4152-8e64-6e0266a87bf6",
+            "session_token": "85bc5364-7765-4562-be9e-02d899bb575e"
+          },
+          "body": {},
+          "webhookUrl": "https://n8n.n8nsrv.ru/webhook/android/messages",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "68f53671-3c8c-473e-9ef7-673de86c9305",
+  "activeVersionId": "68f53671-3c8c-473e-9ef7-673de86c9305",
+  "versionCounter": 15,
   "triggerCount": 1,
   "shared": [
     {
@@ -304,7 +332,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "updatedAt": "2025-12-20T20:00:02.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -319,7 +347,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-19",
+              "lastActiveAt": "2025-12-20",
               "isPending": false
             }
           }
@@ -342,14 +370,14 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-20T17:10:15.659Z",
-    "createdAt": "2025-12-20T17:10:15.659Z",
-    "versionId": "e84f0f7a-04f0-46eb-becb-f62c9f74f1ab",
+    "updatedAt": "2025-12-20T19:55:39.549Z",
+    "createdAt": "2025-12-20T19:55:39.549Z",
+    "versionId": "68f53671-3c8c-473e-9ef7-673de86c9305",
     "workflowId": "2uj0zqoqbSRd0iue",
     "nodes": [
       {
         "parameters": {
-          "path": "android/dialogs/:dialog_id/messages",
+          "path": "android/messages",
           "responseMode": "responseNode",
           "options": {
             "allowedOrigins": "*"
@@ -424,7 +452,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT \n  d.id as dialog_id,\n  c.name as client_name,\n  c.phone as client_phone,\n  LOWER(ch.name) as channel,\n  d.external_chat_id as chat_id\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nJOIN elo_channels ch ON d.channel_id = ch.id\nWHERE d.id = '{{ $('Webhook - Get Messages').item.json.params.dialog_id }}'::uuid\n  AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\nLIMIT 1;",
+          "query": "SELECT\n    d.id as dialog_id,\n    c.name as client_name,\n    c.phone as client_phone,\n    LOWER(ch.name) as channel,\n    d.external_chat_id as chat_id\n  FROM elo_t_dialogs d\n  JOIN elo_t_clients c ON d.client_id = c.id\n  JOIN elo_channels ch ON d.channel_id = ch.id\n  WHERE d.id = '{{ $('Webhook - Get Messages').item.json.query.dialog_id }}'::uuid\n    AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\n  LIMIT 1;",
           "options": {}
         },
         "id": "c45ab15b-fcae-4d6e-8a65-2ee6ad35842c",
@@ -446,7 +474,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT \n  m.id,\n  m.content as text,\n  m.direction_id,\n  CASE WHEN m.direction_id = 1 THEN 'in' ELSE 'out' END as direction,\n  m.actor_type as sender_type,\n  CASE \n    WHEN m.actor_type = 'client' THEN (SELECT name FROM elo_t_clients WHERE id = m.client_id)\n    WHEN m.actor_type = 'operator' THEN (SELECT name FROM elo_t_operators WHERE id = m.actor_id)\n    WHEN m.actor_type = 'ai' THEN 'AI'\n    ELSE m.actor_type\n  END as sender_name,\n  m.message_type_id,\n  m.media,\n  EXTRACT(EPOCH FROM m.timestamp)::bigint * 1000 as timestamp\nFROM elo_t_messages m\nWHERE m.dialog_id = '{{ $('Webhook - Get Messages').item.json.params.dialog_id }}'::uuid\nORDER BY m.timestamp ASC\nLIMIT 100;",
+          "query": "SELECT\n    m.id,\n    m.content as text,\n    m.direction_id,\n    CASE WHEN m.direction_id = 1 THEN 'in' ELSE 'out' END as direction,\n    m.actor_type as sender_type,\n    CASE\n      WHEN m.actor_type = 'client' THEN (SELECT name FROM elo_t_clients WHERE id = m.client_id)\n      WHEN m.actor_type = 'operator' THEN (SELECT name FROM elo_t_operators WHERE id = m.actor_id)\n      WHEN m.actor_type = 'ai' THEN 'AI'\n      ELSE m.actor_type\n    END as sender_name,\n    m.message_type_id,\n    m.media,\n    EXTRACT(EPOCH FROM m.timestamp)::bigint * 1000 as timestamp\n  FROM elo_t_messages m\n  WHERE m.dialog_id = '{{ $('Webhook - Get Messages').item.json.query.dialog_id }}'::uuid\n  ORDER BY m.timestamp ASC\n  LIMIT 100;",
           "options": {}
         },
         "id": "c6e04cc6-44fe-47f7-9ab0-0756eb571567",

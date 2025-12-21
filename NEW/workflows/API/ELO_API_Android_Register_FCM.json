@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-20T17:09:42.784Z",
+  "updatedAt": "2025-12-20T18:01:29.580Z",
   "createdAt": "2025-12-17T18:19:32.143Z",
   "id": "yW11VXCx1UCfJqXd",
   "name": "ELO_API_Android_Register_FCM",
@@ -65,7 +65,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id, operator_id, tenant_id, device_type \nFROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nLIMIT 1;",
+        "query": "SELECT id, operator_id, tenant_id, device_type\n  FROM elo_t_operator_devices\n  WHERE session_token = '{{ $json.session_token }}'\n    AND device_type = 'mobile'\n  LIMIT 1;",
         "options": {}
       },
       "id": "93e2f2fe-1039-4ec7-ad2e-1808a78df3fa",
@@ -89,7 +89,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -101,7 +102,8 @@
                 "operation": "exists"
               }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
@@ -130,7 +132,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE operator_devices\nSET \n  fcm_token = '{{ $json.fcm_token }}',\n  device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n  device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n  last_active_at = NOW()\nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nRETURNING id, operator_id;",
+        "query": "UPDATE elo_t_operator_devices\n  SET\n    fcm_token = '{{ $json.fcm_token }}',\n    device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n    device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n    last_active_at = NOW()\n  WHERE session_token = '{{ $json.session_token }}'\n    AND device_type = 'mobile'\n  RETURNING id, operator_id;",
         "options": {}
       },
       "id": "8ab2a60c-2017-4544-93cc-6a3d0bc70aec",
@@ -299,9 +301,9 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
-  "activeVersionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
-  "versionCounter": 8,
+  "versionId": "5df9a147-5263-47ae-aff9-7c6a5f901dff",
+  "activeVersionId": "5df9a147-5263-47ae-aff9-7c6a5f901dff",
+  "versionCounter": 11,
   "triggerCount": 1,
   "shared": [
     {
@@ -325,7 +327,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "updatedAt": "2025-12-20T20:00:02.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -340,7 +342,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-19",
+              "lastActiveAt": "2025-12-20",
               "isPending": false
             }
           }
@@ -363,9 +365,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-20T17:09:42.785Z",
-    "createdAt": "2025-12-20T17:09:42.785Z",
-    "versionId": "7146b9b5-6289-4c43-b8e3-d34ed03d9721",
+    "updatedAt": "2025-12-20T18:01:29.582Z",
+    "createdAt": "2025-12-20T18:01:29.582Z",
+    "versionId": "5df9a147-5263-47ae-aff9-7c6a5f901dff",
     "workflowId": "yW11VXCx1UCfJqXd",
     "nodes": [
       {
@@ -426,7 +428,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT id, operator_id, tenant_id, device_type \nFROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nLIMIT 1;",
+          "query": "SELECT id, operator_id, tenant_id, device_type\n  FROM elo_t_operator_devices\n  WHERE session_token = '{{ $json.session_token }}'\n    AND device_type = 'mobile'\n  LIMIT 1;",
           "options": {}
         },
         "id": "93e2f2fe-1039-4ec7-ad2e-1808a78df3fa",
@@ -450,7 +452,8 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict"
+              "typeValidation": "strict",
+              "version": 1
             },
             "conditions": [
               {
@@ -462,7 +465,8 @@
                   "operation": "exists"
                 }
               }
-            ]
+            ],
+            "combinator": "and"
           },
           "options": {}
         },
@@ -491,7 +495,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "UPDATE operator_devices\nSET \n  fcm_token = '{{ $json.fcm_token }}',\n  device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n  device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n  last_active_at = NOW()\nWHERE session_token = '{{ $json.session_token }}'\n  AND device_type = 'mobile'\nRETURNING id, operator_id;",
+          "query": "UPDATE elo_t_operator_devices\n  SET\n    fcm_token = '{{ $json.fcm_token }}',\n    device_id = {{ $json.device_id && $json.device_id !== 'null' ? \"'\" + $json.device_id + \"'\" : \"device_id\" }},\n    device_info = {{ $json.device_info_json ? \"'\" + $json.device_info_json + \"'::jsonb\" : \"device_info\" }},\n    last_active_at = NOW()\n  WHERE session_token = '{{ $json.session_token }}'\n    AND device_type = 'mobile'\n  RETURNING id, operator_id;",
           "options": {}
         },
         "id": "8ab2a60c-2017-4544-93cc-6a3d0bc70aec",

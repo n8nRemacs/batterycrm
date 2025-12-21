@@ -1,0 +1,228 @@
+{
+  "name": "ELO_API_Android_Dialogs",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "android/dialogs",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-dialogs",
+      "name": "Webhook - Get Dialogs",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 200],
+      "webhookId": "android-dialogs"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT od.operator_id, od.tenant_id, o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON od.operator_id = o.id\nWHERE od.session_token = '{{ $json.query.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "validate-session",
+      "name": "Postgres - Validate Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-576, 200],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "session-valid",
+              "leftValue": "={{ $json.operator_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-session-valid",
+      "name": "IF - Session Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-352, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  d.id,\n  c.name as client_name,\n  c.phone as client_phone,\n  LOWER(ch.name) as channel,\n  d.external_chat_id as chat_id,\n  COALESCE(m.content, '') as last_message_text,\n  EXTRACT(EPOCH FROM d.last_message_at)::bigint * 1000 as last_message_time,\n  false as last_message_is_voice,\n  0 as unread_count\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nJOIN elo_channels ch ON d.channel_id = ch.id\nLEFT JOIN LATERAL (\n  SELECT content FROM elo_t_messages \n  WHERE dialog_id = d.id \n  ORDER BY timestamp DESC LIMIT 1\n) m ON true\nWHERE d.assigned_operator_id = '{{ $('Postgres - Validate Session').item.json.operator_id }}'::uuid\n  AND d.tenant_id = '{{ $('Postgres - Validate Session').item.json.tenant_id }}'::uuid\nORDER BY d.last_message_at DESC NULLS LAST;",
+        "options": {}
+      },
+      "id": "get-dialogs",
+      "name": "Postgres - Get Dialogs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-128, 104],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const dialogs = $input.all().map(item => {\n  const d = item.json;\n  return {\n    id: d.id,\n    client_name: d.client_name || 'Unknown',\n    client_phone: d.client_phone || '',\n    channel: d.channel,\n    chat_id: d.chat_id || '',\n    last_message_text: d.last_message_text || '',\n    last_message_time: d.last_message_time || 0,\n    last_message_is_voice: d.last_message_is_voice || false,\n    unread_count: d.unread_count || 0\n  };\n});\n\nreturn { dialogs };"
+      },
+      "id": "format-response",
+      "name": "Format Dialogs Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [96, 104]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"dialogs\": {{ JSON.stringify($json.dialogs) }}\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-success",
+      "name": "Response - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [320, 104]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-unauthorized",
+      "name": "Response - Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-128, 296]
+    }
+  ],
+  "connections": {
+    "Webhook - Get Dialogs": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Validate Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Validate Session": {
+      "main": [
+        [
+          {
+            "node": "IF - Session Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Session Valid": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Get Dialogs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response - Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Get Dialogs": {
+      "main": [
+        [
+          {
+            "node": "Format Dialogs Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Dialogs Response": {
+      "main": [
+        [
+          {
+            "node": "Response - Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "ELO"
+    },
+    {
+      "name": "API"
+    }
+  ]
+}

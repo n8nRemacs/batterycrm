@@ -37,7 +37,7 @@ import com.eldoleado.app.channels.setup.MaxSetupActivity
 import com.eldoleado.app.channels.setup.ChannelDetailsActivity
 import com.eldoleado.app.channels.AlertSender
 import com.eldoleado.app.channels.ChannelMonitorService
-// TunnelService removed - all processing in cloud now
+import com.eldoleado.app.tunnel.TunnelService
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -156,7 +156,10 @@ class MainActivity : AppCompatActivity() {
         val appMode = sessionManager.getAppMode()
         Log.i("MainActivity", "App mode: $appMode")
 
-        // TunnelService removed - all processing in cloud now
+        // Start TunnelService if server mode enabled
+        if (sessionManager.isServerEnabled()) {
+            TunnelService.start(this)
+        }
 
         // Adjust UI based on mode
         when (appMode) {
@@ -346,6 +349,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                     logoutButton.isEnabled = true
                     if (response.isSuccessful && response.body()?.success == true) {
+                        TunnelService.stop(this@MainActivity)
                         sessionManager.clearSession()
                         Toast.makeText(
                             this@MainActivity,
@@ -354,6 +358,7 @@ class MainActivity : AppCompatActivity() {
                         ).show()
                         navigateToLogin()
                     } else if (response.code() == 401) {
+                        TunnelService.stop(this@MainActivity)
                         sessionManager.clearSession()
                         Toast.makeText(
                             this@MainActivity,

@@ -1,4 +1,32 @@
-# Start Session - План на 2025-12-21
+# Start Session - План на следующую сессию
+
+## Приоритет 0: Тестирование Redis Queue
+
+### Что проверить
+Отправка сообщений через новую Redis архитектуру:
+
+```bash
+curl -X POST "https://n8n.n8nsrv.ru/webhook/android/messages/send" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_token": "85bc5364-7765-4562-be9e-02d899bb575e",
+    "dialog_id": "cff56064-1fc3-4152-8e64-6e0266a87bf6",
+    "text": "Test Redis queue message"
+  }'
+```
+
+**Ожидаемый результат:**
+1. Ответ: `{"success": true, "queued": true, "queue": "queue:outgoing:whatsapp"}`
+2. Через 3 сек ELO_Out_WhatsApp берёт сообщение из очереди
+3. Сообщение отправляется в WhatsApp через Baileys
+4. Клиент получает сообщение
+
+**Мониторинг очередей:**
+```bash
+ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:whatsapp"
+```
+
+---
 
 ## Приоритет 1: Исправить нормализацию текста
 
@@ -29,19 +57,7 @@ Webhook `android-normalize/android/dialogs/:dialog_id/normalize` не работ
 
 ---
 
-## Приоритет 2: Исправить отправку сообщений
-
-Проверить webhook для отправки сообщений - вероятно та же проблема с path параметрами.
-
-Текущий endpoint в ApiService.kt:
-```kotlin
-@POST("android-messages/android/dialogs/{dialog_id}/messages")
-fun sendChatMessage(...)
-```
-
----
-
-## Приоритет 3: Автоназначение оператора для новых диалогов
+## Приоритет 2: Автоназначение оператора для новых диалогов
 
 ### ELO_Client_Resolve - изменения:
 
@@ -53,9 +69,7 @@ fun sendChatMessage(...)
    ...
    ```
 
-2. **Prepare Dialog Cache Key** - передавать `channel_account_id`
-
-3. **DB Create Dialog** - назначать оператора:
+2. **DB Create Dialog** - назначать оператора:
    ```sql
    INSERT INTO elo_t_dialogs (..., assigned_operator_id, channel_account_id)
    SELECT ...,
@@ -65,36 +79,36 @@ fun sendChatMessage(...)
        '...'
    ```
 
-4. **Save Incoming Message** - обновлять `last_message_at`:
-   ```sql
-   WITH msg AS (INSERT INTO elo_t_messages ... RETURNING id, dialog_id)
-   UPDATE elo_t_dialogs SET last_message_at = NOW() WHERE id = (SELECT dialog_id FROM msg)
-   ```
-
 ---
 
-## Документация
+## Архитектура Redis Queue (реализовано)
 
-Полные SQL запросы в: `NEW/N8N_SQL_FIXES.md`
-
----
-
-## Baileys Session (ЛОКАЛЬНО!)
-
-**ВАЖНО: Baileys работает ЛОКАЛЬНО на рабочем компе, НЕ на сервере!**
-
-```bash
-cd /c/Users/User/Documents/Eldoleado/NEW/MVP/MCP/mcp-whatsapp-baileys
-npm run build && npm start
+```
+Android App ──► ELO_API_Android_Send_Message
+                        │
+                        ├─► queue:outgoing:telegram  ──► ELO_Out_Telegram
+                        ├─► queue:outgoing:whatsapp  ──► ELO_Out_WhatsApp
+                        ├─► queue:outgoing:avito     ──► ELO_Out_Avito
+                        ├─► queue:outgoing:vk        ──► ELO_Out_VK
+                        └─► queue:outgoing:max       ──► ELO_Out_MAX
 ```
 
-**Port:** localhost:8766
-**Session ID:** test-local
-**Session path:** C:\Users\User\Documents\Eldoleado\NEW\MVP\MCP\mcp-whatsapp-baileys\sessions\test-local\
+Каждый ELO_Out_* воркфлоу:
+- Schedule Trigger (каждые 3 сек)
+- Redis LPOP из своей очереди
+- IF Has Message → Parse → Get Token → Send → Update Dialog
+
+---
+
+## Baileys Session (Finnish Server)
+
+**Server:** 217.145.79.27:8766
+**Session ID:** eldoleado_main
 **Phone:** 79171708077 (Ремакс)
+**Status:** connected (авторизован)
 **Webhook:** https://n8n.n8nsrv.ru/webhook/whatsapp-incoming
 
-**ВАЖНО:** В БД `elo_t_channel_accounts.account_id` должен совпадать с Session ID!
+**ВАЖНО:** В БД `elo_t_channel_accounts.credentials->>'session_id'` = `eldoleado_main`
 
 ---
 
@@ -103,32 +117,33 @@ npm run build && npm start
 - **Оператор:** Test Admin (22222222-2222-2222-2222-222222222222)
 - **Session:** 85bc5364-7765-4562-be9e-02d899bb575e
 - **Диалог:** cff56064-1fc3-4152-8e64-6e0266a87bf6
-- **Клиент:** Дмитрий (+79997253777, WhatsApp)
+- **Клиент:** Дмитрий (+79997253777, WhatsApp, channel_id=2)
+
+---
+
+## Документация
+
+- `NEW/N8N_REDIS_IMPORT.md` — инструкция по импорту Redis воркфлоу
+- `NEW/IMPLEMENTATION_PLAN.md` — план реализации
+- `NEW/N8N_SQL_FIXES.md` — SQL фиксы для n8n
 
 ---
 
 ## Команды для тестирования
 
 ```bash
-# === BAILEYS (ЛОКАЛЬНО!) ===
-cd /c/Users/User/Documents/Eldoleado/NEW/MVP/MCP/mcp-whatsapp-baileys
-npm run build && npm start   # Запустить Baileys
+# === BAILEYS (Finnish Server) ===
+curl http://217.145.79.27:8766/sessions
 
-# Check Baileys status
-curl http://localhost:8766/sessions
-
-# === n8n webhooks ===
-# Тест messages webhook
-curl "https://n8n.n8nsrv.ru/webhook/android/messages?dialog_id=cff56064-1fc3-4152-8e64-6e0266a87bf6&session_token=85bc5364-7765-4562-be9e-02d899bb575e"
-
-# Тест normalize webhook (после фикса)
-curl -X POST "https://n8n.n8nsrv.ru/webhook/android/normalize" \
+# === Отправка сообщения (Redis queue) ===
+curl -X POST "https://n8n.n8nsrv.ru/webhook/android/messages/send" \
   -H "Content-Type: application/json" \
-  -d '{"session_token":"85bc5364-7765-4562-be9e-02d899bb575e","dialog_id":"cff56064-1fc3-4152-8e64-6e0266a87bf6","text":"тест"}'
+  -d '{"session_token":"85bc5364-7765-4562-be9e-02d899bb575e","dialog_id":"cff56064-1fc3-4152-8e64-6e0266a87bf6","text":"Test"}'
 
-# === n8n / Redis (сервер 185.221.214.83) ===
-ssh root@185.221.214.83 "docker exec n8n-redis redis-cli LRANGE queue:incoming 0 5"
+# === Мониторинг Redis очередей ===
+ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:whatsapp"
+ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:telegram"
 
 # === Database ===
-ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * FROM elo_t_messages LIMIT 5;'"
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT id, content, direction_id FROM elo_t_messages ORDER BY timestamp DESC LIMIT 5;'"
 ```

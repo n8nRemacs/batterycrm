@@ -1,34 +1,29 @@
 {
-  "updatedAt": "2025-12-10T10:02:09.000Z",
-  "createdAt": "2025-12-10T10:01:22.747Z",
-  "id": "GrChisyOV9ajgBDX",
   "name": "ELO_Out_Telegram",
-  "description": null,
   "active": false,
-  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "13860ca8-901f-4f80-bbdb-925cf614f889",
+      "id": "4211abe2-d2b2-43b8-9806-4a6babb831cd",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
       "position": [
-        -864,
-        -96
+        -816,
+        -112
       ]
     },
     {
       "parameters": {
         "jsCode": "// Подготовка данных для отправки через MCP Telegram\nconst input = $input.first().json;\nconst outMessage = input.out_message || {};\n\n// Берём данные из корня или из out_message\nlet chatId = input.external_chat_id || outMessage.external_chat_id || input.chat_id || outMessage.chat_id || '';\nif (chatId && chatId.startsWith('tg_')) {\n  chatId = chatId.substring(3);\n}\n\n// text может быть в разных местах\nconst text = input.message_text || outMessage.message_text || input.text || outMessage.text || input.response_text || '';\n\n// tenant_id для запроса bot_token\nconst tenantId = input.tenant_id || outMessage.tenant_id || '';\n\nreturn {\n  chat_id: chatId,\n  text: text,\n  parse_mode: 'Markdown',\n  tenant_id: tenantId,\n  appeal_id: input.appeal?.id || outMessage.appeal_id || input.appeal_id,\n  client_id: input.client?.id || outMessage.client_id || input.client_id,\n  action_source: input.action_source || outMessage.action_source || 'response'\n};"
       },
-      "id": "b76e89c7-7b39-4536-a163-1b62ea72143c",
+      "id": "14e83200-cea1-4390-b6d9-da0b0d245c05",
       "name": "Prepare Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -640,
-        -96
+        -592,
+        -112
       ]
     },
     {
@@ -37,13 +32,13 @@
         "query": "SELECT value->>'token' as bot_token\nFROM tenant_configs\nWHERE tenant_id = '{{ $json.tenant_id }}'::uuid\n  AND key = 'telegram_bot_token'\nLIMIT 1;",
         "options": {}
       },
-      "id": "c5f5adf4-9e56-4175-adf6-666bb15a3213",
+      "id": "5f1960df-ae7c-4f8f-b7d0-80ab9fdfa287",
       "name": "Get Bot Token",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [
-        -416,
-        -96
+        -368,
+        -112
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -57,13 +52,13 @@
       "parameters": {
         "jsCode": "const prepared = $('Prepare Message').first().json;\nconst tokenResult = $input.first().json;\n\n// Получаем bot_token из результата запроса\nconst botToken = tokenResult?.bot_token || '';\n\nif (!botToken) {\n  console.error('Bot token not found for tenant:', prepared.tenant_id);\n}\n\nreturn {\n  ...prepared,\n  bot_token: botToken\n};"
       },
-      "id": "8121fb91-7976-4c32-91d8-ab24899410d0",
+      "id": "df62cd19-b6b5-43fe-a652-a4e4a763b44d",
       "name": "Merge Bot Token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -192,
-        -96
+        -144,
+        -112
       ]
     },
     {
@@ -88,26 +83,26 @@
         "jsonBody": "={\n  \"token\": \"{{ $json.bot_token }}\",\n  \"chat_id\": \"{{ $json.chat_id }}\",\n  \"text\": {{ JSON.stringify($json.text) }},\n  \"parse_mode\": \"{{ $json.parse_mode }}\"\n}",
         "options": {}
       },
-      "id": "1d290f22-8529-4791-bf10-a9907d347b13",
+      "id": "8f4177f5-b3d2-4bb5-8e2d-af0eda0977c4",
       "name": "Send via MCP Telegram",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        32,
-        -96
+        80,
+        -112
       ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nconst preparedData = $('Merge Bot Token').first().json;\n\nif (!response.success) {\n  console.error('Telegram send failed:', response);\n}\n\n// Определяем тип touchpoint\nconst actionSource = preparedData.action_source || '';\nconst touchpointDirection = (actionSource === 'promo' || actionSource === 'greeting' || actionSource === 'broadcast') ? 'promo' : 'outbound';\n\nreturn {\n  ...preparedData,\n  telegram_response: response,\n  message_id: response.message_id?.toString() || Date.now().toString(),\n  sent_at: new Date().toISOString(),\n  touchpoint_direction: touchpointDirection\n};"
       },
-      "id": "46c38f6c-4998-4e3d-88b5-5bf8253646f6",
+      "id": "df2e9d74-4bd6-44ab-be37-06d8962a84c2",
       "name": "Process Telegram Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        -96
+        304,
+        -112
       ]
     },
     {
@@ -116,13 +111,13 @@
         "query": "INSERT INTO messages_history (\n  tenant_id,\n  appeal_id,\n  message_type,\n  message_text,\n  channel, channel_id,\n  external_message_id,\n  external_chat_id\n)\nSELECT\n  '{{ $json.tenant_id }}'::uuid,\n  '{{ $json.appeal_id }}'::uuid,\n  'agent',\n  {{ $json.text ? \"'\" + $json.text.replace(/'/g, \"''\") + \"'\" : \"NULL\" }},\n  'telegram',\n  (SELECT id FROM channels WHERE code = 'telegram' LIMIT 1),\n  '{{ $json.message_id }}',\n  'tg_{{ $json.chat_id }}'\nRETURNING *;",
         "options": {}
       },
-      "id": "b78fb9bf-b489-4a80-a4ec-ad2317c15d7b",
+      "id": "9c9201e1-d985-43df-9eb5-716d75cf84fa",
       "name": "Save Message History",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.4,
       "position": [
-        480,
-        -96
+        528,
+        -112
       ],
       "credentials": {
         "postgres": {
@@ -142,13 +137,13 @@
           "timeout": 5000
         }
       },
-      "id": "88d60434-6d92-4978-a0e5-dae945472525",
+      "id": "e7d3ab39-affc-4d05-a9f3-52d0717d7247",
       "name": "Register Touchpoint",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        704,
-        -96
+        752,
+        -112
       ]
     }
   ],
@@ -234,71 +229,18 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
-  "meta": null,
-  "pinData": {},
-  "versionId": "d41b1f61-3d1a-41d4-9d2a-551c55aa7428",
-  "activeVersionId": null,
-  "versionCounter": 3,
-  "triggerCount": 0,
-  "shared": [
-    {
-      "updatedAt": "2025-12-10T10:01:22.752Z",
-      "createdAt": "2025-12-10T10:01:22.752Z",
-      "role": "workflow:owner",
-      "workflowId": "GrChisyOV9ajgBDX",
-      "projectId": "x7frUSUEowDAk8Dt",
-      "project": {
-        "updatedAt": "2025-08-25T18:57:22.218Z",
-        "createdAt": "2025-08-25T08:16:18.805Z",
-        "id": "x7frUSUEowDAk8Dt",
-        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "projectRelations": [
-          {
-            "updatedAt": "2025-08-25T08:16:18.805Z",
-            "createdAt": "2025-08-25T08:16:18.805Z",
-            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
-            "projectId": "x7frUSUEowDAk8Dt",
-            "user": {
-              "updatedAt": "2025-12-20T04:36:02.000Z",
-              "createdAt": "2025-08-25T08:16:17.784Z",
-              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
-              "email": "dk@n8nsrv.ru",
-              "firstName": "Dmitriy",
-              "lastName": "Remacs",
-              "personalizationAnswers": null,
-              "settings": {
-                "userActivated": true,
-                "easyAIWorkflowOnboarded": true,
-                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
-                "userActivatedAt": 1756286438389
-              },
-              "disabled": false,
-              "mfaEnabled": false,
-              "lastActiveAt": "2025-12-19",
-              "isPending": false
-            }
-          }
-        ]
-      }
-    }
-  ],
   "tags": [
+    {
+      "updatedAt": "2025-11-23T03:59:12.594Z",
+      "createdAt": "2025-11-23T03:59:12.594Z",
+      "name": "Eldoleado"
+    },
     {
       "updatedAt": "2025-11-23T04:03:34.766Z",
       "createdAt": "2025-11-23T04:03:34.766Z",
-      "id": "IbDkJphbr4EygdRZ",
       "name": "Out"
-    },
-    {
-      "updatedAt": "2025-12-09T18:50:08.518Z",
-      "createdAt": "2025-12-09T18:50:08.518Z",
-      "id": "tMSCjbvPU3xrNUqz",
-      "name": "ELO"
     }
   ],
-  "activeVersion": null
+  "updatedAt": "2025-12-08T11:26:00.000Z",
+  "createdAt": "2025-10-14T07:03:45.869Z"
 }

@@ -1,0 +1,284 @@
+{
+  "name": "ELO_API_Android_Send_Message",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "android/messages/send",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-send-message",
+      "name": "Webhook - Send Message",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 64],
+      "webhookId": "android-send-message"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT od.operator_id, od.tenant_id, o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON od.operator_id = o.id\nWHERE od.session_token = '{{ $json.body.session_token }}'\n  AND od.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "validate-session",
+      "name": "Validate Session",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-576, 64],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "session-valid",
+              "leftValue": "={{ $json.operator_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-session-valid",
+      "name": "IF Session Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-352, 64]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  d.id as dialog_id,\n  d.tenant_id,\n  d.client_id,\n  d.channel_id,\n  d.external_chat_id,\n  c.name as client_name,\n  c.phone as client_phone\nFROM elo_t_dialogs d\nJOIN elo_t_clients c ON d.client_id = c.id\nWHERE d.id = '{{ $('Webhook - Send Message').item.json.body.dialog_id }}'::uuid\n  AND d.tenant_id = '{{ $('Validate Session').item.json.tenant_id }}'::uuid\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "get-dialog-info",
+      "name": "Get Dialog Info",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [-128, -48],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO elo_t_messages (\n  tenant_id,\n  dialog_id,\n  client_id,\n  direction_id,\n  message_type_id,\n  actor_type,\n  actor_id,\n  content,\n  timestamp\n) VALUES (\n  '{{ $('Get Dialog Info').item.json.tenant_id }}'::uuid,\n  '{{ $('Get Dialog Info').item.json.dialog_id }}'::uuid,\n  '{{ $('Get Dialog Info').item.json.client_id }}'::uuid,\n  2,\n  1,\n  'operator',\n  '{{ $('Validate Session').item.json.operator_id }}'::uuid,\n  '{{ $('Webhook - Send Message').item.json.body.text.replace(/'/g, \"''\") }}',\n  NOW()\n)\nRETURNING id, content as text, 'out' as direction, 'operator' as sender_type,\n  '{{ $('Validate Session').item.json.operator_name }}' as sender_name,\n  EXTRACT(EPOCH FROM timestamp)::bigint * 1000 as timestamp;",
+        "options": {}
+      },
+      "id": "insert-message",
+      "name": "Insert Message",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [96, -48],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const dialogInfo = $('Get Dialog Info').first().json;\nconst message = $('Insert Message').first().json;\nconst body = $('Webhook - Send Message').first().json.body;\nconst session = $('Validate Session').first().json;\n\n// Prepare outgoing message for Redis queue\nconst outgoingMessage = {\n  channel_id: dialogInfo.channel_id,\n  tenant_id: dialogInfo.tenant_id,\n  dialog_id: dialogInfo.dialog_id,\n  client_id: dialogInfo.client_id,\n  external_chat_id: dialogInfo.external_chat_id,\n  message_text: body.text,\n  message_id: message.id,\n  actor_type: 'operator',\n  actor_id: session.operator_id,\n  timestamp: new Date().toISOString()\n};\n\nreturn {\n  outgoing_message: outgoingMessage,\n  message: {\n    id: message.id,\n    text: message.text,\n    direction: message.direction,\n    sender_type: message.sender_type,\n    sender_name: message.sender_name,\n    timestamp: message.timestamp\n  }\n};"
+      },
+      "id": "prepare-outgoing",
+      "name": "Prepare Outgoing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [320, -48]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "queue:outgoing",
+        "messageData": "={{ JSON.stringify($json.outgoing_message) }}",
+        "tail": true,
+        "options": {}
+      },
+      "id": "redis-push",
+      "name": "Redis Push Outgoing",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [544, -48],
+      "credentials": {
+        "redis": {
+          "id": "redis-n8n",
+          "name": "Redis n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"message\": {{ JSON.stringify($('Prepare Outgoing').item.json.message) }},\n  \"queued\": true\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-success",
+      "name": "Response Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [768, -48]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"invalid_session\"\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "response-unauthorized",
+      "name": "Response Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-128, 160]
+    }
+  ],
+  "connections": {
+    "Webhook - Send Message": {
+      "main": [
+        [
+          {
+            "node": "Validate Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Session": {
+      "main": [
+        [
+          {
+            "node": "IF Session Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Session Valid": {
+      "main": [
+        [
+          {
+            "node": "Get Dialog Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Response Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dialog Info": {
+      "main": [
+        [
+          {
+            "node": "Insert Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Outgoing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Outgoing": {
+      "main": [
+        [
+          {
+            "node": "Redis Push Outgoing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Push Outgoing": {
+      "main": [
+        [
+          {
+            "node": "Response Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "tags": []
+}

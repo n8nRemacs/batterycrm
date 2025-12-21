@@ -1,0 +1,332 @@
+{
+  "name": "ELO_Out_VK",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 3
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-800, 0]
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "queue:outgoing:vk",
+        "tail": false,
+        "options": {
+          "propertyName": "message_json"
+        }
+      },
+      "id": "redis-pop",
+      "name": "Redis Pop Message",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-576, 0],
+      "credentials": {
+        "redis": {
+          "id": "redis-n8n",
+          "name": "Redis n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-message",
+              "leftValue": "={{ $json.message_json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-message",
+      "name": "IF Has Message",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-352, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageJson = $json.message_json;\nconst message = JSON.parse(messageJson);\n\nreturn {\n  out_message: message\n};"
+      },
+      "id": "parse-message",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-128, -96]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  ca.credentials->>'access_token' as access_token,\n  ca.account_id,\n  ca.account_name\nFROM elo_t_channel_accounts ca\nWHERE ca.tenant_id = '{{ $json.out_message.tenant_id }}'::uuid\n  AND ca.channel_id = 4\n  AND ca.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "get-token",
+      "name": "Get VK Token",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [96, -96],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-token",
+              "leftValue": "={{ $json.access_token }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-token-exists",
+      "name": "IF Token Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [320, -96]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vk.com/method/messages.send",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            },
+            {
+              "name": "peer_id",
+              "value": "={{ $('Parse Message').item.json.out_message.external_chat_id }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Parse Message').item.json.out_message.message_text }}"
+            },
+            {
+              "name": "random_id",
+              "value": "={{ Math.floor(Math.random() * 1000000000) }}"
+            },
+            {
+              "name": "v",
+              "value": "5.131"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-vk",
+      "name": "Send VK Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [544, -192]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Parse Message').first().json;\nconst response = $input.first().json;\n\nconst success = !response.error;\nconst messageId = response.response?.toString() || Date.now().toString();\n\nreturn {\n  ...parsed,\n  vk_response: response,\n  message_id: messageId,\n  sent_at: new Date().toISOString(),\n  send_success: success\n};"
+      },
+      "id": "process-response",
+      "name": "Process VK Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [768, -192]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE elo_t_dialogs SET\n  last_message_at = NOW(),\n  last_operator_message_at = NOW(),\n  updated_at = NOW()\nWHERE id = '{{ $json.out_message.dialog_id }}'::uuid;",
+        "options": {}
+      },
+      "id": "update-dialog",
+      "name": "Update Dialog Timestamp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [992, -192],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// No token found - log error\nconst parsed = $('Parse Message').first().json;\n\nconsole.error('No VK access token found for tenant:', parsed.out_message?.tenant_id);\n\nreturn {\n  success: false,\n  error: 'No VK access token found for tenant',\n  tenant_id: parsed.out_message?.tenant_id,\n  out_message: parsed.out_message\n};"
+      },
+      "id": "no-token-error",
+      "name": "No Token Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [544, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No message in queue - just return\nreturn { empty: true };"
+      },
+      "id": "no-message",
+      "name": "No Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-128, 96]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Redis Pop Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Pop Message": {
+      "main": [
+        [
+          {
+            "node": "IF Has Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Message": {
+      "main": [
+        [
+          {
+            "node": "Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Get VK Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get VK Token": {
+      "main": [
+        [
+          {
+            "node": "IF Token Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Token Exists": {
+      "main": [
+        [
+          {
+            "node": "Send VK Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Token Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send VK Message": {
+      "main": [
+        [
+          {
+            "node": "Process VK Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process VK Response": {
+      "main": [
+        [
+          {
+            "node": "Update Dialog Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "tags": []
+}
