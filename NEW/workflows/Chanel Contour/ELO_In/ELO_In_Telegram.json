@@ -1,4 +1,11 @@
 {
+  "updatedAt": "2025-12-17T08:34:29.035Z",
+  "createdAt": "2025-12-10T10:00:01.408Z",
+  "id": "sGJxAIwGzMrfCjeA",
+  "name": "ELO_In_Telegram",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -138,7 +145,7 @@
           "value": "rRO6sxLqiCdgvLZz",
           "mode": "list",
           "cachedResultUrl": "/workflow/rRO6sxLqiCdgvLZz",
-          "cachedResultName": "BAT_Tenant_Resolver"
+          "cachedResultName": "ELO_Core_Tenant_Resolver"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -340,8 +347,74 @@
       ]
     }
   },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
   "pinData": {},
-  "meta": {
-    "instanceId": "8ae77ca901b15c37bb42b26ea9b5a21b78217dd557a563108d875a64964c49bb"
-  }
+  "versionId": "903c41a2-9c7d-4a22-9859-45708759fe2f",
+  "activeVersionId": null,
+  "versionCounter": 12,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T10:00:01.419Z",
+      "createdAt": "2025-12-10T10:00:01.419Z",
+      "role": "workflow:owner",
+      "workflowId": "sGJxAIwGzMrfCjeA",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T04:36:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-19",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T04:03:40.721Z",
+      "createdAt": "2025-11-23T04:03:40.721Z",
+      "id": "nLdF41tEx70V7m3A",
+      "name": "In"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
 }

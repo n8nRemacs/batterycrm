@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2025-12-17T08:57:58.742Z",
+  "createdAt": "2025-12-15T17:25:08.704Z",
+  "id": "i9aZ3bd5btVjzZs8",
   "name": "ELO_Core_AI_Derive",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -8,21 +14,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook",
+      "id": "9e6f39a4-92e2-4ac9-99bb-1a904e2f477e",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [260, 300]
+      "position": [
+        -832,
+        16
+      ],
+      "webhookId": "ef57356f-aa75-4747-8561-b3f062e40251"
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst context = input.context;\nconst linesToDerive = input.lines_to_derive || [];\n\n// Get lines that need derivation\nconst lines = context.lines.filter(line => {\n  if (linesToDerive.length > 0) {\n    return linesToDerive.includes(line.id);\n  }\n  return line.slots?.symptom && !line.slots?.diagnosis;\n});\n\nreturn {\n  context: context,\n  lines: lines,\n  has_lines_to_derive: lines.length > 0\n};"
       },
-      "id": "filter_lines",
+      "id": "65082b91-31b3-4a41-8faf-b77295ae6691",
       "name": "Filter Lines",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300]
+      "position": [
+        -624,
+        16
+      ]
     },
     {
       "parameters": {
@@ -47,32 +60,40 @@
         },
         "options": {}
       },
-      "id": "has_lines",
+      "id": "b378d6d2-7e22-4e94-a5d8-e9ec0fb2e251",
       "name": "Has Lines?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [700, 300]
+      "position": [
+        -400,
+        16
+      ]
     },
     {
       "parameters": {
-        "batchSize": 1,
         "options": {}
       },
-      "id": "split_lines",
+      "id": "0369acd0-0faf-4ffa-8639-086440d36c1a",
       "name": "Split Lines",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [920, 200]
+      "position": [
+        -112,
+        -336
+      ]
     },
     {
       "parameters": {
         "jsCode": "const context = $('Filter Lines').first().json.context;\nconst lines = $('Filter Lines').first().json.lines;\nconst currentIndex = $itemIndex;\nconst line = lines[currentIndex];\n\nconst symptomText = line?.slots?.symptom?.text || '';\nconst deviceBrand = line?.slots?.device?.brand || '';\nconst deviceModel = line?.slots?.device?.model || '';\nconst tenantId = context.tenant_id;\nconst verticalId = context.vertical_id || 1;\n\nreturn {\n  line_id: line.id,\n  symptom_text: symptomText.toLowerCase(),\n  device_brand: deviceBrand,\n  device_model: deviceModel,\n  tenant_id: tenantId,\n  vertical_id: verticalId\n};"
       },
-      "id": "prepare_query",
+      "id": "94e81fc5-4aa9-4126-a7c6-199a766e3b92",
       "name": "Prepare Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 200]
+      "position": [
+        240,
+        -352
+      ]
     },
     {
       "parameters": {
@@ -82,15 +103,18 @@
           "queryReplacement": "={{ [$json.symptom_text, $json.tenant_id, $json.device_brand, $json.device_model] }}"
         }
       },
-      "id": "postgres_derive",
+      "id": "3865c9bb-7352-4d1f-b484-6a74065cec58",
       "name": "PostgreSQL Derive",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1360, 200],
+      "position": [
+        560,
+        -352
+      ],
       "credentials": {
         "postgres": {
-          "id": "postgres_main",
-          "name": "PostgreSQL Main"
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
         }
       }
     },
@@ -98,31 +122,40 @@
       "parameters": {
         "jsCode": "const queryResult = $input.first().json;\nconst prepareData = $('Prepare Query').first().json;\n\nconst derivation = {\n  line_id: prepareData.line_id,\n  derived: {}\n};\n\nif (queryResult.symptom_type_uuid) {\n  derivation.derived.symptom_type = {\n    uuid: queryResult.symptom_type_uuid,\n    code: queryResult.symptom_code,\n    name: queryResult.symptom_name\n  };\n}\n\nif (queryResult.diagnosis_type_uuid) {\n  derivation.derived.diagnosis = {\n    uuid: queryResult.diagnosis_type_uuid,\n    code: queryResult.diagnosis_code,\n    text: queryResult.diagnosis_name,\n    confidence: parseFloat(queryResult.confidence) || 0.8\n  };\n}\n\nif (queryResult.repair_action_uuid) {\n  derivation.derived.repair_type = {\n    uuid: queryResult.repair_action_uuid,\n    code: queryResult.repair_code,\n    text: queryResult.repair_name\n  };\n}\n\nif (queryResult.price_min) {\n  derivation.derived.price = {\n    amount: queryResult.price_min === queryResult.price_max \n      ? parseFloat(queryResult.price_min)\n      : (parseFloat(queryResult.price_min) + parseFloat(queryResult.price_max)) / 2,\n    min: parseFloat(queryResult.price_min),\n    max: parseFloat(queryResult.price_max),\n    currency: queryResult.currency || 'RUB',\n    is_estimate: queryResult.is_estimate || false\n  };\n}\n\nreturn derivation;"
       },
-      "id": "format_derivation",
+      "id": "df4c689b-8ca3-460d-9c8a-0e11eae63f09",
       "name": "Format Derivation",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1580, 200]
+      "position": [
+        896,
+        -352
+      ]
     },
     {
       "parameters": {
         "jsCode": "const items = $input.all();\nconst context = $('Filter Lines').first().json.context;\n\nconst derivations = items.map(item => item.json);\n\nreturn {\n  derivations: derivations,\n  context: context\n};"
       },
-      "id": "aggregate",
+      "id": "e6ac961d-f13d-4e3c-a421-6cd012478d13",
       "name": "Aggregate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1800, 200]
+      "position": [
+        128,
+        -80
+      ]
     },
     {
       "parameters": {
         "jsCode": "return {\n  derivations: [],\n  context: $('Filter Lines').first().json.context\n};"
       },
-      "id": "empty_derivations",
+      "id": "4c4dc571-856a-450d-b926-a1f3c35786a3",
       "name": "Empty Derivations",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [920, 400]
+      "position": [
+        -160,
+        32
+      ]
     },
     {
       "parameters": {
@@ -130,11 +163,14 @@
         "combineBy": "combineAll",
         "options": {}
       },
-      "id": "merge",
+      "id": "7441cf24-e71d-451d-8249-5ff099f5db94",
       "name": "Merge",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [2020, 300]
+      "position": [
+        384,
+        16
+      ]
     },
     {
       "parameters": {
@@ -142,73 +178,212 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "respond",
+      "id": "60855ba6-eb31-4aa5-ac31-a55085584c5e",
       "name": "Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [2240, 300]
+      "position": [
+        624,
+        16
+      ]
     }
   ],
   "connections": {
     "Webhook": {
       "main": [
-        [{"node": "Filter Lines", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Filter Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Filter Lines": {
       "main": [
-        [{"node": "Has Lines?", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Has Lines?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Has Lines?": {
       "main": [
-        [{"node": "Split Lines", "type": "main", "index": 0}],
-        [{"node": "Empty Derivations", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Split Lines",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Empty Derivations",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Split Lines": {
       "main": [
-        [{"node": "Prepare Query", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Prepare Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Prepare Query": {
       "main": [
-        [{"node": "PostgreSQL Derive", "type": "main", "index": 0}]
+        [
+          {
+            "node": "PostgreSQL Derive",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "PostgreSQL Derive": {
       "main": [
-        [{"node": "Format Derivation", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Format Derivation",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Format Derivation": {
       "main": [
-        [{"node": "Split Lines", "type": "main", "index": 0}]
-      ]
-    },
-    "Split Lines": {
-      "main": [
-        null,
-        [{"node": "Aggregate", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Split Lines",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Aggregate": {
       "main": [
-        [{"node": "Merge", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Empty Derivations": {
       "main": [
-        [{"node": "Merge", "type": "main", "index": 1}]
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
       ]
     },
     "Merge": {
       "main": [
-        [{"node": "Respond", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
   "settings": {
     "executionOrder": "v1"
-  }
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "512be403-bec4-4616-aca4-a4b601b66eff",
+  "activeVersionId": null,
+  "versionCounter": 5,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-15T17:25:08.710Z",
+      "createdAt": "2025-12-15T17:25:08.710Z",
+      "role": "workflow:owner",
+      "workflowId": "i9aZ3bd5btVjzZs8",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T20:00:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-20",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-12T08:39:41.170Z",
+      "createdAt": "2025-12-12T08:39:41.170Z",
+      "id": "8dihLRJvdhkW2kZ1",
+      "name": "AI"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
 }

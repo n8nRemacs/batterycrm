@@ -1,29 +1,40 @@
 {
+  "updatedAt": "2025-12-15T17:27:52.659Z",
+  "createdAt": "2025-12-15T17:27:45.757Z",
+  "id": "b9tW1Lfnf4kncdbA",
   "name": "ELO_Core_Triggers_Checker",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "method": "POST",
         "path": "elo-core-triggers-checker",
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-trigger",
+      "id": "106cb09b-07bd-45ac-a26e-4e5c66fb1584",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [250, 300],
+      "position": [
+        -400,
+        -112
+      ],
       "webhookId": "elo-core-triggers-checker"
     },
     {
       "parameters": {
         "jsCode": "const input = $input.first().json;\nconst context = input.context;\nconst stage = input.stage || context.current_stage;\n\nreturn {\n  context: context,\n  stage: stage,\n  vertical_id: context.vertical_id || 1,\n  executed_trigger_ids: context.executed_triggers || []\n};"
       },
-      "id": "prepare-query",
+      "id": "5f82d964-a963-4449-8529-8fc0b2d006ab",
       "name": "Prepare Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [470, 300]
+      "position": [
+        -176,
+        -112
+      ]
     },
     {
       "parameters": {
@@ -33,15 +44,18 @@
           "queryReplacement": "={{ [$json.stage, $json.vertical_id] }}"
         }
       },
-      "id": "load-triggers-sql",
+      "id": "aa43becd-8730-46f6-90e6-c44b3c813d5c",
       "name": "PostgreSQL Load Triggers",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [690, 300],
+      "position": [
+        48,
+        -112
+      ],
       "credentials": {
         "postgres": {
-          "id": "postgres_main",
-          "name": "PostgreSQL Main"
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
         }
       }
     },
@@ -49,11 +63,14 @@
       "parameters": {
         "jsCode": "const prepareData = $('Prepare Query').first().json;\nconst context = prepareData.context;\nconst executedIds = prepareData.executed_trigger_ids;\n\n// Get triggers from SQL\nconst triggers = $input.all().map(item => {\n  const t = item.json;\n  return {\n    trigger_id: t.trigger_id,\n    trigger_name: t.trigger_name,\n    stage: t.stage,\n    conditions: t.conditions,\n    once_per_dialog: t.once_per_dialog,\n    action: {\n      type: t.action_type,\n      ...t.action\n    }\n  };\n});\n\nconst triggersToFire = [];\nconst triggersSkipped = [];\n\n// Build flat context for condition checking\nfunction buildFlatContext(ctx) {\n  const flat = {\n    stage: ctx.current_stage,\n    vertical_id: ctx.vertical_id,\n    tenant_id: ctx.tenant_id,\n    client_name: ctx.client?.name,\n    client_phone: ctx.client?.phone\n  };\n  \n  // Add line data (focus line)\n  const focusLine = ctx.lines?.find(l => l.id === ctx.focus_line_id) || ctx.lines?.[0];\n  if (focusLine?.slots) {\n    flat['device.brand'] = focusLine.slots.device?.brand;\n    flat['device.model'] = focusLine.slots.device?.model;\n    flat['symptom.text'] = focusLine.slots.symptom?.text;\n    flat['diagnosis.code'] = focusLine.slots.diagnosis?.code;\n    flat['repair_type.code'] = focusLine.slots.repair_type?.code;\n    flat['price.amount'] = focusLine.slots.price?.amount;\n  }\n  \n  return flat;\n}\n\n// Check if conditions match\nfunction matchConditions(conditions, flatContext) {\n  if (!conditions || Object.keys(conditions).length === 0) return true;\n  \n  for (const [key, expectedValue] of Object.entries(conditions)) {\n    const actualValue = flatContext[key];\n    \n    // Handle different comparison types\n    if (expectedValue === null) {\n      if (actualValue !== null && actualValue !== undefined) return false;\n    } else if (typeof expectedValue === 'object' && expectedValue !== null) {\n      // Advanced conditions ($gt, $lt, $in)\n      if (expectedValue.$gt !== undefined && !(actualValue > expectedValue.$gt)) return false;\n      if (expectedValue.$gte !== undefined && !(actualValue >= expectedValue.$gte)) return false;\n      if (expectedValue.$lt !== undefined && !(actualValue < expectedValue.$lt)) return false;\n      if (expectedValue.$lte !== undefined && !(actualValue <= expectedValue.$lte)) return false;\n      if (expectedValue.$in && !expectedValue.$in.includes(actualValue)) return false;\n      if (expectedValue.$ne !== undefined && actualValue === expectedValue.$ne) return false;\n    } else {\n      // Simple equality (case-insensitive for strings)\n      const actual = typeof actualValue === 'string' ? actualValue.toLowerCase() : actualValue;\n      const expected = typeof expectedValue === 'string' ? expectedValue.toLowerCase() : expectedValue;\n      if (actual !== expected) return false;\n    }\n  }\n  \n  return true;\n}\n\nconst flatContext = buildFlatContext(context);\n\nfor (const trigger of triggers) {\n  // Check if already executed\n  if (trigger.once_per_dialog && executedIds.includes(trigger.trigger_id)) {\n    triggersSkipped.push({\n      trigger_id: trigger.trigger_id,\n      reason: 'already_executed'\n    });\n    continue;\n  }\n  \n  // Check conditions\n  if (matchConditions(trigger.conditions, flatContext)) {\n    triggersToFire.push({\n      trigger_id: trigger.trigger_id,\n      trigger_name: trigger.trigger_name,\n      action: trigger.action,\n      once_per_dialog: trigger.once_per_dialog,\n      executed: true\n    });\n  }\n}\n\n// Mark executed triggers in context\nconst updatedContext = { ...context };\nupdatedContext.executed_triggers = [\n  ...(context.executed_triggers || []),\n  ...triggersToFire.filter(t => t.once_per_dialog).map(t => t.trigger_id)\n];\n\nreturn {\n  triggers_fired: triggersToFire,\n  triggers_skipped: triggersSkipped,\n  context: updatedContext\n};"
       },
-      "id": "evaluate-triggers",
+      "id": "6954cd45-45ee-4b18-a7bb-c6ce888bd3f8",
       "name": "Evaluate Triggers",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [910, 300]
+      "position": [
+        272,
+        -112
+      ]
     },
     {
       "parameters": {
@@ -61,11 +78,14 @@
         "responseBody": "={{ $json }}",
         "options": {}
       },
-      "id": "respond-webhook",
+      "id": "c935d62d-6c7a-4638-855b-04497bc72a9c",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1130, 300]
+      "position": [
+        480,
+        -112
+      ]
     }
   ],
   "connections": {
@@ -114,17 +134,76 @@
       ]
     }
   },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "",
+  "staticData": null,
   "meta": {
-    "instanceId": ""
+    "templateCredsSetupCompleted": true
   },
+  "pinData": {},
+  "versionId": "f7117522-174d-4fec-9c5f-ea87eebcc27d",
+  "activeVersionId": null,
+  "versionCounter": 3,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-15T17:27:45.762Z",
+      "createdAt": "2025-12-15T17:27:45.762Z",
+      "role": "workflow:owner",
+      "workflowId": "b9tW1Lfnf4kncdbA",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-20T20:00:02.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-20",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
   "tags": [
     {
-      "name": "ELO_Core_AI"
+      "updatedAt": "2025-12-12T08:39:41.170Z",
+      "createdAt": "2025-12-12T08:39:41.170Z",
+      "id": "8dihLRJvdhkW2kZ1",
+      "name": "AI"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
     }
-  ]
+  ],
+  "activeVersion": null
 }
