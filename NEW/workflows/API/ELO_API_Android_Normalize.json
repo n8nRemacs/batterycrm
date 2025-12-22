@@ -10,7 +10,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "android/dialogs/:dialog_id/normalize",
+        "path": "android/normalize",
         "responseMode": "responseNode",
         "options": {
           "allowedOrigins": "*"
@@ -331,7 +331,7 @@
       {
         "parameters": {
           "httpMethod": "POST",
-          "path": "android/dialogs/:dialog_id/normalize",
+          "path": "android/normalize",
           "responseMode": "responseNode",
           "options": {
             "allowedOrigins": "*"

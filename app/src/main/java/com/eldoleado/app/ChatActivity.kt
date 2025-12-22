@@ -347,12 +347,13 @@ class ChatActivity : AppCompatActivity() {
 
         val request = SendChatMessageRequest(
             session_token = sessionToken,
+            dialog_id = dialogId,
             text = text,
             media_type = mediaType,
             media_data = mediaData
         )
 
-        RetrofitClient.getApiService(this).sendChatMessage(dialogId, request)
+        RetrofitClient.getApiService(this).sendChatMessage(request)
             .enqueue(object : Callback<SendChatMessageResponse> {
                 override fun onResponse(
                     call: Call<SendChatMessageResponse>,
@@ -399,10 +400,11 @@ class ChatActivity : AppCompatActivity() {
 
         val request = NormalizeDialogRequest(
             session_token = sessionToken,
+            dialog_id = dialogId,
             text = text
         )
 
-        RetrofitClient.getApiService(this).normalizeDialogText(dialogId, request)
+        RetrofitClient.getApiService(this).normalizeDialogText(request)
             .enqueue(object : Callback<NormalizeDialogResponse> {
                 override fun onResponse(
                     call: Call<NormalizeDialogResponse>,

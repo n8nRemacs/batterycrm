@@ -1,114 +1,113 @@
 # Start Session - План на следующую сессию
 
-## Приоритет 0: Тестирование Redis Queue
+## Приоритет 0: Исправить Redis зависание
+
+### Проблема
+Нода "Set Deadline" в ELO_Input_Batcher зависает — получает данные, но не завершается.
 
 ### Что проверить
-Отправка сообщений через новую Redis архитектуру:
+1. **Redis credentials в n8n:**
+   - n8n → Credentials → "Redis account"
+   - Host должен быть `n8n-redis` (не `redis`, не `localhost`)
+   - Port: `6379`
 
+2. **Тест без TTL:**
+   - Убрать галочку "Expire" в ноде Set Deadline
+   - Проверить проходит ли без TTL
+
+3. **Проверить Redis доступность:**
+   ```bash
+   ssh root@185.221.214.83 "docker exec n8n-n8n-1 sh -c 'echo PING | nc n8n-redis 6379'"
+   # Должен вернуть +PONG
+   ```
+
+---
+
+## Приоритет 1: DB Get Tenant — исправить поиск
+
+### Проблема
+Запрос ищет `account_id = 'eldoleado_arceos'`, но в базе `account_id = 'eldoleado_main'`.
+
+### Решение
+Изменить запрос в ELO_Client_Resolve → DB Get Tenant:
+
+```sql
+SELECT
+  t.id as tenant_id,
+  t.domain_id,
+  ca.id as channel_account_id,
+  ca.channel_id
+FROM elo_t_tenants t
+JOIN elo_t_channel_accounts ca ON ca.tenant_id = t.id
+JOIN elo_channels c ON c.id = ca.channel_id
+WHERE ca.credentials->>'session_id' = '{{ $('Validate Input').item.json.meta.raw.sessionId }}'
+  AND c.code = '{{ $('Validate Input').first().json.channel }}'
+  AND ca.is_active = true
+  AND t.is_active = true
+LIMIT 1;
+```
+
+---
+
+## Приоритет 2: Тестировать полный flow WhatsApp
+
+### Входящие сообщения
+1. Отправить сообщение с +79171708077 на +79997253777
+2. Проверить:
+   - ELO_In_WhatsApp получил webhook
+   - Extract WhatsApp Data отфильтровал мусор
+   - Сообщение в Redis queue
+   - ELO_Input_Batcher обработал
+   - ELO_Client_Resolve нашёл tenant
+   - Сообщение в базе
+
+### Исходящие сообщения
 ```bash
 curl -X POST "https://n8n.n8nsrv.ru/webhook/android/messages/send" \
   -H "Content-Type: application/json" \
   -d '{
     "session_token": "85bc5364-7765-4562-be9e-02d899bb575e",
     "dialog_id": "cff56064-1fc3-4152-8e64-6e0266a87bf6",
-    "text": "Test Redis queue message"
+    "text": "Test message"
   }'
 ```
 
-**Ожидаемый результат:**
-1. Ответ: `{"success": true, "queued": true, "queue": "queue:outgoing:whatsapp"}`
-2. Через 3 сек ELO_Out_WhatsApp берёт сообщение из очереди
-3. Сообщение отправляется в WhatsApp через Baileys
-4. Клиент получает сообщение
-
-**Мониторинг очередей:**
-```bash
-ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:whatsapp"
-```
-
 ---
 
-## Приоритет 1: Исправить нормализацию текста
-
-### Проблема
-Webhook `android-normalize/android/dialogs/:dialog_id/normalize` не работает - n8n не поддерживает динамические path параметры.
-
-### Решение
-1. **n8n:** Изменить webhook path на `android/normalize`
-
-2. **ApiService.kt:** Убрать `@Path`, использовать body:
-   ```kotlin
-   @POST("android/normalize")
-   fun normalizeDialogText(
-       @Body request: NormalizeDialogRequest
-   ): Call<NormalizeDialogResponse>
-   ```
-
-3. **NormalizeDialogRequest:** Добавить dialog_id:
-   ```kotlin
-   data class NormalizeDialogRequest(
-       val session_token: String,
-       val dialog_id: String,
-       val text: String
-   )
-   ```
-
-4. **ChatActivity.kt:** Передавать dialog_id в request
-
----
-
-## Приоритет 2: Автоназначение оператора для новых диалогов
-
-### ELO_Client_Resolve - изменения:
-
-1. **DB Get Tenant** - добавить `channel_account_id`:
-   ```sql
-   SELECT t.id as tenant_id, t.domain_id, ca.id as channel_account_id, ca.channel_id
-   FROM elo_t_tenants t
-   JOIN elo_t_channel_accounts ca ON ca.tenant_id = t.id
-   ...
-   ```
-
-2. **DB Create Dialog** - назначать оператора:
-   ```sql
-   INSERT INTO elo_t_dialogs (..., assigned_operator_id, channel_account_id)
-   SELECT ...,
-       (SELECT oc.operator_id FROM elo_t_operator_channels oc
-        WHERE oc.channel_account_id = '...' AND oc.is_active = true
-        ORDER BY oc.is_primary DESC LIMIT 1),
-       '...'
-   ```
-
----
-
-## Архитектура Redis Queue (реализовано)
+## Текущая архитектура WhatsApp
 
 ```
-Android App ──► ELO_API_Android_Send_Message
-                        │
-                        ├─► queue:outgoing:telegram  ──► ELO_Out_Telegram
-                        ├─► queue:outgoing:whatsapp  ──► ELO_Out_WhatsApp
-                        ├─► queue:outgoing:avito     ──► ELO_Out_Avito
-                        ├─► queue:outgoing:vk        ──► ELO_Out_VK
-                        └─► queue:outgoing:max       ──► ELO_Out_MAX
+Клиент (+79171708077)
+    │
+    ▼ WhatsApp
+    │
+MessagerOne (155.212.221.189:8769) — @arceos/baileys
+    │
+    ▼ WEBHOOK
+    │
+https://n8n.n8nsrv.ru/webhook/whatsapp-incoming
+    │
+    ▼
+ELO_In_WhatsApp → Redis queue → ELO_Input_Batcher → ELO_Client_Resolve
+    │
+    ▼
+elo_t_messages (PostgreSQL)
 ```
 
-Каждый ELO_Out_* воркфлоу:
-- Schedule Trigger (каждые 3 сек)
-- Redis LPOP из своей очереди
-- IF Has Message → Parse → Get Token → Send → Update Dialog
+**Сессия:** eldoleado_arceos
+**Оператор:** +79997253777
+**IP Nodes:** MessagerOne (155.212.221.189, 217.114.14.17)
 
 ---
 
-## Baileys Session (Finnish Server)
+## Серверы
 
-**Server:** 217.145.79.27:8766
-**Session ID:** eldoleado_main
-**Phone:** 79171708077 (Ремакс)
-**Status:** connected (авторизован)
-**Webhook:** https://n8n.n8nsrv.ru/webhook/whatsapp-incoming
-
-**ВАЖНО:** В БД `elo_t_channel_accounts.credentials->>'session_id'` = `eldoleado_main`
+| Сервер | IP | Сервисы |
+|--------|-----|---------|
+| n8n | 185.221.214.83 | n8n, PostgreSQL, Redis |
+| MessagerOne | 155.212.221.189 | WhatsApp Baileys (8769) |
+| Finnish | 217.145.79.27 | Telegram (8767) — WhatsApp ВЫКЛЮЧЕН |
+| RU Server | 45.144.177.128 | Avito, VK, MAX, Neo4j |
 
 ---
 
@@ -117,33 +116,37 @@ Android App ──► ELO_API_Android_Send_Message
 - **Оператор:** Test Admin (22222222-2222-2222-2222-222222222222)
 - **Session:** 85bc5364-7765-4562-be9e-02d899bb575e
 - **Диалог:** cff56064-1fc3-4152-8e64-6e0266a87bf6
-- **Клиент:** Дмитрий (+79997253777, WhatsApp, channel_id=2)
+- **WhatsApp Session:** eldoleado_arceos
 
 ---
 
-## Документация
-
-- `NEW/N8N_REDIS_IMPORT.md` — инструкция по импорту Redis воркфлоу
-- `NEW/IMPLEMENTATION_PLAN.md` — план реализации
-- `NEW/N8N_SQL_FIXES.md` — SQL фиксы для n8n
-
----
-
-## Команды для тестирования
+## Полезные команды
 
 ```bash
-# === BAILEYS (Finnish Server) ===
-curl http://217.145.79.27:8766/sessions
+# === WhatsApp Baileys ===
+ssh root@155.212.221.189 "curl -s http://localhost:8769/health"
+ssh root@155.212.221.189 "docker logs mcp-whatsapp-ip1 --tail 30"
 
-# === Отправка сообщения (Redis queue) ===
-curl -X POST "https://n8n.n8nsrv.ru/webhook/android/messages/send" \
-  -H "Content-Type: application/json" \
-  -d '{"session_token":"85bc5364-7765-4562-be9e-02d899bb575e","dialog_id":"cff56064-1fc3-4152-8e64-6e0266a87bf6","text":"Test"}'
-
-# === Мониторинг Redis очередей ===
-ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:whatsapp"
-ssh root@185.221.214.83 "docker exec redis redis-cli LLEN queue:outgoing:telegram"
+# === Redis ===
+ssh root@185.221.214.83 "docker exec n8n-redis redis-cli KEYS '*'"
+ssh root@185.221.214.83 "docker exec n8n-redis redis-cli LLEN queue:incoming"
 
 # === Database ===
-ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT id, content, direction_id FROM elo_t_messages ORDER BY timestamp DESC LIMIT 5;'"
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c \"
+  SELECT account_id, credentials->>'session_id' as session_id
+  FROM elo_t_channel_accounts WHERE channel_id = 2;
+\""
+
+# === Test send message ===
+ssh root@155.212.221.189 "curl -X POST http://155.212.221.189:8769/messages/text \
+  -H 'Content-Type: application/json' \
+  -d '{\"sessionId\": \"eldoleado_arceos\", \"to\": \"79171708077\", \"text\": \"Test\"}'"
 ```
+
+---
+
+## Файлы с кодом (обновлены)
+
+- `NEW/workflows/Channel Contour/ELO_In/ELO_In_WhatsApp.json` — нужно обновить в n8n
+- `NEW/workflows/Channel Contour/ELO_Out/ELO_Out_WhatsApp_v2.json` — обновлён Parse Message
+- `NEW/workflows/API/ELO_API_Android_Normalize.json` — path изменён на `android/normalize`

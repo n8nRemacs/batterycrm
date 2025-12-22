@@ -51,7 +51,7 @@
           "conditions": [
             {
               "id": "has-message",
-              "leftValue": "={{ $json.message_json }}",
+              "leftValue": "={{ $json.message_json || $json.propertyName }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -72,7 +72,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const messageJson = $json.message_json;\nconst message = JSON.parse(messageJson);\n\nreturn {\n  out_message: message\n};"
+        "jsCode": "// Handle both: string (old) and object (new Redis behavior)\nlet message;\nif ($json.message_json) {\n  message = typeof $json.message_json === 'string' \n    ? JSON.parse($json.message_json) \n    : $json.message_json;\n} else if ($json.propertyName) {\n  message = typeof $json.propertyName === 'string'\n    ? JSON.parse($json.propertyName)\n    : $json.propertyName;\n} else {\n  throw new Error('No message data found');\n}\n\nreturn {\n  out_message: message\n};"
       },
       "id": "parse-message",
       "name": "Parse Message",

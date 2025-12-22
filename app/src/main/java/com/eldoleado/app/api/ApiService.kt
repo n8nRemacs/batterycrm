@@ -31,15 +31,13 @@ interface ApiService {
         @Query("session_token") sessionToken: String
     ): Call<ChatMessagesResponse>
 
-    @POST("android-messages/android/dialogs/{dialog_id}/messages")
+    @POST("android/messages/send")
     fun sendChatMessage(
-        @Path("dialog_id") dialogId: String,
         @Body request: SendChatMessageRequest
     ): Call<SendChatMessageResponse>
 
     @POST("android/normalize")
     fun normalizeDialogText(
-        @Path("dialog_id") dialogId: String,
         @Body request: NormalizeDialogRequest
     ): Call<NormalizeDialogResponse>
 
@@ -474,6 +472,7 @@ data class ChatMessageDto(
 
 data class SendChatMessageRequest(
     val session_token: String,
+    val dialog_id: String,
     val text: String,
     val media_type: String? = null,  // "voice", "image", etc.
     val media_data: String? = null   // base64 encoded
@@ -489,6 +488,7 @@ data class SendChatMessageResponse(
 
 data class NormalizeDialogRequest(
     val session_token: String,
+    val dialog_id: String,
     val text: String
 )
 
