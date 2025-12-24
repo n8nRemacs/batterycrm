@@ -1,114 +1,105 @@
-# Stop Session - 2025-12-23
+# Stop Session - 2025-12-24
 
 ## Что сделано сегодня
 
-### 1. Humanized отправка сообщений на 155.212.221.189
+### 1. Avito WebSocket через Android WebView
 
-Развернут humanizer модуль для задержек перед отправкой сообщений:
+**Проблема:** Python avito-listener на сервере блокируется QRATOR (anti-bot)
 
-| Период | Время | Задержка |
-|--------|-------|----------|
-| Рабочее | 09:00-18:00 | 3-7 сек |
-| Нерабочее | 18:00-00:00, 07:00-09:00 | 15-45 сек |
-| Ночное | 00:00-07:00 | 1-3 мин |
+**Решение:** WebSocket через Android WebView
+- Используется мобильный IP телефона
+- QRATOR пропускает мобильные устройства
+- VPN должен быть ОТКЛЮЧЕН!
 
-**Статус сервисов:**
+**Ключевой файл:**
+`app/src/main/java/com/eldoleado/app/channels/avito/AvitoWebViewClient.kt`
 
-| Сервис | Порт | Humanizer | Typing |
-|--------|------|-----------|--------|
-| `avito-messenger-api` | 8766 | ✅ | ❌ (нет в API) |
-| `max-bot-api` | 8768 | ✅ | ✅ typing_on |
-| `telegram-bot-api` | 8761 | ✅ | ✅ typing |
-| `telegram-user-api` | 8762 | ⏳ (ждёт credentials) | ✅ |
+### 2. sender_name - получение имени контакта
 
-### 2. Telegram Bot API (порт 8761)
+Добавлено получение имени отправителя через `getChannels` API:
 
-- Развернут `/opt/mcp-telegram/` из локального проекта
-- Docker image: `telegram-bot-api:v1.0.3`
-- Humanizer + typing action интегрированы
-- Работает через registry ботов (multi-tenant)
-
-### 3. Telegram User API (порт 8762)
-
-- Развернут `/opt/mcp-telegram-user/`
-- Docker image: `telegram-user-api:v1.0.0`
-- **НЕ ЗАПУЩЕН** — требуются реальные credentials:
-  - `TELEGRAM_API_ID` — из my.telegram.org
-  - `TELEGRAM_API_HASH` — из my.telegram.org
-  - `TELEGRAM_PHONE_NUMBER` — телефон для авторизации
-
-### 4. Исправлен Redis в shared/storage.py
-
-**Было:**
-```python
-REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379")
+```kotlin
+fetchContactName(channelId) → "Дмитрий"
 ```
 
-**Стало:**
-```python
-REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379")
-```
+**Логика:**
+- `sender_id` = уникальный хэш пользователя (для БД lookup)
+- `sender_name` = имя для отображения (может повторяться)
 
-### 5. Апгрейд сервера
+### 3. Webhook payload (работает!)
 
-- Было: 1 core, 1 GB RAM
-- Стало: 2 cores, 4 GB RAM
-- Причина: Docker builds перегружали сервер
-
----
-
-## Текущая архитектура 155.212.221.189
-
-```
-┌────────────────────────────────────────────────────────────┐
-│                    MessagerOne Server                       │
-│                    155.212.221.189                          │
-├────────────────────────────────────────────────────────────┤
-│  avito-messenger-api:8766   │  max-bot-api:8768            │
-│  telegram-bot-api:8761      │  telegram-user-api:8762 (⏳)  │
-│  mcp-whatsapp-ip1:8769      │  android-api:8780            │
-│  redis:6379                 │  tunnel-server:80            │
-└────────────────────────────────────────────────────────────┘
+```json
+{
+  "channel_account_id": "default",
+  "tenant_id": "11111111-1111-1111-1111-111111111111",
+  "channel_type": "avito",
+  "external_chat_id": "u2i-PJIRB81Ps9iX81CSTNUgPw",
+  "external_message_id": "be83190f7db4b85b8b53dc281f91eb96",
+  "message_type": "text",
+  "message_text": "Здравствуйте",
+  "sender_id": "b5b928d9b300d15526cf829b93962213",
+  "sender_name": "Дмитрий",
+  "source": "android_webview"
+}
 ```
 
 ---
 
-## Следующая сессия (Start.md)
+## Текущая архитектура Avito
 
-**Приоритет 1:** Авторизация каналов через Android
-
-1. **Avito** — Puppeteer на сервере (login/password → sessid)
-2. **MAX** — QR авторизация (User API opcode 20)
-3. **Telegram Bot** — ввод токена от @BotFather
-4. **Telegram User** — SMS авторизация (позже)
-
----
-
-## Тестовые команды
-
-```bash
-# Проверить все сервисы
-ssh root@155.212.221.189 "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
-
-# Логи humanized сервисов
-ssh root@155.212.221.189 "docker logs avito-messenger-api --tail 20"
-ssh root@155.212.221.189 "docker logs max-bot-api --tail 20"
-ssh root@155.212.221.189 "docker logs telegram-bot-api --tail 20"
-
-# Проверить humanizer в контейнере
-ssh root@155.212.221.189 "docker exec avito-messenger-api grep -l 'humanizer' /app/*.py"
-
-# WhatsApp
-curl http://155.212.221.189:8769/sessions
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Android Phone                             │
+│                    (Mobile IP - no VPN!)                     │
+├─────────────────────────────────────────────────────────────┤
+│  AvitoWebViewClient                                          │
+│  ├── WebView with cookies                                    │
+│  ├── JavaScript WebSocket to socket.avito.ru                │
+│  ├── fetchContactName() → getChannels API                   │
+│  └── Forward to n8n webhook                                  │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           │ POST /avito/incoming
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    n8n (185.221.214.83)                      │
+│  ELO_In_Avito_User → queue:incoming:universal               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Humanized Client файлы
+## Что осталось сделать
 
-| Клиент | Путь |
-|--------|------|
-| Avito | `NEW/MVP/MCP/mcp-avito-user/humanized_client.py` |
-| MAX Bot | `NEW/MVP/MCP/mcp-max/humanized_client.py` |
-| MAX User | `NEW/MVP/MCP/Max-user/humanized_client.py` |
-| MAX User Client | `NEW/MVP/MCP/Max-user/max_user_client.py` |
+### n8n доработки
+
+1. **Normalize Message** — добавить `client_name`:
+   ```javascript
+   client_name: $json.sender_name || $json.sender_id
+   ```
+
+2. **ELO_Client_Resolve** — создание клиента:
+   - Искать: `WHERE external_id = sender_id AND channel_type = 'avito'`
+   - Если не найден → создать нового клиента
+
+---
+
+## Серверы
+
+| Сервер | IP | Роль |
+|--------|-----|------|
+| MessagerOne | 155.212.221.189 | MCP сервисы (WhatsApp, MAX, Telegram) |
+| n8n | 185.221.214.83 | n8n, PostgreSQL, Redis |
+| Android | Mobile IP | Avito WebSocket (обход QRATOR) |
+
+---
+
+## Коммиты сегодня
+
+```
+3cc20cd7d feat: Avito WebSocket via Android WebView + sender_name
+```
+
+---
+
+*Сессия завершена: 2025-12-24 14:40 MSK*
