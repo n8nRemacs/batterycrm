@@ -667,6 +667,12 @@ class MainActivity : AppCompatActivity() {
         notificationsSection = findViewById(R.id.notificationsSection)
         notificationsSection.visibility = if (showNotifications) View.VISIBLE else View.GONE
 
+        // Start monitor service if Avito configured (regardless of app mode)
+        val hasAvito = !channelCredentialsManager.getAvitoCookies().isNullOrBlank()
+        if (hasAvito) {
+            ChannelMonitorService.start(this)
+        }
+
         if (!showNotifications) return
 
         // Init views
@@ -693,12 +699,6 @@ class MainActivity : AppCompatActivity() {
         // Save button
         btnSaveNotifications.setOnClickListener {
             saveNotificationSettings()
-        }
-
-        // Start monitor service if configured
-        if (!channelCredentialsManager.getAlertBotToken().isNullOrBlank() &&
-            !channelCredentialsManager.getAlertChatId().isNullOrBlank()) {
-            ChannelMonitorService.start(this)
         }
     }
 
@@ -760,7 +760,9 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Настройки уведомлений сохранены", Toast.LENGTH_SHORT).show()
 
         // Start or restart monitor service if configured
-        if (!botToken.isNullOrBlank() && !chatId.isNullOrBlank()) {
+        val hasAlerts = !botToken.isNullOrBlank() && !chatId.isNullOrBlank()
+        val hasAvito = !channelCredentialsManager.getAvitoCookies().isNullOrBlank()
+        if (hasAlerts || hasAvito) {
             ChannelMonitorService.start(this)
         } else {
             ChannelMonitorService.stop(this)

@@ -20,6 +20,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.eldoleado.app.MainActivity
 import com.eldoleado.app.R
+import com.eldoleado.app.SessionManager
+import com.eldoleado.app.channels.avito.AvitoMessage
+import com.eldoleado.app.channels.avito.AvitoWebViewClient
 import kotlinx.coroutines.*
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -64,9 +67,13 @@ class ChannelMonitorService : Service() {
     }
 
     private lateinit var credentialsManager: ChannelCredentialsManager
+    private lateinit var sessionManager: SessionManager
     private lateinit var alertSender: AlertSender
     private var monitorJob: Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // Avito WebSocket client
+    private var avitoClient: AvitoWebViewClient? = null
 
     // State tracking
     private var lastBatteryLevel: Int = 100
@@ -101,6 +108,7 @@ class ChannelMonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
         credentialsManager = ChannelCredentialsManager(this)
+        sessionManager = SessionManager(this)
         alertSender = AlertSender(this)
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -186,6 +194,9 @@ class ChannelMonitorService : Service() {
         // Check current network state
         lastNetworkState = isNetworkAvailable()
 
+        // Start Avito WebSocket if configured
+        startAvitoWebSocket()
+
         // Start periodic channel checks
         monitorJob?.cancel()
         monitorJob = scope.launch {
@@ -200,6 +211,9 @@ class ChannelMonitorService : Service() {
         Log.i(TAG, "Stopping channel monitoring")
         monitorJob?.cancel()
 
+        // Stop Avito WebSocket
+        stopAvitoWebSocket()
+
         try {
             unregisterReceiver(batteryReceiver)
         } catch (e: Exception) {
@@ -211,6 +225,71 @@ class ChannelMonitorService : Service() {
         } catch (e: Exception) {
             // Already unregistered
         }
+    }
+
+    // ==================== Avito WebSocket ====================
+
+    private fun startAvitoWebSocket() {
+        val cookies = credentialsManager.getAvitoCookies()
+        if (cookies.isNullOrEmpty()) {
+            Log.d(TAG, "Avito not configured, skipping WebView")
+            return
+        }
+
+        // Get tenant_id from session or use default
+        val tenantId = sessionManager.getTenantId() ?: "11111111-1111-1111-1111-111111111111"
+        val channelAccountId = credentialsManager.getAvitoAccountId() ?: "default"
+
+        Log.i(TAG, "Starting Avito WebView client...")
+
+        avitoClient = AvitoWebViewClient(
+            context = this,
+            cookies = cookies,
+            tenantId = tenantId,
+            channelAccountId = channelAccountId
+        ).apply {
+            listener = object : AvitoWebViewClient.Listener {
+                override fun onConnected() {
+                    Log.i(TAG, "Avito WebSocket connected")
+                    credentialsManager.setAvitoStatus(ChannelStatus.CONNECTED)
+                    updateNotification("Avito: подключено")
+                }
+
+                override fun onDisconnected(reason: String) {
+                    Log.w(TAG, "Avito WebSocket disconnected: $reason")
+                    credentialsManager.setAvitoStatus(ChannelStatus.CHECKING)
+                }
+
+                override fun onMessage(message: AvitoMessage) {
+                    Log.i(TAG, "Avito message from ${message.fromUid}: ${message.text?.take(50)}")
+                    // Message is already forwarded to n8n by AvitoWebSocketClient
+                }
+
+                override fun onError(error: String) {
+                    Log.e(TAG, "Avito WebSocket error: $error")
+                    credentialsManager.setAvitoStatus(ChannelStatus.ERROR)
+                }
+            }
+            connect()
+        }
+    }
+
+    private fun stopAvitoWebSocket() {
+        avitoClient?.disconnect()
+        avitoClient = null
+    }
+
+    private fun updateNotification(status: String) {
+        val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Eldoleado")
+            .setContentText(status)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setOngoing(true)
+            .setSilent(true)
+            .build()
+
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun isNetworkAvailable(): Boolean {

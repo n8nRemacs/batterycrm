@@ -34,7 +34,11 @@ class ChannelCredentialsManager(context: Context) {
 
         // Avito
         private const val KEY_AVITO_SESSID = "avito_sessid"
+        private const val KEY_AVITO_COOKIES = "avito_cookies"
+        private const val KEY_AVITO_ACCOUNT_ID = "avito_account_id"
         private const val KEY_AVITO_USER_ID = "avito_user_id"
+        private const val KEY_AVITO_HASH_ID = "avito_hash_id" // WebSocket my_hash_id
+        private const val KEY_AVITO_SEQ = "avito_seq" // WebSocket seq number
         private const val KEY_AVITO_EMAIL = "avito_email"
         private const val KEY_AVITO_STATUS = "avito_status"
 
@@ -194,18 +198,40 @@ class ChannelCredentialsManager(context: Context) {
 
     // ==================== AVITO ====================
 
-    fun saveAvito(sessid: String, userId: String?, email: String?) {
+    /**
+     * Save Avito credentials (cookies-based auth)
+     * @param cookies Full cookie string for API calls
+     * @param userId Avito user ID (optional)
+     * @param displayName Display name or email (optional)
+     * @param hashId WebSocket hash ID (optional) - used for my_hash_id in WebSocket URL
+     */
+    fun saveAvito(cookies: String, userId: String?, displayName: String?, hashId: String? = null, seq: Int = 0) {
         prefs.edit().apply {
-            putString(KEY_AVITO_SESSID, sessid)
+            putString(KEY_AVITO_COOKIES, cookies)
+            putString(KEY_AVITO_SESSID, cookies) // For backwards compatibility
             userId?.let { putString(KEY_AVITO_USER_ID, it) }
-            email?.let { putString(KEY_AVITO_EMAIL, it) }
+            displayName?.let { putString(KEY_AVITO_EMAIL, it) }
+            hashId?.let { putString(KEY_AVITO_HASH_ID, it) }
+            if (seq > 0) putInt(KEY_AVITO_SEQ, seq)
             putString(KEY_AVITO_STATUS, ChannelStatus.CONNECTED.name)
             apply()
         }
     }
 
+    fun getAvitoCookies(): String? = prefs.getString(KEY_AVITO_COOKIES, null)
+        ?: prefs.getString(KEY_AVITO_SESSID, null) // Fallback to old sessid
+
+    fun getAvitoAccountId(): String? = prefs.getString(KEY_AVITO_ACCOUNT_ID, null)
+        ?: prefs.getString(KEY_AVITO_USER_ID, null)
+
+    fun setAvitoAccountId(accountId: String) {
+        prefs.edit().putString(KEY_AVITO_ACCOUNT_ID, accountId).apply()
+    }
+
     fun getAvitoSessid(): String? = prefs.getString(KEY_AVITO_SESSID, null)
     fun getAvitoUserId(): String? = prefs.getString(KEY_AVITO_USER_ID, null)
+    fun getAvitoHashId(): String? = prefs.getString(KEY_AVITO_HASH_ID, null)
+    fun getAvitoSeq(): Int = prefs.getInt(KEY_AVITO_SEQ, 0)
     fun getAvitoEmail(): String? = prefs.getString(KEY_AVITO_EMAIL, null)
 
     fun getAvitoStatus(): ChannelStatus {
@@ -228,6 +254,8 @@ class ChannelCredentialsManager(context: Context) {
     fun clearAvito() {
         prefs.edit().apply {
             remove(KEY_AVITO_SESSID)
+            remove(KEY_AVITO_COOKIES)
+            remove(KEY_AVITO_ACCOUNT_ID)
             remove(KEY_AVITO_USER_ID)
             remove(KEY_AVITO_EMAIL)
             remove(KEY_AVITO_STATUS)
