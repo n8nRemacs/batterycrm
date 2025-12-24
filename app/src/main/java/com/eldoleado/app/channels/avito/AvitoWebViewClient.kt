@@ -45,8 +45,8 @@ class AvitoWebViewClient(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // Cache for user names: userId -> userName (null means "fetched but no name")
-    private val userNameCache = ConcurrentHashMap<String, String?>()
+    // Cache for channel names: channelId -> contactName (empty string means "fetched but no name")
+    private val channelNameCache = ConcurrentHashMap<String, String>()
 
     interface Listener {
         fun onConnected()
@@ -273,19 +273,19 @@ class AvitoWebViewClient(
         }
 
         @JavascriptInterface
-        fun onUserNameFetched(userId: String, name: String) {
-            Log.d(TAG, "onUserNameFetched: userId=$userId, name=$name")
+        fun onContactNameFetched(channelId: String, name: String) {
+            Log.d(TAG, "onContactNameFetched: channelId=$channelId, name=$name")
             try {
-                val callback = pendingUserNameCallbacks.remove(userId)
+                val callback = pendingContactNameCallbacks.remove(channelId)
                 if (callback != null) {
-                    Log.d(TAG, "Invoking callback for $userId")
+                    Log.d(TAG, "Invoking callback for channel $channelId")
                     callback.invoke(name)
-                    Log.d(TAG, "Callback completed for $userId")
+                    Log.d(TAG, "Callback completed for channel $channelId")
                 } else {
-                    Log.w(TAG, "No callback found for $userId")
+                    Log.w(TAG, "No callback found for channel $channelId")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in onUserNameFetched callback: ${e.javaClass.simpleName}: ${e.message}")
+                Log.e(TAG, "Error in onContactNameFetched callback: ${e.javaClass.simpleName}: ${e.message}")
                 e.printStackTrace()
             }
         }
@@ -366,55 +366,50 @@ class AvitoWebViewClient(
     }
 
     /**
-     * Fetch user name from Avito API via WebView JavaScript
+     * Fetch contact name from Avito API via WebView JavaScript
+     * Uses getChannelById which returns channel.info.name (contact name)
      * Uses fetch() from WebView context which has authenticated session
-     * @param channelId - required by Avito API
-     * @param userId - user ID to fetch name for
-     * @return user name or null if not found
+     * @param channelId - channel ID to get contact name from
+     * @return contact name or null if not found
      */
-    private suspend fun fetchUserName(channelId: String, userId: String): String? {
+    private suspend fun fetchContactName(channelId: String): String? {
         // Check cache first (empty string means "fetched but no name")
-        val cached = userNameCache[userId]
+        val cached = channelNameCache[channelId]
         if (cached != null) {
             return cached.ifEmpty { null }
         }
 
-        if (channelId.isEmpty() || userId.isEmpty()) {
-            Log.w(TAG, "fetchUserName: channelId or userId is empty")
+        if (channelId.isEmpty()) {
+            Log.w(TAG, "fetchContactName: channelId is empty")
             return null
         }
 
-        Log.d(TAG, "Fetching user info for: $userId in channel $channelId via WebView JS")
+        Log.d(TAG, "Fetching contact name for channel: $channelId via WebView JS")
 
         return withContext(Dispatchers.Main) {
             suspendCancellableCoroutine { continuation ->
-                // Use the correct API format with channelId
-                // Use flag to prevent double callback invocation
+                // Use getChannelById API to get channel.info.name
+                // Note: Use www.avito.ru as m.avito.ru returns "Channel not found"
                 val js = """
                     (function() {
                         var called = false;
-                        fetch('https://m.avito.ru/web/1/messenger/getUsers', {
+                        fetch('https://www.avito.ru/web/1/messenger/getChannelById', {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({channelId: '$channelId', userIds: ['$userId']}),
+                            body: JSON.stringify({channelId: '$channelId'}),
                             credentials: 'include'
                         })
                         .then(function(r) { return r.json(); })
                         .then(function(data) {
                             if (called) return;
                             called = true;
-                            console.log('AvitoWebView: getUsers response:', JSON.stringify(data).substring(0, 300));
+                            console.log('AvitoWebView: getChannelById response:', JSON.stringify(data).substring(0, 500));
                             var name = '';
-                            if (data.success && data.success.users && data.success.users.length > 0) {
-                                var user = data.success.users[0];
-                                // Try name first, then publicUserProfile.name
-                                name = user.name || '';
-                                if (!name && user.publicUserProfile && user.publicUserProfile.name) {
-                                    name = user.publicUserProfile.name;
-                                }
+                            if (data.success && data.success.channel && data.success.channel.info) {
+                                name = data.success.channel.info.name || '';
                             }
                             try {
-                                AvitoAndroid.onUserNameFetched('$userId', name);
+                                AvitoAndroid.onContactNameFetched('$channelId', name);
                             } catch(e2) {
                                 console.log('AvitoWebView: callback error:', e2);
                             }
@@ -422,9 +417,9 @@ class AvitoWebViewClient(
                         .catch(function(e) {
                             if (called) return;
                             called = true;
-                            console.log('AvitoWebView: getUsers error:', e);
+                            console.log('AvitoWebView: getChannelById error:', e);
                             try {
-                                AvitoAndroid.onUserNameFetched('$userId', '');
+                                AvitoAndroid.onContactNameFetched('$channelId', '');
                             } catch(e2) {}
                         });
                     })();
@@ -434,36 +429,30 @@ class AvitoWebViewClient(
                 val timeoutJob = scope.launch {
                     delay(5000)
                     if (continuation.isActive) {
-                        Log.w(TAG, "fetchUserName timeout for $userId")
-                        userNameCache[userId] = null
-                        pendingUserNameCallbacks.remove(userId)
+                        Log.w(TAG, "fetchContactName timeout for $channelId")
+                        channelNameCache[channelId] = ""
+                        pendingContactNameCallbacks.remove(channelId)
                         continuation.resume(null) {}
                     }
                 }
 
                 // Store callback for JS interface
-                pendingUserNameCallbacks[userId] = { name ->
-                    Log.d(TAG, "Callback lambda for $userId, name='$name', cancelling timeout")
+                pendingContactNameCallbacks[channelId] = { name ->
+                    Log.d(TAG, "Callback lambda for channel $channelId, name='$name', cancelling timeout")
                     try {
                         timeoutJob.cancel()
-                        // Use empty string as sentinel for "no name" since ConcurrentHashMap doesn't allow null
                         val result = if (name.isNotEmpty()) name else null
                         // Cache: empty string means "fetched but no name"
-                        userNameCache[userId] = name.ifEmpty { "" }
+                        channelNameCache[channelId] = name.ifEmpty { "" }
                         if (result != null) {
-                            Log.i(TAG, "Got user name via JS: $result for $userId")
+                            Log.i(TAG, "Got contact name via JS: $result for channel $channelId")
                         } else {
-                            Log.d(TAG, "User has no name for $userId")
+                            Log.d(TAG, "No contact name for channel $channelId")
                         }
-                        Log.d(TAG, "Posting resume to main handler, continuation.isActive=${continuation.isActive}")
                         // Resume on Main thread to avoid thread issues
                         mainHandler.post {
-                            Log.d(TAG, "In mainHandler, resuming continuation with result=$result")
                             if (continuation.isActive) {
                                 continuation.resume(result) {}
-                                Log.d(TAG, "Continuation resumed successfully")
-                            } else {
-                                Log.w(TAG, "Continuation already completed")
                             }
                         }
                     } catch (e: Exception) {
@@ -478,7 +467,7 @@ class AvitoWebViewClient(
     }
 
     // Callbacks for async JS results - thread-safe
-    private val pendingUserNameCallbacks = ConcurrentHashMap<String, (String) -> Unit>()
+    private val pendingContactNameCallbacks = ConcurrentHashMap<String, (String) -> Unit>()
 
     private suspend fun forwardToN8n(messageData: JSONObject) {
         try {
@@ -492,15 +481,15 @@ class AvitoWebViewClient(
                     .format(java.util.Date(createdNs / 1_000_000))
             } else null
 
-            // Fetch sender name from Avito API (cached)
+            // Fetch sender name from Avito API via getChannelById (cached)
             val channelId = value.optString("channelId")
             val senderId = value.optString("fromUid")
             val senderName = try {
-                if (senderId.isNotEmpty() && channelId.isNotEmpty()) {
-                    fetchUserName(channelId, senderId)
+                if (channelId.isNotEmpty()) {
+                    fetchContactName(channelId)
                 } else null
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to fetch user name: ${e.message}")
+                Log.e(TAG, "Failed to fetch contact name: ${e.message}")
                 null
             }
 
