@@ -115,6 +115,12 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".channels.setup.AvitoCamoufoxSetupActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".channels.setup.WhatsAppSetupActivity"
             android:exported="false"
             android:screenOrientation="portrait"

@@ -4,47 +4,84 @@
 
 | Сервер | IP | Сервисы |
 |--------|-----|---------|
-| **Messenger** | 155.212.221.189 | Все MCP, Redis |
+| **Messenger** | 155.212.221.189 (ext: 217.114.14.17) | mcp-avito-camoufox :8793 |
 | **n8n** | 185.221.214.83 | n8n, PostgreSQL, Redis |
 
 ---
 
-## Приоритет 1: Тест Browser Service
+## Приоритет 1: Avito Polling
 
-```bash
-# Деплой на сервер
-cd /opt/mcp-browser-service
-docker-compose up -d
+Webhook от Avito не работает без платной подписки. Решение — polling.
 
-# Тест
-curl http://155.212.221.189:8792/health
-curl -X POST http://155.212.221.189:8792/session/test/create
-curl -X POST http://155.212.221.189:8792/session/test/channel/avito/open
+### Импорт workflow
+
+1. Открыть n8n: https://n8n.n8nsrv.ru
+2. Import → From File
+3. Выбрать: `NEW/MVP/MCP/mcp-avito-camoufox/n8n-avito-polling.json`
+4. Настроить Redis credentials
+5. Активировать
+
+### Что делает polling
+
+```
+Каждые 15 сек:
+  GET /chats?unread_only=true
+    ↓
+  Новые сообщения → Redis Queue
 ```
 
-- [ ] Задеплоить mcp-Browser-Service на 155.212.221.189
-- [ ] Проверить логин в Avito через браузер
-- [ ] Проверить что QRATOR не блокирует
+---
+
+## Приоритет 2: Отправка через Camoufox
+
+Official API требует платную подписку для отправки. Альтернатива — Camoufox.
+
+### Endpoint уже есть:
+```bash
+POST http://155.212.221.189:8793/account/{id}/send
+{
+  "chat_id": "u2i-xxx",
+  "text": "Ответ клиенту"
+}
+```
+
+### Проблема:
+Использует internal API (`/web/1/messenger/postMessage`) → 403
+
+### Нужно:
+Реализовать отправку через браузерную автоматизацию:
+1. Открыть чат по chat_id
+2. Ввести текст в input
+3. Нажать кнопку отправки
 
 ---
 
-## Приоритет 2: Интеграция с n8n
+## Avito API — Статус
 
-- [ ] Создать workflow ELO_In_Browser для приёма сообщений
-- [ ] Настроить webhook forwarding из Browser Service
+| Функция | Статус |
+|---------|--------|
+| GET /chats + last_message | ✅ Бесплатно |
+| Webhook подписка | ✅ Создаётся |
+| Webhook от Avito | ❌ Не приходит (платно) |
+| GET /messages | ❌ 402 (платно) |
+| POST /messages | ❌ 402 (платно) |
 
 ---
 
-## Avito подходы
+## Credentials
 
-| Подход | Папка | Для чего |
-|--------|-------|----------|
-| Android WebView | `app/` | Мобильный IP, обход QRATOR |
-| Official API | `Avito-Official-Api/` | Webhook входящих (бесплатно) |
-| curl_cffi | `mcp-Avito-Server-Mix/` | TLS fingerprint Chrome |
-| **Browser Service** | `mcp-Browser-Service/` | Полный браузер, multi-tenant |
+### Avito API (n8n-1)
+```
+Client_id: MS0TjX2bwNcLapoX7YCc
+Client_secret: QrhNXcvAzZexWOaFE99kMiRPDSE1hTZwkUYX4RFN
+User ID: 157920214
+```
 
-**Рекомендация:** Начать с Browser Service — это самый надёжный подход.
+### Avito Camoufox
+```
+Phone: 79171708077
+Password: Mi31415926pS
+```
 
 ---
 
@@ -52,14 +89,14 @@ curl -X POST http://155.212.221.189:8792/session/test/channel/avito/open
 
 | Файл | Описание |
 |------|----------|
-| `mcp-Browser-Service/server.py` | REST API для браузера |
-| `mcp-Browser-Service/browser_manager.py` | Управление контекстами |
-| `mcp-Browser-Service/fingerprint.py` | Генерация отпечатков |
-| `CLAUDE.md` | Основной контекст |
+| `mcp-avito-camoufox/AVITO_RESEARCH.md` | Полное исследование API |
+| `mcp-avito-camoufox/n8n-avito-polling.json` | Workflow для импорта |
+| `mcp-avito-camoufox/server.py` | REST API :8793 |
+| `mcp-avito-camoufox/avito_channel.py` | Browser automation |
 
 ---
 
-## SSH доступ
+## SSH
 
 ```bash
 ssh root@155.212.221.189  # Messenger

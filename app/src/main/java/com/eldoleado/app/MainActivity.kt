@@ -32,6 +32,7 @@ import com.eldoleado.app.channels.ChannelStatus
 import com.eldoleado.app.channels.ChannelType
 import com.eldoleado.app.channels.setup.TelegramSetupActivity
 import com.eldoleado.app.channels.setup.AvitoSetupActivity
+import com.eldoleado.app.channels.setup.AvitoCamoufoxSetupActivity
 import com.eldoleado.app.channels.setup.WhatsAppSetupActivity
 import com.eldoleado.app.channels.setup.MaxSetupActivity
 import com.eldoleado.app.channels.setup.ChannelDetailsActivity
@@ -594,7 +595,7 @@ class MainActivity : AppCompatActivity() {
             when (channelType) {
                 ChannelType.WHATSAPP -> startActivity(Intent(this, WhatsAppSetupActivity::class.java))
                 ChannelType.TELEGRAM -> startActivity(Intent(this, TelegramSetupActivity::class.java))
-                ChannelType.AVITO -> startActivity(Intent(this, AvitoSetupActivity::class.java))
+                ChannelType.AVITO -> startActivity(Intent(this, AvitoCamoufoxSetupActivity::class.java))
                 ChannelType.MAX -> startActivity(Intent(this, MaxSetupActivity::class.java))
                 // TODO: Implement setup activities for these channels
                 ChannelType.TELEGRAM_BOT -> Toast.makeText(this, "Telegram Bot: в разработке", Toast.LENGTH_SHORT).show()

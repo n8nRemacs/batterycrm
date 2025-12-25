@@ -1,0 +1,157 @@
+{
+  "name": "ELO_Avito_Polling",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 15
+            }
+          ]
+        }
+      },
+      "name": "Every 15 seconds",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.avito.ru/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "grant_type", "value": "client_credentials"},
+            {"name": "client_id", "value": "MS0TjX2bwNcLapoX7YCc"},
+            {"name": "client_secret", "value": "QrhNXcvAzZexWOaFE99kMiRPDSE1hTZwkUYX4RFN"}
+          ]
+        }
+      },
+      "name": "Get Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://api.avito.ru/messenger/v2/accounts/157920214/chats",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "limit", "value": "20"},
+            {"name": "unread_only", "value": "true"}
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Authorization", "value": "=Bearer {{ $json.access_token }}"}
+          ]
+        }
+      },
+      "name": "Get Unread Chats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const chats = $input.first().json.chats || [];\nconst results = [];\n\nfor (const chat of chats) {\n  const msg = chat.last_message || {};\n  \n  // Skip if direction is 'out' (our own message)\n  if (msg.direction === 'out') continue;\n  \n  // Skip if already read\n  if (msg.read) continue;\n  \n  results.push({\n    chat_id: chat.id,\n    chat_type: chat.context?.type || 'unknown',\n    item_id: chat.context?.value?.id,\n    item_title: chat.context?.value?.title,\n    author_id: msg.author_id,\n    user_id: chat.users?.find(u => u.id !== 157920214)?.id,\n    user_name: chat.users?.find(u => u.id !== 157920214)?.name,\n    message_id: msg.id,\n    message_type: msg.type,\n    message_text: msg.content?.text || '',\n    created: msg.created,\n    updated: chat.updated\n  });\n}\n\nreturn results.length > 0 ? results : [];"
+      },
+      "name": "Parse New Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Has New Messages?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nreturn {\n  channel: 'avito',\n  external_user_id: String(data.author_id),\n  external_chat_id: data.chat_id,\n  \n  text: data.message_text,\n  timestamp: new Date(data.created * 1000).toISOString(),\n  \n  client_phone: null,\n  client_name: data.user_name,\n  client_email: null,\n  \n  media: {\n    has_voice: data.message_type === 'voice',\n    has_images: data.message_type === 'image',\n    has_video: data.message_type === 'video'\n  },\n  \n  meta: {\n    external_message_id: data.message_id,\n    ad_channel: 'avito',\n    ad_id: String(data.item_id || ''),\n    item_title: data.item_title,\n    chat_type: data.chat_type,\n    source: 'polling'\n  }\n};"
+      },
+      "name": "Normalize Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, -100]
+    },
+    {
+      "parameters": {
+        "operation": "rightPush",
+        "list": "elo:incoming:queue",
+        "messageData": "={{ JSON.stringify($json) }}"
+      },
+      "name": "Push to Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1320, -100],
+      "credentials": {
+        "redis": {
+          "id": "1",
+          "name": "Redis"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "name": "No New Messages",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1100, 100]
+    }
+  ],
+  "connections": {
+    "Every 15 seconds": {
+      "main": [[{"node": "Get Token", "type": "main", "index": 0}]]
+    },
+    "Get Token": {
+      "main": [[{"node": "Get Unread Chats", "type": "main", "index": 0}]]
+    },
+    "Get Unread Chats": {
+      "main": [[{"node": "Parse New Messages", "type": "main", "index": 0}]]
+    },
+    "Parse New Messages": {
+      "main": [[{"node": "Has New Messages?", "type": "main", "index": 0}]]
+    },
+    "Has New Messages?": {
+      "main": [
+        [{"node": "Normalize Message", "type": "main", "index": 0}],
+        [{"node": "No New Messages", "type": "main", "index": 0}]
+      ]
+    },
+    "Normalize Message": {
+      "main": [[{"node": "Push to Queue", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,18 @@
+# Avito Camoufox Service
+# pip install -r requirements.txt
+# camoufox fetch  # Download Firefox build
+
+# Anti-detect browser
+camoufox>=0.4.0
+browserforge>=1.1.0
+
+# Web framework
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+
+# HTTP client (for webhooks)
+httpx>=0.26.0
+
+# Async
+asyncio>=3.4.3

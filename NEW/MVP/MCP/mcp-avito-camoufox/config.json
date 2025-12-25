@@ -1,0 +1,15 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8793
+  },
+  "data_dir": "/data/avito-camoufox",
+  "max_accounts": 20,
+  "n8n_webhook": "https://n8n.n8nsrv.ru/webhook/avito-camoufox/incoming",
+  "accounts": {
+    "example_account_1": {
+      "phone": "+7...",
+      "note": "Remaks account 1"
+    }
+  }
+}

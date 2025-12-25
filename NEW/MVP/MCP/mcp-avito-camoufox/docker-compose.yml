@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  avito-camoufox:
+    build: .
+    container_name: avito-camoufox
+    ports:
+      - "8793:8793"
+    volumes:
+      - avito-data:/data/avito-camoufox
+    environment:
+      - DATA_DIR=/data/avito-camoufox
+      - PORT=8793
+    restart: unless-stopped
+    # Shared memory for browser
+    shm_size: '2gb'
+    # Resource limits for 20 accounts
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8793/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  avito-data:

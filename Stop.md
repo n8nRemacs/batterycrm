@@ -1,69 +1,90 @@
-# Stop Session - 2025-12-25
+# Stop Session - 2025-12-25 (продолжение)
 
 ## Что сделано сегодня
 
-### 1. Очистка инфраструктуры
-- Удалены упоминания 45.144.177.128 и 217.145.79.27
-- Все MCP теперь на 155.212.221.189
+### 1. Avito Official API — Исследование
 
-### 2. Avito подходы — 4 папки
-
-| Папка | Подход | Статус |
-|-------|--------|--------|
-| `mcp-avito-user/` | Реверсный API (sessid) | ✅ Работает |
-| `Avito-Official-Api/` | Официальный API | ✅ Создан |
-| `MCP-Avito-Mix/` | Микс Official + Reverse | ✅ Создан |
-| `mcp-Avito-Server-Mix/` | curl_cffi с TLS fingerprint | ✅ Создан |
-| `mcp-Browser-Service/` | Headless Chromium multi-tenant | ✅ Создан |
-
-### 3. Browser Service — главная разработка
-
-Headless браузер как микросервис:
-- Один Chromium на сервере
-- Изолированный контекст для каждого тенанта
-- Уникальный fingerprint (UA, viewport, timezone)
-- REST API для управления
-- Поддержка Avito, WhatsApp, MAX
-
+Протестированы credentials:
 ```
-Browser Service :8792
-├── Tenant "remaks" (Context 1, Fingerprint A)
-│   ├── Avito Page
-│   └── WhatsApp Page
-├── Tenant "autoservice" (Context 2, Fingerprint B)
-│   └── Avito Page
-└── ... до 100 тенантов (~4GB RAM)
+Client_id: MS0TjX2bwNcLapoX7YCc
+Client_secret: QrhNXcvAzZexWOaFE99kMiRPDSE1hTZwkUYX4RFN
+User ID: 157920214 (РемАкс)
 ```
 
-### 4. Инфраструктура
+**Scopes получены:**
+- messenger:read ✅
+- messenger:write ✅
+- items:info, stats:read, user:read ✅
 
-| Сервер | IP | Сервисы |
-|--------|-----|---------|
-| Messenger | 155.212.221.189 | Все MCP, Redis |
-| n8n | 185.221.214.83 | n8n, PostgreSQL, Redis |
+### 2. Avito API — Что бесплатно/платно
+
+| Функция | Бесплатно | Платно (402) |
+|---------|:---------:|:------------:|
+| OAuth токен | ✅ | |
+| GET /chats (список + last_message) | ✅ | |
+| POST /webhook (подписка) | ✅ | |
+| **Отправка webhooks от Avito** | | ❌ |
+| GET /messages (полная история) | | ❌ |
+| POST /messages (отправка) | | ❌ |
+
+**Вывод:** Webhook подписка создаётся бесплатно, но Avito НЕ отправляет webhooks без платной подписки.
+
+### 3. Решение — Polling
+
+Создан workflow для polling каждые 15 секунд:
+```
+NEW/MVP/MCP/mcp-avito-camoufox/n8n-avito-polling.json
+```
+
+Схема:
+```
+Schedule (15 сек) → Get Token → GET /chats?unread_only=true → Parse → Queue
+```
+
+### 4. n8n Workflows
+
+| Workflow | Статус | Примечание |
+|----------|--------|------------|
+| ELO_In_Avito | ✅ Active | Webhook (не работает без платной подписки) |
+| ELO_Avito_Polling | 📄 JSON | Нужно импортировать |
+
+### 5. mcp-avito-camoufox
+
+- ✅ Логин через браузер работает
+- ✅ SMS авторизация работает
+- ✅ IP: 217.114.14.17 (через iptables SNAT)
+- ✅ Сессии сохраняются
+- ❌ WebSocket закрывается Avito
+- ❌ Internal API возвращает 403
+
+### 6. AVITO_RESEARCH.md — Обновлён
+
+Полная документация:
+- Сравнение Official API vs Camoufox
+- Все endpoints с статусами
+- Webhook формат
+- Ограничения
 
 ---
 
-## Новые файлы
+## Файлы изменены/созданы
 
 ```
-NEW/MVP/MCP/
-├── mcp-Browser-Service/     # Headless browser multi-tenant
-│   ├── server.py            # FastAPI :8792
-│   ├── browser_manager.py   # Контексты по тенантам
-│   ├── fingerprint.py       # Уникальные fingerprints
-│   ├── channels.py          # Avito, WhatsApp, MAX
-│   ├── Dockerfile
-│   └── docker-compose.yml
-│
-├── mcp-Avito-Server-Mix/    # curl_cffi approach
-│   ├── avito_browser.py     # HTTP с Chrome TLS
-│   ├── avito_ws.py          # WebSocket
-│   └── cookie_extractor.py  # Playwright cookies
-│
-├── Avito-Official-Api/      # Официальный API
-└── MCP-Avito-Mix/           # Mix approach
+NEW/MVP/MCP/mcp-avito-camoufox/
+├── AVITO_RESEARCH.md          # Полное исследование
+├── n8n-avito-polling.json     # Workflow для импорта
+├── avito_channel.py           # Добавлен _extract_hash_id()
+└── server.py                  # Добавлены debug endpoints
 ```
+
+---
+
+## Инфраструктура
+
+| Сервер | IP | Сервисы |
+|--------|-----|---------|
+| Messenger | 155.212.221.189 (→ 217.114.14.17) | mcp-avito-camoufox :8793 |
+| n8n | 185.221.214.83 | n8n, PostgreSQL |
 
 ---
 

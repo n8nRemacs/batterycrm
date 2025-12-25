@@ -221,7 +221,7 @@ class ChannelDetailsActivity : AppCompatActivity() {
         when (channelType) {
             ChannelType.WHATSAPP -> startActivity(Intent(this, WhatsAppSetupActivity::class.java))
             ChannelType.TELEGRAM -> startActivity(Intent(this, TelegramSetupActivity::class.java))
-            ChannelType.AVITO -> startActivity(Intent(this, AvitoSetupActivity::class.java))
+            ChannelType.AVITO -> startActivity(Intent(this, AvitoCamoufoxSetupActivity::class.java))
             ChannelType.MAX -> startActivity(Intent(this, MaxSetupActivity::class.java))
             // TODO: Add setup activities for these
             ChannelType.TELEGRAM_BOT, ChannelType.VK, ChannelType.VK_GROUP -> {
