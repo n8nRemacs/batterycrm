@@ -1,0 +1,6 @@
+{
+  "sessid": "",
+  "hash_id": "",
+  "n8n_webhook": "https://n8n.n8nsrv.ru/webhook/avito/incoming",
+  "note": "Run cookie_extractor.py to fill sessid and hash_id"
+}

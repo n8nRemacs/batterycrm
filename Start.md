@@ -9,46 +9,61 @@
 
 ---
 
-## Приоритет 1: Avito Official API
+## Приоритет 1: Тест Browser Service
 
-- [ ] Задеплоить `Avito-Official-Api/` на 155.212.221.189:8790
-- [ ] Протестировать webhook от Avito
-- [ ] Интегрировать с n8n workflow
+```bash
+# Деплой на сервер
+cd /opt/mcp-browser-service
+docker-compose up -d
 
----
+# Тест
+curl http://155.212.221.189:8792/health
+curl -X POST http://155.212.221.189:8792/session/test/create
+curl -X POST http://155.212.221.189:8792/session/test/channel/avito/open
+```
 
-## Приоритет 2: Тестирование каналов
-
-| Канал | Incoming | Outgoing | Статус |
-|-------|----------|----------|--------|
-| Avito (Android WebView) | ✅ | ⏳ | Работает |
-| Avito (Official API) | ⏳ | ❌ (платно) | Новый |
-| WhatsApp | ✅ | ✅ | Работает |
-| Telegram | ⏳ | ⏳ | Требует деплой |
-| VK | ⏳ | ⏳ | Требует деплой |
-| MAX | ⏳ | ⏳ | Требует деплой |
+- [ ] Задеплоить mcp-Browser-Service на 155.212.221.189
+- [ ] Проверить логин в Avito через браузер
+- [ ] Проверить что QRATOR не блокирует
 
 ---
 
-## Файлы
+## Приоритет 2: Интеграция с n8n
+
+- [ ] Создать workflow ELO_In_Browser для приёма сообщений
+- [ ] Настроить webhook forwarding из Browser Service
+
+---
+
+## Avito подходы
+
+| Подход | Папка | Для чего |
+|--------|-------|----------|
+| Android WebView | `app/` | Мобильный IP, обход QRATOR |
+| Official API | `Avito-Official-Api/` | Webhook входящих (бесплатно) |
+| curl_cffi | `mcp-Avito-Server-Mix/` | TLS fingerprint Chrome |
+| **Browser Service** | `mcp-Browser-Service/` | Полный браузер, multi-tenant |
+
+**Рекомендация:** Начать с Browser Service — это самый надёжный подход.
+
+---
+
+## Ключевые файлы
 
 | Файл | Описание |
 |------|----------|
+| `mcp-Browser-Service/server.py` | REST API для браузера |
+| `mcp-Browser-Service/browser_manager.py` | Управление контекстами |
+| `mcp-Browser-Service/fingerprint.py` | Генерация отпечатков |
 | `CLAUDE.md` | Основной контекст |
-| `CORE_NEW/CONTEXT.md` | Статус разработки |
-| `123.md` | Подробный отчёт |
-| `NEW/MVP/MCP/Avito-Official-Api/` | Официальный Avito API |
 
 ---
 
 ## SSH доступ
 
 ```bash
-# Messenger Server
-ssh root@155.212.221.189
-
-# n8n Server
-ssh root@185.221.214.83
+ssh root@155.212.221.189  # Messenger
+ssh root@185.221.214.83   # n8n
 ```
 
 ---

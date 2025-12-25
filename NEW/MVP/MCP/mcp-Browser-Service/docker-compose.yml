@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  browser-service:
+    build: .
+    container_name: mcp-browser-service
+    restart: unless-stopped
+    ports:
+      - "8792:8792"
+    volumes:
+      # Persist sessions across restarts
+      - browser-data:/data/browser-service
+    environment:
+      - DATA_DIR=/data/browser-service
+      - PORT=8792
+      - N8N_WEBHOOK=https://n8n.n8nsrv.ru/webhook/browser/incoming
+    # Shared memory for Chromium
+    shm_size: '2gb'
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8792/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+volumes:
+  browser-data:
+    driver: local

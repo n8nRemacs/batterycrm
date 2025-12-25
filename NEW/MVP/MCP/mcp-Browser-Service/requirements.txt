@@ -1,0 +1,19 @@
+# Browser automation
+playwright>=1.40.0
+
+# FastAPI server
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.6
+
+# Async
+aiofiles>=23.2.1
+asyncio>=3.4.3
+
+# Utils
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+httpx>=0.26.0
+
+# Fingerprint generation
+faker>=22.0.0

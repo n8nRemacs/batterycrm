@@ -3,58 +3,66 @@
 ## Что сделано сегодня
 
 ### 1. Очистка инфраструктуры
-- Удалены упоминания старого сервера 45.144.177.128
-- Удалены упоминания Finnish сервера 217.145.79.27 (кроме VPN)
-- Все MCP серверы теперь на 155.212.221.189
+- Удалены упоминания 45.144.177.128 и 217.145.79.27
+- Все MCP теперь на 155.212.221.189
 
-### 2. Обновлённая инфраструктура
+### 2. Avito подходы — 4 папки
+
+| Папка | Подход | Статус |
+|-------|--------|--------|
+| `mcp-avito-user/` | Реверсный API (sessid) | ✅ Работает |
+| `Avito-Official-Api/` | Официальный API | ✅ Создан |
+| `MCP-Avito-Mix/` | Микс Official + Reverse | ✅ Создан |
+| `mcp-Avito-Server-Mix/` | curl_cffi с TLS fingerprint | ✅ Создан |
+| `mcp-Browser-Service/` | Headless Chromium multi-tenant | ✅ Создан |
+
+### 3. Browser Service — главная разработка
+
+Headless браузер как микросервис:
+- Один Chromium на сервере
+- Изолированный контекст для каждого тенанта
+- Уникальный fingerprint (UA, viewport, timezone)
+- REST API для управления
+- Поддержка Avito, WhatsApp, MAX
+
+```
+Browser Service :8792
+├── Tenant "remaks" (Context 1, Fingerprint A)
+│   ├── Avito Page
+│   └── WhatsApp Page
+├── Tenant "autoservice" (Context 2, Fingerprint B)
+│   └── Avito Page
+└── ... до 100 тенантов (~4GB RAM)
+```
+
+### 4. Инфраструктура
 
 | Сервер | IP | Сервисы |
 |--------|-----|---------|
-| **Messenger** | 155.212.221.189 (alt: 217.114.14.17) | Все MCP, Redis для MCP |
-| **n8n** | 185.221.214.83 | n8n, PostgreSQL, Redis для n8n |
-| **VPN** | 217.145.79.27 | Только VPN сервер |
-
-**Neo4j** пока не развёрнут.
-
-### 3. Обновлённые файлы
-
-**Конфиги:**
-- `CLAUDE.md` — основная документация
-- `MCP/mcp-ssh/servers.json` — SSH доступы
-- `CORE_NEW/CONTEXT.md` — контекст разработки
-- `NEW/MVP/MCP/docker-compose.yml`
-- `NEW/MVP/MCP/*/config.py` — все конфиги MCP
-- `scripts/db/*.cmd` и `*.sh`
-- `scripts/setup_ssh*.sh` и `*.ps1`
-
-**Документация:**
-- `NEW/MVP/INVENTORY.md`
-- `123.md` — отчёт
-
-### 4. Avito Official API
-- Папка `Avito-Official-Api/` — чистый официальный API
-- Папка `MCP-Avito-Mix/` — микс официального и реверсного
-- Папка `mcp-avito-user/` — реверсный API
+| Messenger | 155.212.221.189 | Все MCP, Redis |
+| n8n | 185.221.214.83 | n8n, PostgreSQL, Redis |
 
 ---
 
-## Серверы
+## Новые файлы
 
 ```
-Messenger (155.212.221.189):
-├── mcp-telegram    :8767
-├── mcp-whatsapp    :8766
-├── mcp-avito       :8765
-├── mcp-avito-official :8790
-├── mcp-vk          :8767
-├── mcp-max         :8768
-└── redis           :6379
-
-n8n (185.221.214.83):
-├── n8n             :5678
-├── PostgreSQL      :6544
-└── redis           :6379
+NEW/MVP/MCP/
+├── mcp-Browser-Service/     # Headless browser multi-tenant
+│   ├── server.py            # FastAPI :8792
+│   ├── browser_manager.py   # Контексты по тенантам
+│   ├── fingerprint.py       # Уникальные fingerprints
+│   ├── channels.py          # Avito, WhatsApp, MAX
+│   ├── Dockerfile
+│   └── docker-compose.yml
+│
+├── mcp-Avito-Server-Mix/    # curl_cffi approach
+│   ├── avito_browser.py     # HTTP с Chrome TLS
+│   ├── avito_ws.py          # WebSocket
+│   └── cookie_extractor.py  # Playwright cookies
+│
+├── Avito-Official-Api/      # Официальный API
+└── MCP-Avito-Mix/           # Mix approach
 ```
 
 ---
