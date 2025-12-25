@@ -191,22 +191,23 @@ MCP Channels → Input (8771) → Client (8772) → Core (n8n) → Graph (8773)
 
 | Сервер | Порт | Хост | Статус |
 |--------|------|------|--------|
-| input-contour | 8771 | 45.144.177.128 (RU) | 📝 Documented |
-| client-contour | 8772 | 45.144.177.128 (RU) | 📝 Documented |
-| graph-tool | 8773 | 45.144.177.128 (RU) | 📝 Documented |
-| ai-tool | 8774 | 45.144.177.128 (RU) | ✅ Created |
+| input-contour | 8771 | 155.212.221.189 | 📝 Documented |
+| client-contour | 8772 | 155.212.221.189 | 📝 Documented |
+| graph-tool | 8773 | 155.212.221.189 | 📝 Documented |
+| ai-tool | 8774 | 155.212.221.189 | ✅ Created |
 
 ### MCP Channel Adapters:
 
 | Сервер | Порт | Хост | Статус |
 |--------|------|------|--------|
-| mcp-telegram | 8767 | 217.145.79.27 (FI) | ✅ v2.0.0 |
-| mcp-whatsapp | 8766 | 217.145.79.27 (FI) | ✅ v2.0.0 |
-| mcp-avito | 8765 | 45.144.177.128 (RU) | ✅ v2.0.0 |
-| mcp-vk | 8767 | 45.144.177.128 (RU) | ✅ v2.0.0 |
-| mcp-max | 8768 | 45.144.177.128 (RU) | ✅ v2.0.0 |
-| mcp-form | 8770 | 45.144.177.128 (RU) | ✅ v1.0.0 |
-| api-android | 8780 | 45.144.177.128 (RU) | ✅ Gateway |
+| mcp-telegram | 8767 | 155.212.221.189 | ✅ v2.0.0 |
+| mcp-whatsapp | 8766 | 155.212.221.189 | ✅ v2.0.0 |
+| mcp-avito | 8765 | 155.212.221.189 | ✅ v2.0.0 |
+| mcp-avito-official | 8790 | 155.212.221.189 | ✅ v1.0.0 |
+| mcp-vk | 8767 | 155.212.221.189 | ✅ v2.0.0 |
+| mcp-max | 8768 | 155.212.221.189 | ✅ v2.0.0 |
+| mcp-form | 8770 | 155.212.221.189 | ✅ v1.0.0 |
+| api-android | 8780 | 155.212.221.189 | ✅ Gateway |
 
 ---
 
@@ -234,9 +235,7 @@ ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'QUERY'"
 ```
 
 ### Neo4j
-```bash
-ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost:7687' -u neo4j -p 'Mi31415926pS' 'QUERY'"
-```
+Neo4j пока не развёрнут.
 
 ### n8n API (read-only)
 ```bash

@@ -171,7 +171,5 @@ from pyrogram import Client
 
 | Сервер | IP | Сервисы |
 |--------|-----|---------|
-| RU Server | 45.144.177.128 | Neo4j, Redis |
-| Finnish Server | 217.145.79.27 | mcp-telegram, mcp-whatsapp |
-| n8n Server | 185.221.214.83 | n8n, PostgreSQL |
-| **Tunnel Server** | TBD | New dedicated server |
+| Messenger Server | 155.212.221.189 (alt: 217.114.14.17) | Все MCP, Redis (для MCP) |
+| n8n Server | 185.221.214.83 | n8n, PostgreSQL, Redis (для n8n) |

@@ -86,24 +86,19 @@ Old/                    # Old architecture (ARCHIVE)
 
 ## Servers & Services
 
-### RU Server (45.144.177.128)
-
-| Service | Port | Description |
-|---------|------|-------------|
-| mcp-avito | 8765 | Avito Messenger API |
-| mcp-vk | 8767 | VK Community API |
-| mcp-max | 8768 | MAX (VK Teams) API |
-| mcp-form | 8770 | Web forms API |
-| api-android | 8780 | Android API Gateway |
-| Neo4j | 7474/7687 | Graph database |
-| Redis | 6379 | Cache |
-
-### Finnish Server (217.145.79.27)
+### Messenger Server (155.212.221.189 / 217.114.14.17)
 
 | Service | Port | Description |
 |---------|------|-------------|
 | mcp-telegram | 8767 | Telegram Bot API |
-| mcp-whatsapp | 8766 | WhatsApp (Wappi.pro) |
+| mcp-whatsapp | 8766 | WhatsApp (Baileys) |
+| mcp-avito | 8765 | Avito Messenger API |
+| mcp-avito-official | 8790 | Avito Official API |
+| mcp-vk | 8767 | VK Community API |
+| mcp-max | 8768 | MAX (VK Teams) API |
+| mcp-form | 8770 | Web forms API |
+| api-android | 8780 | Android API Gateway |
+| Redis | 6379 | MCP cache |
 
 ### n8n Server (185.221.214.83)
 
@@ -112,6 +107,9 @@ Old/                    # Old architecture (ARCHIVE)
 | n8n | 5678 | https://n8n.n8nsrv.ru |
 | PostgreSQL | 6544 | Main database |
 | Redis | 6379 | n8n cache |
+
+### Neo4j
+Neo4j пока не развёрнут. Планируется на отдельном сервере.
 
 ---
 
@@ -122,11 +120,6 @@ SSH keys configured. Passwords embedded in commands.
 ### PostgreSQL (185.221.214.83)
 ```bash
 ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'QUERY'"
-```
-
-### Neo4j (45.144.177.128)
-```bash
-ssh root@45.144.177.128 "docker exec neo4j cypher-shell -a 'bolt+ssc://localhost:7687' -u neo4j -p 'Mi31415926pS' 'QUERY'"
 ```
 
 ### n8n API (READ ONLY — changes via UI)
@@ -144,7 +137,6 @@ curl -s "https://n8n.n8nsrv.ru/api/v1/workflows/{id}" -H "X-N8N-API-KEY: n8n_api
 ### Local scripts (Windows)
 ```cmd
 scripts\db\pg.cmd "SELECT * FROM elo_tenants;"
-scripts\db\neo4j.cmd "MATCH (n) RETURN count(n);"
 ```
 
 ---

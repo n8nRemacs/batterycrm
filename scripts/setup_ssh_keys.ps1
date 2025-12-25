@@ -5,9 +5,7 @@ $pubKey = Get-Content "$env:USERPROFILE\.ssh\id_rsa.pub"
 
 $servers = @{
     "n8n" = @{host="185.221.214.83"; pass="Mi31415926pS"}
-    "ru" = @{host="45.144.177.128"; pass="Mi31415926pSss!"}
-    "fi" = @{host="217.145.79.27"; pass="Mi31415926pSss!"}
-    "new" = @{host="155.212.221.189"; pass="Mi31415926pSss!"}
+    "msg" = @{host="155.212.221.189"; pass="Mi31415926pSss!"}
 }
 
 Write-Host "Public key: $($pubKey.Substring(0,50))..."

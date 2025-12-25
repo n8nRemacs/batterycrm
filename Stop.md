@@ -1,80 +1,62 @@
-# Stop Session - 2025-12-24
+# Stop Session - 2025-12-25
 
 ## Что сделано сегодня
 
-### 1. Avito WebSocket через Android WebView
-- WebSocket через WebView (обход QRATOR)
-- Мобильный IP телефона, VPN отключать!
-- `AvitoWebViewClient.kt` — основной файл
+### 1. Очистка инфраструктуры
+- Удалены упоминания старого сервера 45.144.177.128
+- Удалены упоминания Finnish сервера 217.145.79.27 (кроме VPN)
+- Все MCP серверы теперь на 155.212.221.189
 
-### 2. sender_name — имя контакта
-- Получение через `getChannels` API
-- `fetchContactName(channelId)` → "Дмитрий"
-- Кэширование в `channelNameCache`
+### 2. Обновлённая инфраструктура
 
-### 3. WakeLock — стабильность соединения
-- `PowerManager.PARTIAL_WAKE_LOCK`
-- Предотвращает disconnect при sleep телефона
-- Добавлен в `ChannelMonitorService.kt`
+| Сервер | IP | Сервисы |
+|--------|-----|---------|
+| **Messenger** | 155.212.221.189 (alt: 217.114.14.17) | Все MCP, Redis для MCP |
+| **n8n** | 185.221.214.83 | n8n, PostgreSQL, Redis для n8n |
+| **VPN** | 217.145.79.27 | Только VPN сервер |
 
-### 4. n8n исправления
+**Neo4j** пока не развёрнут.
 
-**ELO_In_Avito_User → Normalize Message:**
-```javascript
-external_user_id: body.sender_id || msg.fromUid,
-client_name: body.sender_name || rawMsg.userName || null,
-```
+### 3. Обновлённые файлы
 
-**ELO_Client_Resolve → Validate Input:**
-```javascript
-const required = ['channel', 'external_chat_id'];  // убрали 'text'
-case 'avito': credential = input.profile_id || input.user_id;
-if (!credential) credential = 'default';
-```
+**Конфиги:**
+- `CLAUDE.md` — основная документация
+- `MCP/mcp-ssh/servers.json` — SSH доступы
+- `CORE_NEW/CONTEXT.md` — контекст разработки
+- `NEW/MVP/MCP/docker-compose.yml`
+- `NEW/MVP/MCP/*/config.py` — все конфиги MCP
+- `scripts/db/*.cmd` и `*.sh`
+- `scripts/setup_ssh*.sh` и `*.ps1`
 
-**ELO_Client_Resolve → Prepare Client Cache Key:**
-```javascript
-const clientExternalId = data.external_user_id || data.external_chat_id;
-```
+**Документация:**
+- `NEW/MVP/INVENTORY.md`
+- `123.md` — отчёт
 
-### 5. Синхронизация
-- 23 ELO workflows синхронизированы из n8n
-- DATABASE_ANALYSIS.md создан
-- Redis очищен (n8n server)
+### 4. Avito Official API
+- Папка `Avito-Official-Api/` — чистый официальный API
+- Папка `MCP-Avito-Mix/` — микс официального и реверсного
+- Папка `mcp-avito-user/` — реверсный API
 
 ---
 
-## Коммиты
+## Серверы
 
 ```
-3cc20cd7d feat: Avito WebSocket via Android WebView + sender_name
-9410d0b53 docs: update Stop.md and Start.md
-+ WakeLock commit (pending)
-```
+Messenger (155.212.221.189):
+├── mcp-telegram    :8767
+├── mcp-whatsapp    :8766
+├── mcp-avito       :8765
+├── mcp-avito-official :8790
+├── mcp-vk          :8767
+├── mcp-max         :8768
+└── redis           :6379
 
----
-
-## Архитектура Avito
-
-```
-Android Phone (Mobile IP)
-    │
-    ├── AvitoWebViewClient (WebSocket)
-    │   ├── fetchContactName() → getChannels API
-    │   └── WakeLock (prevent sleep)
-    │
-    │ POST /avito/incoming
-    ▼
-n8n (185.221.214.83)
-    │
-    ├── ELO_In_Avito_User
-    │   └── Normalize Message (external_user_id, client_name)
-    │
-    └── ELO_Client_Resolve
-        ├── Validate Input (credential = profile_id)
-        └── DB Create Client (client_external_id)
+n8n (185.221.214.83):
+├── n8n             :5678
+├── PostgreSQL      :6544
+└── redis           :6379
 ```
 
 ---
 
-*Сессия завершена: 2025-12-24 16:15 MSK*
+*Сессия завершена: 2025-12-25*

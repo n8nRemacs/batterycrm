@@ -15,7 +15,7 @@ import redis.asyncio as aioredis
 logger = logging.getLogger(__name__)
 
 # Connection URLs - use local Redis, remote PostgreSQL
-# REDIS_URL is localhost for RU server (45.144.177.128) and Finnish server (217.145.79.27)
+# REDIS_URL is localhost for Messenger server (155.212.221.189)
 import os
 REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379")  # Docker network name or localhost
 DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://supabase_admin:Mi31415926pS@185.221.214.83:6544/postgres")

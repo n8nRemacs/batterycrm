@@ -1,28 +1,18 @@
 {
   "servers": {
-    "ru": {
-      "host": "45.144.177.128",
+    "msg": {
+      "host": "155.212.221.189",
       "user": "root",
       "port": 22,
-      "password": "Mi31415926pSss!"
-    },
-    "fi": {
-      "host": "217.145.79.27",
-      "user": "root",
-      "port": 22,
-      "password": "Mi31415926pSss!"
+      "password": "Mi31415926pSss!",
+      "description": "Messenger Server (Telegram, WhatsApp, Avito, VK, MAX)"
     },
     "n8n": {
       "host": "185.221.214.83",
       "user": "root",
       "port": 22,
-      "password": "Mi31415926pS"
-    },
-    "MessagerOne": {
-      "host": "155.212.221.189",
-      "user": "root",
-      "port": 22,
-      "password": "Mi31415926pSss!"
+      "password": "Mi31415926pS",
+      "description": "n8n + PostgreSQL"
     }
   }
 }

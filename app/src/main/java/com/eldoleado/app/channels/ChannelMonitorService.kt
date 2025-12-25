@@ -13,6 +13,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.IBinder
@@ -78,6 +79,8 @@ class ChannelMonitorService : Service() {
 
     // WakeLock to prevent CPU sleep during WebSocket connections
     private var wakeLock: PowerManager.WakeLock? = null
+    // WiFi Lock to prevent WiFi from sleeping
+    private var wifiLock: WifiManager.WifiLock? = null
 
     // State tracking
     private var lastBatteryLevel: Int = 100
@@ -291,7 +294,9 @@ class ChannelMonitorService : Service() {
 
     // ==================== WakeLock ====================
 
+    @Suppress("DEPRECATION")
     private fun acquireWakeLock() {
+        // CPU WakeLock
         if (wakeLock == null) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
             wakeLock = powerManager.newWakeLock(
@@ -307,9 +312,27 @@ class ChannelMonitorService : Service() {
                 Log.i(TAG, "WakeLock acquired")
             }
         }
+
+        // WiFi Lock - keep WiFi active during sleep
+        if (wifiLock == null) {
+            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiLock = wifiManager.createWifiLock(
+                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                "Eldoleado::WiFiLock"
+            ).apply {
+                setReferenceCounted(false)
+            }
+        }
+        wifiLock?.let {
+            if (!it.isHeld) {
+                it.acquire()
+                Log.i(TAG, "WiFiLock acquired (WIFI_MODE_FULL_HIGH_PERF)")
+            }
+        }
     }
 
     private fun releaseWakeLock() {
+        // Release CPU WakeLock
         wakeLock?.let {
             if (it.isHeld) {
                 it.release()
@@ -317,6 +340,15 @@ class ChannelMonitorService : Service() {
             }
         }
         wakeLock = null
+
+        // Release WiFi Lock
+        wifiLock?.let {
+            if (it.isHeld) {
+                it.release()
+                Log.i(TAG, "WiFiLock released")
+            }
+        }
+        wifiLock = null
     }
 
     private fun updateNotification(status: String) {

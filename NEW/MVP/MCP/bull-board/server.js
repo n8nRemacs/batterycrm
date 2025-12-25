@@ -9,9 +9,9 @@ const IORedis = require('ioredis');
 const config = {
   port: process.env.PORT || 3001,
   redis: {
-    // RU server (45.144.177.128) - all queues go here
+    // Messenger server (155.212.221.189) - all queues go here
     main: {
-      host: process.env.REDIS_HOST || '45.144.177.128',
+      host: process.env.REDIS_HOST || '155.212.221.189',
       port: parseInt(process.env.REDIS_PORT) || 6379,
       password: process.env.REDIS_PASSWORD || undefined,
     }

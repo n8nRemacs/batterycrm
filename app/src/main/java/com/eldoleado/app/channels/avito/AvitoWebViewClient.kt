@@ -148,7 +148,7 @@ class AvitoWebViewClient(
                 if (window.__avitoIntercepted) return;
                 window.__avitoIntercepted = true;
 
-                console.log('AvitoWebView: Installing interceptor...');
+                console.log('AvitoWebView: Installing interceptor with heartbeat...');
 
                 // Store all WebSockets for debugging
                 window.__avitoWebSockets = [];
@@ -163,6 +163,28 @@ class AvitoWebViewClient(
                     ws.addEventListener('open', function() {
                         console.log('AvitoWebView: WebSocket OPEN: ' + url);
                         try { AvitoAndroid.onConnected(); } catch(e) { console.log('AvitoWebView: onConnected error: ' + e); }
+
+                        // === HEARTBEAT: Keep connection alive ===
+                        var pingCount = 0;
+                        var pingInterval = setInterval(function() {
+                            if (ws.readyState === 1) { // WebSocket.OPEN
+                                pingCount++;
+                                var pingMsg = JSON.stringify({
+                                    jsonrpc: "2.0",
+                                    method: "ping",
+                                    id: "ping_" + pingCount + "_" + Date.now()
+                                });
+                                ws.send(pingMsg);
+                                console.log('AvitoWebView: Ping #' + pingCount + ' sent');
+                            } else {
+                                console.log('AvitoWebView: Stopping ping, ws.readyState=' + ws.readyState);
+                                clearInterval(pingInterval);
+                            }
+                        }, 25000); // Every 25 seconds (less than server timeout)
+
+                        ws.__pingInterval = pingInterval;
+                        ws.__pingCount = pingCount;
+                        console.log('AvitoWebView: Heartbeat started (25s interval)');
                     });
 
                     ws.addEventListener('message', function(event) {
@@ -176,11 +198,20 @@ class AvitoWebViewClient(
 
                     ws.addEventListener('close', function(event) {
                         console.log('AvitoWebView: WebSocket CLOSED: ' + event.code + ' ' + event.reason);
+                        // Stop heartbeat on close
+                        if (ws.__pingInterval) {
+                            clearInterval(ws.__pingInterval);
+                            console.log('AvitoWebView: Heartbeat stopped');
+                        }
                         try { AvitoAndroid.onDisconnected(event.code + ': ' + event.reason); } catch(e) {}
                     });
 
                     ws.addEventListener('error', function(event) {
                         console.log('AvitoWebView: WebSocket ERROR');
+                        // Stop heartbeat on error
+                        if (ws.__pingInterval) {
+                            clearInterval(ws.__pingInterval);
+                        }
                         try { AvitoAndroid.onError('WebSocket error'); } catch(e) {}
                     });
 
@@ -192,7 +223,7 @@ class AvitoWebViewClient(
                 window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
                 window.WebSocket.CLOSED = OriginalWebSocket.CLOSED;
 
-                console.log('AvitoWebView: Interceptor installed successfully');
+                console.log('AvitoWebView: Interceptor with heartbeat installed successfully');
                 try { AvitoAndroid.onInterceptorReady(); } catch(e) {}
             })();
         """.trimIndent()

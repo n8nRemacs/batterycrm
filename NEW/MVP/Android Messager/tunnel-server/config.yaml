@@ -16,12 +16,12 @@ database:
     password: "${POSTGRES_PASSWORD}"
 
   neo4j:
-    uri: "${NEO4J_URI:bolt+ssc://45.144.177.128:7687}"
+    uri: "${NEO4J_URI:bolt+ssc://155.212.221.189:7687}"
     user: "${NEO4J_USER:neo4j}"
     password: "${NEO4J_PASSWORD}"
 
   redis:
-    host: "${REDIS_HOST:45.144.177.128}"
+    host: "${REDIS_HOST:155.212.221.189}"
     port: "${REDIS_PORT:6379}"
 
 # Webhooks

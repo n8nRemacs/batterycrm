@@ -1,0 +1,16 @@
+{
+  "official_api": {
+    "client_id": "trTwLtOgDpAtNnq412ec",
+    "client_secret": "VgFdlaIhwk5nLwbyf_i5K6kiji3skDtAmqqgF5lH",
+    "user_id": 157920214,
+    "token_url": "https://api.avito.ru/token",
+    "api_base": "https://api.avito.ru"
+  },
+  "webhook": {
+    "n8n_url": "https://n8n.n8nsrv.ru/webhook/avito-official/incoming"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8790
+  }
+}

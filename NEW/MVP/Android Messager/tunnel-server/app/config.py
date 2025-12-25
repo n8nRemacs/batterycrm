@@ -24,7 +24,7 @@ class PostgresSettings(BaseSettings):
 
 
 class Neo4jSettings(BaseSettings):
-    uri: str = Field(default="bolt+ssc://45.144.177.128:7687")
+    uri: str = Field(default="bolt+ssc://155.212.221.189:7687")
     user: str = Field(default="neo4j")
     password: str = Field(default="")
 
@@ -33,7 +33,7 @@ class Neo4jSettings(BaseSettings):
 
 
 class RedisSettings(BaseSettings):
-    host: str = Field(default="45.144.177.128")
+    host: str = Field(default="155.212.221.189")
     port: int = Field(default=6379)
 
     class Config:

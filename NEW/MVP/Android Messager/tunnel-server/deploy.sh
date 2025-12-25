@@ -4,7 +4,7 @@
 
 set -e
 
-HOST="${1:-45.144.177.128}"
+HOST="${1:-155.212.221.189}"
 APP_DIR="/opt/eldoleado/tunnel-server"
 USER="root"
 

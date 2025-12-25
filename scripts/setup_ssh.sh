@@ -37,12 +37,10 @@ echo "Public key: ${PUB_KEY:0:50}..."
 
 # Setup all servers
 setup_server "n8n" "185.221.214.83" "Mi31415926pS"
-setup_server "ru" "45.144.177.128" "Mi31415926pSss!"
-setup_server "fi" "217.145.79.27" "Mi31415926pSss!"
-setup_server "new" "155.212.221.189" "Mi31415926pSss!"
+setup_server "msg" "155.212.221.189" "Mi31415926pSss!"
 
 echo ""
 echo "Testing connections..."
-for host in 185.221.214.83 45.144.177.128 217.145.79.27 155.212.221.189; do
+for host in 185.221.214.83 155.212.221.189; do
     ssh -o BatchMode=yes -o ConnectTimeout=5 root@$host "echo 'OK'" 2>/dev/null && echo "✅ $host" || echo "❌ $host"
 done

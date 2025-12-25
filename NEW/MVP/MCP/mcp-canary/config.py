@@ -20,12 +20,12 @@ class Settings(BaseSettings):
     PROXY_URL: str = ""  # e.g., http://user:pass@proxy.example.com:8080
     USE_PROXY_FOR_EXTERNAL: bool = True  # Use proxy for VK, Avito external APIs
 
-    # MCP Server URLs (internal)
-    WHATSAPP_URL: str = "http://217.145.79.27:3000"
-    TELEGRAM_URL: str = "http://217.145.79.27:8767"
-    VK_URL: str = "http://45.144.177.128:8767"
-    MAX_URL: str = "http://45.144.177.128:8768"
-    AVITO_URL: str = "http://45.144.177.128:8765"
+    # MCP Server URLs (internal) - all on Messenger Server 155.212.221.189
+    WHATSAPP_URL: str = "http://155.212.221.189:8766"
+    TELEGRAM_URL: str = "http://155.212.221.189:8767"
+    VK_URL: str = "http://155.212.221.189:8767"
+    MAX_URL: str = "http://155.212.221.189:8768"
+    AVITO_URL: str = "http://155.212.221.189:8765"
 
     # API Keys for MCP servers (optional)
     WHATSAPP_API_KEY: str = ""

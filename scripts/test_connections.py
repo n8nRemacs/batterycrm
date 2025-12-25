@@ -280,7 +280,7 @@ def main():
         "MCP servers": test_mcp_servers(),
         "n8n API": test_n8n_api(),
         "Supabase API": test_supabase_api(),
-        "VPN Server": test_server_ping("217.145.79.27", "VPN Server"),
+        "Messenger Server": test_server_ping("155.212.221.189", "Messenger Server"),
         "n8n/Supabase Server": test_server_ping("185.221.214.83", "n8n/Supabase Server"),
         "Android SDK": test_android_sdk(),
     }
