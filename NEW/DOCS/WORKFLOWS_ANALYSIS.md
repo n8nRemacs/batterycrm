@@ -1,239 +1,248 @@
-# ELO Workflows Analysis
+# Workflows Analysis
 
-> Last sync: 2025-12-23 12:10
+**Last sync:** 2025-12-26
 
 ---
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Total workflows (n8n) | 40 |
-| Active | 12 |
-| Inactive | 28 |
+| Category | Active | Inactive | Total |
+|----------|--------|----------|-------|
+| Channel Contour (In) | 4 | 6 | 10 |
+| Channel Contour (Out) | 1 | 5 | 6 |
+| API | 8 | 2 | 10 |
+| AI Contour | 1 | 10 | 11 |
+| Input Contour | 0 | 3 | 3 |
+| Core | 0 | 3 | 3 |
+| Graph Contour | 0 | 1 | 1 |
+| **Total** | **14** | **30** | **44** |
 
 ---
 
 ## Data Flow Diagram
 
 ```
-                              INCOMING MESSAGES
-                                     |
-         +---------------+-----------+-----------+---------------+
-         |               |           |           |               |
-         v               v           v           v               v
-    [WhatsApp]      [Telegram]   [Avito]     [VK/MAX]        [App]
-  ELO_In_WhatsApp  ELO_In_Tg   ELO_In_*    ELO_In_*      ELO_In_App
-     [ACTIVE]      [inactive]  [inactive]  [inactive]     [ACTIVE]
-         |               |           |           |               |
-         +---------------+-----------+-----------+---------------+
-                                     |
-                                     v
-                        +------------------------+
-                        |   ELO_Message_Router   |
-                        |        [ACTIVE]        |
-                        +------------------------+
-                                     |
-                    +----------------+----------------+
-                    |                                 |
-                    v                                 v
-         +--------------------+            +--------------------+
-         | ELO_Client_Resolve |            |  ELO_Core_AI_*     |
-         |      [ACTIVE]      |            |    [inactive]      |
-         +--------------------+            +--------------------+
-                    |
-                    v
-              [PostgreSQL]
-            elo_t_messages
-            elo_t_dialogs
-            elo_t_clients
-
-
-
-                              OUTGOING MESSAGES
-                                     |
-                                     v
-                   +--------------------------------+
-                   | ELO_API_Android_Send_Message   |
-                   |           [ACTIVE]             |
-                   +--------------------------------+
-                                     |
-                                     v
-                              [Redis Queue]
-                        queue:outgoing:{channel}
-                                     |
-         +---------------+-----------+-----------+---------------+
-         |               |           |           |               |
-         v               v           v           v               v
-   ELO_Out_WA     ELO_Out_Tg    ELO_Out_VK  ELO_Out_MAX  ELO_Out_Avito
-   [inactive]     [inactive]   [inactive]  [inactive]    [inactive]
-         |               |           |           |               |
-         v               v           v           v               v
-    [Baileys]      [Telegram]    [VK API]   [MAX API]    [Avito API]
+                            MCP Channels
+                                 |
+    +----------+----------+------+------+----------+----------+
+    |          |          |             |          |          |
+    v          v          v             v          v          v
+ELO_In_   ELO_In_    ELO_In_       ELO_In_    ELO_In_    ELO_In_
+WhatsApp  Telegram   Avito         VK         MAX        App
+  [ON]      [off]    [ON]         [off]      [off]      [ON]
+    |          |          |             |          |          |
+    +----------+----------+------+------+----------+----------+
+                                 |
+                                 v
+                    +------------------------+
+                    | ELO_Core_Tenant_Resolver|
+                    |         [off]          |
+                    +------------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    |   ELO_Client_Resolve   |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    |   ELO_Input_Ingest     |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    |   ELO_Input_Batcher    |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    |  ELO_Input_Processor   |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    | ELO_Core_Dialog_Engine |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+          +----------------------+----------------------+
+          |                                             |
+          v                                             v
++-------------------+                        +-------------------+
+| AI Processing     |                        | Operator Mode     |
+| (auto-response)   |                        | (manual)          |
++-------------------+                        +-------------------+
+          |                                             |
+          v                                             v
++-------------------+                        +-------------------+
+| ELO_AI_Extract    |                        | ELO_Message_Router|
+|       [off]       |                        |       [ON]        |
++-------------------+                        +-------------------+
+          |                                             |
+          v                                             |
++-------------------+                                   |
+| ELO_Decision      |                                   |
+|       [off]       |                                   |
++-------------------+                                   |
+          |                                             |
+          v                                             |
++-------------------+                                   |
+| ELO_Executor      |                                   |
+|       [off]       |                                   |
++-------------------+                                   |
+          |                                             |
+          +----------------------+----------------------+
+                                 |
+                                 v
+                    +------------------------+
+                    |    ELO_Out_Router      |
+                    |         [off]          |
+                    +------------------------+
+                                 |
+    +----------+----------+------+------+----------+
+    |          |          |             |          |
+    v          v          v             v          v
+ELO_Out_   ELO_Out_  ELO_Out_      ELO_Out_   ELO_Out_
+WhatsApp   Telegram  Avito          VK         MAX
+  [ON]      [off]    [off]        [off]      [off]
 ```
 
 ---
 
-## Active Workflows (12)
+## Channel Contour
 
-| Workflow | Folder | Webhook Path |
-|----------|--------|--------------|
-| ELO_API_Android_Auth | API | /android/auth/login |
-| ELO_API_Android_Dialogs | API | /android/dialogs |
-| ELO_API_Android_Logout | API | /android/logout |
-| ELO_API_Android_Messages | API | /android/messages |
-| ELO_API_Android_Normalize | API | /android/normalize |
-| ELO_API_Android_Register_FCM | API | /android-register-fcm |
-| ELO_API_Android_Send_Message | API | /android/messages/send |
-| ELO_Client_Resolve | Client Contour | /elo-client-resolve |
-| ELO_Core_AI_Test_Stub | AI Contour | /elo-core-ingest |
-| ELO_In_App | Channel Contour | /in-app |
-| ELO_In_WhatsApp | Channel Contour | /whatsapp-incoming |
-| ELO_Message_Router | Core Contour | /router |
+### Inbound (ELO_In_*)
+
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_In_WhatsApp | ON | Webhook | WhatsApp messages via MCP |
+| ELO_In_Telegram | off | Webhook | Telegram messages via MCP |
+| ELO_In_Avito | ON | Webhook | Avito messages via MCP |
+| ELO_In_VK | off | Webhook | VK messages via MCP |
+| ELO_In_MAX | off | Webhook | MAX messages via MCP |
+| ELO_In_App | ON | Webhook | Android app messages |
+| ELO_In_Form | off | Webhook | Web form submissions |
+| ELO_In_Phone | off | Webhook | Phone call transcriptions |
+| ELO_In_Avito_User | - | Webhook | Avito user account (legacy) |
+
+**Flow:** Webhook -> Normalize -> Tenant Resolver -> Client Resolve -> Input Ingest
+
+### Outbound (ELO_Out_*)
+
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_Out_Router | off | Execute | Routes to channel-specific Out |
+| ELO_Out_WhatsApp | ON | Execute | Send via WhatsApp MCP |
+| ELO_Out_Telegram | off | Execute | Send via Telegram MCP |
+| ELO_Out_Avito | off | Execute | Send via Avito MCP |
+| ELO_Out_VK | off | Execute | Send via VK MCP |
+| ELO_Out_MAX | off | Execute | Send via MAX MCP |
+
+**Flow:** Out Router -> Channel Out -> MCP -> Messenger
 
 ---
 
-## Android API Endpoints
+## API Contour
 
-| Endpoint | Workflow | Method | Status |
-|----------|----------|--------|--------|
-| /android/auth/login | ELO_API_Android_Auth | POST | ACTIVE |
-| /android/dialogs | ELO_API_Android_Dialogs | GET | ACTIVE |
-| /android/messages | ELO_API_Android_Messages | GET | ACTIVE |
-| /android/messages/send | ELO_API_Android_Send_Message | POST | ACTIVE |
-| /android/normalize | ELO_API_Android_Normalize | POST | ACTIVE |
-| /android/logout | ELO_API_Android_Logout | POST | ACTIVE |
-| /android-register-fcm | ELO_API_Android_Register_FCM | POST | ACTIVE |
+| Workflow | Active | Endpoint | Description |
+|----------|--------|----------|-------------|
+| ELO_API_Android_Auth | ON | POST /android/auth | Login with PIN |
+| ELO_API_Android_Logout | ON | POST /android/logout | Logout device |
+| ELO_API_Android_Dialogs | ON | GET /android/dialogs | Get operator dialogs |
+| ELO_API_Android_Messages | ON | GET /android/messages | Get dialog messages |
+| ELO_API_Android_Send_Message | ON | POST /android/send | Send message |
+| ELO_API_Android_Normalize | ON | POST /android/normalize | Normalize operator reply |
+| ELO_API_Android_Register_FCM | ON | POST /android/fcm | Register FCM token |
 
 ---
 
-## Workflows by Contour
+## AI Contour
 
-### Channel Contour - ELO_In (8 workflows)
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_Core_AI_Test_Stub | ON | Execute | Test stub (returns mock) |
+| ELO_AI_Extract | off | Execute | Extract entities from message |
+| ELO_Context_Collector | off | Execute | Collect context for AI |
+| ELO_Core_Context_Builder | off | Execute | Build full context |
+| ELO_Decision | off | Execute | Make AI decision |
+| ELO_Executor | off | Execute | Execute AI decision |
+| ELO_Core_Response_Generator | off | Execute | Generate response text |
+| ELO_Core_Stage_Manager | off | Execute | Manage funnel stages |
+| ELO_Core_Triggers_Checker | off | Execute | Check triggers |
+| ELO_Core_AI_Derive | off | Execute | Derive insights |
+| ELO_Core_Graph_Writer | off | Execute | Write to Neo4j |
 
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_In_WhatsApp | ACTIVE | webhook: /whatsapp-incoming |
-| ELO_In_App | ACTIVE | webhook: /in-app |
-| ELO_In_Telegram | inactive | webhook: /telegram-in |
-| ELO_In_Avito | inactive | webhook: /avito |
-| ELO_In_VK | inactive | webhook: /vk |
-| ELO_In_MAX | inactive | webhook: /max |
-| ELO_In_Phone | inactive | webhook: /phone |
-| ELO_In_Form | inactive | webhook: /form |
+---
 
-### Channel Contour - ELO_Out (6 workflows)
+## Input Contour
 
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Out_WhatsApp | inactive | schedule (3 sec) |
-| ELO_Out_Telegram | inactive | schedule (3 sec) |
-| ELO_Out_VK | inactive | schedule (3 sec) |
-| ELO_Out_MAX | inactive | schedule (3 sec) |
-| ELO_Out_Avito | inactive | schedule (3 sec) |
-| ELO_Out_Router | inactive | webhook |
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_Input_Ingest | off | Execute | Initial message ingest |
+| ELO_Input_Batcher | off | Schedule | Batch messages |
+| ELO_Input_Processor | off | Execute | Process batched messages |
 
-### Input Contour (3 workflows)
+---
 
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Input_Batcher | inactive | schedule |
-| ELO_Input_Processor | inactive | schedule |
-| ELO_Input_Ingest | inactive | webhook |
+## Core
 
-### Client Contour (1 workflow)
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_Core_Tenant_Resolver | off | Execute | Resolve tenant from webhook_hash |
+| ELO_Core_Dialog_Engine | off | Execute | Main dialog processing |
+| ELO_Core_Batcher | off | Execute | Message batching |
+| ELO_Message_Router | ON | Execute | Route to operator/channel |
 
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Client_Resolve | ACTIVE | webhook: /elo-client-resolve |
+---
 
-### Core Contour (4 workflows)
+## Graph Contour
 
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Message_Router | ACTIVE | webhook: /router |
-| ELO_Core_Dialog_Engine | inactive | - |
-| ELO_Core_Tenant_Resolver | inactive | - |
-| ELO_Core_Batcher | inactive | webhook |
-
-### AI Contour (10 workflows)
-
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Core_AI_Test_Stub | ACTIVE | webhook: /elo-core-ingest |
-| ELO_AI_Extract | inactive | webhook |
-| ELO_Context_Collector | inactive | webhook |
-| ELO_Core_AI_Derive | inactive | webhook |
-| ELO_Core_Context_Builder | inactive | webhook |
-| ELO_Core_Graph_Writer | inactive | webhook |
-| ELO_Core_Response_Generator | inactive | webhook |
-| ELO_Core_Stage_Manager | inactive | webhook |
-| ELO_Core_Triggers_Checker | inactive | webhook |
-| ELO_Decision | inactive | webhook |
-| ELO_Executor | inactive | webhook |
-
-### Graph Contour (1 workflow)
-
-| Workflow | Status | Trigger |
-|----------|--------|---------|
-| ELO_Graph_Query | inactive | webhook: /elo-graph-query |
+| Workflow | Active | Trigger | Description |
+|----------|--------|---------|-------------|
+| ELO_Graph_Query | off | Webhook | Execute Cypher queries |
 
 ---
 
 ## Current Issues
 
-1. **ELO_Out_* inactive** - Outgoing message processors are not running
-   - Messages queued in Redis but not sent to channels
+### 1. Many workflows are inactive
+Most AI and Core workflows are disabled. Only the basic message flow works:
+- ELO_In_* -> ELO_Message_Router -> ELO_Out_WhatsApp
 
-2. **ELO_Input_Batcher inactive** - Redis batching not working
-   - Set Deadline node hangs (Redis credentials issue)
+### 2. Android App flow is separate
+The Android app uses direct API calls and bypasses the main flow:
+- API Auth -> API Dialogs -> API Messages -> API Send
 
-3. **AI Contour inactive** - Only test stub is active
-   - Full AI pipeline not operational
+### 3. Missing Client Resolve integration
+ELO_Client_Resolve exists but has no ELO tag and is not properly integrated.
 
-4. **DB Get Tenant mismatch** - Looking for wrong session_id
-   - Query uses `eldoleado_arceos` but DB has `eldoleado_main`
-
----
-
-## Servers
-
-| Server | IP | Services |
-|--------|-----|----------|
-| n8n | 185.221.214.83 | n8n, PostgreSQL, Redis |
-| MessagerOne | 155.212.221.189 | WhatsApp Baileys (8769) |
-| Finnish | 217.145.79.27 | Telegram (8767) |
-| RU Server | 45.144.177.128 | Avito, VK, MAX, Neo4j |
+### 4. Avito Official API not integrated
+The official Avito API workflows are separate and not part of ELO flow.
 
 ---
 
-## File Structure
+## Recommended Activation Order
 
-```
-NEW/workflows/
-├── API/                          # Android API endpoints
-│   ├── ELO_API_Android_Auth.json
-│   ├── ELO_API_Android_Dialogs.json
-│   ├── ELO_API_Android_Messages.json
-│   ├── ELO_API_Android_Normalize.json
-│   ├── ELO_API_Android_Send_Message.json
-│   ├── ELO_API_Android_Logout.json
-│   └── ELO_API_Android_Register_FCM.json
-├── Channel Contour/
-│   ├── ELO_In/                   # Incoming message handlers
-│   │   ├── ELO_In_WhatsApp.json  [ACTIVE]
-│   │   ├── ELO_In_App.json       [ACTIVE]
-│   │   └── ...
-│   └── ELO_Out/                  # Outgoing message senders
-│       ├── ELO_Out_WhatsApp.json [inactive]
-│       └── ...
-├── Input Contour/                # Message batching
-├── Client Contour/               # Client resolution
-├── Core Contour/                 # Core routing
-├── AI Contour/                   # AI processing
-└── Graph Contour/                # Neo4j queries
-```
+1. **Phase 1: Basic Flow**
+   - ELO_Core_Tenant_Resolver
+   - ELO_Client_Resolve (add ELO tag)
+   - ELO_Input_Ingest
+   - ELO_Out_Router
+
+2. **Phase 2: AI Processing**
+   - ELO_AI_Extract
+   - ELO_Context_Collector
+   - ELO_Decision
+
+3. **Phase 3: Full AI**
+   - ELO_Executor
+   - ELO_Core_Response_Generator
+   - ELO_Core_Graph_Writer
 
 ---
 
-*Generated by sync script*
+*Generated by Claude Code*

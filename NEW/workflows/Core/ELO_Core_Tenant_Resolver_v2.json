@@ -1,0 +1,224 @@
+{
+  "name": "ELO_Core_Tenant_Resolver_v2",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trigger-1",
+      "name": "When Executed",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [-800, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Extract session_id based on channel\nconst channel = data.channel || 'unknown';\nlet sessionId = null;\n\n// WhatsApp: meta.raw.sessionId\nif (channel === 'whatsapp') {\n  sessionId = data.meta?.raw?.sessionId || data.profile_id;\n}\n// Telegram: bot_token or session_id\nelse if (channel === 'telegram') {\n  sessionId = data.meta?.bot_token || data.profile_id;\n}\n// Avito: user_id or session_id\nelse if (channel === 'avito') {\n  sessionId = data.meta?.user_id || data.profile_id;\n}\n// VK: group_id or session_id\nelse if (channel === 'vk') {\n  sessionId = data.meta?.raw?.group_id?.toString() || data.profile_id;\n}\n// MAX: bot_token or session_id\nelse if (channel === 'max') {\n  sessionId = data.meta?.bot_token || data.profile_id;\n}\n// Form/Phone: use default\nelse {\n  sessionId = data.profile_id || 'default';\n}\n\nconst cacheKey = `cache:tenant:${channel}:${sessionId}`;\n\nreturn {\n  ...data,\n  _resolver: {\n    channel: channel,\n    session_id: sessionId,\n    cache_key: cacheKey\n  }\n};"
+      },
+      "id": "prepare-1",
+      "name": "Prepare Lookup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-576, 0]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json._resolver.cache_key }}"
+      },
+      "id": "redis-get-1",
+      "name": "Cache Get Tenant",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-352, 0],
+      "alwaysOutputData": true,
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cache-hit",
+              "leftValue": "={{ $json.propertyName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-cache-1",
+      "name": "Cache Hit?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-128, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('Prepare Lookup').first().json;\nconst cached = JSON.parse($input.first().json.propertyName);\n\nreturn {\n  ...originalData,\n  tenant_id: cached.tenant_id,\n  channel_account_id: cached.channel_account_id,\n  _resolver: {\n    ...originalData._resolver,\n    source: 'cache'\n  }\n};"
+      },
+      "id": "parse-cache-1",
+      "name": "Parse Cached Tenant",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [96, -112]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  ca.id as channel_account_id,\n  ca.tenant_id,\n  t.name as tenant_name,\n  t.settings as tenant_settings\nFROM elo_t_channel_accounts ca\nJOIN elo_t_tenants t ON t.id = ca.tenant_id\nJOIN elo_channels ch ON ch.id = ca.channel_id\nWHERE ch.code = '{{ $('Prepare Lookup').item.json._resolver.channel }}'\n  AND ca.session_id = '{{ $('Prepare Lookup').item.json._resolver.session_id }}'\n  AND ca.is_active = true\n  AND t.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "db-lookup-1",
+      "name": "DB Lookup Tenant",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [96, 112],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "db-found",
+              "leftValue": "={{ $json.tenant_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ]
+        }
+      },
+      "id": "if-db-1",
+      "name": "DB Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [320, 112]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Prepare Lookup').item.json._resolver.cache_key }}",
+        "value": "={{ JSON.stringify({ tenant_id: $json.tenant_id, channel_account_id: $json.channel_account_id }) }}",
+        "expire": true,
+        "ttl": 3600
+      },
+      "id": "redis-set-1",
+      "name": "Set Cache",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [544, 0],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('Prepare Lookup').first().json;\nconst dbResult = $('DB Lookup Tenant').first().json;\n\nreturn {\n  ...originalData,\n  tenant_id: dbResult.tenant_id,\n  channel_account_id: dbResult.channel_account_id,\n  tenant_name: dbResult.tenant_name,\n  tenant_settings: dbResult.tenant_settings,\n  _resolver: {\n    ...originalData._resolver,\n    source: 'database'\n  }\n};"
+      },
+      "id": "attach-db-1",
+      "name": "Attach DB Tenant",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [768, 0]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "dlq:unknown_tenant",
+        "messageData": "={{ JSON.stringify($('Prepare Lookup').first().json) }}",
+        "tail": true
+      },
+      "id": "dlq-1",
+      "name": "DLQ Unknown Tenant",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [544, 224],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalData = $('Prepare Lookup').first().json;\n\n// Return with error flag - caller should handle\nreturn {\n  ...originalData,\n  tenant_id: null,\n  channel_account_id: null,\n  _resolver: {\n    ...originalData._resolver,\n    source: 'not_found',\n    error: 'Unknown session - not registered in elo_t_channel_accounts'\n  }\n};"
+      },
+      "id": "error-1",
+      "name": "Return Not Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [768, 224]
+    }
+  ],
+  "connections": {
+    "When Executed": {
+      "main": [[{ "node": "Prepare Lookup", "type": "main", "index": 0 }]]
+    },
+    "Prepare Lookup": {
+      "main": [[{ "node": "Cache Get Tenant", "type": "main", "index": 0 }]]
+    },
+    "Cache Get Tenant": {
+      "main": [[{ "node": "Cache Hit?", "type": "main", "index": 0 }]]
+    },
+    "Cache Hit?": {
+      "main": [
+        [{ "node": "Parse Cached Tenant", "type": "main", "index": 0 }],
+        [{ "node": "DB Lookup Tenant", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Cached Tenant": {
+      "main": [[{ "node": "Attach DB Tenant", "type": "main", "index": 0 }]]
+    },
+    "DB Lookup Tenant": {
+      "main": [[{ "node": "DB Found?", "type": "main", "index": 0 }]]
+    },
+    "DB Found?": {
+      "main": [
+        [{ "node": "Set Cache", "type": "main", "index": 0 }],
+        [{ "node": "DLQ Unknown Tenant", "type": "main", "index": 0 }]
+      ]
+    },
+    "Set Cache": {
+      "main": [[{ "node": "Attach DB Tenant", "type": "main", "index": 0 }]]
+    },
+    "DLQ Unknown Tenant": {
+      "main": [[{ "node": "Return Not Found", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": { "description": "Universal tenant resolver for all channels. Uses cache with DB fallback." },
+  "tags": [{ "name": "ELO" }, { "name": "Core" }]
+}

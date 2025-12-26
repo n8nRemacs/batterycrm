@@ -9,10 +9,12 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eldoleado.app.R
 import com.eldoleado.app.channels.ChannelCredentialsManager
+import com.eldoleado.app.channels.ChannelRegistrationService
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
@@ -40,6 +42,7 @@ class MaxSetupActivity : AppCompatActivity() {
     }
 
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
+    private lateinit var channelRegistrationService: ChannelRegistrationService
 
     // Views
     private lateinit var btnBack: ImageView
@@ -63,6 +66,7 @@ class MaxSetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_max_setup)
 
         channelCredentialsManager = ChannelCredentialsManager(this)
+        channelRegistrationService = ChannelRegistrationService(this)
 
         initViews()
         setupListeners()
@@ -246,10 +250,39 @@ class MaxSetupActivity : AppCompatActivity() {
     private fun onConnectionSuccess(token: String, userId: String, name: String) {
         pollJob?.cancel()
 
-        // Save credentials
+        // Save credentials locally
         channelCredentialsManager.saveMax(token, userId, name)
 
-        // Show success UI
+        // Register with backend
+        CoroutineScope(Dispatchers.Main).launch {
+            statusText.text = "Регистрация канала..."
+
+            val result = channelRegistrationService.registerMax(
+                token = token,
+                userId = userId,
+                name = name
+            )
+
+            when (result) {
+                is ChannelRegistrationService.RegistrationResult.Success -> {
+                    Log.i(TAG, "MAX registered: ${result.channelAccountId}")
+                    showSuccessUI(userId, name)
+                }
+                is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                    Log.w(TAG, "MAX conflict: ${result.message}")
+                    channelCredentialsManager.clearMax()
+                    Toast.makeText(this@MaxSetupActivity, result.message, Toast.LENGTH_LONG).show()
+                    showQrError(result.message)
+                }
+                else -> {
+                    Log.w(TAG, "Registration warning: $result")
+                    showSuccessUI(userId, name)
+                }
+            }
+        }
+    }
+
+    private fun showSuccessUI(userId: String, name: String) {
         stepQrCode.visibility = View.GONE
         stepSuccess.visibility = View.VISIBLE
         successUserId.text = userId

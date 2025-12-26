@@ -1,0 +1,703 @@
+{
+  "updatedAt": "2025-12-12T09:11:33.000Z",
+  "createdAt": "2025-12-09T18:50:14.629Z",
+  "id": "lmMxcDEJAcverxhC",
+  "name": "ELO_Core_Batcher",
+  "description": null,
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ca4b77f3-55e7-45c0-9544-ac06c1feca39",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $input.first().json;\n\n// Генерируем ключи для Redis\nconst batchKey = `elo:${msg.channel}:${msg.external_chat_id}`;\n\n// Получаем batch_timeout из tenant_settings или используем default 10 сек\nconst batchTimeout = msg.tenant_settings?.batch_timeout_sec || 10;\n\nreturn {\n  batch_key: batchKey,\n  queue_key: `queue:${batchKey}`,\n  last_seen_key: `last_seen:${batchKey}`,\n  lock_key: `lock:${batchKey}`,\n  now_iso: new Date().toISOString(),\n  batch_timeout_sec: batchTimeout,\n  batch_timeout_ms: batchTimeout * 1000,\n  message: msg\n};"
+      },
+      "id": "d79b7c02-aa60-476f-aff1-7923127a196d",
+      "name": "Prepare Keys",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1200,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.queue_key }}",
+        "messageData": "={{ JSON.stringify($json.message) }}",
+        "tail": true
+      },
+      "id": "1e6fc3a1-9737-4263-9cba-8339d640c05d",
+      "name": "Push to Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1008,
+        208
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $json.last_seen_key }}",
+        "value": "={{ $json.now_iso }}",
+        "expire": true,
+        "ttl": 600
+      },
+      "id": "372ea1b5-efe6-4ea8-ab70-0a64017c2548",
+      "name": "Update Last Seen",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        208
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.lock_key }}",
+        "options": {}
+      },
+      "id": "4bd89ba2-bc5d-404f-9fa5-f0094f9e8e5f",
+      "name": "Get Lock",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        208
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.value === null || $json.value === undefined || $json.value === '' }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c896e484-0006-40b7-bbea-8b0b0b8e8cb8",
+      "name": "Lock Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Prepare Keys').item.json.lock_key }}",
+        "value": "busy",
+        "expire": true,
+        "ttl": 300
+      },
+      "id": "d55adfc2-6a17-4ec6-96dc-ffd557c2f734",
+      "name": "Acquire Lock (TTL 300s)",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {success:true, queued:true, is_first:false, batch_key: $('Prepare Keys').item.json.batch_key} }}",
+        "options": {}
+      },
+      "id": "eceeea69-97e8-47ef-9d4a-fa7897c09559",
+      "name": "Respond Queued",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {success:true, queued:true, is_first:true, batch_timeout_sec: $('Prepare Keys').item.json.batch_timeout_sec, batch_key: $('Prepare Keys').item.json.batch_key} }}",
+        "options": {}
+      },
+      "id": "1e10589e-d6ef-482a-824a-2f1cc018221d",
+      "name": "Respond First",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        16,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ $('Prepare Keys').item.json.batch_timeout_sec }}",
+        "unit": "seconds"
+      },
+      "id": "cac9d2a7-b31a-4fa2-b0a9-20c2133db1ab",
+      "name": "Wait Batch Timeout",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        208,
+        96
+      ],
+      "webhookId": "elo-batcher-wait"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Prepare Keys').item.json.last_seen_key }}",
+        "options": {}
+      },
+      "id": "cbae15e5-e900-48f7-8a3e-e4f5e339f412",
+      "name": "Get Last Seen",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        416,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const last = $json.value ? Date.parse($json.value) : 0;\nconst batchTimeoutMs = $('Prepare Keys').item.json.batch_timeout_ms || 10000;\nconst quiet = Date.now() - last >= batchTimeoutMs;\nreturn { quiet, last_seen: $json.value, elapsed_ms: Date.now() - last };"
+      },
+      "id": "ee20a209-5ced-4566-90d0-31923fc93359",
+      "name": "Quiet >= Timeout?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.quiet === true }}",
+              "value2": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c039f393-1a16-4d94-bbc9-2c1681657685",
+      "name": "Silence Reached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        816,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Prepare Keys').item.json.queue_key }}",
+        "options": {}
+      },
+      "id": "12ff6047-e8a6-433a-9041-271920d88497",
+      "name": "Get Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Получаем массив из Redis\nconst raw = Array.isArray($json.value) ? $json.value : ($json.propertyName || []);\n\nconst items = raw.map(s => {\n  try {\n    return typeof s === 'string' ? JSON.parse(s) : s;\n  } catch (e) {\n    return { text: String(s) };\n  }\n});\n\nreturn { snapshot: items, count: items.length };"
+      },
+      "id": "bcd92b60-4ca1-4d2f-9441-18d0f17ad340",
+      "name": "Normalize Snapshot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.count }}",
+              "operation": "smaller",
+              "value2": 1
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ef512731-d892-4786-9105-0c789e090846",
+      "name": "Empty?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Prepare Keys').item.json.queue_key }}"
+      },
+      "id": "c4ea5d09-90f5-41d2-8a74-f250d6511715",
+      "name": "Delete Queue",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Объединяем сообщения из батча\nconst rawArr = $json.snapshot || [];\n\n// Парсим каждое сообщение\nconst messages = rawArr.map(s => {\n  try {\n    return typeof s === 'string' ? JSON.parse(s) : s;\n  } catch {\n    return { text: String(s) };\n  }\n});\n\nif (messages.length === 0) {\n  return [{ json: { error: 'empty_batch' } }];\n}\n\n// Сортируем по timestamp\nconst toTs = (m) => {\n  const t = m.timestamp ? Date.parse(m.timestamp) : NaN;\n  return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;\n};\nmessages.sort((a, b) => toTs(a) - toTs(b));\n\n// Собираем тексты\nconst texts = messages\n  .map(m => m.media?.voice_transcribed_text\n    ? `[Голосовое]: ${m.media.voice_transcribed_text}`\n    : (m.text || ''))\n  .filter(t => t.trim());\n\nconst combinedText = texts.join('\\n\\n');\n\n// Берём первое сообщение как базу\nconst base = messages[0];\n\n// Находим последнее с raw данными\nconst lastWithRaw = [...messages].reverse().find(m => m?.meta?.raw);\n\n// Формируем выход\nconst output = {\n  ...base,\n  text: combinedText,\n  meta: {\n    ...base.meta,\n    ...(lastWithRaw?.meta?.raw ? { raw: lastWithRaw.meta.raw } : {}),\n    batched: true,\n    batch_size: messages.length,\n    batch_timeout_sec: $('Prepare Keys').item.json.batch_timeout_sec,\n    original_messages: messages.map(m => ({\n      timestamp: m.timestamp,\n      type: m.meta?.original_media_type || 'text',\n      text_length: (m.text || '').length\n    })),\n    combined_at: new Date().toISOString()\n  }\n};\n\nreturn [{ json: output }];"
+      },
+      "id": "3f8895b4-8aa2-41c0-b052-3aa43a10d016",
+      "name": "Combine Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Prepare Keys').item.json.lock_key }}"
+      },
+      "id": "df99a9a6-725c-4097-af60-d3d2b3590942",
+      "name": "Release Lock",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        96
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "empty-batch-check",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "empty_batch",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2288,
+        96
+      ],
+      "id": "09610bbe-a7c3-4367-87be-dfda8f8c93bf",
+      "name": "Skip Empty?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Подготавливаем итоговый контракт для Dialog Engine\nconst input = $input.first()?.json || {};\n\nconst output = {\n  ...input,\n  success: true\n};\n\n// Сохраняем tenant_id\nif (input.tenant_id) {\n  output.tenant_id = input.tenant_id;\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        192
+      ],
+      "id": "59b43466-0653-4456-bddb-5fabf96715d9",
+      "name": "Prepare Output"
+    }
+  ],
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Keys": {
+      "main": [
+        [
+          {
+            "node": "Push to Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push to Queue": {
+      "main": [
+        [
+          {
+            "node": "Update Last Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Last Seen": {
+      "main": [
+        [
+          {
+            "node": "Get Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Lock": {
+      "main": [
+        [
+          {
+            "node": "Lock Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lock Exists?": {
+      "main": [
+        [
+          {
+            "node": "Acquire Lock (TTL 300s)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Queued",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Lock (TTL 300s)": {
+      "main": [
+        [
+          {
+            "node": "Respond First",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond First": {
+      "main": [
+        [
+          {
+            "node": "Wait Batch Timeout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Batch Timeout": {
+      "main": [
+        [
+          {
+            "node": "Get Last Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Last Seen": {
+      "main": [
+        [
+          {
+            "node": "Quiet >= Timeout?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quiet >= Timeout?": {
+      "main": [
+        [
+          {
+            "node": "Silence Reached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Silence Reached?": {
+      "main": [
+        [
+          {
+            "node": "Get Queue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait Batch Timeout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Queue": {
+      "main": [
+        [
+          {
+            "node": "Normalize Snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Empty?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty?": {
+      "main": [
+        [
+          {
+            "node": "Delete Queue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Queue": {
+      "main": [
+        [
+          {
+            "node": "Combine Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Messages": {
+      "main": [
+        [
+          {
+            "node": "Release Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Lock": {
+      "main": [
+        [
+          {
+            "node": "Skip Empty?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Empty?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Prepare Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "b75360ab-c14a-4e40-a5d1-1a7fa121a93b",
+  "activeVersionId": null,
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-09T18:50:14.639Z",
+      "createdAt": "2025-12-09T18:50:14.639Z",
+      "role": "workflow:owner",
+      "workflowId": "lmMxcDEJAcverxhC",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-26T07:11:12.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-25",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T04:04:01.292Z",
+      "createdAt": "2025-11-23T04:04:01.292Z",
+      "id": "eiI07cPEeFxzR69p",
+      "name": "Core"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
+}

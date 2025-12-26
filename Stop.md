@@ -1,91 +1,83 @@
-# Stop Session - 2025-12-25 (продолжение)
+# Stop Session - 2025-12-26
 
 ## Что сделано сегодня
 
-### 1. Avito Official API — Исследование
+### 1. Telegram Bot Integration
 
-Протестированы credentials:
-```
-Client_id: MS0TjX2bwNcLapoX7YCc
-Client_secret: QrhNXcvAzZexWOaFE99kMiRPDSE1hTZwkUYX4RFN
-User ID: 157920214 (РемАкс)
-```
+- ✅ Подключен бот @remacsbot через Android приложение
+- ✅ Исправлен MCP webhook URL: `telegram-incoming` → `telegram-in`
+- ✅ Добавлена регистрация бота в MCP из Android приложения
+- ✅ Исправлено поле credentials: `token` → `bot_token`
+- ✅ MCP успешно пересылает сообщения в n8n (200 OK)
 
-**Scopes получены:**
-- messenger:read ✅
-- messenger:write ✅
-- items:info, stats:read, user:read ✅
+### 2. HTTPS Gateway
 
-### 2. Avito API — Что бесплатно/платно
+Настроен nginx + Let's Encrypt на msg.eldoleado.ru:
+- https://msg.eldoleado.ru/telegram/
+- https://msg.eldoleado.ru/whatsapp/
+- https://msg.eldoleado.ru/avito/
+- https://msg.eldoleado.ru/max/
+- https://msg.eldoleado.ru/vk/
 
-| Функция | Бесплатно | Платно (402) |
-|---------|:---------:|:------------:|
-| OAuth токен | ✅ | |
-| GET /chats (список + last_message) | ✅ | |
-| POST /webhook (подписка) | ✅ | |
-| **Отправка webhooks от Avito** | | ❌ |
-| GET /messages (полная история) | | ❌ |
-| POST /messages (отправка) | | ❌ |
+### 3. Документация
 
-**Вывод:** Webhook подписка создаётся бесплатно, но Avito НЕ отправляет webhooks без платной подписки.
-
-### 3. Решение — Polling
-
-Создан workflow для polling каждые 15 секунд:
-```
-NEW/MVP/MCP/mcp-avito-camoufox/n8n-avito-polling.json
-```
-
-Схема:
-```
-Schedule (15 сек) → Get Token → GET /chats?unread_only=true → Parse → Queue
-```
-
-### 4. n8n Workflows
-
-| Workflow | Статус | Примечание |
-|----------|--------|------------|
-| ELO_In_Avito | ✅ Active | Webhook (не работает без платной подписки) |
-| ELO_Avito_Polling | 📄 JSON | Нужно импортировать |
-
-### 5. mcp-avito-camoufox
-
-- ✅ Логин через браузер работает
-- ✅ SMS авторизация работает
-- ✅ IP: 217.114.14.17 (через iptables SNAT)
-- ✅ Сессии сохраняются
-- ❌ WebSocket закрывается Avito
-- ❌ Internal API возвращает 403
-
-### 6. AVITO_RESEARCH.md — Обновлён
-
-Полная документация:
-- Сравнение Official API vs Camoufox
-- Все endpoints с статусами
-- Webhook формат
-- Ограничения
+Создан `NEW/DOCS/NEW_Channel_Add.md` — полное руководство по добавлению новых каналов.
 
 ---
 
-## Файлы изменены/созданы
+## Нерешённые проблемы
 
-```
-NEW/MVP/MCP/mcp-avito-camoufox/
-├── AVITO_RESEARCH.md          # Полное исследование
-├── n8n-avito-polling.json     # Workflow для импорта
-├── avito_channel.py           # Добавлен _extract_hash_id()
-└── server.py                  # Добавлены debug endpoints
+### Проблема 1: Неактивный Tenant Resolver
+
+`ELO_In_Telegram_Bot` вызывает `BAT_Tenant_Resolver` (ID: `rRO6sxLqiCdgvLZz`), но он **неактивен**.
+
+**Решение (выбрать одно):**
+- A: Активировать `BAT_Tenant_Resolver` в n8n UI
+- B: Изменить `ELO_In_Telegram_Bot` — вызывать `ELO_Client_Resolve` (ID: `OHjjTQDguN2G6xin`)
+
+### Проблема 2: WhatsApp credential маппинг
+
+В `ELO_Client_Resolve` → `Validate Input`:
+```javascript
+// Сейчас:
+case 'whatsapp': credential = input.profile_id || input.meta?.raw?.sessionId; break;
+// Нужно:
+case 'whatsapp': credential = input.session_id || input.profile_id || input.meta?.raw?.sessionId; break;
 ```
 
 ---
 
 ## Инфраструктура
 
-| Сервер | IP | Сервисы |
-|--------|-----|---------|
-| Messenger | 155.212.221.189 (→ 217.114.14.17) | mcp-avito-camoufox :8793 |
-| n8n | 185.221.214.83 | n8n, PostgreSQL |
+| Компонент | Статус |
+|-----------|--------|
+| MCP Telegram | ✅ 155.212.221.189:8761 |
+| HTTPS Gateway | ✅ msg.eldoleado.ru |
+| ELO_In_Telegram_Bot | ✅ Active |
+| ELO_Client_Resolve | ✅ Active |
+| BAT_Tenant_Resolver | ❌ Inactive |
 
 ---
 
-*Сессия завершена: 2025-12-25*
+## Файлы изменены
+
+```
+app/src/main/java/com/eldoleado/app/channels/
+├── ChannelRegistrationService.kt     # bot_token field
+├── setup/TelegramSetupActivity.kt    # MCP registration
+NEW/DOCS/
+├── NEW_Channel_Add.md                # Новое руководство
+```
+
+---
+
+## Следующие шаги
+
+1. [ ] Активировать resolver (вариант A или B)
+2. [ ] Тест Telegram бота
+3. [ ] Проверить WhatsApp
+4. [ ] Исправить credential маппинг если нужно
+
+---
+
+*Сессия завершена: 2025-12-26*

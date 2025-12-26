@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.eldoleado.app.R
 import com.eldoleado.app.SessionManager
 import com.eldoleado.app.channels.ChannelCredentialsManager
+import com.eldoleado.app.channels.ChannelRegistrationService
 import com.eldoleado.app.channels.ChannelStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +39,7 @@ class AvitoSetupActivity : AppCompatActivity() {
     }
 
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
+    private lateinit var channelRegistrationService: ChannelRegistrationService
     private lateinit var sessionManager: SessionManager
 
     // Views
@@ -61,6 +63,7 @@ class AvitoSetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_avito_setup)
 
         channelCredentialsManager = ChannelCredentialsManager(this)
+        channelRegistrationService = ChannelRegistrationService(this)
         sessionManager = SessionManager(this)
 
         initViews()
@@ -409,18 +412,51 @@ class AvitoSetupActivity : AppCompatActivity() {
                 channelCredentialsManager.saveAvito(allCookies, userId, displayName, hashId, extractedSeq)
                 Log.i(TAG, "Credentials saved! Verify: savedHash=${channelCredentialsManager.getAvitoHashId()}, savedSeq=${channelCredentialsManager.getAvitoSeq()}")
 
-                // Send to server (n8n -> PostgreSQL)
-                sendToServer(allCookies, ftCookie, fCookie, upinCookie, userId, displayName, hashId)
+                // Register with backend (unified API)
+                val sessionId = hashId ?: "avito_${System.currentTimeMillis()}"
+                val accountId = userId ?: sessionId
+
+                val regResult = channelRegistrationService.registerAvito(
+                    sessionId = sessionId,
+                    userId = accountId,
+                    displayName = displayName,
+                    cookies = allCookies,
+                    hashId = hashId
+                )
 
                 withContext(Dispatchers.Main) {
-                    showSuccess(displayName ?: "Подключено")
+                    when (regResult) {
+                        is ChannelRegistrationService.RegistrationResult.Success -> {
+                            Log.i(TAG, "Avito registered: ${regResult.channelAccountId}")
+                            showSuccess(displayName ?: "Подключено")
+                        }
+                        is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                            Log.w(TAG, "Avito conflict: ${regResult.message}")
+                            channelCredentialsManager.clearAvito()
+                            Toast.makeText(this@AvitoSetupActivity, regResult.message, Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+                        else -> {
+                            Log.w(TAG, "Registration warning: $regResult")
+                            showSuccess(displayName ?: "Подключено")
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error verifying auth", e)
                 // Save anyway - user did login successfully
                 val hashId = extractedUserHash ?: upinCookie
                 channelCredentialsManager.saveAvito(allCookies, null, null, hashId)
-                sendToServer(allCookies, ftCookie, fCookie, upinCookie, null, null, hashId)
+
+                // Still try to register
+                val sessionId = hashId ?: "avito_${System.currentTimeMillis()}"
+                channelRegistrationService.registerAvito(
+                    sessionId = sessionId,
+                    userId = sessionId,
+                    displayName = null,
+                    cookies = allCookies,
+                    hashId = hashId
+                )
 
                 withContext(Dispatchers.Main) {
                     showSuccess("Подключено")

@@ -1,11 +1,11 @@
 {
-  "updatedAt": "2025-12-21T11:25:48.597Z",
+  "updatedAt": "2025-12-23T18:12:54.000Z",
   "createdAt": "2025-12-10T10:00:56.185Z",
   "id": "X5hxPPtz3OQGB8SS",
   "name": "ELO_Out_Avito",
   "description": null,
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -380,9 +380,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "eb0a7af3-16d2-426b-b1b2-77942b854b1f",
+  "versionId": "05206939-0801-489c-a5d2-ff32f917b2ce",
   "activeVersionId": null,
-  "versionCounter": 4,
+  "versionCounter": 5,
   "triggerCount": 0,
   "shared": [
     {
@@ -406,7 +406,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-23T08:01:19.000Z",
+              "updatedAt": "2025-12-26T07:11:12.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -421,7 +421,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-22",
+              "lastActiveAt": "2025-12-25",
               "isPending": false
             }
           }

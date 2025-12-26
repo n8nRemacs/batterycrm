@@ -11,8 +11,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 import com.eldoleado.app.R
 import com.eldoleado.app.channels.ChannelCredentialsManager
+import com.eldoleado.app.channels.ChannelRegistrationService
 import com.eldoleado.app.channels.ChannelStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +26,15 @@ import java.net.URL
 
 class TelegramSetupActivity : AppCompatActivity() {
 
+    companion object {
+        private const val TAG = "TelegramSetupActivity"
+        // MCP Telegram server for webhook registration
+        private const val MCP_TELEGRAM_URL = "http://155.212.221.189:8761"
+        private const val MCP_API_KEY = "eldoleado_mcp_2024"
+    }
+
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
+    private lateinit var channelRegistrationService: ChannelRegistrationService
 
     // Views
     private lateinit var btnBack: ImageView
@@ -84,6 +94,7 @@ class TelegramSetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_telegram_setup)
 
         channelCredentialsManager = ChannelCredentialsManager(this)
+        channelRegistrationService = ChannelRegistrationService(this)
 
         initViews()
         setupListeners()
@@ -250,12 +261,38 @@ class TelegramSetupActivity : AppCompatActivity() {
                         val result = json.getJSONObject("result")
                         val username = result.getString("username")
 
-                        // Save credentials
+                        // Save credentials locally
                         channelCredentialsManager.saveTelegramBot(token, username)
 
+                        // Register with backend
+                        val regResult = channelRegistrationService.registerTelegramBot(token, username)
+
+                        // Register bot with MCP server (sets up webhook)
+                        val mcpResult = registerBotWithMcp(token)
+                        if (!mcpResult) {
+                            Log.w(TAG, "MCP registration failed, but continuing...")
+                        }
+
                         withContext(Dispatchers.Main) {
-                            successInfo.text = "@$username"
-                            showStep(Step.SUCCESS)
+                            when (regResult) {
+                                is ChannelRegistrationService.RegistrationResult.Success -> {
+                                    Log.i(TAG, "Bot registered: ${regResult.channelAccountId}")
+                                    successInfo.text = "@$username"
+                                    showStep(Step.SUCCESS)
+                                }
+                                is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                                    Log.w(TAG, "Bot conflict: ${regResult.message}")
+                                    channelCredentialsManager.clearTelegram()
+                                    showStep(Step.BOT_TOKEN)
+                                    Toast.makeText(this@TelegramSetupActivity, regResult.message, Toast.LENGTH_LONG).show()
+                                }
+                                else -> {
+                                    // Network error or unauthorized - still show success with local credentials
+                                    Log.w(TAG, "Registration warning: $regResult")
+                                    successInfo.text = "@$username"
+                                    showStep(Step.SUCCESS)
+                                }
+                            }
                         }
                     } else {
                         withContext(Dispatchers.Main) {
@@ -313,7 +350,7 @@ class TelegramSetupActivity : AppCompatActivity() {
 
         showLoading("Проверка кода...")
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             // TODO: Implement actual code verification via MCP server
             kotlinx.coroutines.delay(1000)
 
@@ -321,11 +358,40 @@ class TelegramSetupActivity : AppCompatActivity() {
             val apiHash = inputApiHash.text.toString().trim()
             val phone = inputPhone.text.toString().trim()
 
-            // Save credentials (placeholder - actual session will come from MCP)
-            channelCredentialsManager.saveTelegramUser(apiId, apiHash, phone, null)
+            // Generate session ID (in real implementation, this comes from MCP)
+            val sessionId = "tg_user_${phone}_${System.currentTimeMillis()}"
 
-            successInfo.text = phone
-            showStep(Step.SUCCESS)
+            // Save credentials locally
+            channelCredentialsManager.saveTelegramUser(apiId, apiHash, phone, sessionId)
+
+            // Register with backend
+            val regResult = channelRegistrationService.registerTelegramUser(
+                sessionId = sessionId,
+                phone = phone,
+                apiId = apiId,
+                apiHash = apiHash
+            )
+
+            withContext(Dispatchers.Main) {
+                when (regResult) {
+                    is ChannelRegistrationService.RegistrationResult.Success -> {
+                        Log.i(TAG, "User registered: ${regResult.channelAccountId}")
+                        successInfo.text = phone
+                        showStep(Step.SUCCESS)
+                    }
+                    is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                        Log.w(TAG, "User conflict: ${regResult.message}")
+                        channelCredentialsManager.clearTelegram()
+                        showStep(Step.USER_API)
+                        Toast.makeText(this@TelegramSetupActivity, regResult.message, Toast.LENGTH_LONG).show()
+                    }
+                    else -> {
+                        Log.w(TAG, "Registration warning: $regResult")
+                        successInfo.text = phone
+                        showStep(Step.SUCCESS)
+                    }
+                }
+            }
         }
     }
 
@@ -354,6 +420,48 @@ class TelegramSetupActivity : AppCompatActivity() {
             Step.ENTER_CODE -> showStep(Step.USER_API)
             Step.SUCCESS -> finish()
             else -> super.onBackPressed()
+        }
+    }
+
+    /**
+     * Register bot with MCP server and set up webhook.
+     * This enables the bot to receive messages via our MCP proxy.
+     */
+    private fun registerBotWithMcp(token: String): Boolean {
+        return try {
+            val setupUrl = URL("$MCP_TELEGRAM_URL/setup?base_url=$MCP_TELEGRAM_URL")
+            val connection = setupUrl.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("X-API-Key", MCP_API_KEY)
+            connection.doOutput = true
+            connection.connectTimeout = 15000
+            connection.readTimeout = 15000
+
+            val body = JSONObject().apply {
+                put("token", token)
+            }
+
+            connection.outputStream.bufferedWriter().use { it.write(body.toString()) }
+
+            val responseCode = connection.responseCode
+            Log.d(TAG, "MCP setup response code: $responseCode")
+
+            if (responseCode in 200..299) {
+                val response = connection.inputStream.bufferedReader().readText()
+                val json = JSONObject(response)
+                val webhookSet = json.optBoolean("webhook_set", false)
+                val tokenHash = json.optString("token_hash", "")
+                Log.i(TAG, "Bot registered with MCP: token_hash=$tokenHash, webhook_set=$webhookSet")
+                true
+            } else {
+                val error = connection.errorStream?.bufferedReader()?.readText() ?: ""
+                Log.e(TAG, "MCP setup failed: $responseCode - $error")
+                false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "MCP registration error", e)
+            false
         }
     }
 }

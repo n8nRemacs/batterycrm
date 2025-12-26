@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.eldoleado.app.R
 import com.eldoleado.app.SessionManager
 import com.eldoleado.app.channels.ChannelCredentialsManager
+import com.eldoleado.app.channels.ChannelRegistrationService
 // NodeJSBridge removed - using cloud Baileys only
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -48,6 +49,7 @@ class WhatsAppSetupActivity : AppCompatActivity() {
     }
 
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
+    private lateinit var channelRegistrationService: ChannelRegistrationService
     private lateinit var sessionManager: SessionManager
 
     // Views
@@ -73,6 +75,7 @@ class WhatsAppSetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_whatsapp_setup)
 
         channelCredentialsManager = ChannelCredentialsManager(this)
+        channelRegistrationService = ChannelRegistrationService(this)
         sessionManager = SessionManager(this)
 
         initViews()
@@ -364,12 +367,52 @@ class WhatsAppSetupActivity : AppCompatActivity() {
     private fun onConnectionSuccess(phone: String, name: String, sessionId: String) {
         pollJob?.cancel()
 
-        // Save credentials
+        // Save credentials locally
         channelCredentialsManager.saveWhatsApp(sessionId, phone, name)
 
-        Toast.makeText(this, "WhatsApp подключен!", Toast.LENGTH_SHORT).show()
+        // Register channel with backend (links session_id to tenant)
+        CoroutineScope(Dispatchers.Main).launch {
+            statusText.text = "Регистрация канала..."
 
-        // Show success UI
+            val result = channelRegistrationService.registerWhatsApp(
+                sessionId = sessionId,
+                phone = phone,
+                name = name
+            )
+
+            when (result) {
+                is ChannelRegistrationService.RegistrationResult.Success -> {
+                    Log.i(TAG, "Channel registered: ${result.channelAccountId}")
+                    Toast.makeText(this@WhatsAppSetupActivity, "WhatsApp подключен!", Toast.LENGTH_SHORT).show()
+                    showSuccessUI(phone, name)
+                }
+
+                is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                    Log.w(TAG, "Channel conflict: ${result.message}")
+                    // Channel belongs to another tenant - clear local credentials
+                    channelCredentialsManager.clearWhatsApp()
+                    Toast.makeText(this@WhatsAppSetupActivity, result.message, Toast.LENGTH_LONG).show()
+                    showQrError(result.message)
+                }
+
+                is ChannelRegistrationService.RegistrationResult.Unauthorized -> {
+                    Log.w(TAG, "Unauthorized: ${result.message}")
+                    // Session expired - still keep local credentials, show warning
+                    Toast.makeText(this@WhatsAppSetupActivity, "Сессия истекла. Войдите заново.", Toast.LENGTH_LONG).show()
+                    showSuccessUI(phone, name)
+                }
+
+                is ChannelRegistrationService.RegistrationResult.Error -> {
+                    Log.e(TAG, "Registration error: ${result.message}", result.exception)
+                    // Network error - still keep local credentials, show warning
+                    Toast.makeText(this@WhatsAppSetupActivity, "WhatsApp подключен (офлайн)", Toast.LENGTH_SHORT).show()
+                    showSuccessUI(phone, name)
+                }
+            }
+        }
+    }
+
+    private fun showSuccessUI(phone: String, name: String) {
         stepQrCode.visibility = View.GONE
         stepSuccess.visibility = View.VISIBLE
         successPhone.text = if (phone.isNotEmpty()) phone else "Подключено"

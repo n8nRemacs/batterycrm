@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.eldoleado.app.R
 import com.eldoleado.app.SessionManager
 import com.eldoleado.app.channels.ChannelCredentialsManager
+import com.eldoleado.app.channels.ChannelRegistrationService
 import com.eldoleado.app.channels.ChannelStatus
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +43,7 @@ class AvitoCamoufoxSetupActivity : AppCompatActivity() {
     }
 
     private lateinit var channelCredentialsManager: ChannelCredentialsManager
+    private lateinit var channelRegistrationService: ChannelRegistrationService
     private lateinit var sessionManager: SessionManager
 
     // Views
@@ -80,6 +82,7 @@ class AvitoCamoufoxSetupActivity : AppCompatActivity() {
         setContentView(R.layout.activity_avito_camoufox_setup)
 
         channelCredentialsManager = ChannelCredentialsManager(this)
+        channelRegistrationService = ChannelRegistrationService(this)
         sessionManager = SessionManager(this)
 
         initViews()
@@ -317,7 +320,7 @@ class AvitoCamoufoxSetupActivity : AppCompatActivity() {
         channelCredentialsManager.setAvitoAccountId(currentAccountId)
         channelCredentialsManager.setAvitoStatus(ChannelStatus.CONNECTED)
 
-        // Try to get additional info from status
+        // Try to get additional info from status and register with backend
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val statusResult = getAccountStatus(currentAccountId)
@@ -326,15 +329,44 @@ class AvitoCamoufoxSetupActivity : AppCompatActivity() {
                 val userId = state?.optString("user_id")
                 val hashId = state?.optString("hash_id")
 
-                // Save additional info
+                // Save additional info locally
                 channelCredentialsManager.saveAvito(
                     cookies = "", // Cookies are on server
                     userId = userId,
                     displayName = userName ?: currentPhone,
                     hashId = hashId
                 )
+
+                // Register with backend (unified API)
+                val sessionId = "camoufox_$currentAccountId"
+                val accountId = userId ?: currentAccountId
+
+                val regResult = channelRegistrationService.registerAvito(
+                    sessionId = sessionId,
+                    userId = accountId,
+                    displayName = userName ?: currentPhone,
+                    cookies = "", // Cookies are on Camoufox server
+                    hashId = hashId
+                )
+
+                withContext(Dispatchers.Main) {
+                    when (regResult) {
+                        is ChannelRegistrationService.RegistrationResult.Success -> {
+                            Log.i(TAG, "Avito Camoufox registered: ${regResult.channelAccountId}")
+                        }
+                        is ChannelRegistrationService.RegistrationResult.AlreadyRegistered -> {
+                            Log.w(TAG, "Avito conflict: ${regResult.message}")
+                            channelCredentialsManager.clearAvito()
+                            Toast.makeText(this@AvitoCamoufoxSetupActivity, regResult.message, Toast.LENGTH_LONG).show()
+                            finish()
+                        }
+                        else -> {
+                            Log.w(TAG, "Registration warning: $regResult")
+                        }
+                    }
+                }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to get status", e)
+                Log.w(TAG, "Failed to get status or register", e)
             }
         }
 
