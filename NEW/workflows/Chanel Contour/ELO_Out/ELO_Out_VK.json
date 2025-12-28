@@ -1,0 +1,433 @@
+{
+  "updatedAt": "2025-12-21T11:27:07.611Z",
+  "createdAt": "2025-12-10T10:01:36.319Z",
+  "id": "ZqRsbSo0I0z71Bwb",
+  "name": "ELO_Out_VK",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 3
+            }
+          ]
+        }
+      },
+      "id": "42f230c6-0ec1-4cc0-bbd2-c9c832105439",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1504,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pop",
+        "list": "queue:outgoing:vk",
+        "options": {}
+      },
+      "id": "02926d5f-a1ad-41ed-a5d0-9caf4cc773cb",
+      "name": "Redis Pop Message",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        64
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-message",
+              "leftValue": "={{ $json.message_json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9f769393-428d-4f6e-b23f-5c0a4d63b029",
+      "name": "IF Has Message",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const messageJson = $json.message_json;\nconst message = JSON.parse(messageJson);\n\nreturn {\n  out_message: message\n};"
+      },
+      "id": "d25e2da8-2757-4965-b264-068df5f31fe7",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  ca.credentials->>'access_token' as access_token,\n  ca.account_id,\n  ca.account_name\nFROM elo_t_channel_accounts ca\nWHERE ca.tenant_id = '{{ $json.out_message.tenant_id }}'::uuid\n  AND ca.channel_id = 4\n  AND ca.is_active = true\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "0c757117-d2e8-4c13-b252-7b14f855c0d2",
+      "name": "Get VK Token",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -608,
+        -32
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-token",
+              "leftValue": "={{ $json.access_token }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "01440499-4c99-41ae-8bc6-5aca1d2a80d7",
+      "name": "IF Token Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.vk.com/method/messages.send",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $json.access_token }}"
+            },
+            {
+              "name": "peer_id",
+              "value": "={{ $('Parse Message').item.json.out_message.external_chat_id }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $('Parse Message').item.json.out_message.message_text }}"
+            },
+            {
+              "name": "random_id",
+              "value": "={{ Math.floor(Math.random() * 1000000000) }}"
+            },
+            {
+              "name": "v",
+              "value": "5.131"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "bbe1fafc-ad28-4f60-8701-7e79704085a2",
+      "name": "Send VK Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -160,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = $('Parse Message').first().json;\nconst response = $input.first().json;\n\nconst success = !response.error;\nconst messageId = response.response?.toString() || Date.now().toString();\n\nreturn {\n  ...parsed,\n  vk_response: response,\n  message_id: messageId,\n  sent_at: new Date().toISOString(),\n  send_success: success\n};"
+      },
+      "id": "65ea5399-4807-4451-b868-82b2afd7060c",
+      "name": "Process VK Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE elo_t_dialogs SET\n  last_message_at = NOW(),\n  last_operator_message_at = NOW(),\n  updated_at = NOW()\nWHERE id = '{{ $json.out_message.dialog_id }}'::uuid;",
+        "options": {}
+      },
+      "id": "093e0f8a-ab44-42e9-a907-0523564b1472",
+      "name": "Update Dialog Timestamp",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        288,
+        -128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// No token found - log error\nconst parsed = $('Parse Message').first().json;\n\nconsole.error('No VK access token found for tenant:', parsed.out_message?.tenant_id);\n\nreturn {\n  success: false,\n  error: 'No VK access token found for tenant',\n  tenant_id: parsed.out_message?.tenant_id,\n  out_message: parsed.out_message\n};"
+      },
+      "id": "62924467-6449-4e31-8fa8-c1cb27b70789",
+      "name": "No Token Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No message in queue - just return\nreturn { empty: true };"
+      },
+      "id": "eb03b052-b1f5-4bd5-a29f-07e9610a69fe",
+      "name": "No Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -832,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Redis Pop Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Pop Message": {
+      "main": [
+        [
+          {
+            "node": "IF Has Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Has Message": {
+      "main": [
+        [
+          {
+            "node": "Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Get VK Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get VK Token": {
+      "main": [
+        [
+          {
+            "node": "IF Token Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Token Exists": {
+      "main": [
+        [
+          {
+            "node": "Send VK Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Token Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send VK Message": {
+      "main": [
+        [
+          {
+            "node": "Process VK Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process VK Response": {
+      "main": [
+        [
+          {
+            "node": "Update Dialog Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "978868fe-2aa2-44e5-ab58-7c0d36beafab",
+  "activeVersionId": null,
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T10:01:36.325Z",
+      "createdAt": "2025-12-10T10:01:36.325Z",
+      "role": "workflow:owner",
+      "workflowId": "ZqRsbSo0I0z71Bwb",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-28T09:13:23.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-27",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T04:03:34.766Z",
+      "createdAt": "2025-11-23T04:03:34.766Z",
+      "id": "IbDkJphbr4EygdRZ",
+      "name": "Out"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
+}

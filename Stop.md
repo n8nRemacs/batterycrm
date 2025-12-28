@@ -1,102 +1,92 @@
-# Stop Session - 2025-12-27
+# Stop Session - 2025-12-28
+
+## УСПЕХ: Messenger -> Batcher -> Resolver работает!
+
+Полный pipeline входящих сообщений наконец-то работает end-to-end.
+
+---
 
 ## Что сделано сегодня
 
-### 1. Полная переработка ELO_Resolver
+### 1. Синхронизация n8n workflows
 
-Создан новый ELO_Resolver с **47 нодами** и правильным потоком данных:
-- Tenant → Client → Dialog resolution
-- ONE dialog per client (channel-agnostic)
-- Добавлены колонки `first_contact_channel_id` и `last_client_channel_id`
+- Скачано **45 workflows** с тегом ELO из n8n
+- Распределены по папкам согласно тегам
+- Обновлен WORKFLOWS_ANALYSIS.md
 
-**Файл:** `NEW/workflows/Resolve Contour/ELO_Resolver.json`
+### 2. Исправлен ELO_Resolver
 
-### 2. Исправлена потеря данных между нодами
-
-**Проблема:** Redis GET возвращает только `{propertyName: value}`, каждая нода получает только output предыдущей.
-
-**Решение:** Добавлены 6 Merge нод:
-- `Merge Tenant Redis` - input + redis
-- `Merge DB Tenant` - prev + db
-- `Merge Client Redis` - tenant data + redis
-- `Merge DB Client` - prev + db
-- `Merge Dialog Redis` - client data + redis
-- `Merge DB Dialog` - prev + db
-
-### 3. Исправлен парсинг Redis
-
-**Проблема:** Redis в n8n возвращает значение в `propertyName`, не `value`.
+**Проблема:** Нода Forward to Core ссылалась на несуществующую ноду Validate Input.
 
 **Решение:**
-```javascript
-const cachedValue = redis.propertyName || redis.value || null;
-```
+- Переименована Prepare Input -> Validate Input
+- Добавлен CONFIG с CORE_URL
 
-### 4. Добавлена валидация парсинга
+### 3. Исправлен порядок нод в ELO_Resolver
 
-Merge ноды проверяют распарсенные данные:
-```javascript
-if (!parsed || !parsed.client_id) parsed = null;
-```
+**Было:**
+Dialog Resolver -> Forward to Core -> Save Message -> Build Response
+(Save Message ссылался на Build Output которого нет!)
 
-### 5. Исправлены IF ноды (ПОСЛЕДНЕЕ)
+**Стало:**
+Dialog Resolver -> Build Response -> Forward to Core -> Save Message
+(Build Response собирает все данные, остальные ноды используют его)
 
-**Проблема:** `!!$json._client_cached` пропускал null в TRUE ветку.
+### 4. ELO_Dialog_Resolver добавлен в n8n
 
-**Решение:** Optional chaining + string comparison:
-```
-Tenant Cached?:  $json._tenant_cached?.tenant_id || ''  notEquals  ''
-Client Cached?:  $json._client_cached?.client_id || ''  notEquals  ''
-Dialog Cached?:  $json._dialog_cached?.dialog_id || ''  notEquals  ''
-```
-
-### 6. Restore ноды
-
-Добавлены после Redis SET и DB UPDATE (возвращают "OK", не данные).
+Workflow был только локально, теперь импортирован в n8n.
 
 ---
 
-## НЕ протестировано
-
-1. **IF ноды** - последнее исправление (optional chaining) НЕ ТЕСТИРОВАЛОСЬ
-2. **Полный флоу** - не завершён ни один успешный прогон
-3. **Call Unifier** - вызов ELO_Unifier
-4. **Кеширование** - сохранение/чтение Redis
-
----
-
-## Известные проблемы n8n IF node v2
-
-| Что пробовали | Результат |
-|---------------|-----------|
-| `!!$json.field` | null идёт в TRUE |
-| `exists` оператор | ненадёжен |
-| `isEmpty` | неожиданные результаты |
-
-**Рабочее решение:** `$json.field?.id || '' notEquals ''`
-
----
-
-## Структура данных в workflow
+## Рабочий pipeline
 
 ```
-_tenant_cached  → {tenant_id, channel_account_id, channel_id}
-_client_cached  → {client_id}
-_dialog_cached  → {dialog_id}
-_db_tenant      → tenant object from DB
-_db_client_id   → client_id from DB
-_db_dialog_id   → dialog_id from DB
+WhatsApp/Telegram -> ELO_In_* -> Redis batch:*
+                                      |
+                            ELO_Input_Batcher
+                                      |
+                            ELO_Input_Processor
+                                      |
+                               ELO_Resolver
+                                      |
+                 +--------------------+--------------------+
+                 |                    |                    |
+         ELO_Tenant_          ELO_Client_          ELO_Dialog_
+         Resolver             Resolver             Resolver
+                 +--------------------+--------------------+
+                                      |
+                               Build Response
+                                      |
+                               Forward to Core
+                                      |
+                       ELO_Core_AI_Test_Stub (webhook)
+                                      |
+                            Save Incoming Message
 ```
 
 ---
 
-## Файлы изменены
+## Workflows в n8n
 
-```
-NEW/workflows/Resolve Contour/ELO_Resolver.json  # Полная переработка
-123.md                                            # Статус работы
-```
+| Категория | Активных | Всего |
+|-----------|----------|-------|
+| Channel In | 5 | 8 |
+| Channel Out | 2 | 6 |
+| API | 7 | 7 |
+| AI Contour | 1 | 10 |
+| Resolve Contour | 0 | 5 |
+| Input Contour | 0 | 3 |
+| **Итого** | **14** | **45** |
 
 ---
 
-*Сессия завершена: 2025-12-27*
+## Следующие шаги
+
+1. Активировать Resolve Contour
+2. Активировать Input Contour
+3. Тестировать AI ответы
+4. Подключить Out для отправки ответов
+
+---
+
+*Сессия завершена: 2025-12-28*

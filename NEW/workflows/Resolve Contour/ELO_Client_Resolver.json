@@ -1,143 +1,230 @@
 {
+  "updatedAt": "2025-12-28T10:06:03.716Z",
+  "createdAt": "2025-12-28T09:14:39.460Z",
+  "id": "MOa50VVpseLR5xna",
   "name": "ELO_Client_Resolver",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "trigger-001",
+      "id": "ac25fff0-b378-47bc-8d67-7625b562dfc7",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
-      "position": [0, 300]
+      "position": [
+        -1360,
+        16
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Validate Input for Client Resolver\nconst raw = $input.first().json;\nconst input = raw.payload || raw;\n\nif (!input.tenant_id) throw new Error('Missing: tenant_id');\nif (!input.channel_id) throw new Error('Missing: channel_id');\nif (!input.channel) throw new Error('Missing: channel');\nif (!input.external_chat_id) throw new Error('Missing: external_chat_id');\n\nconst phoneChannels = ['whatsapp', 'max'];\nconst hasPhoneInExternalId = phoneChannels.includes(input.channel.toLowerCase());\nlet phoneFromExternalId = null;\nif (input.channel === 'whatsapp') phoneFromExternalId = input.external_chat_id.split('@')[0];\nelse if (input.channel === 'max') phoneFromExternalId = input.external_user_id || input.external_chat_id;\n\nconst trace_id = input.trace_id || `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  tenant_id: input.tenant_id,\n  channel_id: input.channel_id,\n  channel: input.channel.toLowerCase(),\n  external_chat_id: input.external_chat_id,\n  sender_name: input.sender_name || input.client_name || 'Unknown',\n  sender_username: input.sender_username || input.client_username || '',\n  hasPhoneInExternalId,\n  phoneFromExternalId,\n  trace_id,\n  _cache_key: `cache:client:${input.tenant_id}:${input.channel}:${input.external_chat_id}`,\n  _original_input: input\n};"
       },
-      "id": "validate-001",
+      "id": "fb5aa3bc-72df-4e96-8b40-9aa425e71913",
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [220, 300]
+      "position": [
+        -1136,
+        16
+      ]
     },
     {
       "parameters": {
         "operation": "get",
-        "key": "={{ $json._cache_key }}"
+        "key": "={{ $json._cache_key }}",
+        "options": {}
       },
-      "id": "redis-client-get",
+      "id": "ee93918a-a5be-41ea-a5c4-bac6a79ae791",
       "name": "Cache Get Client",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [440, 300],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        -912,
+        16
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge Redis result with input\nconst input = $('Validate Input').first().json;\nconst redis = $json;\nconst cachedValue = redis.propertyName || redis.value || null;\n\nlet parsed = null;\nif (cachedValue && cachedValue !== 'null' && cachedValue !== '') {\n  try {\n    parsed = JSON.parse(cachedValue);\n    if (!parsed || !parsed.client_id) parsed = null;\n  } catch (e) {\n    parsed = null;\n  }\n}\n\nreturn {\n  ...input,\n  _client_cached: parsed\n};"
       },
-      "id": "merge-client-redis",
+      "id": "6d58a717-f171-42cd-b5d5-5382e55773bf",
       "name": "Merge Client Redis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [
+        -704,
+        16
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ $json._client_cached?.client_id || '' }}", "rightValue": "", "operator": { "type": "string", "operation": "notEquals" } }]
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._client_cached?.client_id || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "id": "93c092d7-4564-4cde-beab-fd1c40723435"
+            }
+          ],
+          "combinator": "and"
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-client-cache",
+      "id": "babd8e2f-c699-4925-9d7a-c3da61e5636e",
       "name": "Client Cached?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 300]
+      "position": [
+        -480,
+        16
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use client from cache\nconst data = $json;\nconst cached = data._client_cached;\n\nif (!cached || !cached.client_id) {\n  throw new Error(`Invalid client cache: ${JSON.stringify(cached)}`);\n}\n\nreturn {\n  tenant_id: data.tenant_id,\n  channel_id: data.channel_id,\n  channel: data.channel,\n  external_chat_id: data.external_chat_id,\n  client_id: cached.client_id,\n  is_new_client: false,\n  hasPhoneInExternalId: data.hasPhoneInExternalId,\n  phoneFromExternalId: data.phoneFromExternalId,\n  trace_id: data.trace_id,\n  _source: 'cache',\n  _original_input: data._original_input\n};"
       },
-      "id": "use-cached-client",
+      "id": "a69aa393-9817-4f22-b522-6a33ee399e34",
       "name": "Use Cached Client",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 200]
+      "position": [
+        -256,
+        -96
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT c.id as client_id\nFROM elo_t_clients c\nJOIN elo_t_client_channels cc ON cc.client_id = c.id\nWHERE c.tenant_id = '{{ $json.tenant_id }}'\n  AND cc.channel_id = {{ $json.channel_id }}\n  AND cc.external_id = '{{ $json.external_chat_id }}'\nLIMIT 1;"
+        "query": "SELECT c.id as client_id\nFROM elo_t_clients c\nJOIN elo_t_client_channels cc ON cc.client_id = c.id\nWHERE c.tenant_id = '{{ $json.tenant_id }}'\n  AND cc.channel_id = {{ $json.channel_id }}\n  AND cc.external_id = '{{ $json.external_chat_id }}'\nLIMIT 1;",
+        "options": {}
       },
-      "id": "db-client-query",
+      "id": "f7080ff9-0175-450a-8083-bb8317cfe704",
       "name": "DB Get Client",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1100, 400],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        -256,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge DB result with previous data\nconst prevData = $('Merge Client Redis').first().json;\nconst dbResult = $json;\n\nreturn {\n  ...prevData,\n  _db_client_id: dbResult.client_id || null\n};"
       },
-      "id": "merge-db-client",
+      "id": "1e026678-8fce-4d68-90f6-6f613307e1c1",
       "name": "Merge DB Client",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, 400]
+      "position": [
+        -32,
+        112
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ !!$json._db_client_id }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+          "options": {
+            "version": 1,
+            "looseTypeValidation": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$json._db_client_id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-client-found",
+      "id": "90d316aa-8067-4210-8ec5-4a0370cd0297",
       "name": "Client Found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1540, 400]
+      "position": [
+        192,
+        112
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use existing client from DB\nconst data = $json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  channel_id: data.channel_id,\n  channel: data.channel,\n  external_chat_id: data.external_chat_id,\n  client_id: data._db_client_id,\n  is_new_client: false,\n  hasPhoneInExternalId: data.hasPhoneInExternalId,\n  phoneFromExternalId: data.phoneFromExternalId,\n  trace_id: data.trace_id,\n  _source: 'database',\n  _cache_key: data._cache_key,\n  _cache_value: JSON.stringify({ client_id: data._db_client_id }),\n  _original_input: data._original_input\n};"
       },
-      "id": "use-existing-client",
+      "id": "ba05986f-7978-4c70-a5a8-449b4581735e",
       "name": "Use Existing Client",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 300]
+      "position": [
+        416,
+        16
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH new_client AS (\n  INSERT INTO elo_t_clients (tenant_id, name)\n  VALUES ('{{ $json.tenant_id }}', '{{ $json.sender_name }}')\n  RETURNING id\n)\nINSERT INTO elo_t_client_channels (client_id, channel_id, external_id, external_username)\nSELECT id, {{ $json.channel_id }}, '{{ $json.external_chat_id }}', '{{ $json.sender_username }}'\nFROM new_client\nRETURNING client_id;"
+        "query": "WITH new_client AS (\n  INSERT INTO elo_t_clients (tenant_id, name)\n  VALUES ('{{ $json.tenant_id }}', '{{ $json.sender_name }}')\n  RETURNING id\n)\nINSERT INTO elo_t_client_channels (client_id, channel_id, external_id, external_username)\nSELECT id, {{ $json.channel_id }}, '{{ $json.external_chat_id }}', '{{ $json.sender_username }}'\nFROM new_client\nRETURNING client_id;",
+        "options": {}
       },
-      "id": "db-client-create",
+      "id": "c1412934-d736-450b-91ab-c65dac61509a",
       "name": "DB Create Client",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1760, 500],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        416,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use new client\nconst prevData = $('Merge DB Client').first().json;\nconst dbResult = $json;\n\nreturn {\n  tenant_id: prevData.tenant_id,\n  channel_id: prevData.channel_id,\n  channel: prevData.channel,\n  external_chat_id: prevData.external_chat_id,\n  client_id: dbResult.client_id,\n  is_new_client: true,\n  hasPhoneInExternalId: prevData.hasPhoneInExternalId,\n  phoneFromExternalId: prevData.phoneFromExternalId,\n  trace_id: prevData.trace_id,\n  _source: 'created',\n  _cache_key: prevData._cache_key,\n  _cache_value: JSON.stringify({ client_id: dbResult.client_id }),\n  _original_input: prevData._original_input\n};"
       },
-      "id": "use-new-client",
+      "id": "02a76711-930c-4cea-94e3-c60da96d5e00",
       "name": "Use New Client",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1980, 500]
+      "position": [
+        624,
+        208
+      ]
     },
     {
       "parameters": {
@@ -147,124 +234,518 @@
         "expire": true,
         "ttl": 3600
       },
-      "id": "redis-client-set",
+      "id": "d9a5620a-2016-4348-a877-521311309771",
       "name": "Cache Client",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [2200, 400],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        848,
+        112
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Restore data after Redis SET\nlet data;\ntry {\n  data = $('Use Existing Client').first().json;\n} catch {\n  data = $('Use New Client').first().json;\n}\nreturn data;"
       },
-      "id": "restore-client",
+      "id": "0fcf4bf1-6d3c-4f52-903f-74d99b6cd163",
       "name": "Restore Client",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2420, 400]
+      "position": [
+        1072,
+        112
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ $json.hasPhoneInExternalId === true }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+          "options": {
+            "version": 1,
+            "looseTypeValidation": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.hasPhoneInExternalId === true }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-has-phone",
+      "id": "56d06107-13cb-44ec-8ce4-4e80a0ede356",
       "name": "Has Phone?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [2640, 400]
+      "position": [
+        1296,
+        112
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Prepare data for Unifier\nconst data = $json;\nreturn {\n  tenant_id: data.tenant_id,\n  client_id: data.client_id,\n  phone: data.phoneFromExternalId,\n  channel: data.channel,\n  external_chat_id: data.external_chat_id,\n  _resolver_data: data\n};"
       },
-      "id": "prepare-unifier",
+      "id": "085c304e-57f5-46af-bca1-c07246c6d4ad",
       "name": "Prepare Unifier",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2860, 300]
+      "position": [
+        1504,
+        16
+      ]
     },
     {
       "parameters": {
-        "workflowId": { "mode": "name", "value": "ELO_Unifier" }
+        "workflowId": "K3Sm81ZI3aC12xqN",
+        "options": {}
       },
-      "id": "call-unifier",
+      "id": "3be758c8-a650-42ae-ad5b-54310c364725",
       "name": "Call Unifier",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
-      "position": [3080, 300]
+      "position": [
+        1728,
+        16
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// After Unifier - restore data and apply unifier result\nconst base = $('Prepare Unifier').first().json._resolver_data;\nconst unifierResult = $json;\nconst finalClientId = unifierResult.result_client_id || base.client_id;\n\nreturn {\n  tenant_id: base.tenant_id,\n  channel_id: base.channel_id,\n  channel: base.channel,\n  external_chat_id: base.external_chat_id,\n  client_id: finalClientId,\n  is_new_client: base.is_new_client,\n  was_unified: unifierResult.was_merged || false,\n  trace_id: base.trace_id,\n  _source: base._source,\n  _original_input: base._original_input\n};"
       },
-      "id": "after-unifier",
+      "id": "134e77ed-83c0-427b-9dc2-b680436562e2",
       "name": "After Unifier",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3300, 300]
+      "position": [
+        1952,
+        16
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Skip unifier - just pass data through\nconst data = $json;\nreturn {\n  tenant_id: data.tenant_id,\n  channel_id: data.channel_id,\n  channel: data.channel,\n  external_chat_id: data.external_chat_id,\n  client_id: data.client_id,\n  is_new_client: data.is_new_client,\n  was_unified: false,\n  trace_id: data.trace_id,\n  _source: data._source,\n  _original_input: data._original_input\n};"
       },
-      "id": "skip-unifier",
+      "id": "99cafcd9-94d2-455d-9917-a950463af730",
       "name": "Skip Unifier",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2860, 500]
+      "position": [
+        1504,
+        208
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Build final response\nconst data = $json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  channel_id: data.channel_id,\n  channel: data.channel,\n  external_chat_id: data.external_chat_id,\n  client_id: data.client_id,\n  is_new_client: data.is_new_client,\n  was_unified: data.was_unified,\n  trace_id: data.trace_id,\n  _source: data._source,\n  _original_input: data._original_input\n};"
       },
-      "id": "build-response",
+      "id": "8406d6c7-8330-42d0-83bd-7b3c7466155f",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3520, 400]
+      "position": [
+        2176,
+        112
+      ]
     }
   ],
   "connections": {
-    "Execute Workflow Trigger": { "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]] },
-    "Validate Input": { "main": [[{ "node": "Cache Get Client", "type": "main", "index": 0 }]] },
-    "Cache Get Client": { "main": [[{ "node": "Merge Client Redis", "type": "main", "index": 0 }]] },
-    "Merge Client Redis": { "main": [[{ "node": "Client Cached?", "type": "main", "index": 0 }]] },
-    "Client Cached?": { "main": [
-      [{ "node": "Use Cached Client", "type": "main", "index": 0 }],
-      [{ "node": "DB Get Client", "type": "main", "index": 0 }]
-    ]},
-    "Use Cached Client": { "main": [[{ "node": "Has Phone?", "type": "main", "index": 0 }]] },
-    "DB Get Client": { "main": [[{ "node": "Merge DB Client", "type": "main", "index": 0 }]] },
-    "Merge DB Client": { "main": [[{ "node": "Client Found?", "type": "main", "index": 0 }]] },
-    "Client Found?": { "main": [
-      [{ "node": "Use Existing Client", "type": "main", "index": 0 }],
-      [{ "node": "DB Create Client", "type": "main", "index": 0 }]
-    ]},
-    "Use Existing Client": { "main": [[{ "node": "Cache Client", "type": "main", "index": 0 }]] },
-    "DB Create Client": { "main": [[{ "node": "Use New Client", "type": "main", "index": 0 }]] },
-    "Use New Client": { "main": [[{ "node": "Cache Client", "type": "main", "index": 0 }]] },
-    "Cache Client": { "main": [[{ "node": "Restore Client", "type": "main", "index": 0 }]] },
-    "Restore Client": { "main": [[{ "node": "Has Phone?", "type": "main", "index": 0 }]] },
-    "Has Phone?": { "main": [
-      [{ "node": "Prepare Unifier", "type": "main", "index": 0 }],
-      [{ "node": "Skip Unifier", "type": "main", "index": 0 }]
-    ]},
-    "Prepare Unifier": { "main": [[{ "node": "Call Unifier", "type": "main", "index": 0 }]] },
-    "Call Unifier": { "main": [[{ "node": "After Unifier", "type": "main", "index": 0 }]] },
-    "After Unifier": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] },
-    "Skip Unifier": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] }
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Cache Get Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Get Client": {
+      "main": [
+        [
+          {
+            "node": "Merge Client Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Client Redis": {
+      "main": [
+        [
+          {
+            "node": "Client Cached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Client Cached?": {
+      "main": [
+        [
+          {
+            "node": "Use Cached Client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Get Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Cached Client": {
+      "main": [
+        [
+          {
+            "node": "Has Phone?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Get Client": {
+      "main": [
+        [
+          {
+            "node": "Merge DB Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge DB Client": {
+      "main": [
+        [
+          {
+            "node": "Client Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Client Found?": {
+      "main": [
+        [
+          {
+            "node": "Use Existing Client",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Create Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Existing Client": {
+      "main": [
+        [
+          {
+            "node": "Cache Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Create Client": {
+      "main": [
+        [
+          {
+            "node": "Use New Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use New Client": {
+      "main": [
+        [
+          {
+            "node": "Cache Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Client": {
+      "main": [
+        [
+          {
+            "node": "Restore Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Client": {
+      "main": [
+        [
+          {
+            "node": "Has Phone?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Phone?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Unifier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Unifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Unifier": {
+      "main": [
+        [
+          {
+            "node": "Call Unifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Unifier": {
+      "main": [
+        [
+          {
+            "node": "After Unifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Unifier": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Unifier": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "staticData": null,
-  "tags": [{ "name": "ELO" }, { "name": "Resolve" }, { "name": "Client" }]
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "tenant_id": "11111111-1111-1111-1111-111111111111",
+          "channel_account_id": "f9f4d6e9-d2ae-42fd-8602-90e4d4c3472a",
+          "channel_id": 2,
+          "channel": "whatsapp",
+          "credential": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+          "external_chat_id": "79997253777@s.whatsapp.net",
+          "sender_name": "Дмитрий",
+          "sender_username": "",
+          "external_user_id": "79997253777",
+          "trace_id": "trace_1766916042106",
+          "_tenant_source": "cache",
+          "_original_input": {
+            "channel": "whatsapp",
+            "external_user_id": "79997253777",
+            "external_chat_id": "79997253777@s.whatsapp.net",
+            "client_name": "Дмитрий",
+            "client_phone": "+79997253777",
+            "text": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+            "timestamp": "2025-12-28T10:00:13.000Z",
+            "message_ids": [
+              "3A493402312DA3C23DCC"
+            ],
+            "trace_id": "trace_1766916042106",
+            "media": {
+              "has_voice": false,
+              "voice_transcribed_text": null,
+              "has_images": false,
+              "images": [],
+              "has_video": false,
+              "videos": [],
+              "has_document": false
+            },
+            "meta": {
+              "external_message_id": "3A493402312DA3C23DCC",
+              "ad_channel": "whatsapp",
+              "ad_id": null,
+              "original_media_type": "text",
+              "raw": {
+                "sessionId": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+                "message": {
+                  "key": {
+                    "remoteJid": "79997253777@s.whatsapp.net",
+                    "fromMe": false,
+                    "id": "3A493402312DA3C23DCC",
+                    "senderLid": "88115666518211@lid",
+                    "remoteLid": "79997253777@lid",
+                    "remoteJidNormalized": "79997253777@s.whatsapp.net"
+                  },
+                  "messageTimestamp": 1766916013,
+                  "pushName": "Дмитрий",
+                  "broadcast": false,
+                  "message": {
+                    "conversation": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+                    "messageContextInfo": {
+                      "deviceListMetadata": {
+                        "senderKeyHash": "bfKpC2v48BC7rw==",
+                        "senderTimestamp": "1766734767",
+                        "recipientKeyHash": "v/3fS+pwd3hHLw==",
+                        "recipientTimestamp": "1766570916"
+                      },
+                      "deviceListMetadataVersion": 2,
+                      "messageSecret": "CR+RVqH+V4miSgK2VUYn1IVnJGMGYSpIeyWfXrhdpSI="
+                    }
+                  }
+                },
+                "type": "notify"
+              },
+              "provider": "baileys",
+              "batched": false,
+              "batch_size": 1,
+              "batch_reason": "orphan"
+            },
+            "_entry_timestamp": 1766916042135
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "dfe4d541-807b-4847-913a-208099f2a470",
+  "activeVersionId": null,
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-28T09:14:39.467Z",
+      "createdAt": "2025-12-28T09:14:39.467Z",
+      "role": "workflow:owner",
+      "workflowId": "MOa50VVpseLR5xna",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-28T09:13:23.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-27",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T09:24:16.983Z",
+      "createdAt": "2025-12-27T09:24:16.983Z",
+      "id": "FmBrJ66uBJQlxu3o",
+      "name": "Resolve"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
 }

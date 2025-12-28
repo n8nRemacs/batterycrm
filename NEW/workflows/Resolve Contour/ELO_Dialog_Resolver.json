@@ -1,189 +1,298 @@
 {
+  "updatedAt": "2025-12-28T11:07:47.105Z",
+  "createdAt": "2025-12-28T09:15:09.682Z",
+  "id": "bPNUrwJNSyj52z8B",
   "name": "ELO_Dialog_Resolver",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "trigger-001",
+      "id": "d93c575a-3651-4166-93c5-0cd42eb0e9c0",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
-      "position": [0, 300]
+      "position": [
+        -1376,
+        32
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Validate Input for Dialog Resolver\nconst raw = $input.first().json;\nconst input = raw.payload || raw;\n\nif (!input.tenant_id) throw new Error('Missing: tenant_id');\nif (!input.client_id) throw new Error('Missing: client_id');\nif (!input.channel_id) throw new Error('Missing: channel_id');\n\nconst trace_id = input.trace_id || `dialog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  tenant_id: input.tenant_id,\n  client_id: input.client_id,\n  channel_id: input.channel_id,\n  trace_id,\n  _cache_key: `cache:dialog:${input.tenant_id}:${input.client_id}`,\n  _original_input: input\n};"
       },
-      "id": "validate-001",
+      "id": "3636f9e2-73ea-4ab6-8e89-f263ee1a565e",
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [220, 300]
+      "position": [
+        -1152,
+        32
+      ]
     },
     {
       "parameters": {
         "operation": "get",
-        "key": "={{ $json._cache_key }}"
+        "key": "={{ $json._cache_key }}",
+        "options": {}
       },
-      "id": "redis-dialog-get",
+      "id": "2f6b07e5-0695-48f0-bdd7-47b328decb04",
       "name": "Cache Get Dialog",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [440, 300],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        -928,
+        32
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge Redis result with input\nconst input = $('Validate Input').first().json;\nconst redis = $json;\nconst cachedValue = redis.propertyName || redis.value || null;\n\nlet parsed = null;\nif (cachedValue && cachedValue !== 'null' && cachedValue !== '') {\n  try {\n    parsed = JSON.parse(cachedValue);\n    if (!parsed || !parsed.dialog_id) parsed = null;\n  } catch (e) {\n    parsed = null;\n  }\n}\n\nreturn {\n  ...input,\n  _dialog_cached: parsed\n};"
       },
-      "id": "merge-dialog-redis",
+      "id": "a444c371-21e4-42ee-a734-e3530ba1ac68",
       "name": "Merge Dialog Redis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [
+        -720,
+        32
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ $json._dialog_cached?.dialog_id || '' }}", "rightValue": "", "operator": { "type": "string", "operation": "notEquals" } }]
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._dialog_cached?.dialog_id || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "id": "49747a7e-1390-4fff-ad7a-055bcebeb467"
+            }
+          ],
+          "combinator": "and"
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-dialog-cache",
+      "id": "ee1167ec-7136-484c-aa2f-348d049a5fb1",
       "name": "Dialog Cached?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 300]
+      "position": [
+        -496,
+        32
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use dialog from cache\nconst data = $json;\nconst cached = data._dialog_cached;\n\nif (!cached || !cached.dialog_id) {\n  throw new Error(`Invalid dialog cache: ${JSON.stringify(cached)}`);\n}\n\nreturn {\n  tenant_id: data.tenant_id,\n  client_id: data.client_id,\n  channel_id: data.channel_id,\n  dialog_id: cached.dialog_id,\n  is_new_dialog: false,\n  last_client_channel_id: data.channel_id,\n  trace_id: data.trace_id,\n  _source: 'cache',\n  _original_input: data._original_input\n};"
       },
-      "id": "use-cached-dialog",
+      "id": "c23d4032-e46e-444d-b6fb-83a3e1f12c8f",
       "name": "Use Cached Dialog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 200]
+      "position": [
+        -272,
+        -80
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE elo_t_dialogs SET last_client_channel_id = {{ $json.last_client_channel_id }}, last_message_at = NOW(), last_client_message_at = NOW() WHERE id = '{{ $json.dialog_id }}';"
+        "query": "UPDATE elo_t_dialogs SET last_client_channel_id = {{ $json.last_client_channel_id }}, last_message_at = NOW(), last_client_message_at = NOW() WHERE id = '{{ $json.dialog_id }}';",
+        "options": {}
       },
-      "id": "update-dialog-cached",
+      "id": "1f32ed47-be08-4e63-9e5a-906f4b9c5e56",
       "name": "Update Dialog (cached)",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1320, 200],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        -48,
+        -80
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Restore data after UPDATE\nreturn $('Use Cached Dialog').first().json;"
       },
-      "id": "restore-cached-dialog",
+      "id": "22974286-fcdf-4bde-958a-bbf9857a3da3",
       "name": "Restore (cached)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 200]
+      "position": [
+        176,
+        -80
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT id as dialog_id FROM elo_t_dialogs WHERE tenant_id = '{{ $json.tenant_id }}' AND client_id = '{{ $json.client_id }}' LIMIT 1;"
+        "query": "SELECT id as dialog_id FROM elo_t_dialogs WHERE tenant_id = '{{ $json.tenant_id }}' AND client_id = '{{ $json.client_id }}' LIMIT 1;",
+        "options": {}
       },
-      "id": "db-dialog-query",
+      "id": "1ee7db89-78b2-4692-8ec9-f5957ec718b0",
       "name": "DB Get Dialog",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1100, 400],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        -272,
+        128
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge DB result with previous data\nconst prevData = $('Merge Dialog Redis').first().json;\nconst dbResult = $json;\n\nreturn {\n  ...prevData,\n  _db_dialog_id: dbResult.dialog_id || null\n};"
       },
-      "id": "merge-db-dialog",
+      "id": "a32d8e8f-7036-4fed-b3c5-fd9b12660f4e",
       "name": "Merge DB Dialog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, 400]
+      "position": [
+        -48,
+        128
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ !!$json._db_dialog_id }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+          "options": {
+            "version": 1,
+            "looseTypeValidation": true
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$json._db_dialog_id }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-dialog-found",
+      "id": "8e90c3b0-a736-4880-9e82-2018a51f42b4",
       "name": "Dialog Found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1540, 400]
+      "position": [
+        176,
+        128
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use existing dialog\nconst data = $json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  client_id: data.client_id,\n  channel_id: data.channel_id,\n  dialog_id: data._db_dialog_id,\n  is_new_dialog: false,\n  last_client_channel_id: data.channel_id,\n  trace_id: data.trace_id,\n  _source: 'database',\n  _cache_key: data._cache_key,\n  _cache_value: JSON.stringify({ dialog_id: data._db_dialog_id }),\n  _original_input: data._original_input\n};"
       },
-      "id": "use-existing-dialog",
+      "id": "bbe27a8d-be21-4bea-a29b-a0d405bf8f11",
       "name": "Use Existing Dialog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 300]
+      "position": [
+        400,
+        32
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE elo_t_dialogs SET last_client_channel_id = {{ $json.last_client_channel_id }}, last_message_at = NOW(), last_client_message_at = NOW() WHERE id = '{{ $json.dialog_id }}';"
+        "query": "UPDATE elo_t_dialogs SET last_client_channel_id = {{ $json.last_client_channel_id }}, last_message_at = NOW(), last_client_message_at = NOW() WHERE id = '{{ $json.dialog_id }}';",
+        "options": {}
       },
-      "id": "update-dialog-db",
+      "id": "250ff958-2561-4314-90b9-c3b9c2a03035",
       "name": "Update Dialog (db)",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1980, 300],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        608,
+        32
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Restore data after UPDATE\nreturn $('Use Existing Dialog').first().json;"
       },
-      "id": "restore-existing-dialog",
+      "id": "33f41778-2891-410e-9e14-4dc1684444a6",
       "name": "Restore (existing)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2200, 300]
+      "position": [
+        832,
+        32
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO elo_t_dialogs (tenant_id, client_id, channel_id, first_contact_channel_id, last_client_channel_id, status_id)\nVALUES ('{{ $json.tenant_id }}', '{{ $json.client_id }}', {{ $json.channel_id }}, {{ $json.channel_id }}, {{ $json.channel_id }}, 1)\nRETURNING id as dialog_id;"
+        "query": "INSERT INTO elo_t_dialogs (tenant_id, client_id, channel_id, first_contact_channel_id, last_client_channel_id, status_id)\nVALUES ('{{ $json.tenant_id }}', '{{ $json.client_id }}', {{ $json.channel_id }}, {{ $json.channel_id }}, {{ $json.channel_id }}, 1)\nRETURNING id as dialog_id;",
+        "options": {}
       },
-      "id": "db-dialog-create",
+      "id": "17ba1378-9a18-43f5-9aca-0caba5046e6f",
       "name": "DB Create Dialog",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1760, 500],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        400,
+        224
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use new dialog\nconst prevData = $('Merge DB Dialog').first().json;\nconst dbResult = $json;\n\nreturn {\n  tenant_id: prevData.tenant_id,\n  client_id: prevData.client_id,\n  channel_id: prevData.channel_id,\n  dialog_id: dbResult.dialog_id,\n  is_new_dialog: true,\n  last_client_channel_id: prevData.channel_id,\n  trace_id: prevData.trace_id,\n  _source: 'created',\n  _cache_key: prevData._cache_key,\n  _cache_value: JSON.stringify({ dialog_id: dbResult.dialog_id }),\n  _original_input: prevData._original_input\n};"
       },
-      "id": "use-new-dialog",
+      "id": "eecdbeab-bddd-4a55-b3ce-0739ecde0cd6",
       "name": "Use New Dialog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1980, 500]
+      "position": [
+        608,
+        224
+      ]
     },
     {
       "parameters": {
@@ -193,63 +302,417 @@
         "expire": true,
         "ttl": 86400
       },
-      "id": "redis-dialog-set",
+      "id": "42386b95-558d-46b4-9def-e749a2603e39",
       "name": "Cache Dialog",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [2420, 400],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        1056,
+        128
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Restore data after Redis SET\nlet data;\ntry {\n  data = $('Use Existing Dialog').first().json;\n} catch {\n  data = $('Use New Dialog').first().json;\n}\nreturn data;"
       },
-      "id": "restore-dialog",
+      "id": "33e40143-c9d3-4130-9d4b-d495774a6b0b",
       "name": "Restore Dialog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2640, 400]
+      "position": [
+        1280,
+        128
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Build final response\nconst data = $json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  client_id: data.client_id,\n  channel_id: data.channel_id,\n  dialog_id: data.dialog_id,\n  last_client_channel_id: data.last_client_channel_id,\n  is_new_dialog: data.is_new_dialog,\n  trace_id: data.trace_id,\n  _source: data._source,\n  _original_input: data._original_input\n};"
       },
-      "id": "build-response",
+      "id": "813853dd-56da-41a7-bf18-54ed7242f673",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2860, 300]
+      "position": [
+        1488,
+        32
+      ]
     }
   ],
   "connections": {
-    "Execute Workflow Trigger": { "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]] },
-    "Validate Input": { "main": [[{ "node": "Cache Get Dialog", "type": "main", "index": 0 }]] },
-    "Cache Get Dialog": { "main": [[{ "node": "Merge Dialog Redis", "type": "main", "index": 0 }]] },
-    "Merge Dialog Redis": { "main": [[{ "node": "Dialog Cached?", "type": "main", "index": 0 }]] },
-    "Dialog Cached?": { "main": [
-      [{ "node": "Use Cached Dialog", "type": "main", "index": 0 }],
-      [{ "node": "DB Get Dialog", "type": "main", "index": 0 }]
-    ]},
-    "Use Cached Dialog": { "main": [[{ "node": "Update Dialog (cached)", "type": "main", "index": 0 }]] },
-    "Update Dialog (cached)": { "main": [[{ "node": "Restore (cached)", "type": "main", "index": 0 }]] },
-    "Restore (cached)": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] },
-    "DB Get Dialog": { "main": [[{ "node": "Merge DB Dialog", "type": "main", "index": 0 }]] },
-    "Merge DB Dialog": { "main": [[{ "node": "Dialog Found?", "type": "main", "index": 0 }]] },
-    "Dialog Found?": { "main": [
-      [{ "node": "Use Existing Dialog", "type": "main", "index": 0 }],
-      [{ "node": "DB Create Dialog", "type": "main", "index": 0 }]
-    ]},
-    "Use Existing Dialog": { "main": [[{ "node": "Update Dialog (db)", "type": "main", "index": 0 }]] },
-    "Update Dialog (db)": { "main": [[{ "node": "Restore (existing)", "type": "main", "index": 0 }]] },
-    "Restore (existing)": { "main": [[{ "node": "Cache Dialog", "type": "main", "index": 0 }]] },
-    "DB Create Dialog": { "main": [[{ "node": "Use New Dialog", "type": "main", "index": 0 }]] },
-    "Use New Dialog": { "main": [[{ "node": "Cache Dialog", "type": "main", "index": 0 }]] },
-    "Cache Dialog": { "main": [[{ "node": "Restore Dialog", "type": "main", "index": 0 }]] },
-    "Restore Dialog": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] }
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Cache Get Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Get Dialog": {
+      "main": [
+        [
+          {
+            "node": "Merge Dialog Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Dialog Redis": {
+      "main": [
+        [
+          {
+            "node": "Dialog Cached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dialog Cached?": {
+      "main": [
+        [
+          {
+            "node": "Use Cached Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Get Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Cached Dialog": {
+      "main": [
+        [
+          {
+            "node": "Update Dialog (cached)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Dialog (cached)": {
+      "main": [
+        [
+          {
+            "node": "Restore (cached)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore (cached)": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Get Dialog": {
+      "main": [
+        [
+          {
+            "node": "Merge DB Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge DB Dialog": {
+      "main": [
+        [
+          {
+            "node": "Dialog Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dialog Found?": {
+      "main": [
+        [
+          {
+            "node": "Use Existing Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Create Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Existing Dialog": {
+      "main": [
+        [
+          {
+            "node": "Update Dialog (db)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Dialog (db)": {
+      "main": [
+        [
+          {
+            "node": "Restore (existing)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore (existing)": {
+      "main": [
+        [
+          {
+            "node": "Cache Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Create Dialog": {
+      "main": [
+        [
+          {
+            "node": "Use New Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use New Dialog": {
+      "main": [
+        [
+          {
+            "node": "Cache Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Dialog": {
+      "main": [
+        [
+          {
+            "node": "Restore Dialog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Dialog": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "staticData": null,
-  "tags": [{ "name": "ELO" }, { "name": "Resolve" }, { "name": "Dialog" }]
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "tenant_id": "11111111-1111-1111-1111-111111111111",
+          "client_id": "d9f48ac6-b00d-4904-a2ff-86698479b920",
+          "channel_id": 2,
+          "trace_id": "trace_1766916042106",
+          "_tenant_id": "11111111-1111-1111-1111-111111111111",
+          "_channel_account_id": "f9f4d6e9-d2ae-42fd-8602-90e4d4c3472a",
+          "_channel": "whatsapp",
+          "_external_chat_id": "79997253777@s.whatsapp.net",
+          "_is_new_client": false,
+          "_was_unified": false,
+          "_tenant_source": "cache",
+          "_client_source": "cache",
+          "_original_input": {
+            "channel": "whatsapp",
+            "external_user_id": "79997253777",
+            "external_chat_id": "79997253777@s.whatsapp.net",
+            "client_name": "Дмитрий",
+            "client_phone": "+79997253777",
+            "text": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+            "timestamp": "2025-12-28T10:00:13.000Z",
+            "message_ids": [
+              "3A493402312DA3C23DCC"
+            ],
+            "trace_id": "trace_1766916042106",
+            "media": {
+              "has_voice": false,
+              "voice_transcribed_text": null,
+              "has_images": false,
+              "images": [],
+              "has_video": false,
+              "videos": [],
+              "has_document": false
+            },
+            "meta": {
+              "external_message_id": "3A493402312DA3C23DCC",
+              "ad_channel": "whatsapp",
+              "ad_id": null,
+              "original_media_type": "text",
+              "raw": {
+                "sessionId": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+                "message": {
+                  "key": {
+                    "remoteJid": "79997253777@s.whatsapp.net",
+                    "fromMe": false,
+                    "id": "3A493402312DA3C23DCC",
+                    "senderLid": "88115666518211@lid",
+                    "remoteLid": "79997253777@lid",
+                    "remoteJidNormalized": "79997253777@s.whatsapp.net"
+                  },
+                  "messageTimestamp": 1766916013,
+                  "pushName": "Дмитрий",
+                  "broadcast": false,
+                  "message": {
+                    "conversation": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+                    "messageContextInfo": {
+                      "deviceListMetadata": {
+                        "senderKeyHash": "bfKpC2v48BC7rw==",
+                        "senderTimestamp": "1766734767",
+                        "recipientKeyHash": "v/3fS+pwd3hHLw==",
+                        "recipientTimestamp": "1766570916"
+                      },
+                      "deviceListMetadataVersion": 2,
+                      "messageSecret": "CR+RVqH+V4miSgK2VUYn1IVnJGMGYSpIeyWfXrhdpSI="
+                    }
+                  }
+                },
+                "type": "notify"
+              },
+              "provider": "baileys",
+              "batched": false,
+              "batch_size": 1,
+              "batch_reason": "orphan"
+            },
+            "_entry_timestamp": 1766916042135
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "3a61d169-94f3-4269-8cd1-b2e90c7eef27",
+  "activeVersionId": null,
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-28T09:15:09.687Z",
+      "createdAt": "2025-12-28T09:15:09.687Z",
+      "role": "workflow:owner",
+      "workflowId": "bPNUrwJNSyj52z8B",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-28T09:13:23.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-27",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T09:24:16.983Z",
+      "createdAt": "2025-12-27T09:24:16.983Z",
+      "id": "FmBrJ66uBJQlxu3o",
+      "name": "Resolve"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
 }

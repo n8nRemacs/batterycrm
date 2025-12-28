@@ -1,104 +1,78 @@
-# Start Session - План на следующую сессию
+# Start Session - 2025-12-28
+
+## Текущий статус: Pipeline РАБОТАЕТ
+
+Messenger -> Batcher -> Resolver -> AI Stub -> Save Message
+
+---
 
 ## Инфраструктура
 
 | Сервер | IP | Сервисы |
 |--------|-----|---------|
-| **Messenger** | 155.212.221.189 | MCP: telegram :8761, whatsapp :8769, avito :8793 |
+| **Messenger** | 155.212.221.189 | MCP: telegram :8767, whatsapp :8769, avito :8793 |
 | **n8n** | 185.221.214.83 | n8n, PostgreSQL, Redis |
 | **HTTPS Gateway** | msg.eldoleado.ru | nginx + Let's Encrypt |
 
 ---
 
-## Приоритет 1: Протестировать ELO_Resolver
+## Активные workflows (14/45)
 
-Workflow полностью переписан, но **не протестирован**.
+### Channel In (5 ON)
+- ELO_In_WhatsApp
+- ELO_In_Telegram_Bot
+- ELO_In_Avito
+- ELO_In_App
+- ELO_Message_Router
 
-### Что сделано
-- 47 нод с правильным потоком данных
-- Merge ноды после Redis/DB операций
-- IF ноды с optional chaining: `$json._cached?.id || '' notEquals ''`
+### Channel Out (2 ON)
+- ELO_Out_Telegram_Bot
+- ELO_Out_WhatsApp
 
-### Шаги тестирования
+### API (7 ON)
+- ELO_API_Android_Auth
+- ELO_API_Android_Dialogs
+- ELO_API_Android_Messages
+- ELO_API_Android_Send_Message
+- ELO_API_Android_Logout
+- ELO_API_Android_Register_FCM
+- ELO_API_Android_Normalize
 
-1. Импортировать `NEW/workflows/Resolve Contour/ELO_Resolver.json` в n8n
-2. Очистить Redis: `ssh root@185.221.214.83 "docker exec n8n-redis redis-cli FLUSHALL"`
-3. Отправить сообщение в WhatsApp
-4. Проверить execution в n8n
-
-### Ожидаемый поток (первое сообщение)
-
-```
-Validate Input
-    ↓
-Cache Get Tenant → null
-    ↓
-Merge Tenant Redis → _tenant_cached: null
-    ↓
-Tenant Cached? → FALSE
-    ↓
-DB Get Tenant → {tenant_id, channel_account_id, channel_id}
-    ↓
-Merge DB Tenant → _db_tenant: {...}
-    ↓
-Tenant Found? → TRUE
-    ↓
-Use DB Tenant
-    ↓
-Cache Tenant (SET)
-    ↓
-Restore Tenant
-    ↓
-Cache Get Client → null
-    ↓
-... (аналогично для Client и Dialog)
-    ↓
-Build Response
-```
-
-### Если ошибка в IF ноде
-
-Проверить execution, найти где данные теряются. Возможно нужно другое условие.
+### AI (1 ON)
+- ELO_Core_AI_Test_Stub
 
 ---
 
-## Приоритет 2: Avito Polling
+## Следующие задачи
 
-Webhook от Avito не работает без платной подписки.
+### Приоритет 1: Активировать pipeline
 
-### Импорт workflow
+1. Активировать ELO_Input_Batcher
+2. Активировать ELO_Input_Processor  
+3. Активировать ELO_Resolver
+4. Активировать ELO_Tenant_Resolver
+5. Активировать ELO_Client_Resolver
+6. Активировать ELO_Dialog_Resolver
 
-1. n8n → Import → From File
-2. Файл: `NEW/MVP/MCP/mcp-avito-camoufox/n8n-avito-polling.json`
-3. Настроить Redis credentials
-4. Активировать
+### Приоритет 2: Тестирование
+
+1. Отправить сообщение в WhatsApp
+2. Проверить что сообщение проходит весь pipeline
+3. Проверить сохранение в elo_t_messages
+4. Проверить вызов ELO_Core_AI_Test_Stub
+
+### Приоритет 3: AI ответы
+
+1. Заменить Test Stub на реальный AI
+2. Подключить ELO_Out_Router
+3. Отправлять ответы обратно клиенту
 
 ---
 
-## Workflows
+## Ключевые URLs
 
-| Workflow | Файл | Статус |
-|----------|------|--------|
-| ELO_Resolver | `NEW/workflows/Resolve Contour/ELO_Resolver.json` | Переписан, не тестирован |
-| ELO_Unifier | `NEW/workflows/Resolve Contour/ELO_Unifier.json` | Готов |
-| ELO_Input_Processor | n8n | Вызывает ELO_Resolver |
-
----
-
-## Данные в БД
-
-### Клиенты
-```
-Дмитрий | +79997253777 | 79997253777@s.whatsapp.net
-Ремакс  | +79171708077 | 79171708077@s.whatsapp.net
-```
-
-### Channel Accounts (WhatsApp)
-```
-session_id: wa_22222222-2222-2222-2222-222222222222_1766570899887
-channel_id: 2
-tenant_id: 11111111-1111-1111-1111-111111111111
-```
+- n8n: https://n8n.n8nsrv.ru
+- AI Webhook: https://n8n.n8nsrv.ru/webhook/elo-core-ingest
 
 ---
 
@@ -120,36 +94,21 @@ ssh root@185.221.214.83 "docker exec n8n-redis redis-cli FLUSHALL"
 # Проверить кеш
 ssh root@185.221.214.83 "docker exec n8n-redis redis-cli KEYS 'cache:*'"
 
-# Посмотреть клиентов
-ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT id, name, phone FROM elo_t_clients;'"
-
-# Логи WhatsApp MCP
-ssh root@155.212.221.189 "docker logs whatsapp-mcp --tail 50"
+# Посмотреть сообщения
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT id, content, created_at FROM elo_t_messages ORDER BY created_at DESC LIMIT 5;'"
 ```
 
 ---
 
-## Ключевые файлы
+## Документация
 
 | Файл | Описание |
 |------|----------|
-| `123.md` | Статус работы, что сделано/не сделано |
-| `Stop.md` | Что сделано в прошлой сессии |
-| `NEW/workflows/Resolve Contour/ELO_Resolver.json` | Unified resolver (47 нод) |
-| `NEW/workflows/Resolve Contour/ELO_Unifier.json` | Модуль объединения клиентов |
+| Stop.md | Что сделано в прошлой сессии |
+| NEW/DOCS/WORKFLOWS_ANALYSIS.md | Анализ всех workflows |
+| NEW/DOCS/DATABASE_ANALYSIS.md | Структура БД |
+| NEW/DOCS/SYNC_AND_ANALYZE.md | Инструкция синхронизации |
 
 ---
 
-## Известные баги n8n IF node v2
-
-| Условие | Результат |
-|---------|-----------|
-| `!!$json.field` boolean equals true | null идёт в TRUE |
-| `field exists` | undefined идёт в TRUE |
-| `field isEmpty` | непредсказуемо |
-
-**Рабочее решение:** `$json.field?.id || '' notEquals ''`
-
----
-
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2025-12-28*

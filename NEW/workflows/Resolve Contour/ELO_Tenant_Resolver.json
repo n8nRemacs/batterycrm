@@ -1,131 +1,213 @@
 {
+  "updatedAt": "2025-12-28T10:04:27.693Z",
+  "createdAt": "2025-12-28T09:15:41.638Z",
+  "id": "h97a3boAV7LuSBGZ",
   "name": "ELO_Tenant_Resolver",
+  "description": null,
+  "active": false,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "trigger-001",
+      "id": "f4ee871c-6423-444b-9b89-f78d71d3dea9",
       "name": "Execute Workflow Trigger",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1,
-      "position": [0, 300]
+      "position": [
+        -1376,
+        64
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Validate Input for Tenant Resolver\nconst raw = $input.first().json;\nconst input = raw.payload || raw;\n\nlet credential = input.credential || input.meta?.raw?.sessionId || input.meta?.raw?.botId || input.session_id || input.bot_token;\n\nif (!input.channel) throw new Error('Missing: channel');\nif (!credential) throw new Error('Missing: credential');\n\nconst channel = input.channel.toLowerCase();\nconst validChannels = ['telegram', 'whatsapp', 'avito', 'vk', 'max', 'form', 'phone'];\nif (!validChannels.includes(channel)) throw new Error(`Invalid channel: ${channel}`);\n\nconst trace_id = input.trace_id || `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\nreturn {\n  channel,\n  credential,\n  trace_id,\n  _cache_key: `cache:tenant:${channel}:${credential}`,\n  _original_input: input\n};"
       },
-      "id": "validate-001",
+      "id": "5b9f6ffe-fa3e-4dc8-bc65-41469fd7f81c",
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [220, 300]
+      "position": [
+        -1152,
+        64
+      ]
     },
     {
       "parameters": {
         "operation": "get",
-        "key": "={{ $json._cache_key }}"
+        "key": "={{ $json._cache_key }}",
+        "options": {}
       },
-      "id": "redis-tenant-get",
+      "id": "239cd031-643e-45f7-a583-01760bbccb8c",
       "name": "Cache Get Tenant",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [440, 300],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        -928,
+        64
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge Redis result with input data\nconst input = $('Validate Input').first().json;\nconst redis = $json;\nconst cachedValue = redis.propertyName || redis.value || null;\n\nlet parsed = null;\nif (cachedValue && cachedValue !== 'null' && cachedValue !== '') {\n  try {\n    parsed = JSON.parse(cachedValue);\n    if (!parsed || !parsed.tenant_id) parsed = null;\n  } catch (e) {\n    parsed = null;\n  }\n}\n\nreturn {\n  ...input,\n  _tenant_cached: parsed\n};"
       },
-      "id": "merge-tenant-redis",
+      "id": "d00a6a59-8efe-4c64-b322-d18bc59b4e56",
       "name": "Merge Tenant Redis",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [660, 300]
+      "position": [
+        -720,
+        64
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ $json._tenant_cached?.tenant_id || '' }}", "rightValue": "", "operator": { "type": "string", "operation": "notEquals" } }]
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json._tenant_cached?.tenant_id || '' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "id": "9b91dc49-f769-44e7-98ec-3758f92bfb96"
+            }
+          ],
+          "combinator": "and"
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-tenant-cache",
+      "id": "18381392-c5a4-49a4-b0f9-17ee6180b421",
       "name": "Tenant Cached?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [880, 300]
+      "position": [
+        -496,
+        64
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use tenant from cache\nconst data = $json;\nconst cached = data._tenant_cached;\n\nif (!cached || !cached.tenant_id) {\n  throw new Error(`Invalid tenant cache: ${JSON.stringify(cached)}`);\n}\n\nreturn {\n  tenant_id: cached.tenant_id,\n  channel_account_id: cached.channel_account_id,\n  channel_id: cached.channel_id,\n  channel: data.channel,\n  credential: data.credential,\n  trace_id: data.trace_id,\n  _source: 'cache',\n  _original_input: data._original_input\n};"
       },
-      "id": "use-cached-tenant",
+      "id": "a649696b-c4ab-4fbc-9e11-3eb47e816e5f",
       "name": "Use Cached Tenant",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 200]
+      "position": [
+        0,
+        -208
+      ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT ca.tenant_id, ca.id as channel_account_id, ca.channel_id\nFROM elo_t_channel_accounts ca\nJOIN elo_channels c ON c.id = ca.channel_id\nWHERE c.code = '{{ $json.channel }}'\n  AND ca.session_id = '{{ $json.credential }}'\n  AND ca.is_active = true\nLIMIT 1;"
+        "query": "SELECT ca.tenant_id, ca.id as channel_account_id, ca.channel_id\nFROM elo_t_channel_accounts ca\nJOIN elo_channels c ON c.id = ca.channel_id\nWHERE c.code = '{{ $json.channel }}'\n  AND ca.session_id = '{{ $json.credential }}'\n  AND ca.is_active = true\nLIMIT 1;",
+        "options": {}
       },
-      "id": "db-tenant-query",
+      "id": "12c5bfa8-7d9c-44a5-972c-044e1fe24075",
       "name": "DB Get Tenant",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
-      "position": [1100, 400],
-      "credentials": { "postgres": { "id": "postgres-main", "name": "PostgreSQL Main" } }
+      "position": [
+        -272,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Merge DB result with input data\nconst input = $('Merge Tenant Redis').first().json;\nconst dbResult = $json;\n\nreturn {\n  ...input,\n  _db_tenant: dbResult.tenant_id ? dbResult : null\n};"
       },
-      "id": "merge-db-tenant",
+      "id": "52c84e5a-63a4-4503-80cd-bff5bc63254c",
       "name": "Merge DB Tenant",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1320, 400]
+      "position": [
+        -48,
+        160
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "version": 1, "looseTypeValidation": true },
-          "conditions": [{ "leftValue": "={{ !!$json._db_tenant }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$json._db_tenant }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "70f9d072-6643-4e0a-bdbc-0d5c7d6cce81"
+            }
+          ],
+          "combinator": "and"
         },
-        "options": { "looseTypeValidation": true }
+        "options": {
+          "looseTypeValidation": true
+        }
       },
-      "id": "if-tenant-found",
+      "id": "37a60132-0cf3-4d99-9e37-e6aa8efd1267",
       "name": "Tenant Found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1540, 400]
+      "position": [
+        176,
+        160
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "throw new Error(`Channel not registered: ${$json.channel}:${$json.credential}`);"
       },
-      "id": "error-no-tenant",
+      "id": "6e0c5aa8-e926-4e60-a238-755b8d72bfc8",
       "name": "Error: No Tenant",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 500]
+      "position": [
+        400,
+        256
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Use tenant from DB and prepare for cache\nconst data = $json;\nconst tenant = data._db_tenant;\n\nreturn {\n  tenant_id: tenant.tenant_id,\n  channel_account_id: tenant.channel_account_id,\n  channel_id: tenant.channel_id,\n  channel: data.channel,\n  credential: data.credential,\n  trace_id: data.trace_id,\n  _source: 'database',\n  _cache_key: data._cache_key,\n  _cache_value: JSON.stringify({ \n    tenant_id: tenant.tenant_id, \n    channel_account_id: tenant.channel_account_id, \n    channel_id: tenant.channel_id \n  }),\n  _original_input: data._original_input\n};"
       },
-      "id": "use-db-tenant",
+      "id": "dc46e780-fa9d-49d1-b1bf-17194e7c828f",
       "name": "Use DB Tenant",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1760, 300]
+      "position": [
+        400,
+        64
+      ]
     },
     {
       "parameters": {
@@ -135,57 +217,337 @@
         "expire": true,
         "ttl": 86400
       },
-      "id": "redis-tenant-set",
+      "id": "5ece4043-1efc-4834-82ae-d50ab2b50cff",
       "name": "Cache Tenant",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1980, 300],
-      "credentials": { "redis": { "id": "redis-n8n", "name": "Redis n8n" } }
+      "position": [
+        608,
+        64
+      ],
+      "credentials": {
+        "redis": {
+          "id": "7FQcEivUY94atW24",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Restore data after Redis SET (Redis returns OK, not our data)\nreturn $('Use DB Tenant').first().json;"
       },
-      "id": "restore-tenant",
+      "id": "55539a2c-5a82-4c56-a074-cc55aa260afa",
       "name": "Restore Tenant",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2200, 300]
+      "position": [
+        832,
+        64
+      ]
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "// Build final response\nconst data = $json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  channel_account_id: data.channel_account_id,\n  channel_id: data.channel_id,\n  channel: data.channel,\n  credential: data.credential,\n  trace_id: data.trace_id,\n  _source: data._source,\n  _original_input: data._original_input\n};"
       },
-      "id": "build-response",
+      "id": "01cb5829-cdf5-466c-96b7-dbb5881bd9f6",
       "name": "Build Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2420, 300]
+      "position": [
+        1056,
+        64
+      ]
     }
   ],
   "connections": {
-    "Execute Workflow Trigger": { "main": [[{ "node": "Validate Input", "type": "main", "index": 0 }]] },
-    "Validate Input": { "main": [[{ "node": "Cache Get Tenant", "type": "main", "index": 0 }]] },
-    "Cache Get Tenant": { "main": [[{ "node": "Merge Tenant Redis", "type": "main", "index": 0 }]] },
-    "Merge Tenant Redis": { "main": [[{ "node": "Tenant Cached?", "type": "main", "index": 0 }]] },
-    "Tenant Cached?": { "main": [
-      [{ "node": "Use Cached Tenant", "type": "main", "index": 0 }],
-      [{ "node": "DB Get Tenant", "type": "main", "index": 0 }]
-    ]},
-    "Use Cached Tenant": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] },
-    "DB Get Tenant": { "main": [[{ "node": "Merge DB Tenant", "type": "main", "index": 0 }]] },
-    "Merge DB Tenant": { "main": [[{ "node": "Tenant Found?", "type": "main", "index": 0 }]] },
-    "Tenant Found?": { "main": [
-      [{ "node": "Use DB Tenant", "type": "main", "index": 0 }],
-      [{ "node": "Error: No Tenant", "type": "main", "index": 0 }]
-    ]},
-    "Use DB Tenant": { "main": [[{ "node": "Cache Tenant", "type": "main", "index": 0 }]] },
-    "Cache Tenant": { "main": [[{ "node": "Restore Tenant", "type": "main", "index": 0 }]] },
-    "Restore Tenant": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] }
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Cache Get Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Get Tenant": {
+      "main": [
+        [
+          {
+            "node": "Merge Tenant Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Tenant Redis": {
+      "main": [
+        [
+          {
+            "node": "Tenant Cached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Cached?": {
+      "main": [
+        [
+          {
+            "node": "Use Cached Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DB Get Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Cached Tenant": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DB Get Tenant": {
+      "main": [
+        [
+          {
+            "node": "Merge DB Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge DB Tenant": {
+      "main": [
+        [
+          {
+            "node": "Tenant Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tenant Found?": {
+      "main": [
+        [
+          {
+            "node": "Use DB Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: No Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use DB Tenant": {
+      "main": [
+        [
+          {
+            "node": "Cache Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Tenant": {
+      "main": [
+        [
+          {
+            "node": "Restore Tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restore Tenant": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "staticData": null,
-  "tags": [{ "name": "ELO" }, { "name": "Resolve" }, { "name": "Tenant" }]
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "channel": "whatsapp",
+          "external_user_id": "79997253777",
+          "external_chat_id": "79997253777@s.whatsapp.net",
+          "client_name": "Дмитрий",
+          "client_phone": "+79997253777",
+          "text": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+          "timestamp": "2025-12-28T10:00:13.000Z",
+          "message_ids": [
+            "3A493402312DA3C23DCC"
+          ],
+          "trace_id": "trace_1766916042106",
+          "media": {
+            "has_voice": false,
+            "voice_transcribed_text": null,
+            "has_images": false,
+            "images": [],
+            "has_video": false,
+            "videos": [],
+            "has_document": false
+          },
+          "meta": {
+            "external_message_id": "3A493402312DA3C23DCC",
+            "ad_channel": "whatsapp",
+            "ad_id": null,
+            "original_media_type": "text",
+            "raw": {
+              "sessionId": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+              "message": {
+                "key": {
+                  "remoteJid": "79997253777@s.whatsapp.net",
+                  "fromMe": false,
+                  "id": "3A493402312DA3C23DCC",
+                  "senderLid": "88115666518211@lid",
+                  "remoteLid": "79997253777@lid",
+                  "remoteJidNormalized": "79997253777@s.whatsapp.net"
+                },
+                "messageTimestamp": 1766916013,
+                "pushName": "Дмитрий",
+                "broadcast": false,
+                "message": {
+                  "conversation": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам.",
+                  "messageContextInfo": {
+                    "deviceListMetadata": {
+                      "senderKeyHash": "bfKpC2v48BC7rw==",
+                      "senderTimestamp": "1766734767",
+                      "recipientKeyHash": "v/3fS+pwd3hHLw==",
+                      "recipientTimestamp": "1766570916"
+                    },
+                    "deviceListMetadataVersion": 2,
+                    "messageSecret": "CR+RVqH+V4miSgK2VUYn1IVnJGMGYSpIeyWfXrhdpSI="
+                  }
+                }
+              },
+              "type": "notify"
+            },
+            "provider": "baileys",
+            "batched": false,
+            "batch_size": 1,
+            "batch_reason": "orphan"
+          },
+          "_entry_timestamp": 1766916042135
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "656c225d-985f-402a-ad27-eadbb4766d4e",
+  "activeVersionId": null,
+  "versionCounter": 4,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-28T09:15:41.642Z",
+      "createdAt": "2025-12-28T09:15:41.642Z",
+      "role": "workflow:owner",
+      "workflowId": "h97a3boAV7LuSBGZ",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-28T09:13:23.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-27",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T09:24:16.983Z",
+      "createdAt": "2025-12-27T09:24:16.983Z",
+      "id": "FmBrJ66uBJQlxu3o",
+      "name": "Resolve"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": null
 }
