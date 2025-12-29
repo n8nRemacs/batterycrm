@@ -15,28 +15,28 @@ interface ApiService {
     // Base URL: https://n8n.n8nsrv.ru/webhook/
 
     // Auth
-    @POST("android/auth/login")
+    @POST("v1/auth/login")
     fun login(@Body request: LoginRequest): Call<LoginResponse>
 
-    @POST("android/logout")
+    @POST("v1/auth/logout")
     fun logout(): Call<ApiResponse>
 
     // Dialogs
-    @GET("android/dialogs")
+    @GET("v1/dialogs")
     fun getDialogs(@Query("session_token") sessionToken: String): Call<DialogsResponse>
 
-    @GET("android/messages")
+    @GET("v1/messages")
     fun getChatMessages(
         @Query("dialog_id") dialogId: String,
         @Query("session_token") sessionToken: String
     ): Call<ChatMessagesResponse>
 
-    @POST("android/messages/send")
+    @POST("v1/messages/send")
     fun sendChatMessage(
         @Body request: SendChatMessageRequest
     ): Call<SendChatMessageResponse>
 
-    @POST("android/normalize")
+    @POST("v1/normalize")
     fun normalizeDialogText(
         @Body request: NormalizeDialogRequest
     ): Call<NormalizeDialogResponse>
@@ -87,17 +87,17 @@ interface ApiService {
     ): Call<ApiResponse>
 
     // FCM & Settings
-    @POST("android-register-fcm")
+    @POST("v1/register-fcm")
     fun registerFCMToken(
         @Body request: FCMTokenRegisterRequest
     ): Call<FCMTokenResponse>
 
-    @POST("android-update-settings")
+    @POST("v1/update-settings")
     fun updateSettings(
         @Body request: UpdateSettingsRequest
     ): Call<ApiResponse>
 
-    @POST("android-update-appeal-mode")
+    @POST("v1/update-appeal-mode")
     fun updateAppealMode(
         @Path("appeal_id") appealId: String,
         @Body request: UpdateAppealModeRequest
@@ -105,38 +105,38 @@ interface ApiService {
 
     // ========== DEVICE CRUD ==========
 
-    @POST("android/appeal-devices")
+    @POST("v1/appeal-devices")
     fun createDevice(
         @Path("appeal_id") appealId: String,
         @Body request: CreateDeviceRequest
     ): Call<DeviceResponse>
 
-    @PATCH("android/appeal-devices/{device_id}")
+    @PATCH("v1/appeal-devices/{device_id}")
     fun updateDevice(
         @Path("device_id") deviceId: String,
         @Body request: UpdateDeviceRequest
     ): Call<DeviceResponse>
 
-    @DELETE("android/appeal-devices/{device_id}")
+    @DELETE("v1/appeal-devices/{device_id}")
     fun deleteDevice(
         @Path("device_id") deviceId: String
     ): Call<ApiResponse>
 
     // ========== REPAIR CRUD ==========
 
-    @POST("android/appeal-repairs")
+    @POST("v1/appeal-repairs")
     fun createRepair(
         @Path("device_id") deviceId: String,
         @Body request: CreateRepairRequest
     ): Call<RepairResponse>
 
-    @PATCH("android/appeal-repairs/{repair_id}")
+    @PATCH("v1/appeal-repairs/{repair_id}")
     fun updateRepair(
         @Path("repair_id") repairId: String,
         @Body request: UpdateRepairRequest
     ): Call<RepairResponse>
 
-    @DELETE("android/appeal-repairs/{repair_id}")
+    @DELETE("v1/appeal-repairs/{repair_id}")
     fun deleteRepair(
         @Path("repair_id") repairId: String
     ): Call<ApiResponse>
