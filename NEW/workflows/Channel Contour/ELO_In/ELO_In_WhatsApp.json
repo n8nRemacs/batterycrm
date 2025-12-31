@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-27T13:16:55.641Z",
+  "updatedAt": "2025-12-30T11:28:22.700Z",
   "createdAt": "2025-12-11T17:21:02.716Z",
   "id": "PrsqCxCgoZuxnKus",
   "name": "ELO_In_WhatsApp",
@@ -36,8 +36,8 @@
           "conditions": [
             {
               "id": "is-message",
-              "leftValue": "={{ $json.body.type }}",
-              "rightValue": "notify",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "=message",
               "operator": {
                 "type": "string",
                 "operation": "equals"
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\n  const event = input.body || input;\n  const msg = event.message || {};\n  const key = msg.key || {};\n  const content = msg.message || {};\n\n  const chatId = key.remoteJid || '';\n\n  // Только входящие от клиентов (@s.whatsapp.net)\n  const isClient = chatId.endsWith('@s.whatsapp.net') && !key.fromMe;\n\n  if (!isClient) {\n    return [];\n  }\n\n  // Has content?\n  const hasText = !!(content.conversation || content.extendedTextMessage?.text);\n  const hasMedia = !!(content.imageMessage || content.videoMessage || content.audioMessage || content.documentMessage);\n\n  if (!hasText && !hasMedia) {\n    return [];\n  }\n\n  const phone = '+' + chatId.replace('@s.whatsapp.net', '');\n\n  const messageText = content.conversation\n    || content.extendedTextMessage?.text\n    || content.imageMessage?.caption\n    || content.videoMessage?.caption\n    || '';\n\n  const timestamp = msg.messageTimestamp\n    ? new Date(msg.messageTimestamp * 1000).toISOString()\n    : new Date().toISOString();\n\n  return {\n    session_id: event.sessionId,\n    chat_id: chatId,\n    phone: phone,\n    message_text: messageText,\n    message_id: key.id,\n    timestamp: timestamp,\n    sender_name: msg.pushName || msg.verifiedBizName || null,\n    has_photo: !!content.imageMessage,\n    has_voice: !!content.audioMessage,\n    has_video: !!content.videoMessage,\n    has_document: !!content.documentMessage,\n    raw_event: event\n  };"
+        "jsCode": " const input = $input.first().json;\n  const body = input.body || input;\n  const data = body.data || {};\n\n  // Только входящие сообщения (event = message, не из группы)\n  if (body.event !== 'message') {\n    return [];\n  }\n\n  // Пропускаем групповые сообщения (опционально)\n  if (data.isGroup) {\n    return [];\n  }\n\n  // Проверяем наличие контента\n  const hasText = !!data.text;\n  const hasMedia = data.type === 'image' || data.type === 'video' || data.type === 'audio' || data.type === 'document';\n\n  if (!hasText && !hasMedia) {\n    return [];\n  }\n\n  const phone = '+' + data.from;\n  const messageText = data.text || data.caption || '';\n\n  const timestamp = data.timestamp\n    ? new Date(data.timestamp).toISOString()\n    : new Date().toISOString();\n\n  return {\n    session_id: body.sessionId,\n    session_hash: body.sessionHash,\n    chat_id: data.from + '@s.whatsapp.net',\n    phone: phone,\n    message_text: messageText,\n    message_id: data.messageId,\n    timestamp: timestamp,\n    sender_name: data.fromName || null,\n    has_photo: data.type === 'image',\n    has_voice: data.type === 'audio',\n    has_video: data.type === 'video',\n    has_document: data.type === 'document',\n    raw_event: body\n  };"
       },
       "id": "4d4a2c74-554f-492d-8b53-f4e660931ee1",
       "name": "Extract WhatsApp Data",
@@ -362,13 +362,11 @@
         "json": {
           "headers": {
             "host": "n8n.n8nsrv.ru",
-            "user-agent": "node",
-            "content-length": "4175",
-            "accept": "*/*",
-            "accept-encoding": "br, gzip, deflate",
-            "accept-language": "*",
+            "user-agent": "axios/1.13.2",
+            "content-length": "676",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
             "content-type": "application/json",
-            "sec-fetch-mode": "cors",
             "via": "1.1 Caddy",
             "x-forwarded-for": "155.212.221.189",
             "x-forwarded-host": "n8n.n8nsrv.ru",
@@ -377,58 +375,22 @@
           "params": {},
           "query": {},
           "body": {
-            "sessionId": "eldoleado_arceos",
-            "message": {
-              "key": {
-                "remoteJid": "status@broadcast",
-                "fromMe": false,
-                "id": "3A75B8271D932087B08D",
-                "participant": "79275852829@s.whatsapp.net",
-                "participantLid": "79275852829@lid",
-                "remoteLid": "status@lid",
-                "remoteJidNormalized": "status@broadcast"
-              },
-              "messageTimestamp": 1766430180,
-              "pushName": "Али",
-              "broadcast": true,
-              "message": {
-                "senderKeyDistributionMessage": {
-                  "groupId": "status@broadcast",
-                  "axolotlSenderKeyDistributionMessage": "Mwi+m5OCARAAGiAr6QiRy9NvayFWms4MTJKwWH0Vh0FbMyk4eADDfw5nKCIhBdCmFOEIE9Tdo8BCmdNU73W/cpEJ09RmSmbrcbLCz+Bw"
-                },
-                "videoMessage": {
-                  "url": "https://mmg.whatsapp.net/v/t62.7161-24/557416401_921276850222204_2821392706377997194_n.enc?ccb=11-4&oh=01_Q5Aa3QFNzLvjAgiyprug4Ags-RviIx68zvHSegtqSP_X3fcrsg&oe=69711E51&_nc_sid=5e03e0&mms3=true",
-                  "mimetype": "video/mp4",
-                  "fileSha256": "QzdV7skJrRhohAriZyteNCxMuQ66njj1zpZCZxH559U=",
-                  "fileLength": "4702780",
-                  "seconds": 29,
-                  "mediaKey": "1Y+1x+lHY8ElLg/EMurTGQVCkoI0WE1OgTaAoeoJDLE=",
-                  "caption": "😔",
-                  "height": 848,
-                  "width": 464,
-                  "fileEncSha256": "bK3F4rA+jpJbHeRbVqrbgtBStdcFQvo2xE5ckiAbO/4=",
-                  "directPath": "/v/t62.7161-24/557416401_921276850222204_2821392706377997194_n.enc?ccb=11-4&oh=01_Q5Aa3QFNzLvjAgiyprug4Ags-RviIx68zvHSegtqSP_X3fcrsg&oe=69711E51&_nc_sid=5e03e0",
-                  "mediaKeyTimestamp": "1766430034",
-                  "jpegThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABEMDQ8NCxEPDg8TEhEUGSocGRcXGTQlJx8qPTZBQDw2OzpETGJTREhcSTo7VXRWXGVobW5tQlJ4gHdqf2JrbWn/2wBDARITExkWGTIcHDJpRjtGaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWn/wgARCABgADUDASIAAhEBAxEB/8QAGwAAAgMBAQEAAAAAAAAAAAAAAwQAAgUBBgf/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAABbGWgfYX4eht570JJIeB1sbTNNdUwt6jB2xuVh8+cDc0ODsNa+HqmjOQyfNdGGOlcdFUZqTNhYTAwq76w0jUhaUhztBj1wkBV7YFDQ/8QAFBEBAAAAAAAAAAAAAAAAAAAAQP/aAAgBAgEBPwBH/8QAFBEBAAAAAAAAAAAAAAAAAAAAQP/aAAgBAwEBPwBH/8QALxAAAgEDAwIFAgUFAAAAAAAAAQIDAAQREiExQVEFEBMiYTJxBkJSwdEUJIGCof/aAAgBAQABPwC98ZSIlLcB2/V0FTTyztrmYk/JqO+eBh6UjAjoKs/GkkYJONDHqeDSuGGRx5hyd+f3pI3nfBJ09qhto0XaMD71cRJOhXSAw4NeB3kkc5s5jt+TJ4PbzDkkfNWYWPGRua3PPFTTpF8sdgBVzqDC4QnWnOBj7VY3AubSOX9Q3+9ZFQ7yAnpUcmEzkbV6853I9vWhCsoEuCRjGx4qK3VMgLkHY/NeHQLb2UcanIAznyjJWQVGGYgdKVQsLYzv3O9QXQgOk7hhwOhpJARqGATyAeK8Pk1waf0nyvbdrW4aKT6huCOoqCbSAaS4DAjHSgY2UBl3+Oa0OFzpEcfzya8I3ic/IHl4gfDc/wB5oL6f9sf4ovGXYRBggPt1nfFI4FJOy/Tpz3p7rIy7l2qG/uUdjDIyjO6g1D+IJ0BWVVc9CRg1O2snG57nrVvEZXKKcPj2jue1BcnY4PavSkqC3PqBn6dKI03LkcZzUkSuc8U8asNQ2oD0pcN/yri2MsTTp9abyAdQfzfzUMpRgsm6d+1BVVCynIxzUK62mPOF/eugoIVVkJ4GQe4ph6kYPVSRXhswikXXgrnDA9VOx/mry2/p7yW3PCN7T3HSlDRMdJODyO9Q+1X0n6iAakOnAzUD6kMbHLKMqfirZhrdG2Db16S5YBidPG3Iq5Jn9OR31Mq6c6eQO9MF1DBJHfFAYc44YUVyTmpkNvLkgh1PuBqU6ZQVqKXUgbtsaHxTbAfepfbGxHIqMK6Bh1r//gADAP/Z",
-                  "contextInfo": {
-                    "featureEligibilities": {
-                      "canBeReshared": false
-                    },
-                    "statusSourceType": "VIDEO"
-                  },
-                  "streamingSidecar": "4XcXGjlpiKqBREPDGJZgnPlTUI1jON6xZ0pahgRWjorPF1ZeOGd2jJUtyBXOIu7gqtA35NSsb8ld7Al+3JfZqy6PzXTFr+EuVhXxD4Hokwa/Uo3CRnkBnOkbGFwvSOmjMSxeagt0nfYi58VKWd5VQIvcp6L2rWJxrCxuozLRGbLXMYLb/yImk1ugwv2wj/Bd8IhNlRr3VWi7La57YTJi8QE2eOJ9Job8/qhReqOUmyY4z4K/qUURCauYZESmnRZGSr8KYfF6ztYnBTvto3EisEQH+Ejzmt8OCv/gdcACgO0Ql1VhLuSEiAL+Xo4hG/9FdaukjZdxCIY432v3Ri9VAH4XKmiGY5epszstsextNkc5xWuv57LMWypEn/eUEKu6E+qB3skTu5to1ZKIqQ8nYOxxUr6j6YCXTfqwVAYnudxyps1qjS5zoJ+7gUMqLAEP0KNKuspqfCPp9turSvG0YDzPuZXbfJsyQkCjAytWE6fPTJ6ZvMRFsv4M8sctTN6K7/kHXdyKt+3Fssqa4C+nll9I8IUNrT7CrFPfM3vxO+EO9LG0qPS+hG1OdqjYr8nzqonleaekI8a3VsZafUSOOQ8A6PSdFle/f0I2ctjh4K7xmnQiLe+vJSSH3ZV7ZnUGigrkXqahZF52KIFY2vtOx7jG2nGXcrkNLTHdBl0FVJFMsSyMUkAxgW0qtqfw36Acm8b/0rcXp6ffKrqitDd3lvrOJOAEZMvyDginOr8baoCuJQTj+VnF1w9tRzjQTZILti6RbExavX+CKzAzq4yYvcqjP8qrlY4vavZjNb6Q4geOQ9nciMv/CDjtLyURTgClLKfk7Zhv77ThrAKSUwCB/aYWOYCz2BvKnsnRZLzJVAryc/21mLijvl+XYZHqqKIHOAcHbxoH/i00yqVVwbEsVL7LSM46+ma4cNwJe9IR384bJXJUpNVyKpri+znxfM+t",
-                  "thumbnailDirectPath": "/v/t62.36147-24/557836400_855471970422373_115496922653043052_n.enc?ccb=11-4&oh=01_Q5Aa3QHoO3hARYF6qPUN_22ohaPPUHH-4WZbPltD1vdJop1VbA&oe=69712200&_nc_sid=5e03e0",
-                  "thumbnailSha256": "RP8EJlzTCz0T53oVO+/XNzj9XxXdFpDKP8saj66kJa8=",
-                  "thumbnailEncSha256": "JzHvZ6Bmwus56el5ddzki0Yt1FDk9UqnbrjHWETFuk0=",
-                  "metadataUrl": "",
-                  "videoSourceType": "USER_VIDEO"
-                },
-                "messageContextInfo": {
-                  "messageSecret": "lH0UjVh0mWUAvWLdym9AW37/qeOekBQywjubA/LSl0c="
-                }
-              }
-            },
-            "type": "notify"
+            "event": "message",
+            "sessionId": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+            "sessionHash": "b5dd413e9d548c93",
+            "timestamp": 1767092658695,
+            "data": {
+              "sessionId": "wa_22222222-2222-2222-2222-222222222222_1766570899887",
+              "sessionHash": "b5dd413e9d548c93",
+              "messageId": "3EB0FA521B1F7EF30E5002",
+              "from": "79997253777",
+              "fromName": "Дмитрий",
+              "to": "79997253777",
+              "isGroup": false,
+              "timestamp": 1767092658000,
+              "type": "text",
+              "text": "К сожалению, у нас возникли трудности с получением необходимой информации. Пожалуйста, уточните ваш вопрос, и мы постараемся помочь вам."
+            }
           },
           "webhookUrl": "https://n8n.n8nsrv.ru/webhook/whatsapp-incoming",
           "executionMode": "production"
@@ -439,9 +401,9 @@
       }
     ]
   },
-  "versionId": "ecda806f-6b4e-4068-bf16-506262bb1099",
-  "activeVersionId": "ecda806f-6b4e-4068-bf16-506262bb1099",
-  "versionCounter": 45,
+  "versionId": "19f85702-d5f5-4107-adc0-303494829c4b",
+  "activeVersionId": "19f85702-d5f5-4107-adc0-303494829c4b",
+  "versionCounter": 56,
   "triggerCount": 1,
   "shared": [
     {
@@ -465,7 +427,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-29T05:00:09.000Z",
+              "updatedAt": "2025-12-31T08:56:11.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -480,7 +442,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-28",
+              "lastActiveAt": "2025-12-30",
               "isPending": false
             }
           }
@@ -503,9 +465,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-22T19:19:14.790Z",
-    "createdAt": "2025-12-22T19:19:14.790Z",
-    "versionId": "ecda806f-6b4e-4068-bf16-506262bb1099",
+    "updatedAt": "2025-12-30T11:07:58.141Z",
+    "createdAt": "2025-12-30T11:07:58.141Z",
+    "versionId": "19f85702-d5f5-4107-adc0-303494829c4b",
     "workflowId": "PrsqCxCgoZuxnKus",
     "nodes": [
       {
@@ -537,8 +499,8 @@
             "conditions": [
               {
                 "id": "is-message",
-                "leftValue": "={{ $json.body.type }}",
-                "rightValue": "notify",
+                "leftValue": "={{ $json.body.event }}",
+                "rightValue": "=message",
                 "operator": {
                   "type": "string",
                   "operation": "equals"
@@ -577,7 +539,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.first().json;\n  const event = input.body || input;\n  const msg = event.message || {};\n  const key = msg.key || {};\n  const content = msg.message || {};\n\n  const chatId = key.remoteJid || '';\n\n  // Только входящие от клиентов (@s.whatsapp.net)\n  const isClient = chatId.endsWith('@s.whatsapp.net') && !key.fromMe;\n\n  if (!isClient) {\n    return [];\n  }\n\n  // Has content?\n  const hasText = !!(content.conversation || content.extendedTextMessage?.text);\n  const hasMedia = !!(content.imageMessage || content.videoMessage || content.audioMessage || content.documentMessage);\n\n  if (!hasText && !hasMedia) {\n    return [];\n  }\n\n  const phone = '+' + chatId.replace('@s.whatsapp.net', '');\n\n  const messageText = content.conversation\n    || content.extendedTextMessage?.text\n    || content.imageMessage?.caption\n    || content.videoMessage?.caption\n    || '';\n\n  const timestamp = msg.messageTimestamp\n    ? new Date(msg.messageTimestamp * 1000).toISOString()\n    : new Date().toISOString();\n\n  return {\n    session_id: event.sessionId,\n    chat_id: chatId,\n    phone: phone,\n    message_text: messageText,\n    message_id: key.id,\n    timestamp: timestamp,\n    sender_name: msg.pushName || msg.verifiedBizName || null,\n    has_photo: !!content.imageMessage,\n    has_voice: !!content.audioMessage,\n    has_video: !!content.videoMessage,\n    has_document: !!content.documentMessage,\n    raw_event: event\n  };"
+          "jsCode": " const input = $input.first().json;\n  const body = input.body || input;\n  const data = body.data || {};\n\n  // Только входящие сообщения (event = message, не из группы)\n  if (body.event !== 'message') {\n    return [];\n  }\n\n  // Пропускаем групповые сообщения (опционально)\n  if (data.isGroup) {\n    return [];\n  }\n\n  // Проверяем наличие контента\n  const hasText = !!data.text;\n  const hasMedia = data.type === 'image' || data.type === 'video' || data.type === 'audio' || data.type === 'document';\n\n  if (!hasText && !hasMedia) {\n    return [];\n  }\n\n  const phone = '+' + data.from;\n  const messageText = data.text || data.caption || '';\n\n  const timestamp = data.timestamp\n    ? new Date(data.timestamp).toISOString()\n    : new Date().toISOString();\n\n  return {\n    session_id: body.sessionId,\n    session_hash: body.sessionHash,\n    chat_id: data.from + '@s.whatsapp.net',\n    phone: phone,\n    message_text: messageText,\n    message_id: data.messageId,\n    timestamp: timestamp,\n    sender_name: data.fromName || null,\n    has_photo: data.type === 'image',\n    has_voice: data.type === 'audio',\n    has_video: data.type === 'video',\n    has_document: data.type === 'document',\n    raw_event: body\n  };"
         },
         "id": "4d4a2c74-554f-492d-8b53-f4e660931ee1",
         "name": "Extract WhatsApp Data",

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-28T10:06:03.716Z",
+  "updatedAt": "2025-12-29T11:29:41.000Z",
   "createdAt": "2025-12-28T09:14:39.460Z",
   "id": "MOa50VVpseLR5xna",
   "name": "ELO_Client_Resolver",
@@ -686,7 +686,7 @@
   },
   "versionId": "dfe4d541-807b-4847-913a-208099f2a470",
   "activeVersionId": null,
-  "versionCounter": 4,
+  "versionCounter": 6,
   "triggerCount": 0,
   "shared": [
     {
@@ -710,7 +710,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-29T05:00:09.000Z",
+              "updatedAt": "2025-12-31T08:56:11.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -725,7 +725,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-28",
+              "lastActiveAt": "2025-12-30",
               "isPending": false
             }
           }

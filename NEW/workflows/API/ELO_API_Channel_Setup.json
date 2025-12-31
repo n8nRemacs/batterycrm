@@ -1,18 +1,30 @@
 {
+  "updatedAt": "2025-12-31T09:02:53.577Z",
+  "createdAt": "2025-12-29T12:23:12.666Z",
+  "id": "a3I85vep9LrKZa3C",
   "name": "ELO_API_Channel_Setup",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
         "httpMethod": "=POST",
         "path": "v1/channels/whatsapp/sessions",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "wa-create",
+      "id": "b2952102-372a-4e98-95ea-cda9695444e5",
       "name": "WA Create Session",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 0]
+      "position": [
+        -80,
+        1056
+      ],
+      "webhookId": "d5733210-76b3-4bd5-ba2c-953fcea78ce3"
     },
     {
       "parameters": {
@@ -21,23 +33,31 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ sessionId: $json.body.sessionId, webhookUrl: 'https://n8n.n8nsrv.ru/webhook/whatsapp/incoming' }) }}",
-        "options": { "timeout": 30000 }
+        "options": {
+          "timeout": 30000
+        }
       },
-      "id": "wa-create-req",
+      "id": "9072c293-bf38-4280-b88c-9ef3901c5d10",
       "name": "WA Create Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 0]
+      "position": [
+        144,
+        1056
+      ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nconst body = $('WA Create Session').first().json.body;\n\nif (response.success && response.data) {\n  // Save to database\n  return {\n    success: true,\n    data: {\n      sessionId: response.data.sessionId,\n      hash: response.data.hash,\n      status: response.data.status || 'connecting',\n      qr: response.data.qr,\n      qrImage: response.data.qrImage\n    }\n  };\n}\n\nreturn { success: false, error: response.error || 'Failed to create session' };"
       },
-      "id": "wa-create-format",
+      "id": "b9774933-838b-40f4-b0ff-1ba1f791c02e",
       "name": "WA Format Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 0]
+      "position": [
+        368,
+        1056
+      ]
     },
     {
       "parameters": {
@@ -47,42 +67,60 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "wa-create-respond",
+      "id": "f0829bb6-fd93-425b-9acd-31edd1b00b88",
       "name": "WA Create Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [660, 0]
+      "position": [
+        592,
+        1056
+      ]
     },
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "v1/channels/whatsapp/sessions/:sessionId/qr",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "wa-qr",
+      "id": "9f30867f-3165-47e3-a8e5-1a0444998f53",
       "name": "WA Get QR",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 200]
+      "position": [
+        -80,
+        1264
+      ],
+      "webhookId": "6a5fa472-38dd-45fa-955c-e66225308fd8"
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "=http://155.212.221.189:8769/sessions/{{ $json.params.sessionId }}/qr",
-        "options": { "timeout": 10000 }
+        "options": {
+          "timeout": 10000
+        }
       },
-      "id": "wa-qr-req",
+      "id": "c1eb7c24-1006-40c0-8063-feb2f6ad74b9",
       "name": "WA QR Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 200]
+      "position": [
+        144,
+        1264
+      ]
     },
     {
       "parameters": {
@@ -92,30 +130,45 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "wa-qr-respond",
+      "id": "28d3ca88-1924-4a00-8ee0-5f3de2c0f963",
       "name": "WA QR Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [440, 200]
+      "position": [
+        368,
+        1264
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "v1/channels/telegram-bot/register",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "tg-register",
+      "id": "53391a5c-a367-4123-9a48-6aea596345db",
       "name": "TG Bot Register",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 400]
+      "position": [
+        -80,
+        1456
+      ],
+      "webhookId": "5a85a89e-94a4-40ea-86b5-8d289c15d960"
     },
     {
       "parameters": {
@@ -124,13 +177,18 @@
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}",
-        "options": { "timeout": 30000 }
+        "options": {
+          "timeout": 30000
+        }
       },
-      "id": "tg-register-req",
+      "id": "620046d6-e00c-40f7-b66c-4542cd92c5c6",
       "name": "TG Register Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 400]
+      "position": [
+        144,
+        1456
+      ]
     },
     {
       "parameters": {
@@ -140,52 +198,74 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "tg-register-respond",
+      "id": "5d2f9eb2-5d94-4fe9-ab4f-815e1d8ab4eb",
       "name": "TG Register Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [440, 400]
+      "position": [
+        368,
+        1456
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "v1/channels/telegram-bot/validate",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "tg-validate",
+      "id": "5182e503-0cfb-4d1e-aa92-74e915439f1e",
       "name": "TG Bot Validate",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 600]
+      "position": [
+        -80,
+        1664
+      ],
+      "webhookId": "1a07b5ec-2af6-4032-8cfd-7aa5ee4146e5"
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "=https://api.telegram.org/bot{{ $json.body.botToken }}/getMe",
-        "options": { "timeout": 10000 }
+        "options": {
+          "timeout": 10000
+        }
       },
-      "id": "tg-validate-req",
+      "id": "56764d4b-cabb-43e2-9664-8df0b8a3a66a",
       "name": "TG Validate Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 600]
+      "position": [
+        144,
+        1664
+      ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nif (response.ok && response.result) {\n  return { success: true, valid: true, botInfo: response.result };\n}\nreturn { success: true, valid: false, error: response.description || 'Invalid token' };"
       },
-      "id": "tg-validate-format",
+      "id": "65915011-3b18-4fdb-b7c6-649fa0a93d02",
       "name": "TG Validate Format",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 600]
+      "position": [
+        368,
+        1664
+      ]
     },
     {
       "parameters": {
@@ -195,30 +275,45 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "tg-validate-respond",
+      "id": "86e5c3f6-f8e5-4b03-8609-8400ba44bfe4",
       "name": "TG Validate Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [660, 600]
+      "position": [
+        592,
+        1664
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "v1/channels/max-user/sessions/create",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "max-create",
+      "id": "92009f70-c632-46f6-a73c-842d725ad804",
       "name": "MAX Create Session",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 800]
+      "position": [
+        -80,
+        1856
+      ],
+      "webhookId": "f39704d1-c6b9-4307-bede-e926d6cc14bc"
     },
     {
       "parameters": {
@@ -227,29 +322,40 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "eldoleado_mcp_2024" }
+            {
+              "name": "X-API-Key",
+              "value": "eldoleado_mcp_2024"
+            }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}",
-        "options": { "timeout": 30000 }
+        "options": {
+          "timeout": 30000
+        }
       },
-      "id": "max-create-req",
+      "id": "12949e86-724f-4150-843d-21718bf38aed",
       "name": "MAX Create Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 800]
+      "position": [
+        144,
+        1856
+      ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || response.error || 'Failed to create session' };"
       },
-      "id": "max-create-format",
+      "id": "1fa368c3-a45b-49b7-9512-8c30f351309b",
       "name": "MAX Create Format",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 800]
+      "position": [
+        368,
+        1856
+      ]
     },
     {
       "parameters": {
@@ -259,30 +365,45 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "max-create-respond",
+      "id": "0b44109b-fbbb-4ae9-a8ec-fb6bf1e7ef58",
       "name": "MAX Create Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [660, 800]
+      "position": [
+        592,
+        1856
+      ]
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "v1/channels/max-user/sessions/:sessionId/verify",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "max-verify",
+      "id": "d8b67a2b-f37b-45f4-91a2-37137ecc4797",
       "name": "MAX Verify Code",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 1000]
+      "position": [
+        -80,
+        2064
+      ],
+      "webhookId": "599caa6d-6893-407a-ac80-28f3d0962235"
     },
     {
       "parameters": {
@@ -291,29 +412,40 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "eldoleado_mcp_2024" }
+            {
+              "name": "X-API-Key",
+              "value": "eldoleado_mcp_2024"
+            }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.body) }}",
-        "options": { "timeout": 30000 }
+        "options": {
+          "timeout": 30000
+        }
       },
-      "id": "max-verify-req",
+      "id": "6a314abf-e2cf-4ad4-8929-2fce2ab939fe",
       "name": "MAX Verify Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 1000]
+      "position": [
+        144,
+        2064
+      ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || response.error || 'Verification failed' };"
       },
-      "id": "max-verify-format",
+      "id": "c28345d7-e958-406d-a8a3-13778d6a473b",
       "name": "MAX Verify Format",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 1000]
+      "position": [
+        368,
+        2064
+      ]
     },
     {
       "parameters": {
@@ -323,58 +455,82 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "max-verify-respond",
+      "id": "fdfe4a82-2ef2-43a2-b86f-8a6c8e9380d0",
       "name": "MAX Verify Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [660, 1000]
+      "position": [
+        592,
+        2064
+      ]
     },
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "v1/channels/max-user/sessions/:sessionId",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "max-get",
+      "id": "629bb771-f12c-4052-bc4e-00eabd8317fc",
       "name": "MAX Get Session",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 1200]
+      "position": [
+        -80,
+        2256
+      ],
+      "webhookId": "7c474edb-e52b-4be6-a09f-780b8cdb0eaf"
     },
     {
       "parameters": {
-        "method": "GET",
         "url": "=http://155.212.221.189:8771/sessions/{{ $json.params.sessionId }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "eldoleado_mcp_2024" }
+            {
+              "name": "X-API-Key",
+              "value": "eldoleado_mcp_2024"
+            }
           ]
         },
-        "options": { "timeout": 10000 }
+        "options": {
+          "timeout": 10000
+        }
       },
-      "id": "max-get-req",
+      "id": "b24007ca-c52d-4503-8603-edcae03a54c3",
       "name": "MAX Get Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 1200]
+      "position": [
+        144,
+        2256
+      ]
     },
     {
       "parameters": {
         "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || 'Session not found' };"
       },
-      "id": "max-get-format",
+      "id": "90ae43f2-bd8f-45dd-8b7e-6286e4c1a60f",
       "name": "MAX Get Format",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [440, 1200]
+      "position": [
+        368,
+        2256
+      ]
     },
     {
       "parameters": {
@@ -384,30 +540,45 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "max-get-respond",
+      "id": "77657d42-bc67-45bc-ac55-ecd66ac3d6d9",
       "name": "MAX Get Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [660, 1200]
+      "position": [
+        592,
+        2256
+      ]
     },
     {
       "parameters": {
         "httpMethod": "DELETE",
         "path": "v1/channels/max-user/sessions/:sessionId",
         "responseMode": "responseNode",
-        "options": { "allowedOrigins": "*" }
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
-      "id": "max-delete",
+      "id": "21ee9e45-b5cb-4798-84ac-dca6af44dd71",
       "name": "MAX Delete Session",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 1400]
+      "position": [
+        -80,
+        2464
+      ],
+      "webhookId": "298d59d6-6904-4cc1-a47e-a1e2b37f0ae0"
     },
     {
       "parameters": {
@@ -416,16 +587,24 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "X-API-Key", "value": "eldoleado_mcp_2024" }
+            {
+              "name": "X-API-Key",
+              "value": "eldoleado_mcp_2024"
+            }
           ]
         },
-        "options": { "timeout": 10000 }
+        "options": {
+          "timeout": 10000
+        }
       },
-      "id": "max-delete-req",
+      "id": "7b218158-db4f-484f-8416-6e0471ce7755",
       "name": "MAX Delete Request",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [220, 1400]
+      "position": [
+        144,
+        2464
+      ]
     },
     {
       "parameters": {
@@ -435,41 +614,1200 @@
           "responseCode": 200,
           "responseHeaders": {
             "entries": [
-              { "name": "Content-Type", "value": "application/json" },
-              { "name": "Access-Control-Allow-Origin", "value": "*" }
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
             ]
           }
         }
       },
-      "id": "max-delete-respond",
+      "id": "b7c10de2-573c-41a6-a598-e1e7c2044a07",
       "name": "MAX Delete Respond",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [440, 1400]
+      "position": [
+        368,
+        2464
+      ]
     }
   ],
   "connections": {
-    "WA Create Session": { "main": [[{ "node": "WA Create Request", "type": "main", "index": 0 }]] },
-    "WA Create Request": { "main": [[{ "node": "WA Format Response", "type": "main", "index": 0 }]] },
-    "WA Format Response": { "main": [[{ "node": "WA Create Respond", "type": "main", "index": 0 }]] },
-    "WA Get QR": { "main": [[{ "node": "WA QR Request", "type": "main", "index": 0 }]] },
-    "WA QR Request": { "main": [[{ "node": "WA QR Respond", "type": "main", "index": 0 }]] },
-    "TG Bot Register": { "main": [[{ "node": "TG Register Request", "type": "main", "index": 0 }]] },
-    "TG Register Request": { "main": [[{ "node": "TG Register Respond", "type": "main", "index": 0 }]] },
-    "TG Bot Validate": { "main": [[{ "node": "TG Validate Request", "type": "main", "index": 0 }]] },
-    "TG Validate Request": { "main": [[{ "node": "TG Validate Format", "type": "main", "index": 0 }]] },
-    "TG Validate Format": { "main": [[{ "node": "TG Validate Respond", "type": "main", "index": 0 }]] },
-    "MAX Create Session": { "main": [[{ "node": "MAX Create Request", "type": "main", "index": 0 }]] },
-    "MAX Create Request": { "main": [[{ "node": "MAX Create Format", "type": "main", "index": 0 }]] },
-    "MAX Create Format": { "main": [[{ "node": "MAX Create Respond", "type": "main", "index": 0 }]] },
-    "MAX Verify Code": { "main": [[{ "node": "MAX Verify Request", "type": "main", "index": 0 }]] },
-    "MAX Verify Request": { "main": [[{ "node": "MAX Verify Format", "type": "main", "index": 0 }]] },
-    "MAX Verify Format": { "main": [[{ "node": "MAX Verify Respond", "type": "main", "index": 0 }]] },
-    "MAX Get Session": { "main": [[{ "node": "MAX Get Request", "type": "main", "index": 0 }]] },
-    "MAX Get Request": { "main": [[{ "node": "MAX Get Format", "type": "main", "index": 0 }]] },
-    "MAX Get Format": { "main": [[{ "node": "MAX Get Respond", "type": "main", "index": 0 }]] },
-    "MAX Delete Session": { "main": [[{ "node": "MAX Delete Request", "type": "main", "index": 0 }]] },
-    "MAX Delete Request": { "main": [[{ "node": "MAX Delete Respond", "type": "main", "index": 0 }]] }
+    "WA Create Session": {
+      "main": [
+        [
+          {
+            "node": "WA Create Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Create Request": {
+      "main": [
+        [
+          {
+            "node": "WA Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Format Response": {
+      "main": [
+        [
+          {
+            "node": "WA Create Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA Get QR": {
+      "main": [
+        [
+          {
+            "node": "WA QR Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WA QR Request": {
+      "main": [
+        [
+          {
+            "node": "WA QR Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TG Bot Register": {
+      "main": [
+        [
+          {
+            "node": "TG Register Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TG Register Request": {
+      "main": [
+        [
+          {
+            "node": "TG Register Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TG Bot Validate": {
+      "main": [
+        [
+          {
+            "node": "TG Validate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TG Validate Request": {
+      "main": [
+        [
+          {
+            "node": "TG Validate Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TG Validate Format": {
+      "main": [
+        [
+          {
+            "node": "TG Validate Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Create Session": {
+      "main": [
+        [
+          {
+            "node": "MAX Create Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Create Request": {
+      "main": [
+        [
+          {
+            "node": "MAX Create Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Create Format": {
+      "main": [
+        [
+          {
+            "node": "MAX Create Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Verify Code": {
+      "main": [
+        [
+          {
+            "node": "MAX Verify Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Verify Request": {
+      "main": [
+        [
+          {
+            "node": "MAX Verify Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Verify Format": {
+      "main": [
+        [
+          {
+            "node": "MAX Verify Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Get Session": {
+      "main": [
+        [
+          {
+            "node": "MAX Get Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Get Request": {
+      "main": [
+        [
+          {
+            "node": "MAX Get Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Get Format": {
+      "main": [
+        [
+          {
+            "node": "MAX Get Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Delete Session": {
+      "main": [
+        [
+          {
+            "node": "MAX Delete Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAX Delete Request": {
+      "main": [
+        [
+          {
+            "node": "MAX Delete Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "50be731d-0185-4f14-b1e9-2fcdd1fba733",
+  "activeVersionId": "50be731d-0185-4f14-b1e9-2fcdd1fba733",
+  "versionCounter": 16,
+  "triggerCount": 8,
+  "shared": [
+    {
+      "updatedAt": "2025-12-29T12:23:12.674Z",
+      "createdAt": "2025-12-29T12:23:12.674Z",
+      "role": "workflow:owner",
+      "workflowId": "a3I85vep9LrKZa3C",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-31T08:56:11.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-30",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-11-23T03:58:34.844Z",
+      "createdAt": "2025-11-23T03:58:34.844Z",
+      "id": "0yzk30hhaSzkl8bF",
+      "name": "API"
+    },
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-31T09:02:53.578Z",
+    "createdAt": "2025-12-31T09:02:53.578Z",
+    "versionId": "50be731d-0185-4f14-b1e9-2fcdd1fba733",
+    "workflowId": "a3I85vep9LrKZa3C",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "=POST",
+          "path": "v1/channels/whatsapp/sessions",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "b2952102-372a-4e98-95ea-cda9695444e5",
+        "name": "WA Create Session",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          1056
+        ],
+        "webhookId": "d5733210-76b3-4bd5-ba2c-953fcea78ce3"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://155.212.221.189:8769/sessions",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ sessionId: $json.body.sessionId, webhookUrl: 'https://n8n.n8nsrv.ru/webhook/whatsapp/incoming' }) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "9072c293-bf38-4280-b88c-9ef3901c5d10",
+        "name": "WA Create Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          1056
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nconst body = $('WA Create Session').first().json.body;\n\nif (response.success && response.data) {\n  // Save to database\n  return {\n    success: true,\n    data: {\n      sessionId: response.data.sessionId,\n      hash: response.data.hash,\n      status: response.data.status || 'connecting',\n      qr: response.data.qr,\n      qrImage: response.data.qrImage\n    }\n  };\n}\n\nreturn { success: false, error: response.error || 'Failed to create session' };"
+        },
+        "id": "b9774933-838b-40f4-b0ff-1ba1f791c02e",
+        "name": "WA Format Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          1056
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "f0829bb6-fd93-425b-9acd-31edd1b00b88",
+        "name": "WA Create Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          592,
+          1056
+        ]
+      },
+      {
+        "parameters": {
+          "path": "v1/channels/whatsapp/sessions/:sessionId/qr",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "9f30867f-3165-47e3-a8e5-1a0444998f53",
+        "name": "WA Get QR",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          1264
+        ],
+        "webhookId": "6a5fa472-38dd-45fa-955c-e66225308fd8"
+      },
+      {
+        "parameters": {
+          "url": "=http://155.212.221.189:8769/sessions/{{ $json.params.sessionId }}/qr",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "c1eb7c24-1006-40c0-8063-feb2f6ad74b9",
+        "name": "WA QR Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          1264
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "28d3ca88-1924-4a00-8ee0-5f3de2c0f963",
+        "name": "WA QR Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          368,
+          1264
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "v1/channels/telegram-bot/register",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "53391a5c-a367-4123-9a48-6aea596345db",
+        "name": "TG Bot Register",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          1456
+        ],
+        "webhookId": "5a85a89e-94a4-40ea-86b5-8d289c15d960"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://155.212.221.189:8761/bots/register",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.body) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "620046d6-e00c-40f7-b66c-4542cd92c5c6",
+        "name": "TG Register Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          1456
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "5d2f9eb2-5d94-4fe9-ab4f-815e1d8ab4eb",
+        "name": "TG Register Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          368,
+          1456
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "v1/channels/telegram-bot/validate",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "5182e503-0cfb-4d1e-aa92-74e915439f1e",
+        "name": "TG Bot Validate",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          1664
+        ],
+        "webhookId": "1a07b5ec-2af6-4032-8cfd-7aa5ee4146e5"
+      },
+      {
+        "parameters": {
+          "url": "=https://api.telegram.org/bot{{ $json.body.botToken }}/getMe",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "56764d4b-cabb-43e2-9664-8df0b8a3a66a",
+        "name": "TG Validate Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          1664
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nif (response.ok && response.result) {\n  return { success: true, valid: true, botInfo: response.result };\n}\nreturn { success: true, valid: false, error: response.description || 'Invalid token' };"
+        },
+        "id": "65915011-3b18-4fdb-b7c6-649fa0a93d02",
+        "name": "TG Validate Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          1664
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "86e5c3f6-f8e5-4b03-8609-8400ba44bfe4",
+        "name": "TG Validate Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          592,
+          1664
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "v1/channels/max-user/sessions/create",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "92009f70-c632-46f6-a73c-842d725ad804",
+        "name": "MAX Create Session",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          1856
+        ],
+        "webhookId": "f39704d1-c6b9-4307-bede-e926d6cc14bc"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://155.212.221.189:8771/sessions/create",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "eldoleado_mcp_2024"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.body) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "12949e86-724f-4150-843d-21718bf38aed",
+        "name": "MAX Create Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          1856
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || response.error || 'Failed to create session' };"
+        },
+        "id": "1fa368c3-a45b-49b7-9512-8c30f351309b",
+        "name": "MAX Create Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          1856
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "0b44109b-fbbb-4ae9-a8ec-fb6bf1e7ef58",
+        "name": "MAX Create Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          592,
+          1856
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "v1/channels/max-user/sessions/:sessionId/verify",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "d8b67a2b-f37b-45f4-91a2-37137ecc4797",
+        "name": "MAX Verify Code",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          2064
+        ],
+        "webhookId": "599caa6d-6893-407a-ac80-28f3d0962235"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=http://155.212.221.189:8771/sessions/{{ $json.params.sessionId }}/verify",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "eldoleado_mcp_2024"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.body) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "6a314abf-e2cf-4ad4-8929-2fce2ab939fe",
+        "name": "MAX Verify Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          2064
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || response.error || 'Verification failed' };"
+        },
+        "id": "c28345d7-e958-406d-a8a3-13778d6a473b",
+        "name": "MAX Verify Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          2064
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "fdfe4a82-2ef2-43a2-b86f-8a6c8e9380d0",
+        "name": "MAX Verify Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          592,
+          2064
+        ]
+      },
+      {
+        "parameters": {
+          "path": "v1/channels/max-user/sessions/:sessionId",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "629bb771-f12c-4052-bc4e-00eabd8317fc",
+        "name": "MAX Get Session",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          2256
+        ],
+        "webhookId": "7c474edb-e52b-4be6-a09f-780b8cdb0eaf"
+      },
+      {
+        "parameters": {
+          "url": "=http://155.212.221.189:8771/sessions/{{ $json.params.sessionId }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "eldoleado_mcp_2024"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "b24007ca-c52d-4503-8603-edcae03a54c3",
+        "name": "MAX Get Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          2256
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const response = $input.first().json;\nif (response.session_id) {\n  return { success: true, data: response };\n}\nreturn { success: false, error: response.detail || 'Session not found' };"
+        },
+        "id": "90ae43f2-bd8f-45dd-8b7e-6286e4c1a60f",
+        "name": "MAX Get Format",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          2256
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "77657d42-bc67-45bc-ac55-ecd66ac3d6d9",
+        "name": "MAX Get Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          592,
+          2256
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "DELETE",
+          "path": "v1/channels/max-user/sessions/:sessionId",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "id": "21ee9e45-b5cb-4798-84ac-dca6af44dd71",
+        "name": "MAX Delete Session",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          2464
+        ],
+        "webhookId": "298d59d6-6904-4cc1-a47e-a1e2b37f0ae0"
+      },
+      {
+        "parameters": {
+          "method": "DELETE",
+          "url": "=http://155.212.221.189:8771/sessions/{{ $json.params.sessionId }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-API-Key",
+                "value": "eldoleado_mcp_2024"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "7b218158-db4f-484f-8416-6e0471ce7755",
+        "name": "MAX Delete Request",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          144,
+          2464
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ success: true }) }}",
+          "options": {
+            "responseCode": 200,
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                }
+              ]
+            }
+          }
+        },
+        "id": "b7c10de2-573c-41a6-a598-e1e7c2044a07",
+        "name": "MAX Delete Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          368,
+          2464
+        ]
+      }
+    ],
+    "connections": {
+      "WA Create Session": {
+        "main": [
+          [
+            {
+              "node": "WA Create Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WA Create Request": {
+        "main": [
+          [
+            {
+              "node": "WA Format Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WA Format Response": {
+        "main": [
+          [
+            {
+              "node": "WA Create Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WA Get QR": {
+        "main": [
+          [
+            {
+              "node": "WA QR Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WA QR Request": {
+        "main": [
+          [
+            {
+              "node": "WA QR Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG Bot Register": {
+        "main": [
+          [
+            {
+              "node": "TG Register Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG Register Request": {
+        "main": [
+          [
+            {
+              "node": "TG Register Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG Bot Validate": {
+        "main": [
+          [
+            {
+              "node": "TG Validate Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG Validate Request": {
+        "main": [
+          [
+            {
+              "node": "TG Validate Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TG Validate Format": {
+        "main": [
+          [
+            {
+              "node": "TG Validate Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Create Session": {
+        "main": [
+          [
+            {
+              "node": "MAX Create Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Create Request": {
+        "main": [
+          [
+            {
+              "node": "MAX Create Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Create Format": {
+        "main": [
+          [
+            {
+              "node": "MAX Create Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Verify Code": {
+        "main": [
+          [
+            {
+              "node": "MAX Verify Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Verify Request": {
+        "main": [
+          [
+            {
+              "node": "MAX Verify Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Verify Format": {
+        "main": [
+          [
+            {
+              "node": "MAX Verify Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Get Session": {
+        "main": [
+          [
+            {
+              "node": "MAX Get Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Get Request": {
+        "main": [
+          [
+            {
+              "node": "MAX Get Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Get Format": {
+        "main": [
+          [
+            {
+              "node": "MAX Get Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Delete Session": {
+        "main": [
+          [
+            {
+              "node": "MAX Delete Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MAX Delete Request": {
+        "main": [
+          [
+            {
+              "node": "MAX Delete Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
 }

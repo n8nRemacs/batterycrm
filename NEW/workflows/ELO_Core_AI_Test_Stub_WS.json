@@ -1,0 +1,520 @@
+{
+  "updatedAt": "2025-12-30T11:52:30.298Z",
+  "createdAt": "2025-12-30T09:06:15.359Z",
+  "id": "kZJ6u5VB4alwVjig",
+  "name": "ELO_Core_AI_Test_Stub_WS",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elo-core-ingest",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f193b1a0-27d9-4389-9940-baf7199a82d6",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -512,
+        -96
+      ],
+      "webhookId": "elo-core-ingest"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst input = raw.body || raw;\n\nconsole.log('=== ELO_Core_AI_Test_Stub_WS ===');\nconsole.log('Received:', JSON.stringify(input, null, 2));\n\nconst response = {\n  tenant_id: input.tenant_id,\n  dialog_id: input.dialog_id,\n  channel_id: input.channel_id,\n  external_chat_id: input.external_chat_id,\n\n  message: {\n    text: `[TEST] Получено: \"${input.text || 'пусто'}\"`,\n    buttons: [],\n    attachments: []\n  },\n\n  context_updated: true,\n  trace_id: input.trace_id || `trace_${Date.now()}`,\n\n  _debug: {\n    received_at: new Date().toISOString(),\n    input_keys: Object.keys(input),\n    client: input.client,\n    meta: input.meta\n  }\n};\n\nreturn response;"
+      },
+      "id": "84b57020-1365-47f4-be4e-f167a59b6fc4",
+      "name": "Build Test Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  od.operator_id,\n  o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON o.id = od.operator_id\nWHERE od.tenant_id = '{{ $json.tenant_id }}'::uuid\n  AND od.device_type = 'mobile'\n  AND o.is_active = true;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        -96
+      ],
+      "id": "a4255eb5-5378-4ba2-ad96-18b5729b9b22",
+      "name": "Get Active Operators",
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const operators = $input.all();\n  const testResponse = $('Build Test Response').first().json;\n\n  const pushRequests = [];\n\n  for (const op of operators) {\n    pushRequests.push({\n      json: {\n        operator_id: op.json.operator_id,\n        action: 'new_message',\n        dialog_id: String(testResponse.dialog_id || ''),\n        title: 'Новое сообщение',\n        body: testResponse.message ? testResponse.message.text : '',\n        message: {\n          id: 'msg_' + Date.now(),\n          chat_id: String(testResponse.external_chat_id || '').replace('@s.whatsapp.net', ''),\n          channel: testResponse.channel_id === '2' ? 'whatsapp' : 'telegram',\n          text: testResponse.message ? testResponse.message.text : '',\n          sender_id: String(testResponse.external_chat_id || ''),\n          sender_name: 'Клиент',\n          sender_phone: String(testResponse.external_chat_id || '').replace('@s.whatsapp.net', ''),\n          server_id: ''\n        }\n      }\n    });\n  }\n\n  return pushRequests;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -96
+      ],
+      "id": "922937ea-b339-4512-9686-33ea580e0eb4",
+      "name": "Build WS Push Requests"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://155.212.221.189:8780/api/push/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Internal-Key",
+              "value": "elo-internal-2024"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        336,
+        -96
+      ],
+      "id": "2a9ba984-9fd0-4d75-b0d1-6f66af56bb2c",
+      "name": "Send WebSocket Push",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const testResponse = $('Build Test Response').first().json;\nconst pushResults = $input.all();\n\nconst successCount = pushResults.filter(r => r.json.success || r.json.delivered).length;\nconst failCount = pushResults.length - successCount;\n\nreturn {\n  json: {\n    ...testResponse,\n    push_status: {\n      total: pushResults.length,\n      success: successCount,\n      failed: failCount\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -96
+      ],
+      "id": "b0c428ba-3564-45fa-8ad2-9699852ac816",
+      "name": "Build Final Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "eb26e726-d33a-45d3-9e78-493c5074c7c4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        -96
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Test Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Test Response": {
+      "main": [
+        [
+          {
+            "node": "Get Active Operators",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Operators": {
+      "main": [
+        [
+          {
+            "node": "Build WS Push Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build WS Push Requests": {
+      "main": [
+        [
+          {
+            "node": "Send WebSocket Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WebSocket Push": {
+      "main": [
+        [
+          {
+            "node": "Build Final Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.n8nsrv.ru",
+            "user-agent": "axios/1.12.0",
+            "content-length": "671",
+            "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "via": "1.1 Caddy",
+            "x-forwarded-for": "172.19.0.1",
+            "x-forwarded-host": "n8n.n8nsrv.ru",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "tenant_id": "11111111-1111-1111-1111-111111111111",
+            "client_id": "d9f48ac6-b00d-4904-a2ff-86698479b920",
+            "dialog_id": "3a7b2b2d-003c-4ff2-83e4-c068bf0b83fa",
+            "channel_id": 2,
+            "channel_account_id": "f9f4d6e9-d2ae-42fd-8602-90e4d4c3472a",
+            "channel": "whatsapp",
+            "external_chat_id": "79997253777@s.whatsapp.net",
+            "text": "Оцените качество обслуживания от 1 до 10",
+            "trace_id": "trace_1767095223187",
+            "config": {
+              "CACHE_TTL_TENANT": 86400,
+              "CACHE_TTL_CLIENT": 3600,
+              "CACHE_TTL_DIALOG": 1800,
+              "CORE_URL": "https://n8n.n8nsrv.ru/webhook/elo-core-ingest",
+              "GRAPH_URL": "http://45.144.177.128:8773/query"
+            },
+            "is_new_client": false,
+            "is_new_dialog": false,
+            "_execution_time_ms": 350
+          },
+          "webhookUrl": "https://n8n.n8nsrv.ru/webhook/elo-core-ingest",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "777a2443-f2e3-4527-8b8b-bd7e6fff89ed",
+  "activeVersionId": "777a2443-f2e3-4527-8b8b-bd7e6fff89ed",
+  "versionCounter": 15,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-30T09:06:15.364Z",
+      "createdAt": "2025-12-30T09:06:15.364Z",
+      "role": "workflow:owner",
+      "workflowId": "kZJ6u5VB4alwVjig",
+      "projectId": "x7frUSUEowDAk8Dt",
+      "project": {
+        "updatedAt": "2025-08-25T18:57:22.218Z",
+        "createdAt": "2025-08-25T08:16:18.805Z",
+        "id": "x7frUSUEowDAk8Dt",
+        "name": "Dmitriy Remacs <dk@n8nsrv.ru>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "projectRelations": [
+          {
+            "updatedAt": "2025-08-25T08:16:18.805Z",
+            "createdAt": "2025-08-25T08:16:18.805Z",
+            "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
+            "projectId": "x7frUSUEowDAk8Dt",
+            "user": {
+              "updatedAt": "2025-12-31T08:56:11.000Z",
+              "createdAt": "2025-08-25T08:16:17.784Z",
+              "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
+              "email": "dk@n8nsrv.ru",
+              "firstName": "Dmitriy",
+              "lastName": "Remacs",
+              "personalizationAnswers": null,
+              "settings": {
+                "userActivated": true,
+                "easyAIWorkflowOnboarded": true,
+                "firstSuccessfulWorkflowId": "RbSUhceYc7q41M5j",
+                "userActivatedAt": 1756286438389
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2025-12-30",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-09T18:50:08.518Z",
+      "createdAt": "2025-12-09T18:50:08.518Z",
+      "id": "tMSCjbvPU3xrNUqz",
+      "name": "ELO"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-30T11:52:30.299Z",
+    "createdAt": "2025-12-30T11:52:30.299Z",
+    "versionId": "777a2443-f2e3-4527-8b8b-bd7e6fff89ed",
+    "workflowId": "kZJ6u5VB4alwVjig",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "elo-core-ingest",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "f193b1a0-27d9-4389-9940-baf7199a82d6",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -512,
+          -96
+        ],
+        "webhookId": "elo-core-ingest"
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $input.first().json;\nconst input = raw.body || raw;\n\nconsole.log('=== ELO_Core_AI_Test_Stub_WS ===');\nconsole.log('Received:', JSON.stringify(input, null, 2));\n\nconst response = {\n  tenant_id: input.tenant_id,\n  dialog_id: input.dialog_id,\n  channel_id: input.channel_id,\n  external_chat_id: input.external_chat_id,\n\n  message: {\n    text: `[TEST] Получено: \"${input.text || 'пусто'}\"`,\n    buttons: [],\n    attachments: []\n  },\n\n  context_updated: true,\n  trace_id: input.trace_id || `trace_${Date.now()}`,\n\n  _debug: {\n    received_at: new Date().toISOString(),\n    input_keys: Object.keys(input),\n    client: input.client,\n    meta: input.meta\n  }\n};\n\nreturn response;"
+        },
+        "id": "84b57020-1365-47f4-be4e-f167a59b6fc4",
+        "name": "Build Test Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -288,
+          -96
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n  od.operator_id,\n  o.name as operator_name\nFROM elo_t_operator_devices od\nJOIN elo_t_operators o ON o.id = od.operator_id\nWHERE od.tenant_id = '{{ $json.tenant_id }}'::uuid\n  AND od.device_type = 'mobile'\n  AND o.is_active = true;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -80,
+          -96
+        ],
+        "id": "a4255eb5-5378-4ba2-ad96-18b5729b9b22",
+        "name": "Get Active Operators",
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const operators = $input.all();\n  const testResponse = $('Build Test Response').first().json;\n\n  const pushRequests = [];\n\n  for (const op of operators) {\n    pushRequests.push({\n      json: {\n        operator_id: op.json.operator_id,\n        action: 'new_message',\n        dialog_id: String(testResponse.dialog_id || ''),\n        title: 'Новое сообщение',\n        body: testResponse.message ? testResponse.message.text : '',\n        message: {\n          id: 'msg_' + Date.now(),\n          chat_id: String(testResponse.external_chat_id || '').replace('@s.whatsapp.net', ''),\n          channel: testResponse.channel_id === '2' ? 'whatsapp' : 'telegram',\n          text: testResponse.message ? testResponse.message.text : '',\n          sender_id: String(testResponse.external_chat_id || ''),\n          sender_name: 'Клиент',\n          sender_phone: String(testResponse.external_chat_id || '').replace('@s.whatsapp.net', ''),\n          server_id: ''\n        }\n      }\n    });\n  }\n\n  return pushRequests;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          128,
+          -96
+        ],
+        "id": "922937ea-b339-4512-9686-33ea580e0eb4",
+        "name": "Build WS Push Requests"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://155.212.221.189:8780/api/push/send",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "X-Internal-Key",
+                "value": "elo-internal-2024"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "timeout": 5000
+          }
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          336,
+          -96
+        ],
+        "id": "2a9ba984-9fd0-4d75-b0d1-6f66af56bb2c",
+        "name": "Send WebSocket Push",
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const testResponse = $('Build Test Response').first().json;\nconst pushResults = $input.all();\n\nconst successCount = pushResults.filter(r => r.json.success || r.json.delivered).length;\nconst failCount = pushResults.length - successCount;\n\nreturn {\n  json: {\n    ...testResponse,\n    push_status: {\n      total: pushResults.length,\n      success: successCount,\n      failed: failCount\n    }\n  }\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          544,
+          -96
+        ],
+        "id": "b0c428ba-3564-45fa-8ad2-9699852ac816",
+        "name": "Build Final Response"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json }}",
+          "options": {}
+        },
+        "id": "eb26e726-d33a-45d3-9e78-493c5074c7c4",
+        "name": "Respond to Webhook",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          752,
+          -96
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build Test Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Test Response": {
+        "main": [
+          [
+            {
+              "node": "Get Active Operators",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Active Operators": {
+        "main": [
+          [
+            {
+              "node": "Build WS Push Requests",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build WS Push Requests": {
+        "main": [
+          [
+            {
+              "node": "Send WebSocket Push",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send WebSocket Push": {
+        "main": [
+          [
+            {
+              "node": "Build Final Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Final Response": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Dmitriy Remacs",
+    "name": null,
+    "description": null
+  }
+}

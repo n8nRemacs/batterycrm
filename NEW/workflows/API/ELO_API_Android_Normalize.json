@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-22T18:24:03.738Z",
+  "updatedAt": "2025-12-29T05:27:57.486Z",
   "createdAt": "2025-12-19T08:32:05.137Z",
   "id": "nsMrS7SmpsxutrfN",
   "name": "ELO_API_Android_Normalize",
@@ -10,7 +10,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "android/normalize",
+        "path": "v1/normalize",
         "responseMode": "responseNode",
         "options": {
           "allowedOrigins": "*"
@@ -259,9 +259,9 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "2d7a76ab-1b61-4100-8442-f364f7d5d756",
-  "activeVersionId": "2d7a76ab-1b61-4100-8442-f364f7d5d756",
-  "versionCounter": 11,
+  "versionId": "72530b3d-c9fa-4101-a4c6-771f049c5302",
+  "activeVersionId": "72530b3d-c9fa-4101-a4c6-771f049c5302",
+  "versionCounter": 13,
   "triggerCount": 1,
   "shared": [
     {
@@ -285,7 +285,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-28T09:13:23.000Z",
+              "updatedAt": "2025-12-31T08:56:11.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -300,7 +300,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-27",
+              "lastActiveAt": "2025-12-30",
               "isPending": false
             }
           }
@@ -323,15 +323,15 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-22T18:24:03.740Z",
-    "createdAt": "2025-12-22T18:24:03.740Z",
-    "versionId": "2d7a76ab-1b61-4100-8442-f364f7d5d756",
+    "updatedAt": "2025-12-29T05:27:57.487Z",
+    "createdAt": "2025-12-29T05:27:57.487Z",
+    "versionId": "72530b3d-c9fa-4101-a4c6-771f049c5302",
     "workflowId": "nsMrS7SmpsxutrfN",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
-          "path": "android/normalize",
+          "path": "v1/normalize",
           "responseMode": "responseNode",
           "options": {
             "allowedOrigins": "*"

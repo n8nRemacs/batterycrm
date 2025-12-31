@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-23T11:39:53.934Z",
+  "updatedAt": "2025-12-29T11:29:02.101Z",
   "createdAt": "2025-12-10T10:01:53.940Z",
   "id": "j8SAGf1ZIC8uqDya",
   "name": "ELO_Out_WhatsApp",
@@ -355,10 +355,31 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "c23f52ab-37cf-41d7-80fa-b4b926ef1385",
-  "activeVersionId": "c23f52ab-37cf-41d7-80fa-b4b926ef1385",
-  "versionCounter": 25,
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-12-28T15:39:36.003+04:00",
+          "Readable date": "December 28th 2025, 3:39:36 pm",
+          "Readable time": "3:39:36 pm",
+          "Day of week": "Sunday",
+          "Year": "2025",
+          "Month": "December",
+          "Day of month": "28",
+          "Hour": "15",
+          "Minute": "39",
+          "Second": "36",
+          "Timezone": "Europe/Samara (UTC+04:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "267381f8-0e2e-47f5-99b1-ac4edc1721dc",
+  "activeVersionId": "267381f8-0e2e-47f5-99b1-ac4edc1721dc",
+  "versionCounter": 38,
   "triggerCount": 1,
   "shared": [
     {
@@ -382,7 +403,7 @@
             "userId": "1d5222a1-8f53-4940-b7de-93daeae04393",
             "projectId": "x7frUSUEowDAk8Dt",
             "user": {
-              "updatedAt": "2025-12-26T07:11:12.000Z",
+              "updatedAt": "2025-12-31T08:56:11.000Z",
               "createdAt": "2025-08-25T08:16:17.784Z",
               "id": "1d5222a1-8f53-4940-b7de-93daeae04393",
               "email": "dk@n8nsrv.ru",
@@ -397,7 +418,7 @@
               },
               "disabled": false,
               "mfaEnabled": false,
-              "lastActiveAt": "2025-12-25",
+              "lastActiveAt": "2025-12-30",
               "isPending": false
             }
           }
@@ -420,9 +441,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-23T10:44:35.603Z",
-    "createdAt": "2025-12-23T10:44:35.603Z",
-    "versionId": "c23f52ab-37cf-41d7-80fa-b4b926ef1385",
+    "updatedAt": "2025-12-28T18:37:16.775Z",
+    "createdAt": "2025-12-28T18:37:16.775Z",
+    "versionId": "267381f8-0e2e-47f5-99b1-ac4edc1721dc",
     "workflowId": "j8SAGf1ZIC8uqDya",
     "nodes": [
       {

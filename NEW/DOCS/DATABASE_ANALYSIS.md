@@ -1,6 +1,6 @@
 # Database Analysis
 
-**Last sync:** 2025-12-28
+**Last sync:** 2025-12-31
 
 ---
 
@@ -11,42 +11,26 @@
 | Transactional tables (elo_t_*) | 14 |
 | Reference tables (elo_*) | 11 |
 | Views (elo_v_*) | 5 |
-| **Total** | 30 |
-
-### Transactional Tables Detail
-
-| Table | Columns | FK |
-|-------|---------|-----|
-| elo_t_tenants | 12 | 1 |
-| elo_t_clients | 10 | 1 |
-| elo_t_client_channels | 8 | 2 |
-| elo_t_dialogs | 18 | 7 |
-| elo_t_messages | 15 | 3 |
-| elo_t_operators | 15 | 1 |
-| elo_t_operator_devices | 16 | 2 |
-| elo_t_operator_channels | 7 | 2 |
-| elo_t_channel_accounts | 18 | 3 |
-| elo_t_ai_extractions | 11 | 4 |
-| elo_t_tasks | 19 | 6 |
-| elo_t_price_list | 20 | 3 |
-| elo_t_tenant_verticals | 6 | 2 |
-| elo_t_events | 5 | 0 |
+| Functions (elo_*) | 3 |
+| **Total objects** | 33 |
 
 ---
 
 ## Reference Tables
 
-### elo_channels (7 rows)
+### elo_channels (9 rows)
 
 | id | code | name | supports_media | max_message_length |
 |----|------|------|----------------|-------------------|
-| 1 | telegram | Telegram | true | 4096 |
+| 1 | telegram_bot | Telegram Bot | true | 4096 |
 | 2 | whatsapp | WhatsApp | true | 4096 |
-| 3 | avito | Avito | true | 4000 |
+| 3 | avito_reverse | Avito Eldoleado | true | 4000 |
 | 4 | vk | VKontakte | true | 4096 |
 | 5 | max | MAX (VK Teams) | true | 4096 |
 | 6 | form | Web Form | false | 10000 |
 | 7 | phone | Phone Call | false | null |
+| 8 | telegram_user | Telegram User | true | 4096 |
+| 9 | avito_official | Avito Official | true | 4000 |
 
 ### elo_verticals (1 row)
 
@@ -63,7 +47,28 @@
 
 ---
 
-## Core Transactional Tables
+## Transactional Tables Detail
+
+| Table | Columns | FK | Description |
+|-------|---------|-----|-------------|
+| elo_t_tenants | 12 | 1 | Business accounts |
+| elo_t_clients | 10 | 1 | Contacts |
+| elo_t_client_channels | 8 | 2 | Client channel links |
+| elo_t_dialogs | 18 | 7 | Conversations |
+| elo_t_messages | 15 | 3 | Messages |
+| elo_t_operators | 15 | 1 | Operators |
+| elo_t_operator_devices | 16 | 2 | Mobile devices |
+| elo_t_operator_channels | 7 | 2 | Operator-channel links |
+| elo_t_channel_accounts | 18 | 3 | Channel credentials |
+| elo_t_ai_extractions | 11 | 4 | AI extractions |
+| elo_t_tasks | 19 | 6 | Tasks |
+| elo_t_price_list | 20 | 3 | Price list |
+| elo_t_tenant_verticals | 6 | 2 | Tenant verticals |
+| elo_t_events | 5 | 0 | Events log |
+
+---
+
+## Core Tables Structure
 
 ### elo_t_tenants
 Main tenant (business account) table.
@@ -122,6 +127,8 @@ Conversation/dialog table.
 | last_message_at | timestamptz | YES | | Last message timestamp |
 | last_client_message_at | timestamptz | YES | | Last client message |
 | last_operator_message_at | timestamptz | YES | | Last operator message |
+| first_contact_channel_id | int | YES | elo_channels | First contact channel |
+| last_client_channel_id | int | YES | elo_channels | Last client channel |
 
 ### elo_t_messages
 Message table.
@@ -138,6 +145,9 @@ Message table.
 | actor_id | uuid | YES | | Actor UUID |
 | content | text | YES | | Message text |
 | media | jsonb | YES | | Media attachments |
+| changed_graph | boolean | YES | | Graph was updated |
+| external_message_id | varchar | YES | | External message ID |
+| trace_id | varchar | YES | | Trace ID |
 | timestamp | timestamptz | YES | | Message timestamp |
 
 ### elo_t_channel_accounts
@@ -158,17 +168,18 @@ Channel account credentials and sessions.
 | session_id | varchar | YES | | Session identifier |
 | session_status | varchar | YES | | 'pending', 'active', 'connected' |
 | is_official | boolean | YES | | Official API flag |
+| session_archive | text | YES | | Session archive |
 
 ### Current Channel Accounts (6 rows)
 
-| channel | account_id | session_id | session_status | ip_node_id |
-|---------|-----------|------------|----------------|------------|
-| Telegram | TEST_BOT_TOKEN_12345 | - | pending | - |
-| Telegram | remacsbot | 6939426823:AAE... | connected | - |
-| WhatsApp | eldoleado_main | eldoleado_arceos | connected | 1 |
-| WhatsApp | remaks_main | wa_22222222-... | connected | 1 |
-| Avito | default | default | active | - |
-| Avito | 3++Dj9NEdAz81lOGAX4Kmg | - | active | - |
+| channel_id | account_id | session_id | session_status | ip_node_id |
+|------------|------------|------------|----------------|------------|
+| 1 | TEST_BOT_TOKEN_12345 | - | pending | - |
+| 1 | remacsbot | 6939426823:AAE... | connected | - |
+| 2 | eldoleado_main | eldoleado_arceos | connected | 1 |
+| 2 | remaks_main | wa_22222222-... | connected | 1 |
+| 3 | default | default | not_configured | - |
+| 3 | 3++Dj9NEdAz81lOGAX4Kmg | - | not_configured | - |
 
 ### elo_t_operators
 Operator table.
@@ -178,8 +189,16 @@ Operator table.
 | id | uuid | NO | | Primary key |
 | tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
 | name | varchar | NO | | Operator name |
-| telegram_id | bigint | YES | | Telegram user ID |
+| email | varchar | YES | | Email |
+| phone | varchar | YES | | Phone |
+| telegram_id | varchar | YES | | Telegram user ID |
+| password_hash | varchar | YES | | Password hash |
+| avatar_url | text | YES | | Avatar URL |
+| role | varchar | YES | | Role (default 'operator') |
+| fcm_tokens | jsonb | YES | | FCM tokens array |
+| settings | jsonb | YES | | Operator settings |
 | is_active | boolean | YES | | Active status |
+| last_seen_at | timestamptz | YES | | Last seen |
 
 ### elo_t_operator_devices
 Operator mobile devices (Android app).
@@ -189,71 +208,17 @@ Operator mobile devices (Android app).
 | id | uuid | NO | | Primary key |
 | operator_id | uuid | NO | elo_t_operators | Operator reference |
 | tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| device_id | varchar | NO | | Device identifier |
+| device_id | varchar | YES | | Device identifier |
+| device_type | varchar | NO | | 'mobile' (default) |
+| device_name | varchar | YES | | Device name |
+| device_info | jsonb | YES | | Device info |
 | session_token | varchar | YES | | Session token |
-| fcm_token | varchar | YES | | Firebase token |
+| fcm_token | text | YES | | Firebase token |
+| app_mode | varchar | NO | | 'client' (default) |
+| tunnel_url | text | YES | | Tunnel URL |
+| tunnel_secret | varchar | YES | | Tunnel secret |
 | is_active | boolean | YES | | Active status |
-
----
-
-## Type Directories
-
-### elo_symptom_types
-Device symptoms (problems reported by client).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| uuid | uuid | UUID for Neo4j |
-| code | varchar | Unique code |
-| name | varchar | Name (EN) |
-| name_ru | varchar | Name (RU) |
-| category | varchar | Category |
-
-### elo_diagnosis_types
-Technical diagnoses.
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| uuid | uuid | UUID for Neo4j |
-| code | varchar | Unique code |
-| name | varchar | Name (EN) |
-| name_ru | varchar | Name (RU) |
-| category | varchar | Category |
-
-### elo_repair_actions
-Repair actions (what we do to fix).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| uuid | uuid | UUID for Neo4j |
-| code | varchar | Unique code |
-| name | varchar | Name (EN) |
-| name_ru | varchar | Name (RU) |
-| category | varchar | Category |
-
-### elo_symptom_diagnosis_links
-Links symptoms to possible diagnoses.
-
-| Column | Type | FK |
-|--------|------|----|
-| symptom_type_id | int | elo_symptom_types |
-| diagnosis_type_id | int | elo_diagnosis_types |
-| confidence | numeric | Probability 0-1 |
-| is_primary | boolean | Primary diagnosis |
-| vertical_id | int | elo_verticals |
-
-### elo_diagnosis_repair_links
-Links diagnoses to repair actions.
-
-| Column | Type | FK |
-|--------|------|----|
-| diagnosis_type_id | int | elo_diagnosis_types |
-| repair_action_id | int | elo_repair_actions |
-| is_primary | boolean | Primary action |
-| vertical_id | int | elo_verticals |
+| last_active_at | timestamptz | YES | | Last active |
 
 ---
 
@@ -297,49 +262,41 @@ AI settings per tenant.
 
 ---
 
-## Data Flow
+## Functions
 
-```
-Incoming Message (from MCP channel)
-         |
-         v
-+-----------------------------------------------+
-|              ELO_In_*                         |
-|  Normalize to standard format                 |
-+-----------------------------------------------+
-         |
-         v
-+-----------------------------------------------+
-|         ELO_Core_Tenant_Resolver              |
-|  Find tenant by channel_account.webhook_hash  |
-+-----------------------------------------------+
-         |
-         v
-+-----------------------------------------------+
-|           ELO_Client_Resolve                  |
-|  1. Cache: cache:client:{channel}:{ext_id}    |
-|  2. DB: elo_t_client_channels                 |
-|  3. Create if not found                       |
-+-----------------------------------------------+
-         |
-         v
-+-----------------------------------------------+
-|            elo_t_clients                      |
-|  id, name, phone, tenant_id                   |
-+-----------------------------------------------+
-         |
-         v
-+-----------------------------------------------+
-|            elo_t_dialogs                      |
-|  Find or create dialog                        |
-+-----------------------------------------------+
-         |
-         v
-+-----------------------------------------------+
-|            elo_t_messages                     |
-|  Save incoming message                        |
-+-----------------------------------------------+
-```
+| Function | Description |
+|----------|-------------|
+| elo_find_ip_for_channel | Find best IP node for channel |
+| elo_update_tenant_preferred_ip | Update tenant preferred IP |
+| elo_update_timestamp | Auto-update timestamps |
+
+---
+
+## Type Directories
+
+### elo_symptom_types
+Device symptoms (problems reported by client).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | serial | Primary key |
+| uuid | uuid | UUID for Neo4j |
+| code | varchar | Unique code |
+| name | varchar | Name (EN) |
+| name_ru | varchar | Name (RU) |
+| category | varchar | Category |
+
+### elo_diagnosis_types
+Technical diagnoses.
+
+### elo_repair_actions
+Repair actions (what we do to fix).
+
+### elo_symptom_diagnosis_links
+Links symptoms to possible diagnoses.
+
+### elo_diagnosis_repair_links
+Links diagnoses to repair actions.
 
 ---
 
@@ -388,4 +345,4 @@ elo_t_tenants
 
 ---
 
-*Generated by Claude Code - 2025-12-28*
+*Generated by Claude Code - 2025-12-31*

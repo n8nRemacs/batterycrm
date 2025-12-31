@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2025-12-29T05:29:08.977Z",
-  "createdAt": "2025-12-17T18:20:44.950Z",
-  "id": "j9VlTpdXIdlfBZhO",
-  "name": "ELO_API_Android_Logout",
+  "updatedAt": "2025-12-31T09:02:00.038Z",
+  "createdAt": "2025-12-23T18:09:40.458Z",
+  "id": "wuoTQYQ1vTGB66yn",
+  "name": "ELO_API_Channel_Avito_Auth",
   "description": null,
   "active": true,
   "isArchived": false,
@@ -10,34 +10,21 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "v1/auth/logout",
+        "path": "android/channels/avito/auth",
         "responseMode": "responseNode",
         "options": {
           "allowedOrigins": "*"
         }
       },
-      "id": "ba11760b-cabb-4706-9c23-7a5bae38ad48",
-      "name": "Webhook - Logout",
+      "id": "fa128ff0-f919-495c-b7ea-9fcbdc5c1e9d",
+      "name": "Webhook - Avito Auth",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -560,
-        -32
+        -800,
+        112
       ],
-      "webhookId": "android-logout"
-    },
-    {
-      "parameters": {
-        "jsCode": "const headers = $json.headers || {};\nlet token = null;\n\n// Try Authorization: Bearer <token>\nconst authHeader = headers.authorization || headers.Authorization || '';\nif (authHeader.startsWith('Bearer ')) {\n  token = authHeader.substring(7);\n} else if (authHeader.startsWith('bearer ')) {\n  token = authHeader.substring(7);\n}\n\n// Try X-Session-Token\nif (!token) {\n  token = headers['x-session-token'] || headers['X-Session-Token'];\n}\n\nreturn { session_token: token || null };"
-      },
-      "id": "060973f4-10ca-461c-9ef5-bde7dc1d2b18",
-      "name": "Parse Token",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -352,
-        -32
-      ]
+      "webhookId": "android-channels-avito-auth"
     },
     {
       "parameters": {
@@ -49,13 +36,21 @@
           },
           "conditions": [
             {
-              "id": "token-exists",
-              "leftValue": "={{ $json.session_token }}",
+              "id": "has-cookies",
+              "leftValue": "={{ $json.body.cookies }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
-                "operation": "notEmpty",
-                "singleValue": true
+                "operation": "exists"
+              }
+            },
+            {
+              "id": "has-operator",
+              "leftValue": "={{ $json.body.operator_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
               }
             }
           ],
@@ -63,28 +58,28 @@
         },
         "options": {}
       },
-      "id": "a4cc0357-a566-49d3-a837-a0c79d585f87",
-      "name": "IF - Token Provided",
+      "id": "59270f2d-2d79-4ab7-8b94-3485b796f4ac",
+      "name": "IF - Valid Request",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -128,
-        -32
+        -576,
+        112
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "DELETE FROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\nRETURNING operator_id;",
+        "query": "SELECT tenant_id FROM elo_t_operators WHERE id = '{{ $json.body.operator_id }}' LIMIT 1;",
         "options": {}
       },
-      "id": "857e46e6-d887-4726-8d2f-7322fd7da496",
-      "name": "Delete Device Session",
+      "id": "22b585d1-2a71-428a-b9a6-b9b40d5efbc5",
+      "name": "Get Tenant ID",
       "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
+      "typeVersion": 2.5,
       "position": [
-        96,
-        -144
+        -352,
+        0
       ],
       "credentials": {
         "postgres": {
@@ -95,21 +90,29 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first()?.json;\n\nconst hasResult = \n  (Array.isArray(input) && input.length > 0 && input[0]?.operator_id) ||\n  (input?.operator_id);\n\nif (hasResult) {\n  return { \n    success: true, \n    message: 'Logged out successfully' \n  };\n} else {\n  return { \n    success: true,\n    message: 'Already logged out'\n  };\n}"
+        "operation": "executeQuery",
+        "query": "INSERT INTO elo_t_channel_accounts\n  (tenant_id, channel_id, account_id, account_name, credentials, session_status, is_active)\nVALUES\n  (\n    '{{ $json.tenant_id }}',\n    3,\n    '{{ $('Webhook - Avito Auth').item.json.body.upin || $('Webhook - Avito Auth').item.json.body.user_id || 'default' }}',\n    '{{ $('Webhook - Avito Auth').item.json.body.display_name || '' }}',\n    '{\n      \"cookies\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.cookies) }},\n      \"ft\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.ft || null) }},\n      \"f\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.f || null) }},\n      \"upin\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.upin || null) }}\n    }'::jsonb,\n    'active',\n    true\n  )\nON CONFLICT (tenant_id, channel_id, account_id)\nDO UPDATE SET\n  credentials = '{\n    \"cookies\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.cookies) }},\n    \"ft\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.ft || null) }},\n    \"f\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.f || null) }},\n    \"upin\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.upin || null) }}\n  }'::jsonb,\n  account_name = COALESCE(NULLIF('{{ $('Webhook - Avito Auth').item.json.body.display_name || '' }}', ''), elo_t_channel_accounts.account_name),\n  session_status = 'active',\n  updated_at = NOW(),\n  error_count = 0,\n  last_error = NULL\nRETURNING id, session_status;",
+        "options": {}
       },
-      "id": "82ffd145-3d32-4130-99fb-89641234eb0d",
-      "name": "Check Result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "4d9bfe8d-d907-47d2-958b-de4953af0d80",
+      "name": "Upsert Channel Account",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
       "position": [
-        304,
-        -144
-      ]
+        -128,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json }}",
+        "responseBody": "={\n  \"success\": true,\n  \"channel_account_id\": \"{{ $json.id }}\",\n  \"session_status\": \"{{ $json.session_status }}\"\n}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
@@ -126,19 +129,19 @@
           }
         }
       },
-      "id": "ada48c95-0374-45a7-b51d-a2417e021b5d",
+      "id": "0726b49d-b140-401c-a3ea-796658ffb76e",
       "name": "Response - Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        512,
-        -32
+        96,
+        0
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ { success: false, error: 'Token not provided' } }}",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"Missing required fields: cookies, operator_id\"\n}",
         "options": {
           "responseCode": 400,
           "responseHeaders": {
@@ -155,69 +158,58 @@
           }
         }
       },
-      "id": "65c0f60a-ab12-4256-ba4f-631c22067355",
-      "name": "Response - No Token",
+      "id": "3ac0225a-180f-4c00-bbe2-a666b8adbecd",
+      "name": "Response - Error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        96,
-        80
+        -352,
+        208
       ]
     }
   ],
   "connections": {
-    "Webhook - Logout": {
+    "Webhook - Avito Auth": {
       "main": [
         [
           {
-            "node": "Parse Token",
+            "node": "IF - Valid Request",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse Token": {
+    "IF - Valid Request": {
       "main": [
         [
           {
-            "node": "IF - Token Provided",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IF - Token Provided": {
-      "main": [
-        [
-          {
-            "node": "Delete Device Session",
+            "node": "Get Tenant ID",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Response - No Token",
+            "node": "Response - Error",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Delete Device Session": {
+    "Get Tenant ID": {
       "main": [
         [
           {
-            "node": "Check Result",
+            "node": "Upsert Channel Account",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check Result": {
+    "Upsert Channel Account": {
       "main": [
         [
           {
@@ -233,18 +225,20 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "d60d2d80-3052-4e4f-8ee5-771995f12ae8",
-  "activeVersionId": "d60d2d80-3052-4e4f-8ee5-771995f12ae8",
-  "versionCounter": 13,
+  "versionId": "f795626c-a14a-4c5b-932f-4af8e4ba860b",
+  "activeVersionId": "f795626c-a14a-4c5b-932f-4af8e4ba860b",
+  "versionCounter": 8,
   "triggerCount": 1,
   "shared": [
     {
-      "updatedAt": "2025-12-17T18:20:44.956Z",
-      "createdAt": "2025-12-17T18:20:44.956Z",
+      "updatedAt": "2025-12-23T18:09:40.464Z",
+      "createdAt": "2025-12-23T18:09:40.464Z",
       "role": "workflow:owner",
-      "workflowId": "j9VlTpdXIdlfBZhO",
+      "workflowId": "wuoTQYQ1vTGB66yn",
       "projectId": "x7frUSUEowDAk8Dt",
       "project": {
         "updatedAt": "2025-08-25T18:57:22.218Z",
@@ -286,12 +280,6 @@
   ],
   "tags": [
     {
-      "updatedAt": "2025-11-23T03:58:34.844Z",
-      "createdAt": "2025-11-23T03:58:34.844Z",
-      "id": "0yzk30hhaSzkl8bF",
-      "name": "API"
-    },
-    {
       "updatedAt": "2025-12-09T18:50:08.518Z",
       "createdAt": "2025-12-09T18:50:08.518Z",
       "id": "tMSCjbvPU3xrNUqz",
@@ -299,42 +287,29 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-29T05:29:08.978Z",
-    "createdAt": "2025-12-29T05:29:08.978Z",
-    "versionId": "d60d2d80-3052-4e4f-8ee5-771995f12ae8",
-    "workflowId": "j9VlTpdXIdlfBZhO",
+    "updatedAt": "2025-12-31T09:02:00.056Z",
+    "createdAt": "2025-12-31T09:02:00.056Z",
+    "versionId": "f795626c-a14a-4c5b-932f-4af8e4ba860b",
+    "workflowId": "wuoTQYQ1vTGB66yn",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
-          "path": "v1/auth/logout",
+          "path": "android/channels/avito/auth",
           "responseMode": "responseNode",
           "options": {
             "allowedOrigins": "*"
           }
         },
-        "id": "ba11760b-cabb-4706-9c23-7a5bae38ad48",
-        "name": "Webhook - Logout",
+        "id": "fa128ff0-f919-495c-b7ea-9fcbdc5c1e9d",
+        "name": "Webhook - Avito Auth",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2,
         "position": [
-          -560,
-          -32
+          -800,
+          112
         ],
-        "webhookId": "android-logout"
-      },
-      {
-        "parameters": {
-          "jsCode": "const headers = $json.headers || {};\nlet token = null;\n\n// Try Authorization: Bearer <token>\nconst authHeader = headers.authorization || headers.Authorization || '';\nif (authHeader.startsWith('Bearer ')) {\n  token = authHeader.substring(7);\n} else if (authHeader.startsWith('bearer ')) {\n  token = authHeader.substring(7);\n}\n\n// Try X-Session-Token\nif (!token) {\n  token = headers['x-session-token'] || headers['X-Session-Token'];\n}\n\nreturn { session_token: token || null };"
-        },
-        "id": "060973f4-10ca-461c-9ef5-bde7dc1d2b18",
-        "name": "Parse Token",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          -352,
-          -32
-        ]
+        "webhookId": "android-channels-avito-auth"
       },
       {
         "parameters": {
@@ -346,13 +321,21 @@
             },
             "conditions": [
               {
-                "id": "token-exists",
-                "leftValue": "={{ $json.session_token }}",
+                "id": "has-cookies",
+                "leftValue": "={{ $json.body.cookies }}",
                 "rightValue": "",
                 "operator": {
                   "type": "string",
-                  "operation": "notEmpty",
-                  "singleValue": true
+                  "operation": "exists"
+                }
+              },
+              {
+                "id": "has-operator",
+                "leftValue": "={{ $json.body.operator_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
                 }
               }
             ],
@@ -360,28 +343,28 @@
           },
           "options": {}
         },
-        "id": "a4cc0357-a566-49d3-a837-a0c79d585f87",
-        "name": "IF - Token Provided",
+        "id": "59270f2d-2d79-4ab7-8b94-3485b796f4ac",
+        "name": "IF - Valid Request",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          -128,
-          -32
+          -576,
+          112
         ]
       },
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "DELETE FROM operator_devices \nWHERE session_token = '{{ $json.session_token }}'\nRETURNING operator_id;",
+          "query": "SELECT tenant_id FROM elo_t_operators WHERE id = '{{ $json.body.operator_id }}' LIMIT 1;",
           "options": {}
         },
-        "id": "857e46e6-d887-4726-8d2f-7322fd7da496",
-        "name": "Delete Device Session",
+        "id": "22b585d1-2a71-428a-b9a6-b9b40d5efbc5",
+        "name": "Get Tenant ID",
         "type": "n8n-nodes-base.postgres",
-        "typeVersion": 2.6,
+        "typeVersion": 2.5,
         "position": [
-          96,
-          -144
+          -352,
+          0
         ],
         "credentials": {
           "postgres": {
@@ -392,21 +375,29 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.first()?.json;\n\nconst hasResult = \n  (Array.isArray(input) && input.length > 0 && input[0]?.operator_id) ||\n  (input?.operator_id);\n\nif (hasResult) {\n  return { \n    success: true, \n    message: 'Logged out successfully' \n  };\n} else {\n  return { \n    success: true,\n    message: 'Already logged out'\n  };\n}"
+          "operation": "executeQuery",
+          "query": "INSERT INTO elo_t_channel_accounts\n  (tenant_id, channel_id, account_id, account_name, credentials, session_status, is_active)\nVALUES\n  (\n    '{{ $json.tenant_id }}',\n    3,\n    '{{ $('Webhook - Avito Auth').item.json.body.upin || $('Webhook - Avito Auth').item.json.body.user_id || 'default' }}',\n    '{{ $('Webhook - Avito Auth').item.json.body.display_name || '' }}',\n    '{\n      \"cookies\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.cookies) }},\n      \"ft\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.ft || null) }},\n      \"f\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.f || null) }},\n      \"upin\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.upin || null) }}\n    }'::jsonb,\n    'active',\n    true\n  )\nON CONFLICT (tenant_id, channel_id, account_id)\nDO UPDATE SET\n  credentials = '{\n    \"cookies\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.cookies) }},\n    \"ft\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.ft || null) }},\n    \"f\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.f || null) }},\n    \"upin\": {{ JSON.stringify($('Webhook - Avito Auth').item.json.body.upin || null) }}\n  }'::jsonb,\n  account_name = COALESCE(NULLIF('{{ $('Webhook - Avito Auth').item.json.body.display_name || '' }}', ''), elo_t_channel_accounts.account_name),\n  session_status = 'active',\n  updated_at = NOW(),\n  error_count = 0,\n  last_error = NULL\nRETURNING id, session_status;",
+          "options": {}
         },
-        "id": "82ffd145-3d32-4130-99fb-89641234eb0d",
-        "name": "Check Result",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
+        "id": "4d9bfe8d-d907-47d2-958b-de4953af0d80",
+        "name": "Upsert Channel Account",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
         "position": [
-          304,
-          -144
-        ]
+          -128,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "n2SyhP9QhMnp1ryk",
+            "name": "Postgres account"
+          }
+        }
       },
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={{ $json }}",
+          "responseBody": "={\n  \"success\": true,\n  \"channel_account_id\": \"{{ $json.id }}\",\n  \"session_status\": \"{{ $json.session_status }}\"\n}",
           "options": {
             "responseCode": 200,
             "responseHeaders": {
@@ -423,19 +414,19 @@
             }
           }
         },
-        "id": "ada48c95-0374-45a7-b51d-a2417e021b5d",
+        "id": "0726b49d-b140-401c-a3ea-796658ffb76e",
         "name": "Response - Success",
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1.1,
         "position": [
-          512,
-          -32
+          96,
+          0
         ]
       },
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={{ { success: false, error: 'Token not provided' } }}",
+          "responseBody": "={\n  \"success\": false,\n  \"error\": \"Missing required fields: cookies, operator_id\"\n}",
           "options": {
             "responseCode": 400,
             "responseHeaders": {
@@ -452,69 +443,58 @@
             }
           }
         },
-        "id": "65c0f60a-ab12-4256-ba4f-631c22067355",
-        "name": "Response - No Token",
+        "id": "3ac0225a-180f-4c00-bbe2-a666b8adbecd",
+        "name": "Response - Error",
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1.1,
         "position": [
-          96,
-          80
+          -352,
+          208
         ]
       }
     ],
     "connections": {
-      "Webhook - Logout": {
+      "Webhook - Avito Auth": {
         "main": [
           [
             {
-              "node": "Parse Token",
+              "node": "IF - Valid Request",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Parse Token": {
+      "IF - Valid Request": {
         "main": [
           [
             {
-              "node": "IF - Token Provided",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "IF - Token Provided": {
-        "main": [
-          [
-            {
-              "node": "Delete Device Session",
+              "node": "Get Tenant ID",
               "type": "main",
               "index": 0
             }
           ],
           [
             {
-              "node": "Response - No Token",
+              "node": "Response - Error",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Delete Device Session": {
+      "Get Tenant ID": {
         "main": [
           [
             {
-              "node": "Check Result",
+              "node": "Upsert Channel Account",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Check Result": {
+      "Upsert Channel Account": {
         "main": [
           [
             {
