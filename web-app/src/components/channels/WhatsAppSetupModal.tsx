@@ -90,7 +90,16 @@ export const WhatsAppSetupModal = ({ isOpen, onClose, onSuccess }: WhatsAppSetup
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b">
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (step === 'name') {
+                onClose();
+              } else if (step === 'qr' || step === 'error') {
+                setStep('name');
+                setError(null);
+              } else {
+                onClose();
+              }
+            }}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeft size={20} className="text-gray-500" />

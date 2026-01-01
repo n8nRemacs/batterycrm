@@ -171,28 +171,30 @@ export interface MaxUserVerifyRequest {
 export const maxUserApi = {
   // Create session and request SMS code
   createSession: async (request: MaxUserCreateRequest): Promise<MaxUserSession> => {
-    const response = await apiClient.post<{ success: boolean; data: MaxUserSession }>(
+    const response = await apiClient.post<MaxUserSession>(
       `${MCP_ENDPOINTS.max}/sessions/create`,
-      request
+      request,
+      { timeout: 60000 } // 60 sec for SMS sending
     );
-    return response.data.data;
+    return response.data;
   },
 
   // Verify SMS code
   verifyCode: async (sessionId: string, request: MaxUserVerifyRequest): Promise<MaxUserSession> => {
-    const response = await apiClient.post<{ success: boolean; data: MaxUserSession }>(
+    const response = await apiClient.post<MaxUserSession>(
       `${MCP_ENDPOINTS.max}/sessions/${sessionId}/verify`,
-      request
+      request,
+      { timeout: 60000 } // 60 sec for verification
     );
-    return response.data.data;
+    return response.data;
   },
 
   // Get session status
   getSession: async (sessionId: string): Promise<MaxUserSession> => {
-    const response = await apiClient.get<{ success: boolean; data: MaxUserSession }>(
+    const response = await apiClient.get<MaxUserSession>(
       `${MCP_ENDPOINTS.max}/sessions/${sessionId}`
     );
-    return response.data.data;
+    return response.data;
   },
 
   // Delete session
