@@ -1,132 +1,95 @@
-# Stop Session - 2025-12-30
+# Stop Session - 2026-01-02
 
-## WhatsApp Webhook + Push Notifications
+## Four-Level Context Extraction System - IMPLEMENTED
 
-Исправлена интеграция WhatsApp с n8n и push-уведомлениями для Android.
+Создана полная система настраиваемого извлечения контекста с четырёхуровневой иерархией.
 
 ---
 
 ## Что сделано сегодня
 
-### 1. mcp-whatsapp-arceos - Исправлен webhook
+### 1. SQL Migration 007 (ВЫПОЛНЕНА)
 
-**Проблема:** Webhook не отправлялся на n8n
+**Файл:** `NEW/migrations/007_domains_context_extraction.sql`
 
-**Причина:** Код читал `process.env.DEFAULT_WEBHOOK_URL`, а в контейнере была переменная `WEBHOOK_URL`
+**Выполнена на сервере:** 185.221.214.83
 
-**Решение:** `index.ts:40`
-```typescript
-defaultWebhookUrl: process.env.DEFAULT_WEBHOOK_URL || process.env.WEBHOOK_URL,
-```
+**Созданные таблицы:**
+- `elo_domains` - 3 домена (electronics, auto, software)
+- `elo_context_types` - глобальные типы контекста
+- `elo_intent_types` - глобальные интенты
+- `elo_d_context_types` - доменные типы контекста
+- `elo_d_intent_types` - доменные интенты
+- `elo_v_context_types` - вертикальные типы контекста
+- `elo_v_intent_types` - вертикальные интенты
+- `elo_t_tenant_domains` - подключенные домены тенанта
+- `elo_t_tenant_verticals` - подключенные вертикали тенанта
+- `elo_t_context_type_overrides` - переопределения
+- `elo_custom_fields` - кастомные поля
+- `elo_funnel_stages` - этапы воронки
+- `elo_prompts` - промпты для воркеров
+- `elo_worker_configs` - конфигурации воркеров
+- `elo_action_types` - 13 типов действий
+- `elo_trigger_types` - 15 типов триггеров
+- `elo_triggers` - триггеры
 
-**Версия:** v1.0.1 задеплоена на оба IP
+### 2. Документация
 
-### 2. api-android - Добавлен internal API key
+**Файл:** `NEW/DOCS/CONTEXT_EXTRACTION_ARCHITECTURE.md`
 
-**Проблема:** n8n workflow не мог вызвать `/api/push/send` (требовал JWT)
+Полная документация архитектуры системы.
 
-**Решение:**
-- Добавлен `get_internal_or_operator` в `auth.py`
-- Добавлен `internal_api_key` в `config.py`
-- Endpoint принимает `X-Internal-Key: elo-internal-2024`
+### 3. Workflows (JSON файлы для импорта)
 
-### 3. api-android - Передача message объекта
+| Workflow | Файл | Описание |
+|----------|------|----------|
+| ELO_AI_Extract_v2 | `NEW/workflows/AI Contour/ELO_AI_Extract_v2.json` | 4-level extraction |
+| ELO_Funnel_Controller | `NEW/workflows/AI Contour/ELO_Funnel_Controller.json` | Stage transitions |
+| ELO_Context_Router | `NEW/workflows/AI Contour/ELO_Context_Router.json` | Domain/vertical routing |
+| ELO_Worker_Executor | `NEW/workflows/AI Contour/ELO_Worker_Executor.json` | Universal workers |
 
-**Проблема:** Push не содержал объект `message` для real-time обновления чата
+### 4. Git
 
-**Решение:** `app.py` - добавлено `"message": body.get("message")`
+**Commit:** `702f89a58` - feat: Add 4-level context extraction system for AI Contour
 
-### 4. n8n Workflow - ELO_In_WhatsApp
+**Pushed:** origin/main
 
-Нужно обновить ноду `Extract WhatsApp Data` под новый формат webhook:
+---
 
-```javascript
-const input = $input.first().json;
-const body = input.body || input;
-const data = body.data || {};
+## Текущее состояние
 
-if (body.event !== 'message') return [];
-if (data.isGroup) return [];
+| Компонент | Статус |
+|-----------|--------|
+| SQL миграция | DONE - выполнена на сервере |
+| Документация | DONE |
+| Workflows JSON | DONE - файлы созданы |
+| Импорт в n8n | NOT DONE - требуется вручную |
+| Neo4j Enterprise | NOT DONE - нужно создать 3 базы |
+| ELO_Graph_Sync | NOT DONE - workflow не создан |
+| REST API endpoints | NOT DONE |
+| Тестирование | NOT DONE |
 
-const hasText = !!data.text;
-const hasMedia = data.type === 'image' || data.type === 'video' || data.type === 'audio' || data.type === 'document';
-if (!hasText && !hasMedia) return [];
+---
 
-const phone = '+' + data.from;
-const messageText = data.text || data.caption || '';
-const timestamp = data.timestamp ? new Date(data.timestamp).toISOString() : new Date().toISOString();
+## Проверка БД
 
-return {
-  session_id: body.sessionId,
-  session_hash: body.sessionHash,
-  chat_id: data.from + '@s.whatsapp.net',
-  phone: phone,
-  message_text: messageText,
-  message_id: data.messageId,
-  timestamp: timestamp,
-  sender_name: data.fromName || null,
-  has_photo: data.type === 'image',
-  has_voice: data.type === 'audio',
-  has_video: data.type === 'video',
-  has_document: data.type === 'document',
-  raw_event: body
-};
-```
+```bash
+# Проверить домены
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT * FROM elo_domains;'"
 
-### 5. n8n Workflow - ELO_Core_AI_Test_Stub_WS
+# Проверить action types
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT code, name FROM elo_action_types;'"
 
-Нода `Send WebSocket Push` - включить **Continue On Fail** (timeout иногда)
-
-Нода `Build WS Push Requests` - использовать snake_case для message:
-```javascript
-message: {
-  id: 'msg_' + Date.now(),
-  chat_id: ...,      // не chatId
-  sender_name: ...,  // не senderName
-  sender_phone: ..., // не senderPhone
-  server_id: ...     // не serverId
-}
+# Проверить trigger types
+ssh root@185.221.214.83 "docker exec supabase-db psql -U postgres -c 'SELECT code, name FROM elo_trigger_types;'"
 ```
 
 ---
 
-## ИЗВЕСТНЫЕ ПРОБЛЕМЫ
+## План архитектуры
 
-### 1. Android App - Сообщения не обновляются в открытом диалоге
-
-**Симптом:** Когда открыт диалог, новые входящие сообщения не отображаются. Нужно выйти и зайти обратно.
-
-**Где искать:**
-- `ChatFragment.kt` - слушает `BROADCAST_NEW_MESSAGE`
-- `ChatsRepository.kt` - `addIncomingMessage()` и `getMessagesLiveData()`
-- `OperatorWebSocketService.kt` - `broadcastNewMessage()`
-
-**Вероятная причина:** Формат message объекта или проблема с LiveData
-
-### 2. Дублирование уведомлений
-
-**Симптом:** Иногда приходит 2 одинаковых push-уведомления
-
-**Где искать:** BAT Debouncer или batching в n8n workflows
+**Файл:** `C:\Users\ELOnout\.claude\plans\polished-foraging-lobster.md`
 
 ---
 
-## Сервисы (актуально)
-
-| Сервис | Порт | Версия | Статус |
-|--------|------|--------|--------|
-| mcp-whatsapp-ip1 | 155.212.221.189:8769 | v1.0.1 | OK |
-| mcp-whatsapp-ip2 | 217.114.14.17:8769 | v1.0.1 | OK |
-| api-android | 155.212.221.189:8780 | latest | OK |
-
----
-
-## Следующие шаги
-
-1. **Исправить real-time обновление в ChatFragment** - сообщения должны появляться без перезахода
-2. **Найти причину дублирования уведомлений** - проверить BAT Debouncer
-3. **Обновить Extract WhatsApp Data в n8n** - код выше
-
----
-
-*Сессия завершена: 2025-12-30*
+*Сессия завершена: 2026-01-02*
