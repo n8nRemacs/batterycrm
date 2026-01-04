@@ -303,7 +303,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO elo_t_token_usage (tenant_id, trace_id, task_id, model_id, agent_tier, prompt_tokens, completion_tokens, total_tokens, cost_usd, task_type, context_type_code) SELECT $1::uuid, $2, $3, $4, $5, $6::int, $7::int, $8::int, COALESCE((SELECT ($6 * input_cost_per_1m + $7 * output_cost_per_1m) / 1000000.0 FROM elo_model_pricing WHERE model_id = $4), 0), $9, $10 WHERE $1 IS NOT NULL AND $1 != '';",
+        "query": "INSERT INTO elo_t_token_usage (tenant_id, trace_id, task_id, model_id, agent_tier, prompt_tokens, completion_tokens, total_tokens, cost_usd, task_type, context_type_code) SELECT $1::uuid, $2, $3, $4, $5, $6::int, $7::int, $8::int, COALESCE((SELECT ($6 * input_cost_per_1m + $7 * output_cost_per_1m) / 1000000.0 FROM elo_model_pricing WHERE model_id = $4), 0), $9, $10 WHERE $1 IS NOT NULL AND $1 != '' AND $5 IS NOT NULL AND $5 != 'nano';",
         "options": {
           "queryReplacement": "={{ [$json.tenant_id || '', $json.trace_id || '', $json.task_id || '', $json.model_used || '', $json.agent_tier || '', $json.prompt_tokens || 0, $json.completion_tokens || 0, $json.tokens_used || 0, $('Parse Task').first().json.task_type || 'llm_extraction', $json.code || ''] }}"
         }
