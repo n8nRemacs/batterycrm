@@ -1,124 +1,102 @@
-# Start Session - 2026-01-04
+# Start Session - 2026-01-05
 
-## Статус: Block 2 Architecture v2.0 Ready
-
----
-
-## ВЫПОЛНЕНО (2026-01-04)
-
-### Block 2: Redis Queue Architecture
-
-**Принцип:** "Маленькие фокусные промпты → меньше галлюцинаций"
-
-**Ключевые изменения:**
-
-| Компонент | Было | Стало |
-|-----------|------|-------|
-| ELO_AI_Extract | 1-3 больших AI вызова | N задач через Redis Queue |
-| ELO_Funnel_Controller | Hardcoded Switch | Dynamic pattern matching |
-| ELO_Blind_Worker | Hardcoded model | Dynamic `config.model` |
-| Масштабирование | 1 workflow | N параллельных воркеров |
-
-**Обновлённые файлы:**
-- `NEW/workflows/Block 2 Context/ELO_AI_Extract.json` — Redis publisher + aggregator
-- `NEW/workflows/Block 2 Context/ELO_Funnel_Controller.json` — Dynamic behaviors
-- `NEW/workflows/AI Contour/Workers/ELO_Blind_Worker.json` — Universal worker
-
-**Redis Keys:**
-- `elo:tasks:pending` — очередь задач
-- `elo:results:{trace_id}` — результаты
-- `elo:counter:{trace_id}` — счётчик
-- `elo:status:{trace_id}` — статус (pending/complete)
-
-**База данных:**
-- Добавлены `output_schema` для всех global context types
-- Унифицирован формат JSON схем
+## Статус: Block 2 Справочники Ready
 
 ---
 
-## СЛЕДУЮЩИЕ ШАГИ
+## ВЫПОЛНЕНО (2026-01-05)
 
-### Фаза 1: Оптимизация Block 2
+### Справочники для Block 2
 
-1. **Импорт workflows в n8n**
-   - ELO_AI_Extract.json
-   - ELO_Funnel_Controller.json
-   - ELO_Blind_Worker.json
+**Миграция 010_device_catalog.sql применена:**
 
-2. **Создать HTTP Header Auth для OpenRouter**
-   - ID: `openrouter-header`
-   - Header: `Authorization: Bearer sk-or-...`
+| Таблица | Записей | Описание |
+|---------|---------|----------|
+| `elo_dict_brands` | 15 | Бренды устройств (Apple, Samsung, Xiaomi...) |
+| `elo_dict_models` | 179 | Модели телефонов |
+| `elo_dict_symptom_candidates` | 0 | AI Learning Pipeline (автозаполнение) |
 
-3. **Тестирование**
-   - Проверить Redis connectivity
-   - Тест single extraction
-   - Тест full pipeline
+**Топ брендов по моделям:**
+- Samsung: 43 модели
+- Apple: 38 моделей
+- Redmi: 19 моделей
+- Xiaomi: 16 моделей
 
-4. **Оптимизации**
-   - Redis connection pooling
-   - Batch similar extractions
-   - Add metrics/logging
+**Обновлённая документация:**
+- `NEW/DOCS/BLOCK2_CONFIGURATION_GUIDE.md` — секция "8. СПРАВОЧНИКИ"
+- `NEW/DOCS/verticals/00_DOMAIN_MOBILE_PHONES.md` — требования справочников
+- `NEW/DOCS/verticals/01_VERTICAL_PHONE_REPAIR.md` — чеклист
+- `NEW/DOCS/verticals/02_VERTICAL_PHONE_PARTS.md` — чеклист
+- `NEW/DOCS/verticals/03_VERTICAL_PHONE_SALES.md` — чеклист
 
-### Фаза 2: Интеграция
-
-1. Подключить Block 1 → Block 2
-2. Создать Block 3 (Planning)
-3. End-to-end test
+**Шаблоны вертикалей (templates):**
+- `ELECTRONICS_00_DOMAIN.md`
+- `ELECTRONICS_01_PHONE_REPAIR.md`
+- `ELECTRONICS_02_PHONE_PARTS.md`
+- `ELECTRONICS_03_PHONE_SALES.md`
+- `ELECTRONICS_DEVICE_CATALOG.md`
 
 ---
 
-## Архитектура Pipeline
+## ЗАДАЧИ НА 2026-01-06
+
+### Приоритет 1: Заполнение справочников
+
+```sql
+-- Проверить что есть
+SELECT * FROM elo_v_brand_stats;
+SELECT * FROM elo_v_device_catalog WHERE brand_code = 'apple';
+
+-- Добавить недостающие модели если нужно
+INSERT INTO elo_dict_models (brand_id, code, name, release_year)
+SELECT id, 'new_model_code', 'New Model Name', 2024
+FROM elo_dict_brands WHERE code = 'samsung';
+```
+
+### Приоритет 2: Настройка тенанта
+
+1. Создать тенанта в `elo_t_tenants`
+2. Привязать к домену `mobile_phones`
+3. Привязать к вертикали (`phone_repair` / `phone_parts` / `phone_sales`)
+4. Настроить context types
+
+### Приоритет 3: Тестирование Block 2
+
+1. Импорт workflows в n8n
+2. Тест извлечения контекста
+3. Тест нормализации (текст → UUID)
+4. Проверка Neo4j записи с UUID
+
+---
+
+## Архитектура справочников
 
 ```
-Block 1 (Input)           Block 2 (Context)              Block 3 (Planning)
-    │                           │                              │
-    ▼                           ▼                              ▼
-ELO_Resolver ───────► ELO_Context_Collector ───────► ELO_Planner
-                             │                              │
-                    ┌────────┴────────┐                     ▼
-                    ▼                 ▼               Block 4 (Execution)
-            ELO_AI_Extract    ELO_Funnel_Controller        │
-                    │                                       ▼
-                    ▼                                 Block 5 (Output)
-              Redis Queue
-                    │
-         ┌─────────┴─────────┐
-         ▼                   ▼
-   ELO_Blind_Worker    ELO_Blind_Worker (N instances)
+PostgreSQL (справочники)          Neo4j (граф)
+┌─────────────────────────┐       ┌─────────────────────────┐
+│ elo_dict_brands         │       │ (:Device)               │
+│ id: 4db5dbd1-4ffb-...   │  ───► │ brand_id: 4db5dbd1-...  │
+│ name: "Samsung"         │       │ model_id: 7a3b2c1d-...  │
+└─────────────────────────┘       └─────────────────────────┘
+
+AI извлекает текст → сопоставляет с UUID → Neo4j хранит UUID
 ```
 
 ---
 
-## Текущее состояние
+## База данных: Справочники
 
-### Block 2 Workflows (ready for import)
-
-| Workflow | Status | Location |
-|----------|--------|----------|
-| ELO_Context_Collector | Ready | `NEW/workflows/Block 2 Context/` |
-| ELO_AI_Extract | Ready (v2.0) | `NEW/workflows/Block 2 Context/` |
-| ELO_Funnel_Controller | Ready (v2.0) | `NEW/workflows/Block 2 Context/` |
-| ELO_Blind_Worker | Ready | `NEW/workflows/AI Contour/Workers/` |
-
-### Database (context types)
-
-| Level | Table | Count |
-|-------|-------|-------|
-| Global | elo_context_types | 6 |
-| Domain | elo_d_context_types | 6 |
-| Vertical | elo_v_context_types | 4 |
-| Normalization | elo_normalization_rules | 10+ |
-
----
-
-## Документация
-
-| Файл | Описание |
-|------|----------|
-| `NEW/DOCS/BLOCKS/BLOCK_2_CONTEXT_COLLECTION.md` | ТЗ Block 2 (v2.0) |
-| `NEW/DOCS/BLOCKS/BLOCK_3_PLANNING.md` | ТЗ Block 3 |
-| `NEW/DOCS/BLOCKS/BLOCK_4_EXECUTION.md` | ТЗ Block 4 |
-| `NEW/DOCS/BLOCKS/BLOCK_5_OUTPUT.md` | ТЗ Block 5 |
+| Таблица | Записей | UUID PK |
+|---------|---------|---------|
+| `elo_dict_brands` | 15 | ✅ |
+| `elo_dict_models` | 179 | ✅ |
+| `elo_symptom_types` | 25 | ✅ |
+| `elo_diagnosis_types` | 10 | ✅ |
+| `elo_repair_actions` | 10 | ✅ |
+| `elo_problem_categories` | 9 | ✅ |
+| `elo_agent_tiers` | 5 | — |
+| `elo_agent_tools` | 6 | — |
+| `elo_model_pricing` | 5 | — |
 
 ---
 
@@ -131,4 +109,4 @@ ELO_Resolver ───────► ELO_Context_Collector ──────�
 
 ---
 
-*Последнее обновление: 2026-01-04*
+*Последнее обновление: 2026-01-05*

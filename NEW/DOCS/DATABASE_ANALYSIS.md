@@ -1,6 +1,6 @@
 # Database Analysis
 
-**Last sync:** 2026-01-04 (post-RBAC migration)
+**Last sync:** 2026-01-04 (post-AI-Agent migration)
 
 ---
 
@@ -8,12 +8,12 @@
 
 | Category | Count |
 |----------|-------|
-| Reference tables (elo_*) | 40 |
-| Transactional tables (elo_t_*) | 19 |
-| Materialized tables (elo_v_*) | 8 |
+| Reference tables (elo_*) | 43 |
+| Transactional tables (elo_t_*) | 20 |
+| Materialized tables (elo_v_*) | 9 |
 | Domain tables (elo_d_*) | 2 |
-| Views (actual) | 5 |
-| **Total objects** | **74** |
+| Views (actual) | 6 |
+| **Total objects** | **79** |
 
 ---
 
@@ -80,6 +80,76 @@ Domain/vertical level admin accounts.
 ### elo_permission_audit (0 rows)
 
 Audit log for permission changes.
+
+---
+
+## AI Agent System
+
+### elo_agent_tiers (5 rows)
+
+5 уровней AI агентов с разными моделями и ценами:
+
+| code | name | model_id | max_tokens | temperature |
+|------|------|----------|------------|-------------|
+| nano | Nano (Free) | qwen/qwen3-4b:free | 500 | 0.10 |
+| small | Small | qwen/qwen3-8b | 800 | 0.20 |
+| optima | Optima | anthropic/claude-3-haiku | 1000 | 0.30 |
+| pro | Pro | openai/gpt-4o-mini | 2000 | 0.50 |
+| expert | Expert | anthropic/claude-3-5-sonnet | 4000 | 0.70 |
+
+### elo_agent_tools (6 rows)
+
+Каталог MCP/SQL/HTTP инструментов для function calling:
+
+| code | name | handler_type | allowed_tiers |
+|------|------|--------------|---------------|
+| mcp_telegram | Send Telegram Message | mcp | optima, pro, expert |
+| mcp_whatsapp | Send WhatsApp Message | mcp | optima, pro, expert |
+| sql_query | Execute SQL Query | sql | pro, expert |
+| redis_get | Redis Get | redis | small, optima, pro, expert |
+| http_request | HTTP Request | http | optima, pro, expert |
+| embeddings | Generate Embeddings | internal | optima, pro, expert |
+
+### elo_model_pricing (5 rows)
+
+Цены моделей для биллинга:
+
+| model_id | provider | input_cost_per_1m | output_cost_per_1m |
+|----------|----------|-------------------|---------------------|
+| qwen/qwen3-4b:free | openrouter | 0.00 | 0.00 |
+| qwen/qwen3-8b | openrouter | 0.07 | 0.07 |
+| anthropic/claude-3-haiku | openrouter | 0.25 | 1.25 |
+| openai/gpt-4o-mini | openrouter | 0.15 | 0.60 |
+| anthropic/claude-3-5-sonnet | openrouter | 3.00 | 15.00 |
+
+### elo_t_token_usage
+
+Учет использования токенов для биллинга франчайзи:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| tenant_id | UUID | FK to tenant |
+| trace_id | VARCHAR(100) | Request trace ID |
+| task_id | VARCHAR(200) | Task ID |
+| model_id | VARCHAR(100) | Model ID |
+| agent_tier | VARCHAR(20) | nano/small/optima/pro/expert |
+| prompt_tokens | INT | Input tokens |
+| completion_tokens | INT | Output tokens |
+| total_tokens | INT | Total tokens |
+| cost_usd | DECIMAL(12,8) | Cost in USD |
+| task_type | VARCHAR(50) | ai_agent, llm_extraction, etc. |
+| created_at | TIMESTAMPTZ | Timestamp |
+
+### elo_v_tenant_monthly_usage (VIEW)
+
+Агрегация для биллинга и дашборда:
+
+```sql
+SELECT tenant_id, month, model_id, agent_tier,
+       request_count, total_prompt_tokens,
+       total_completion_tokens, total_tokens, total_cost_usd
+FROM elo_v_tenant_monthly_usage
+```
 
 ---
 
@@ -189,18 +259,19 @@ Audit log for permission changes.
 
 ## Table Categories
 
-### Reference Tables (elo_*) — 40 tables
+### Reference Tables (elo_*) — 43 tables
 
 | Group | Tables |
 |-------|--------|
 | RBAC | elo_permission_scopes, elo_resources, elo_actions, elo_roles, elo_permissions, elo_user_roles, elo_admin_users, elo_permission_audit |
 | Funnel | elo_behavior_types, elo_condition_operators, elo_executor_types, elo_event_handlers, elo_stage_conditions, elo_stage_actions, elo_funnel_stages, elo_funnel_stage_workers, elo_stage_fields, elo_stage_cta_actions |
 | AI | elo_action_types, elo_context_types, elo_intent_types, elo_prompts, elo_meta_prompts, elo_worker_configs |
+| **AI Agent** | **elo_agent_tiers, elo_agent_tools, elo_model_pricing** |
 | Reference | elo_channels, elo_domains, elo_verticals, elo_ip_nodes |
 | Graph | elo_symptom_types, elo_diagnosis_types, elo_repair_actions, elo_problem_categories, elo_symptom_diagnosis_links, elo_diagnosis_repair_links |
 | Other | elo_triggers, elo_trigger_types, elo_normalization_rules, elo_custom_fields, elo_cypher_queries, elo_auto_generation_log, elo_dialog_field_tracking |
 
-### Transactional Tables (elo_t_*) — 19 tables
+### Transactional Tables (elo_t_*) — 20 tables
 
 | Table | Description |
 |-------|-------------|
@@ -223,6 +294,7 @@ Audit log for permission changes.
 | elo_t_custom_field_overrides | Custom field overrides |
 | elo_t_funnel_custom_stages | Custom funnel stages |
 | elo_t_funnel_stage_overrides | Stage overrides |
+| **elo_t_token_usage** | **AI Agent token billing** |
 
 ### Domain Tables (elo_d_*) — 2 tables
 
@@ -231,15 +303,16 @@ Audit log for permission changes.
 | elo_d_context_types | Domain-level context types |
 | elo_d_intent_types | Domain-level intent types |
 
-### Views — 13 objects (5 actual views)
+### Views — 14 objects (6 actual views)
 
 | Name | Type | Description |
 |------|------|-------------|
-| elo_v_effective_permissions | VIEW | **NEW** Effective permissions |
+| elo_v_effective_permissions | VIEW | Effective permissions |
 | elo_v_ip_usage | VIEW | IP node usage |
 | elo_v_stage_actions_new | VIEW | Stage actions |
 | elo_v_stage_config_new | VIEW | Stage config |
 | elo_v_stage_transitions | VIEW | Stage transitions |
+| **elo_v_tenant_monthly_usage** | **VIEW** | **Token usage aggregation** |
 | elo_v_ai_settings | TABLE | AI settings |
 | elo_v_context_types | TABLE | Merged context types |
 | elo_v_funnel_stages | TABLE | Merged funnel stages |
@@ -295,6 +368,7 @@ elo_domains
 |---|------|------|-------------|
 | 002 | 002_configurable_funnel_system_v2.sql | 2026-01-04 | Funnel system |
 | 003 | 003_rbac_system.sql | 2026-01-04 | RBAC system |
+| 007 | 007_domains_context_extraction.sql | 2026-01-04 | Domains, context extraction, AI Agent |
 
 ---
 
