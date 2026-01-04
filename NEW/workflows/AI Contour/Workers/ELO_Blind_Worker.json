@@ -113,7 +113,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const task = $('Parse Task').first().json;\nconst config = task.config;\n\n// Get model from config or use default\nconst model = config.model || 'qwen/qwen3-4b:free';\n\n// Build system prompt\nlet systemPrompt = config.system_prompt || 'You are an entity extraction assistant. Return ONLY valid JSON.';\n\n// Build user prompt\nlet userPrompt = config.prompt || '';\nif (config.message) {\n  userPrompt = userPrompt.replace('{{message}}', config.message);\n}\n\n// Add output schema if provided\nif (config.output_schema) {\n  const schema = typeof config.output_schema === 'string' ? config.output_schema : JSON.stringify(config.output_schema);\n  systemPrompt += `\\n\\nExpected output schema: ${schema}`;\n}\n\n// Add examples if provided\nif (config.examples && config.examples.length > 0) {\n  userPrompt += '\\n\\nExamples:\\n';\n  for (const ex of config.examples) {\n    userPrompt += `Input: \"${ex.input}\"\\nOutput: ${JSON.stringify(ex.output)}\\n\\n`;\n  }\n}\n\n// Final message\nif (config.message) {\n  userPrompt += `\\n\\nNow extract from: \"${config.message}\"\\nReturn JSON only:`;\n}\n\nreturn {\n  model: model,\n  system_prompt: systemPrompt,\n  user_prompt: userPrompt,\n  temperature: config.temperature || 0.1,\n  max_tokens: config.max_tokens || 500,\n  task: task\n};"
+        "jsCode": "const task = $('Parse Task').first().json;\nconst config = task.config;\n\n// Agent Tiers mapping (hardcoded for speed)\nconst AGENT_TIERS = {\n  nano: 'qwen/qwen3-4b:free',\n  small: 'qwen/qwen3-8b',\n  optima: 'anthropic/claude-3-haiku',\n  pro: 'openai/gpt-4o-mini',\n  expert: 'anthropic/claude-3-5-sonnet'\n};\n\n// Get model: agent_tier -> model -> default\nlet model;\nif (config.agent_tier && AGENT_TIERS[config.agent_tier]) {\n  model = AGENT_TIERS[config.agent_tier];\n} else {\n  model = config.model || 'qwen/qwen3-4b:free';\n}\n\n// Build system prompt\nlet systemPrompt = config.system_prompt || 'You are an entity extraction assistant. Return ONLY valid JSON.';\n\n// Build user prompt\nlet userPrompt = config.prompt || '';\nif (config.message) {\n  userPrompt = userPrompt.replace('{{message}}', config.message);\n}\n\n// Add output schema if provided\nif (config.output_schema) {\n  const schema = typeof config.output_schema === 'string' ? config.output_schema : JSON.stringify(config.output_schema);\n  systemPrompt += `\\n\\nExpected output schema: ${schema}`;\n}\n\n// Add examples if provided\nif (config.examples && config.examples.length > 0) {\n  userPrompt += '\\n\\nExamples:\\n';\n  for (const ex of config.examples) {\n    userPrompt += `Input: \"${ex.input}\"\\nOutput: ${JSON.stringify(ex.output)}\\n\\n`;\n  }\n}\n\n// Final message\nif (config.message) {\n  userPrompt += `\\n\\nNow extract from: \"${config.message}\"\\nReturn JSON only:`;\n}\n\nreturn {\n  model: model,\n  system_prompt: systemPrompt,\n  user_prompt: userPrompt,\n  temperature: config.temperature || 0.1,\n  max_tokens: config.max_tokens || 500,\n  task: task\n};"
       },
       "id": "build-llm-prompt",
       "name": "Build LLM Prompt",
@@ -144,7 +144,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse LLM response\nconst response = $json;\nconst promptData = $('Build LLM Prompt').first().json;\nconst task = promptData.task;\n\nlet result = null;\nlet error = null;\nlet rawContent = '';\n\ntry {\n  rawContent = response.choices?.[0]?.message?.content || '';\n  \n  // Clean up response\n  let content = rawContent.trim();\n  \n  // Remove thinking tags if present (Qwen3)\n  content = content.replace(/<think>[\\s\\S]*?<\\/think>/g, '').trim();\n  \n  // Extract JSON from response\n  const jsonMatch = content.match(/[\\[\\{][\\s\\S]*[\\]\\}]/);\n  if (jsonMatch) {\n    result = JSON.parse(jsonMatch[0]);\n  } else {\n    // Try to parse as-is\n    result = JSON.parse(content);\n  }\n} catch (e) {\n  error = e.message;\n  result = { raw: rawContent, parse_error: e.message };\n}\n\nreturn {\n  task_id: task.task_id,\n  trace_id: task.trace_id,\n  code: task.meta?.code,\n  level: task.meta?.level,\n  result: result,\n  model_used: response.model || promptData.model,\n  tokens_used: response.usage?.total_tokens,\n  raw_response: rawContent,\n  duration_ms: Date.now() - task._start_time,\n  error: error,\n  callback: task.callback,\n  meta: task.meta\n};"
+        "jsCode": "// Parse LLM response\nconst response = $json;\nconst promptData = $('Build LLM Prompt').first().json;\nconst task = promptData.task;\n\nlet result = null;\nlet error = null;\nlet rawContent = '';\n\ntry {\n  rawContent = response.choices?.[0]?.message?.content || '';\n  \n  // Clean up response\n  let content = rawContent.trim();\n  \n  // Remove thinking tags if present (Qwen3)\n  content = content.replace(/<think>[\\s\\S]*?<\\/think>/g, '').trim();\n  \n  // Extract JSON from response\n  const jsonMatch = content.match(/[\\[\\{][\\s\\S]*[\\]\\}]/);\n  if (jsonMatch) {\n    result = JSON.parse(jsonMatch[0]);\n  } else {\n    // Try to parse as-is\n    result = JSON.parse(content);\n  }\n} catch (e) {\n  error = e.message;\n  result = { raw: rawContent, parse_error: e.message };\n}\n\n// Extract usage details\nconst usage = response.usage || {};\n\nreturn {\n  task_id: task.task_id,\n  trace_id: task.trace_id,\n  code: task.meta?.code,\n  level: task.meta?.level,\n  result: result,\n  model_used: response.model || promptData.model,\n  agent_tier: task.config?.agent_tier || null,\n  prompt_tokens: usage.prompt_tokens || 0,\n  completion_tokens: usage.completion_tokens || 0,\n  tokens_used: usage.total_tokens || 0,\n  raw_response: rawContent,\n  duration_ms: Date.now() - task._start_time,\n  error: error,\n  callback: task.callback,\n  meta: task.meta,\n  tenant_id: task.meta?.tenant_id || null\n};"
       },
       "id": "parse-llm-response",
       "name": "Parse LLM Response",
@@ -290,7 +290,7 @@
         "url": "={{ $('Check Completion').first().json.notify_webhook }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  status: 'complete',\n  counter: $('Check Completion').first().json.counter,\n  total_tasks: $('Check Completion').first().json.total_tasks\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  status: 'complete',\n  trace_id: $('Parse Task').first().json.trace_id,\n  counter: $('Check Completion').first().json.counter,\n  total_tasks: $('Check Completion').first().json.total_tasks\n}) }}",
         "options": {"timeout": 5000}
       },
       "id": "notify-complete",
@@ -298,6 +298,24 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1792, 0],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO elo_t_token_usage (tenant_id, trace_id, task_id, model_id, agent_tier, prompt_tokens, completion_tokens, total_tokens, cost_usd, task_type, context_type_code) SELECT $1::uuid, $2, $3, $4, $5, $6::int, $7::int, $8::int, COALESCE((SELECT ($6 * input_cost_per_1m + $7 * output_cost_per_1m) / 1000000.0 FROM elo_model_pricing WHERE model_id = $4), 0), $9, $10 WHERE $1 IS NOT NULL AND $1 != '';",
+        "options": {
+          "queryReplacement": "={{ [$json.tenant_id || '', $json.trace_id || '', $json.task_id || '', $json.model_used || '', $json.agent_tier || '', $json.prompt_tokens || 0, $json.completion_tokens || 0, $json.tokens_used || 0, $('Parse Task').first().json.task_type || 'llm_extraction', $json.code || ''] }}"
+        }
+      },
+      "id": "log-token-usage",
+      "name": "Log Token Usage",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [640, -100],
+      "credentials": {
+        "postgres": {"id": "n2SyhP9QhMnp1ryk", "name": "Postgres account"}
+      },
       "continueOnFail": true
     }
   ],
@@ -333,7 +351,10 @@
       "main": [[{"node": "Parse LLM Response", "type": "main", "index": 0}]]
     },
     "Parse LLM Response": {
-      "main": [[{"node": "Redis Push Result", "type": "main", "index": 0}]]
+      "main": [[
+        {"node": "Log Token Usage", "type": "main", "index": 0},
+        {"node": "Redis Push Result", "type": "main", "index": 0}
+      ]]
     },
     "HTTP Request": {
       "main": [[{"node": "Format HTTP Result", "type": "main", "index": 0}]]

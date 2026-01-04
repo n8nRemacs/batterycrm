@@ -1,0 +1,237 @@
+{
+  "name": "ELO_Extract_Aggregator",
+  "description": "Callback handler. Aggregates extraction results, calls Funnel, updates Dialog, forwards to Block 3.",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elo-extract-complete",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-960, 300],
+      "webhookId": "elo-extract-complete"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\nconst traceId = input.trace_id;\nif (!traceId) {\n  throw new Error('Missing trace_id');\n}\n\nreturn {\n  trace_id: traceId,\n  status: input.status,\n  counter: input.counter,\n  total_tasks: input.total_tasks,\n  result_key: `elo:results:${traceId}`,\n  context_key: `elo:context:${traceId}`,\n  dialog_key: `elo:dialog:${traceId}`,\n  _start_time: Date.now()\n};"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-736, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.result_key }}",
+        "options": {"dotNotation": false}
+      },
+      "id": "get-results",
+      "name": "Get Results",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-512, 150],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Parse Input').first().json.context_key }}",
+        "options": {"dotNotation": false}
+      },
+      "id": "get-context",
+      "name": "Get Context",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-512, 300],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Parse Input').first().json.dialog_key }}",
+        "options": {"dotNotation": false}
+      },
+      "id": "get-dialog",
+      "name": "Get Dialog State",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [-512, 450],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate results from Redis\nconst parseInput = $('Parse Input').first().json;\nconst rawResults = $('Get Results').first().json.data;\nconst rawContext = $('Get Context').first().json.data;\nconst rawDialog = $('Get Dialog State').first().json.data;\n\n// Parse context (from ELO_AI_Extract)\nlet extractContext = {};\ntry {\n  extractContext = JSON.parse(rawContext) || {};\n} catch(e) {\n  extractContext = {};\n}\n\n// Parse dialog state (from ELO_Context_Collector)\nlet dialogState = {};\ntry {\n  dialogState = JSON.parse(rawDialog) || {};\n} catch(e) {\n  dialogState = {};\n}\n\nconst normRules = extractContext.normalization_rules || [];\n\n// Parse results\nlet results = [];\nif (typeof rawResults === 'string') {\n  try {\n    const parsed = JSON.parse(rawResults);\n    results = Array.isArray(parsed) ? parsed : [parsed];\n  } catch(e) {\n    results = rawResults.split('\\n').filter(Boolean).map(line => {\n      try { return JSON.parse(line); } catch(e) { return null; }\n    }).filter(Boolean);\n  }\n} else if (Array.isArray(rawResults)) {\n  results = rawResults.map(r => typeof r === 'string' ? JSON.parse(r) : r);\n}\n\n// Flatten and group\nconst entities = [];\nconst grouped = { global: [], domain: {}, vertical: {} };\n\nfor (const r of results) {\n  if (!r || r.error) continue;\n  \n  const entity = {\n    type: r.code,\n    level: r.level,\n    value: r.result,\n    model_used: r.model_used,\n    duration_ms: r.duration_ms\n  };\n  \n  entities.push(entity);\n  \n  if (r.level === 'global') {\n    grouped.global.push(entity);\n  } else if (r.level === 'domain') {\n    const key = r.domain_code || 'unknown';\n    if (!grouped.domain[key]) grouped.domain[key] = [];\n    grouped.domain[key].push(entity);\n  } else if (r.level === 'vertical') {\n    const key = r.vertical_code || 'unknown';\n    if (!grouped.vertical[key]) grouped.vertical[key] = [];\n    grouped.vertical[key].push(entity);\n  }\n}\n\n// Apply normalization\nfunction normalize(value, fieldType) {\n  if (!value || typeof value !== 'string') return value;\n  const rules = normRules.filter(r => r.field_code === fieldType || r.field_code === 'all');\n  for (const rule of rules) {\n    try {\n      const pattern = new RegExp(rule.pattern, 'gi');\n      if (pattern.test(value)) {\n        value = value.replace(pattern, rule.normalized_value);\n      }\n    } catch (e) {}\n  }\n  return value;\n}\n\nfor (const entity of entities) {\n  if (entity.value?.brand) {\n    entity.value.brand = normalize(entity.value.brand, 'device.brand');\n  }\n}\n\n// Merge context: existing + extracted\nconst existingContext = dialogState.existing_context || {};\nconst mergedContext = { ...existingContext };\nfor (const entity of entities) {\n  if (entity.value && typeof entity.value === 'object') {\n    Object.assign(mergedContext, entity.value);\n  }\n}\n\nreturn {\n  // From dialog state\n  tenant_id: dialogState.tenant_id,\n  client_id: dialogState.client_id,\n  dialog_id: dialogState.dialog_id,\n  channel: dialogState.channel,\n  channel_id: dialogState.channel_id,\n  channel_account_id: dialogState.channel_account_id,\n  external_chat_id: dialogState.external_chat_id,\n  text: dialogState.text,\n  media: dialogState.media,\n  is_new_client: dialogState.is_new_client,\n  is_new_dialog: dialogState.is_new_dialog,\n  current_stage: dialogState.current_stage,\n  current_stage_id: dialogState.current_stage_id,\n  behavior_type: dialogState.behavior_type,\n  vertical_id: dialogState.vertical_id,\n  block2_start: dialogState.block2_start,\n  \n  // Extraction results\n  context: mergedContext,\n  extracted: {\n    entities: entities,\n    grouped: grouped\n  },\n  \n  trace_id: parseInput.trace_id,\n  extraction_duration_ms: Date.now() - parseInput._start_time\n};"
+      },
+      "id": "aggregate",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-256, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.n8nsrv.ru/webhook/elo-funnel-controller",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  context: {\n    tenant_id: $json.tenant_id,\n    dialog_id: $json.dialog_id,\n    client_id: $json.client_id,\n    current_stage: $json.current_stage,\n    vertical_id: $json.vertical_id,\n    ...$json.context\n  },\n  message: { text: $json.text },\n  extracted_context: $json.extracted,\n  trace_id: $json.trace_id\n}) }}",
+        "options": {"timeout": 30000}
+      },
+      "id": "call-funnel",
+      "name": "Call Funnel Controller",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-32, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge extraction + funnel results\nconst aggData = $('Aggregate Results').first().json;\nconst funnelResponse = $input.first().json;\n\nconst funnel = funnelResponse.funnel || funnelResponse || {};\n\nreturn {\n  ...aggData,\n  funnel: {\n    previous_stage: aggData.current_stage,\n    current_stage: funnel.stage?.current || aggData.current_stage,\n    changed: funnel.stage?.changed || false,\n    behavior_type: funnel.stage?.behavior_type || aggData.behavior_type,\n    masks: funnel.masks || {},\n    response: funnel.response || null,\n    actions: funnel.actions || []\n  },\n  final_context: funnel.context || aggData.context\n};"
+      },
+      "id": "merge-funnel",
+      "name": "Merge Funnel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [192, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE elo_t_dialogs\nSET \n  context = $1::jsonb,\n  current_stage = COALESCE(\n    (SELECT id FROM elo_funnel_stages WHERE code = $2 LIMIT 1),\n    current_stage\n  ),\n  last_message_at = NOW(),\n  updated_at = NOW()\nWHERE id = $3::uuid\nRETURNING id, current_stage;",
+        "options": {
+          "queryReplacement": "={{ [JSON.stringify($json.final_context), $json.funnel.current_stage, $json.dialog_id] }}"
+        }
+      },
+      "id": "update-dialog",
+      "name": "Update Dialog",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [416, 300],
+      "credentials": {
+        "postgres": {
+          "id": "n2SyhP9QhMnp1ryk",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build final Block 2 output\nconst data = $('Merge Funnel').first().json;\n\nreturn {\n  tenant_id: data.tenant_id,\n  client_id: data.client_id,\n  dialog_id: data.dialog_id,\n  channel: data.channel,\n  channel_id: data.channel_id,\n  channel_account_id: data.channel_account_id,\n  external_chat_id: data.external_chat_id,\n  text: data.text,\n  media: data.media,\n  context: data.final_context,\n  extracted: data.extracted,\n  funnel: data.funnel,\n  is_new_client: data.is_new_client,\n  is_new_dialog: data.is_new_dialog,\n  trace_id: data.trace_id,\n  block2_duration_ms: Date.now() - data.block2_start\n};"
+      },
+      "id": "build-output",
+      "name": "Build Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.n8nsrv.ru/webhook/elo-block3-planner",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {"timeout": 30000}
+      },
+      "id": "forward-block3",
+      "name": "Forward to Block 3",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [864, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Parse Input').first().json.result_key }}"
+      },
+      "id": "cleanup-results",
+      "name": "Cleanup Results",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1088, 150],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Parse Input').first().json.context_key }}"
+      },
+      "id": "cleanup-context",
+      "name": "Cleanup Context",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1088, 300],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Parse Input').first().json.dialog_key }}"
+      },
+      "id": "cleanup-dialog",
+      "name": "Cleanup Dialog",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [1088, 450],
+      "credentials": {"redis": {"id": "7FQcEivUY94atW24", "name": "Redis account"}}
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Parse Input", "type": "main", "index": 0}]]
+    },
+    "Parse Input": {
+      "main": [[
+        {"node": "Get Results", "type": "main", "index": 0},
+        {"node": "Get Context", "type": "main", "index": 0},
+        {"node": "Get Dialog State", "type": "main", "index": 0}
+      ]]
+    },
+    "Get Results": {
+      "main": [[{"node": "Aggregate Results", "type": "main", "index": 0}]]
+    },
+    "Get Context": {
+      "main": [[{"node": "Aggregate Results", "type": "main", "index": 0}]]
+    },
+    "Get Dialog State": {
+      "main": [[{"node": "Aggregate Results", "type": "main", "index": 0}]]
+    },
+    "Aggregate Results": {
+      "main": [[{"node": "Call Funnel Controller", "type": "main", "index": 0}]]
+    },
+    "Call Funnel Controller": {
+      "main": [[{"node": "Merge Funnel", "type": "main", "index": 0}]]
+    },
+    "Merge Funnel": {
+      "main": [[{"node": "Update Dialog", "type": "main", "index": 0}]]
+    },
+    "Update Dialog": {
+      "main": [[{"node": "Build Output", "type": "main", "index": 0}]]
+    },
+    "Build Output": {
+      "main": [[{"node": "Forward to Block 3", "type": "main", "index": 0}]]
+    },
+    "Forward to Block 3": {
+      "main": [[
+        {"node": "Cleanup Results", "type": "main", "index": 0},
+        {"node": "Cleanup Context", "type": "main", "index": 0},
+        {"node": "Cleanup Dialog", "type": "main", "index": 0}
+      ]]
+    }
+  },
+  "settings": {"executionOrder": "v1"},
+  "tags": [
+    {"id": "8dihLRJvdhkW2kZ1", "name": "AI"},
+    {"id": "tMSCjbvPU3xrNUqz", "name": "ELO"}
+  ],
+  "meta": {"templateCredsSetupCompleted": true}
+}
