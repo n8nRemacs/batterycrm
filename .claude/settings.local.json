@@ -4,7 +4,8 @@
       "Bash(git add:*)",
       "mcp__ssh__ssh_exec",
       "mcp__ssh__ssh_list_servers",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(echo:*)"
     ]
   }
 }

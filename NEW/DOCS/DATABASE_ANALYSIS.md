@@ -1,6 +1,6 @@
 # Database Analysis
 
-**Last sync:** 2025-12-31
+**Last sync:** 2026-01-04 (post-RBAC migration)
 
 ---
 
@@ -8,257 +8,293 @@
 
 | Category | Count |
 |----------|-------|
-| Transactional tables (elo_t_*) | 14 |
-| Reference tables (elo_*) | 11 |
-| Views (elo_v_*) | 5 |
-| Functions (elo_*) | 3 |
-| **Total objects** | 33 |
+| Reference tables (elo_*) | 40 |
+| Transactional tables (elo_t_*) | 19 |
+| Materialized tables (elo_v_*) | 8 |
+| Domain tables (elo_d_*) | 2 |
+| Views (actual) | 5 |
+| **Total objects** | **74** |
 
 ---
 
-## Reference Tables
+## NEW: RBAC System
+
+### elo_permission_scopes (4 rows)
+
+| level | code | name |
+|-------|------|------|
+| 1 | domain | Domain (highest) |
+| 2 | vertical | Vertical |
+| 3 | tenant | Tenant |
+| 4 | operator | Operator |
+
+### elo_roles (8 rows)
+
+| scope | code | name |
+|-------|------|------|
+| domain | supervisor | Supervisor (full access) |
+| domain | domain_admin | Domain Admin |
+| vertical | vertical_admin | Vertical Admin |
+| vertical | vertical_manager | Vertical Manager |
+| tenant | tenant_owner | Tenant Owner |
+| tenant | tenant_admin | Tenant Admin |
+| operator | operator | Operator |
+| operator | operator_senior | Senior Operator |
+
+### elo_resources (22 rows)
+
+| category | resources |
+|----------|-----------|
+| system | domains, verticals, global_config, prompts, behavior_types, executor_types |
+| config | funnel_stages, context_types, intent_types, price_rules, tenant.settings, tenant.channels, tenant.operators |
+| billing | tenant.billing |
+| data | dialogs, messages, clients, analytics, reports |
+| ai | mode_override, generation, extraction |
+
+### elo_actions (7 rows)
+
+| code | description |
+|------|-------------|
+| read | View access |
+| create | Create records |
+| update | Modify records |
+| delete | Delete records |
+| execute | Execute actions |
+| delegate | Delegate to lower level |
+| admin | Full admin access |
+
+### elo_permissions (102 rows)
+
+Role-resource-action mappings.
+
+### elo_user_roles (1 row)
+
+| email | role | scope |
+|-------|------|-------|
+| admin@eldoleado.ru | supervisor | domain |
+
+### elo_admin_users (1 row)
+
+Domain/vertical level admin accounts.
+
+### elo_permission_audit (0 rows)
+
+Audit log for permission changes.
+
+---
+
+## Configurable Funnel Tables
+
+### elo_behavior_types (7 rows)
+
+| code | name |
+|------|------|
+| collect_iterative | Iterative Collection |
+| collect_batch | Batch Collection |
+| present_and_confirm | Present and Confirm |
+| wait_external | Wait for External |
+| terminal_success | Terminal Success |
+| terminal_cancelled | Terminal Cancelled |
+| escalate | Escalate to Operator |
+
+### elo_condition_operators (20 rows)
+
+| Category | Operators |
+|----------|-----------|
+| Comparison | eq, neq, gt, gte, lt, lte |
+| String | contains, starts_with |
+| Existence | exists, is_empty |
+| Collection | in, not_in |
+| Logical | and, or, not |
+| Completion | fields_complete, completion_ratio |
+| Intent | intent_is, intent_in |
+| Iteration | max_iterations |
+
+### elo_executor_types (17 rows)
+
+| Category | Executors |
+|----------|-----------|
+| Context | extract_context, update_context, check_completion |
+| Response | generate_response, send_message |
+| Stage | advance_stage, rollback_stage |
+| Operator | notify_operator, escalate, forward_to_operator |
+| Dialog | close_dialog |
+| Intent | detect_intent, route_by_intent |
+| Graph | write_to_graph |
+| External | call_mcp, call_http |
+
+### elo_event_handlers (5 rows)
+
+| event_type | handler | executor |
+|------------|---------|----------|
+| max_iterations_reached | default_escalate | escalate |
+| timeout_reached | send_reminder | send_reminder |
+| timeout_reached | close_if_no_response | close_dialog |
+| intent_not_recognized | ask_clarification | generate_response |
+| client_inactive | send_followup | send_reminder |
+
+---
+
+## Reference Data
 
 ### elo_channels (9 rows)
 
-| id | code | name | supports_media | max_message_length |
-|----|------|------|----------------|-------------------|
-| 1 | telegram_bot | Telegram Bot | true | 4096 |
-| 2 | whatsapp | WhatsApp | true | 4096 |
-| 3 | avito_reverse | Avito Eldoleado | true | 4000 |
-| 4 | vk | VKontakte | true | 4096 |
-| 5 | max | MAX (VK Teams) | true | 4096 |
-| 6 | form | Web Form | false | 10000 |
-| 7 | phone | Phone Call | false | null |
-| 8 | telegram_user | Telegram User | true | 4096 |
-| 9 | avito_official | Avito Official | true | 4000 |
+| id | code | name |
+|----|------|------|
+| 1 | telegram_bot | Telegram Bot |
+| 2 | whatsapp | WhatsApp |
+| 3 | avito_reverse | Avito Eldoleado |
+| 4 | vk | VKontakte |
+| 5 | max | MAX (VK Teams) |
+| 6 | form | Web Form |
+| 7 | phone | Phone Call |
+| 8 | telegram_user | Telegram User |
+| 9 | avito_official | Avito Official |
 
-### elo_verticals (1 row)
+### elo_domains (3 rows)
 
-| id | code | name | description |
-|----|------|------|-------------|
-| 1 | phone_repair | Phone Repair | Mobile phone repair services |
+| id | code | name |
+|----|------|------|
+| 1 | electronics | Electronics |
+| 2 | auto | Automotive |
+| 3 | software | Software |
 
-### elo_ip_nodes (2 rows)
+### elo_verticals (2 rows)
 
-| id | server_name | ip_address | status | notes |
-|----|-------------|------------|--------|-------|
-| 1 | MessagerOne | 155.212.221.189 | active | Primary IP |
-| 2 | MessagerOne | 217.114.14.17 | active | Secondary IP |
+| id | domain_id | code | name |
+|----|-----------|------|------|
+| 1 | 1 | phone_repair | Phone Repair |
+| 2 | 1 | repair | Repair |
 
----
+### elo_funnel_stages (7 rows)
 
-## Transactional Tables Detail
+| code | behavior_type_id | is_required |
+|------|------------------|-------------|
+| lead | collect_iterative | true |
+| qualification | collect_iterative | true |
+| data_collection | collect_iterative | true |
+| presentation | present_and_confirm | false |
+| agreement | wait_external | false |
+| booking | collect_iterative | false |
+| confirmation | wait_external | false |
 
-| Table | Columns | FK | Description |
-|-------|---------|-----|-------------|
-| elo_t_tenants | 12 | 1 | Business accounts |
-| elo_t_clients | 10 | 1 | Contacts |
-| elo_t_client_channels | 8 | 2 | Client channel links |
-| elo_t_dialogs | 18 | 7 | Conversations |
-| elo_t_messages | 15 | 3 | Messages |
-| elo_t_operators | 15 | 1 | Operators |
-| elo_t_operator_devices | 16 | 2 | Mobile devices |
-| elo_t_operator_channels | 7 | 2 | Operator-channel links |
-| elo_t_channel_accounts | 18 | 3 | Channel credentials |
-| elo_t_ai_extractions | 11 | 4 | AI extractions |
-| elo_t_tasks | 19 | 6 | Tasks |
-| elo_t_price_list | 20 | 3 | Price list |
-| elo_t_tenant_verticals | 6 | 2 | Tenant verticals |
-| elo_t_events | 5 | 0 | Events log |
+### elo_t_tenants (2 rows)
 
----
-
-## Core Tables Structure
-
-### elo_t_tenants
-Main tenant (business account) table.
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| id | uuid | NO | Primary key |
-| name | varchar | YES | Tenant name |
-| settings | jsonb | YES | Tenant settings |
-| created_at | timestamptz | YES | Created timestamp |
-| updated_at | timestamptz | YES | Updated timestamp |
-
-### elo_t_clients
-Client (contact) table.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| name | varchar | YES | | Client name |
-| phone | varchar | YES | | Phone number |
-| email | varchar | YES | | Email |
-| profile | jsonb | YES | | Additional profile data |
-| stats | jsonb | YES | | Client statistics |
-| neo4j_synced_at | timestamptz | YES | | Last Neo4j sync |
-
-### elo_t_client_channels
-Links clients to channels with external IDs.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | serial | NO | | Primary key |
-| client_id | uuid | NO | elo_t_clients | Client reference |
-| channel_id | int | NO | elo_channels | Channel reference |
-| external_id | varchar | NO | | External ID (sender_id) |
-| external_username | varchar | YES | | Username if available |
-| metadata | jsonb | YES | | Additional metadata |
-
-### elo_t_dialogs
-Conversation/dialog table.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| client_id | uuid | NO | elo_t_clients | Client reference |
-| channel_id | int | NO | elo_channels | Channel reference |
-| channel_account_id | uuid | YES | elo_t_channel_accounts | Account reference |
-| external_chat_id | varchar | YES | | External chat ID |
-| vertical_id | int | YES | elo_verticals | Vertical reference |
-| status_id | int | YES | | Dialog status (default 1) |
-| current_stage_id | int | YES | elo_v_funnel_stages | Current funnel stage |
-| assigned_operator_id | uuid | YES | elo_t_operators | Assigned operator |
-| context | jsonb | YES | | Dialog context |
-| metadata | jsonb | YES | | Dialog metadata |
-| last_message_at | timestamptz | YES | | Last message timestamp |
-| last_client_message_at | timestamptz | YES | | Last client message |
-| last_operator_message_at | timestamptz | YES | | Last operator message |
-| first_contact_channel_id | int | YES | elo_channels | First contact channel |
-| last_client_channel_id | int | YES | elo_channels | Last client channel |
-
-### elo_t_messages
-Message table.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| dialog_id | uuid | NO | elo_t_dialogs | Dialog reference |
-| client_id | uuid | YES | elo_t_clients | Client reference |
-| direction_id | int | NO | | 1=incoming, 2=outgoing |
-| message_type_id | int | YES | | Message type (default 1) |
-| actor_type | varchar | NO | | 'client', 'operator', 'ai' |
-| actor_id | uuid | YES | | Actor UUID |
-| content | text | YES | | Message text |
-| media | jsonb | YES | | Media attachments |
-| changed_graph | boolean | YES | | Graph was updated |
-| external_message_id | varchar | YES | | External message ID |
-| trace_id | varchar | YES | | Trace ID |
-| timestamp | timestamptz | YES | | Message timestamp |
-
-### elo_t_channel_accounts
-Channel account credentials and sessions.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| channel_id | int | NO | elo_channels | Channel reference |
-| account_id | varchar | NO | | Account identifier |
-| account_name | varchar | YES | | Display name |
-| webhook_hash | varchar | YES | | Webhook hash |
-| webhook_url | text | YES | | Webhook URL |
-| credentials | jsonb | YES | | Credentials (tokens) |
-| is_active | boolean | YES | | Active status |
-| ip_node_id | int | YES | elo_ip_nodes | IP node reference |
-| session_id | varchar | YES | | Session identifier |
-| session_status | varchar | YES | | 'pending', 'active', 'connected' |
-| is_official | boolean | YES | | Official API flag |
-| session_archive | text | YES | | Session archive |
-
-### Current Channel Accounts (6 rows)
-
-| channel_id | account_id | session_id | session_status | ip_node_id |
-|------------|------------|------------|----------------|------------|
-| 1 | TEST_BOT_TOKEN_12345 | - | pending | - |
-| 1 | remacsbot | 6939426823:AAE... | connected | - |
-| 2 | eldoleado_main | eldoleado_arceos | connected | 1 |
-| 2 | remaks_main | wa_22222222-... | connected | 1 |
-| 3 | default | default | not_configured | - |
-| 3 | 3++Dj9NEdAz81lOGAX4Kmg | - | not_configured | - |
-
-### elo_t_operators
-Operator table.
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| name | varchar | NO | | Operator name |
-| email | varchar | YES | | Email |
-| phone | varchar | YES | | Phone |
-| telegram_id | varchar | YES | | Telegram user ID |
-| password_hash | varchar | YES | | Password hash |
-| avatar_url | text | YES | | Avatar URL |
-| role | varchar | YES | | Role (default 'operator') |
-| fcm_tokens | jsonb | YES | | FCM tokens array |
-| settings | jsonb | YES | | Operator settings |
-| is_active | boolean | YES | | Active status |
-| last_seen_at | timestamptz | YES | | Last seen |
-
-### elo_t_operator_devices
-Operator mobile devices (Android app).
-
-| Column | Type | Nullable | FK | Description |
-|--------|------|----------|-----|-------------|
-| id | uuid | NO | | Primary key |
-| operator_id | uuid | NO | elo_t_operators | Operator reference |
-| tenant_id | uuid | NO | elo_t_tenants | Tenant reference |
-| device_id | varchar | YES | | Device identifier |
-| device_type | varchar | NO | | 'mobile' (default) |
-| device_name | varchar | YES | | Device name |
-| device_info | jsonb | YES | | Device info |
-| session_token | varchar | YES | | Session token |
-| fcm_token | text | YES | | Firebase token |
-| app_mode | varchar | NO | | 'client' (default) |
-| tunnel_url | text | YES | | Tunnel URL |
-| tunnel_secret | varchar | YES | | Tunnel secret |
-| is_active | boolean | YES | | Active status |
-| last_active_at | timestamptz | YES | | Last active |
+| name | slug | domain_id |
+|------|------|-----------|
+| Default Tenant | - | 1 |
+| Test Repair Shop | test-repair | 1 |
 
 ---
 
-## Views
+## Table Categories
 
-### elo_v_ip_usage
-Shows IP node usage by channel type.
+### Reference Tables (elo_*) — 40 tables
 
-```sql
-SELECT
-    n.id AS node_id,
-    n.server_name,
-    n.ip_address,
-    count(CASE WHEN c.code = 'whatsapp' THEN 1 END) AS whatsapp_count,
-    count(CASE WHEN c.code = 'telegram' AND NOT ca.is_official THEN 1 END) AS telegram_user_count,
-    count(CASE WHEN c.code = 'vk' AND NOT ca.is_official THEN 1 END) AS vk_user_count,
-    count(CASE WHEN c.code = 'max' THEN 1 END) AS max_count,
-    count(CASE WHEN c.code = 'avito' THEN 1 END) AS avito_count,
-    count(ca.id) AS total_sessions,
-    count(DISTINCT ca.tenant_id) AS tenant_count
-FROM elo_ip_nodes n
-LEFT JOIN elo_t_channel_accounts ca ON ca.ip_node_id = n.id AND ca.is_active
-LEFT JOIN elo_channels c ON ca.channel_id = c.id
-GROUP BY n.id, n.server_name, n.ip_address, n.status, n.max_sessions_per_type;
+| Group | Tables |
+|-------|--------|
+| RBAC | elo_permission_scopes, elo_resources, elo_actions, elo_roles, elo_permissions, elo_user_roles, elo_admin_users, elo_permission_audit |
+| Funnel | elo_behavior_types, elo_condition_operators, elo_executor_types, elo_event_handlers, elo_stage_conditions, elo_stage_actions, elo_funnel_stages, elo_funnel_stage_workers, elo_stage_fields, elo_stage_cta_actions |
+| AI | elo_action_types, elo_context_types, elo_intent_types, elo_prompts, elo_meta_prompts, elo_worker_configs |
+| Reference | elo_channels, elo_domains, elo_verticals, elo_ip_nodes |
+| Graph | elo_symptom_types, elo_diagnosis_types, elo_repair_actions, elo_problem_categories, elo_symptom_diagnosis_links, elo_diagnosis_repair_links |
+| Other | elo_triggers, elo_trigger_types, elo_normalization_rules, elo_custom_fields, elo_cypher_queries, elo_auto_generation_log, elo_dialog_field_tracking |
+
+### Transactional Tables (elo_t_*) — 19 tables
+
+| Table | Description |
+|-------|-------------|
+| elo_t_tenants | Business accounts |
+| elo_t_clients | Client contacts |
+| elo_t_client_channels | Client-channel links |
+| elo_t_dialogs | Conversations |
+| elo_t_messages | Messages |
+| elo_t_operators | Operators |
+| elo_t_operator_devices | Operator devices |
+| elo_t_operator_channels | Operator-channel links |
+| elo_t_channel_accounts | Channel credentials |
+| elo_t_ai_extractions | AI extractions |
+| elo_t_tasks | Tasks |
+| elo_t_price_list | Price list |
+| elo_t_events | Event log |
+| elo_t_tenant_domains | Tenant domains |
+| elo_t_tenant_verticals | Tenant verticals |
+| elo_t_context_type_overrides | Context type overrides |
+| elo_t_custom_field_overrides | Custom field overrides |
+| elo_t_funnel_custom_stages | Custom funnel stages |
+| elo_t_funnel_stage_overrides | Stage overrides |
+
+### Domain Tables (elo_d_*) — 2 tables
+
+| Table | Description |
+|-------|-------------|
+| elo_d_context_types | Domain-level context types |
+| elo_d_intent_types | Domain-level intent types |
+
+### Views — 13 objects (5 actual views)
+
+| Name | Type | Description |
+|------|------|-------------|
+| elo_v_effective_permissions | VIEW | **NEW** Effective permissions |
+| elo_v_ip_usage | VIEW | IP node usage |
+| elo_v_stage_actions_new | VIEW | Stage actions |
+| elo_v_stage_config_new | VIEW | Stage config |
+| elo_v_stage_transitions | VIEW | Stage transitions |
+| elo_v_ai_settings | TABLE | AI settings |
+| elo_v_context_types | TABLE | Merged context types |
+| elo_v_funnel_stages | TABLE | Merged funnel stages |
+| elo_v_intent_types | TABLE | Merged intent types |
+| elo_v_prompts | TABLE | Active prompts |
+| elo_v_symptom_mappings | TABLE | Symptom mappings |
+| elo_v_triggers | TABLE | Active triggers |
+| elo_verticals | TABLE | Verticals |
+
+---
+
+## Key Relationships
+
+```
+elo_permission_scopes
+    │
+    └──< elo_roles (scope_id)
+            │
+            ├──< elo_permissions (role_id)
+            │       └──> elo_resources (resource_id)
+            │
+            └──< elo_user_roles (role_id)
+                    ├──> elo_t_operators (operator_id)
+                    └──> elo_admin_users (admin_email)
+
+elo_behavior_types
+    │
+    └──< elo_funnel_stages (behavior_type_id)
+            │
+            ├──< elo_stage_conditions (stage_id)
+            │       └──> elo_condition_operators (operator_id)
+            │
+            └──< elo_stage_actions (stage_id)
+                    └──> elo_executor_types (executor_type_id)
+
+elo_domains
+    │
+    ├──< elo_verticals (domain_id)
+    │
+    └──< elo_t_tenants (domain_id)
+            │
+            ├──< elo_t_clients → elo_t_client_channels
+            ├──< elo_t_operators → elo_t_operator_devices
+            ├──< elo_t_dialogs → elo_t_messages
+            └──< elo_t_channel_accounts
 ```
 
-### elo_v_funnel_stages
-Funnel stages for dialog progression.
+---
 
-### elo_v_prompts
-AI prompts storage.
+## Migrations Applied
 
-### elo_v_triggers
-Dialog triggers.
-
-### elo_v_symptom_mappings
-Symptom to diagnosis mappings.
-
-### elo_v_ai_settings
-AI settings per tenant.
+| # | File | Date | Description |
+|---|------|------|-------------|
+| 002 | 002_configurable_funnel_system_v2.sql | 2026-01-04 | Funnel system |
+| 003 | 003_rbac_system.sql | 2026-01-04 | RBAC system |
 
 ---
 
@@ -266,83 +302,8 @@ AI settings per tenant.
 
 | Function | Description |
 |----------|-------------|
-| elo_find_ip_for_channel | Find best IP node for channel |
-| elo_update_tenant_preferred_ip | Update tenant preferred IP |
-| elo_update_timestamp | Auto-update timestamps |
+| elo_check_permission() | Check if user has permission |
 
 ---
 
-## Type Directories
-
-### elo_symptom_types
-Device symptoms (problems reported by client).
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| uuid | uuid | UUID for Neo4j |
-| code | varchar | Unique code |
-| name | varchar | Name (EN) |
-| name_ru | varchar | Name (RU) |
-| category | varchar | Category |
-
-### elo_diagnosis_types
-Technical diagnoses.
-
-### elo_repair_actions
-Repair actions (what we do to fix).
-
-### elo_symptom_diagnosis_links
-Links symptoms to possible diagnoses.
-
-### elo_diagnosis_repair_links
-Links diagnoses to repair actions.
-
----
-
-## Key Relationships
-
-```
-elo_t_tenants
-    |
-    +--< elo_t_clients (tenant_id)
-    |       |
-    |       +--< elo_t_client_channels (client_id)
-    |               |
-    |               +---> elo_channels (channel_id)
-    |
-    +--< elo_t_operators (tenant_id)
-    |       |
-    |       +--< elo_t_operator_devices (operator_id)
-    |       |
-    |       +--< elo_t_operator_channels (operator_id)
-    |
-    +--< elo_t_dialogs (tenant_id, client_id)
-    |       |
-    |       +--< elo_t_messages (dialog_id)
-    |       |
-    |       +--< elo_t_ai_extractions (dialog_id)
-    |
-    +--< elo_t_channel_accounts (tenant_id)
-            |
-            +---> elo_ip_nodes (ip_node_id)
-            |
-            +---> elo_channels (channel_id)
-```
-
----
-
-## Knowledge Graph Links
-
-| PostgreSQL Table | Neo4j Label |
-|-----------------|-------------|
-| elo_t_clients | Client |
-| elo_symptom_types | Symptom |
-| elo_diagnosis_types | Diagnosis |
-| elo_repair_actions | Repair |
-| - | Device (brand/model) |
-| - | Problem (instance) |
-
----
-
-*Generated by Claude Code - 2025-12-31*
+*Generated by Claude Code — 2026-01-04*
