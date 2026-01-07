@@ -1,0 +1,591 @@
+{
+  "date": "2026-01-06",
+  "description": "Normalized models from elo_prices, processed by Opus 4.5 CLI",
+  "stats": {
+    "total_brands": 33,
+    "processed_brands": 33
+  },
+  "brands": {
+    "Alcatel": {
+      "raw_count": 314,
+      "models": [
+        "1 5033D", "1B 5031G", "1C 5003D", "1C 5009D", "1S 5024D", "1S 5028Y", "1S 6025H",
+        "1SE 5030D", "1V 5007U", "1X 5008Y", "1X 5059D", "3 5052D", "3C 5026D", "3L 5029Y",
+        "3L 5034D", "3L 5039D", "3V 5099D", "3X 5048Y", "3X 5058i", "5 5086D", "5V 5060D",
+        "A3 5046D", "A3 XL 9008D", "A5 5085Q", "A5 Led 5085D", "A7 5090Y",
+        "Conquest 7046T", "Fire E 6015X", "Go Play 7048X", "Hero 8020D", "Hero 2 8030Y",
+        "Idol 6030D", "Idol 2 6037Y", "Idol 2 Mini 6016D", "Idol 2 Mini L 6014X",
+        "Idol 2 Mini S 6036Y", "Idol 2S 6050Y", "Idol 3 6039Y", "Idol 3 6045Y",
+        "Idol 4 6055K", "Idol 4S 6070K", "Idol 5 6058D", "Idol Alpha 6032X",
+        "Idol Mini 6012D", "Idol S 6035R", "Idol Ultra 6033", "Idol X 6040D", "Idol X+ 6043D",
+        "M'POP 5020D", "OneTouch POP 7", "OneTouch POP 8", "P310X Pop 7", "P320X Pop 8",
+        "Pixi 4007D", "Pixi 2 4014D", "Pixi 3 4009D", "Pixi 3 4013D", "Pixi 3 4027D",
+        "Pixi 3 5017D", "Pixi 3 9002X", "Pixi 4 4034D", "Pixi 4 5010D", "Pixi 4 5045D",
+        "Pixi 4 8050D", "Pixi 4 9001D", "Pixi 4 Plus Power 5023F",
+        "Pop 2 5042D", "Pop 2 7043K", "Pop 2 Premium 7044X", "Pop 3 5015D", "Pop 3 5025D",
+        "Pop 3 5054D", "Pop 3 5065D", "Pop 4 5051D", "Pop 4 7070X", "Pop 4 Plus 5056D",
+        "Pop 4S 5095K", "Pop C1 4015D", "Pop C2 4032", "Pop C3 4033D", "Pop C5 5036D",
+        "Pop C7 7041D", "Pop C9 7047D", "Pop D1 4018D", "Pop D3 4035D", "Pop D5 5038D",
+        "Pop S3 5050X", "Pop S7 7045Y", "Pop S9 7050Y", "Pop Star 5022D", "Pop Star 4G 5070D",
+        "Pop Up 6044D", "S'Pop 4030D", "Scribe Easy 8000D", "Scribe HD 8008D",
+        "Shine Lite 5080X", "Snap 7025D", "TPop 4010D", "U5 4044D", "U5 3G 4047D", "U5 HD 5047D"
+      ]
+    },
+    "Apple": {
+      "raw_count": 358,
+      "models": [
+        "iPad 1", "iPad 2", "iPad 3", "iPad 4", "iPad 5", "iPad 7", "iPad 9", "iPad 10.9",
+        "iPad 2017", "iPad 2018", "iPad Air", "iPad Air 2", "iPad Air 3", "iPad Air 4", "iPad Air 5",
+        "iPad Mini", "iPad Mini 2", "iPad Mini 3", "iPad Mini 4", "iPad Mini 5", "iPad Mini 6",
+        "iPad Pro 9.7", "iPad Pro 10.5", "iPad Pro 11", "iPad Pro 12.9",
+        "iPhone 4", "iPhone 5", "iPhone 5C", "iPhone 6", "iPhone 6 Plus", "iPhone 6S", "iPhone 6S Plus",
+        "iPhone 7", "iPhone 7 Plus", "iPhone 8", "iPhone 8 Plus",
+        "iPhone SE", "iPhone SE 2020", "iPhone SE 2022",
+        "iPhone X", "iPhone XR", "iPhone XS", "iPhone XS Max",
+        "iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max",
+        "iPhone 12", "iPhone 12 Mini", "iPhone 12 Pro", "iPhone 12 Pro Max",
+        "iPhone 13", "iPhone 13 Mini", "iPhone 13 Pro", "iPhone 13 Pro Max",
+        "iPhone 14", "iPhone 14 Plus", "iPhone 14 Pro", "iPhone 14 Pro Max",
+        "iPhone 15", "iPhone 15 Plus", "iPhone 15 Pro", "iPhone 15 Pro Max",
+        "iPhone 16", "iPhone 16e", "iPhone 16 Plus", "iPhone 16 Pro", "iPhone 16 Pro Max",
+        "Watch Series 2", "Watch Series 3", "Watch Series 4", "Watch Series 5", "Watch Series 6",
+        "Watch SE", "Watch Ultra", "AirPods", "AirPods 2", "AirPods 3", "AirPods Pro"
+      ]
+    },
+    "Samsung": {
+      "raw_count": 1745,
+      "models": [
+        "Galaxy A01", "Galaxy A01 Core", "Galaxy A02", "Galaxy A02s", "Galaxy A03", "Galaxy A03 Core", "Galaxy A03s",
+        "Galaxy A04", "Galaxy A04e", "Galaxy A04s", "Galaxy A05", "Galaxy A05s", "Galaxy A06",
+        "Galaxy A10", "Galaxy A10e", "Galaxy A10s", "Galaxy A11", "Galaxy A12", "Galaxy A12 Nacho", "Galaxy A13",
+        "Galaxy A14 4G", "Galaxy A14 5G", "Galaxy A15", "Galaxy A16 5G", "Galaxy A17",
+        "Galaxy A20", "Galaxy A20e", "Galaxy A20s", "Galaxy A21", "Galaxy A21s", "Galaxy A22", "Galaxy A22s 5G",
+        "Galaxy A23", "Galaxy A24", "Galaxy A25 5G", "Galaxy A26 5G",
+        "Galaxy A30", "Galaxy A30s", "Galaxy A31", "Galaxy A32", "Galaxy A33 5G", "Galaxy A34 5G", "Galaxy A35 5G", "Galaxy A36 5G",
+        "Galaxy A3 2015", "Galaxy A3 2016", "Galaxy A3 2017",
+        "Galaxy A40", "Galaxy A40s", "Galaxy A41", "Galaxy A42",
+        "Galaxy A50", "Galaxy A50s", "Galaxy A51", "Galaxy A52", "Galaxy A52s", "Galaxy A53 5G", "Galaxy A54 5G", "Galaxy A55 5G", "Galaxy A56 5G",
+        "Galaxy A5 2015", "Galaxy A5 2016", "Galaxy A5 2017",
+        "Galaxy A60", "Galaxy A6 2018", "Galaxy A6 Plus",
+        "Galaxy A70", "Galaxy A70s", "Galaxy A71", "Galaxy A72", "Galaxy A73 5G",
+        "Galaxy A7 2016", "Galaxy A7 2017", "Galaxy A7 2018",
+        "Galaxy A80", "Galaxy A8 2015", "Galaxy A8 2018", "Galaxy A8 Plus", "Galaxy A8s",
+        "Galaxy A9 2018", "Galaxy A90",
+        "Galaxy E5", "Galaxy E7",
+        "Galaxy J1", "Galaxy J1 2016", "Galaxy J1 Mini", "Galaxy J2", "Galaxy J2 Prime",
+        "Galaxy J3", "Galaxy J3 2016", "Galaxy J4", "Galaxy J4 Plus",
+        "Galaxy J5", "Galaxy J5 2016", "Galaxy J5 2017", "Galaxy J5 Prime",
+        "Galaxy J6", "Galaxy J6 Plus", "Galaxy J7", "Galaxy J7 2016", "Galaxy J7 2017", "Galaxy J7 2018", "Galaxy J7 Prime",
+        "Galaxy J8",
+        "Galaxy M01", "Galaxy M10", "Galaxy M10s", "Galaxy M11", "Galaxy M12", "Galaxy M13", "Galaxy M14", "Galaxy M15",
+        "Galaxy M20", "Galaxy M21", "Galaxy M22", "Galaxy M23",
+        "Galaxy M30", "Galaxy M30s", "Galaxy M31", "Galaxy M31s", "Galaxy M32", "Galaxy M33",
+        "Galaxy M51", "Galaxy M52", "Galaxy M53", "Galaxy M54", "Galaxy M55",
+        "Galaxy Note 2", "Galaxy Note 3", "Galaxy Note 4", "Galaxy Note 5",
+        "Galaxy Note 7", "Galaxy Note 8", "Galaxy Note 9",
+        "Galaxy Note 10", "Galaxy Note 10 Lite", "Galaxy Note 10 Plus",
+        "Galaxy Note 20", "Galaxy Note 20 Ultra",
+        "Galaxy S2", "Galaxy S3", "Galaxy S3 Mini", "Galaxy S4", "Galaxy S4 Mini", "Galaxy S5", "Galaxy S5 Mini",
+        "Galaxy S6", "Galaxy S6 Edge", "Galaxy S6 Edge Plus", "Galaxy S7", "Galaxy S7 Edge",
+        "Galaxy S8", "Galaxy S8 Plus", "Galaxy S9", "Galaxy S9 Plus",
+        "Galaxy S10", "Galaxy S10e", "Galaxy S10 Lite", "Galaxy S10 Plus",
+        "Galaxy S20", "Galaxy S20 FE", "Galaxy S20 Plus", "Galaxy S20 Ultra",
+        "Galaxy S21", "Galaxy S21 FE", "Galaxy S21 Plus", "Galaxy S21 Ultra",
+        "Galaxy S22", "Galaxy S22 Plus", "Galaxy S22 Ultra",
+        "Galaxy S23", "Galaxy S23 FE", "Galaxy S23 Plus", "Galaxy S23 Ultra",
+        "Galaxy S24", "Galaxy S24 FE", "Galaxy S24 Plus", "Galaxy S24 Ultra",
+        "Galaxy S25", "Galaxy S25 Plus", "Galaxy S25 Ultra",
+        "Galaxy Z Flip", "Galaxy Z Flip 3", "Galaxy Z Flip 4", "Galaxy Z Flip 5", "Galaxy Z Flip 6",
+        "Galaxy Z Fold", "Galaxy Z Fold 2", "Galaxy Z Fold 3", "Galaxy Z Fold 4", "Galaxy Z Fold 5", "Galaxy Z Fold 6",
+        "Galaxy Tab 2 7.0", "Galaxy Tab 2 10.1", "Galaxy Tab 3 7.0", "Galaxy Tab 3 8.0", "Galaxy Tab 3 10.1",
+        "Galaxy Tab 4 7.0", "Galaxy Tab 4 8.0", "Galaxy Tab 4 10.1",
+        "Galaxy Tab A 7.0", "Galaxy Tab A 8.0", "Galaxy Tab A 9.7", "Galaxy Tab A 10.1", "Galaxy Tab A 10.5",
+        "Galaxy Tab A7 Lite", "Galaxy Tab A7 10.4", "Galaxy Tab A8 10.5", "Galaxy Tab A9", "Galaxy Tab A9 Plus",
+        "Galaxy Tab E 9.6", "Galaxy Tab S 8.4", "Galaxy Tab S 10.5",
+        "Galaxy Tab S2 8.0", "Galaxy Tab S2 9.7", "Galaxy Tab S3 9.7", "Galaxy Tab S4 10.5",
+        "Galaxy Tab S5e", "Galaxy Tab S6", "Galaxy Tab S6 Lite", "Galaxy Tab S7", "Galaxy Tab S7 FE", "Galaxy Tab S7 Plus",
+        "Galaxy Tab S8", "Galaxy Tab S9", "Galaxy Tab S9 FE", "Galaxy Tab S9 Plus"
+      ]
+    },
+    "Xiaomi": {
+      "raw_count": 516,
+      "models": [
+        "Mi 1", "Mi 2", "Mi 2A", "Mi 3", "Mi 4", "Mi 4C", "Mi 4i", "Mi 4S",
+        "Mi 5", "Mi 5C", "Mi 5S", "Mi 5X", "Mi 6", "Mi 6X",
+        "Mi 8", "Mi 8 Lite", "Mi 9", "Mi 9 Lite", "Mi 9T",
+        "Mi 10", "Mi 10 Lite", "Mi 10T", "Mi 10T Lite",
+        "Mi 11", "Mi 11i", "Mi 11 Lite", "Mi 11T",
+        "Mi 12", "Mi 12 Lite", "Mi 12S", "Mi 12T",
+        "Mi 13", "Mi 13 Lite", "Mi 13T", "Mi 14", "Mi 14T", "Mi 15",
+        "Mi A2 Lite", "Mi A3",
+        "Mi CC9", "Mi CC9 Pro",
+        "Mi Max", "Mi Max 2", "Mi Max 3",
+        "Mi Mix", "Mi Mix 2", "Mi Mix 2S", "Mi Mix 3",
+        "Mi Note", "Mi Note 2", "Mi Note 3", "Mi Note 10", "Mi Note 10 Lite", "Mi Note 10 Pro", "Mi Note Pro",
+        "Mi Pad", "Mi Pad 2", "Mi Pad 3", "Mi Pad 4", "Mi Pad 4 Plus", "Mi Pad 5",
+        "Mi Play",
+        "Pad 5", "Pad 5 Pro", "Pad 6", "Pad 6 Pro", "Pad 6 Max 14", "Pad 6S Pro 12.4", "Pad 7", "Pad 7 Pro",
+        "Poco C40", "Poco C51", "Poco C61", "Poco C65", "Poco C71", "Poco C75",
+        "Poco F2 Pro", "Poco F3", "Poco F4", "Poco F5", "Poco F5 Pro", "Poco F6", "Poco F6 Pro", "Poco F7", "Poco F7 Pro",
+        "Poco M3", "Poco M3 Pro", "Poco M4", "Poco M4 Pro", "Poco M5", "Poco M6", "Poco M6 Pro", "Poco M7 Pro",
+        "Poco X3", "Poco X3 Pro", "Poco X4", "Poco X4 Pro", "Poco X5", "Poco X5 Pro", "Poco X6", "Poco X6 Pro", "Poco X7", "Poco X7 Pro",
+        "Pocophone F1",
+        "Redmi 1S", "Redmi 2", "Redmi 3", "Redmi 3S", "Redmi 3X",
+        "Redmi 4", "Redmi 4A", "Redmi 4 Pro", "Redmi 4X",
+        "Redmi 5", "Redmi 5A", "Redmi 5 Plus",
+        "Redmi 6", "Redmi 6A", "Redmi 6 Pro",
+        "Redmi 7", "Redmi 7A", "Redmi 8", "Redmi 8A",
+        "Redmi 9", "Redmi 9A", "Redmi 9C", "Redmi 9i", "Redmi 9T",
+        "Redmi 10", "Redmi 10A", "Redmi 10C", "Redmi 10X",
+        "Redmi 11T", "Redmi 12", "Redmi 12C", "Redmi 13", "Redmi 13C", "Redmi 14C", "Redmi 15C",
+        "Redmi A1", "Redmi A1 Plus", "Redmi A2", "Redmi A3", "Redmi A3x",
+        "Redmi Go",
+        "Redmi K20", "Redmi K20 Pro", "Redmi K30", "Redmi K30i", "Redmi K30s", "Redmi K30 Ultra",
+        "Redmi K40", "Redmi K40 Gaming Edition", "Redmi K50", "Redmi K50 Pro",
+        "Redmi Note", "Redmi Note 2", "Redmi Note 3", "Redmi Note 3 Pro",
+        "Redmi Note 4", "Redmi Note 4 Pro", "Redmi Note 4X",
+        "Redmi Note 5", "Redmi Note 5A", "Redmi Note 5 Pro",
+        "Redmi Note 6 Pro", "Redmi Note 7", "Redmi Note 7 Pro",
+        "Redmi Note 8", "Redmi Note 8 Pro", "Redmi Note 8T",
+        "Redmi Note 9", "Redmi Note 9 Pro", "Redmi Note 9S", "Redmi Note 9T",
+        "Redmi Note 10", "Redmi Note 10 Pro", "Redmi Note 10S", "Redmi Note 10T",
+        "Redmi Note 11", "Redmi Note 11E", "Redmi Note 11E Pro", "Redmi Note 11 Pro", "Redmi Note 11S", "Redmi Note 11T", "Redmi Note 11T Pro",
+        "Redmi Note 12", "Redmi Note 12 Pro", "Redmi Note 12S",
+        "Redmi Note 13", "Redmi Note 13 Pro",
+        "Redmi Note 14", "Redmi Note 14 Pro", "Redmi Note 14S",
+        "Redmi Pad", "Redmi Pad 2", "Redmi Pad Pro", "Redmi Pad SE",
+        "Redmi Pro", "Redmi S2"
+      ]
+    },
+    "Huawei": {
+      "raw_count": 1665,
+      "models": [
+        "Ascend D2", "Ascend G300", "Ascend G500 Pro", "Ascend G510", "Ascend G525", "Ascend G526",
+        "Ascend G6", "Ascend G600", "Ascend G610", "Ascend G615", "Ascend G620", "Ascend G620S", "Ascend G630", "Ascend G660",
+        "Ascend G7", "Ascend G700", "Ascend G730", "Ascend G8",
+        "Ascend Mate 7", "Ascend Mate 8", "Ascend Mate 9", "Ascend Mate S",
+        "Ascend P1", "Ascend P2", "Ascend P6", "Ascend P7", "Ascend W1",
+        "Ascend Y200", "Ascend Y210", "Ascend Y221", "Ascend Y320", "Ascend Y330", "Ascend Y360",
+        "Ascend Y511", "Ascend Y520", "Ascend Y530", "Ascend Y560", "Ascend Y5C", "Ascend Y6", "Ascend Y600", "Ascend Y610", "Ascend Y625",
+        "Enjoy 5", "Enjoy 7",
+        "G6", "G600", "G606", "G750", "G8", "GR3", "GR5",
+        "Honor 3", "Honor 3C", "Honor 3C Lite", "Honor 3X",
+        "Honor 4A", "Honor 4C", "Honor 4C Pro", "Honor 4X",
+        "Honor 5A", "Honor 5C", "Honor 5X", "Honor 6", "Honor 6A", "Honor 6C", "Honor 6C Pro", "Honor 6 Plus", "Honor 6X",
+        "Honor 7", "Honor 7A", "Honor 7A Pro", "Honor 7C", "Honor 7C Pro", "Honor 7i S", "Honor 7S", "Honor 7X",
+        "Honor 8", "Honor 8A", "Honor 8A Pro", "Honor 8C", "Honor 8 Lite", "Honor 8 Pro", "Honor 8S", "Honor 8X", "Honor 8X Max",
+        "Honor 9", "Honor 9A", "Honor 9C", "Honor 9 Lite", "Honor 9S", "Honor 9X", "Honor 9X Pro",
+        "Honor 10", "Honor 10i", "Honor 10 Lite", "Honor 10X Lite",
+        "Honor 20", "Honor 20e", "Honor 20i", "Honor 20 Lite", "Honor 20 Pro", "Honor 20S", "Honor 20 Youth Edition",
+        "Honor 30", "Honor 30i", "Honor 30 Lite", "Honor 30 Pro", "Honor 30 Pro Plus", "Honor 30S",
+        "Honor 50", "Honor 50 Lite", "Honor 50 Pro", "Honor 50 SE",
+        "Honor 60", "Honor 60 SE", "Honor 70", "Honor 70 Pro", "Honor 80", "Honor 80 Pro", "Honor 80 SE",
+        "Honor 100", "Honor 100 Pro", "Honor 200", "Honor 200 Pro", "Honor 400", "Honor 400 Lite",
+        "Honor Magic", "Honor Magic 2", "Honor Magic 3", "Honor Magic 4", "Honor Magic 5", "Honor Magic 6",
+        "Honor Play", "Honor Play 3", "Honor Play 4", "Honor Play 4T Pro",
+        "Honor View 10", "Honor View 20", "Honor View 30",
+        "Honor X6", "Honor X7", "Honor X8", "Honor X9", "Honor X10", "Honor X20",
+        "Mate 7", "Mate 8", "Mate 9", "Mate 9 Lite", "Mate 9 Pro",
+        "Mate 10", "Mate 10 Lite", "Mate 10 Pro",
+        "Mate 20", "Mate 20 Lite", "Mate 20 Pro", "Mate 20 X",
+        "Mate 30", "Mate 30 Lite", "Mate 30 Pro",
+        "Mate 40", "Mate 40 Pro", "Mate 40 Pro Plus",
+        "Mate 50", "Mate 50 Pro", "Mate 60", "Mate 60 Pro",
+        "MediaPad M3", "MediaPad M5", "MediaPad M6", "MediaPad T3", "MediaPad T5",
+        "MatePad 10.4", "MatePad 10.8", "MatePad 11", "MatePad Pro",
+        "Nova", "Nova 2", "Nova 2 Plus", "Nova 2S",
+        "Nova 3", "Nova 3e", "Nova 3i",
+        "Nova 4", "Nova 4e", "Nova 5", "Nova 5i", "Nova 5i Pro", "Nova 5 Pro", "Nova 5T",
+        "Nova 6", "Nova 6 SE", "Nova 7", "Nova 7i", "Nova 7 Pro", "Nova 7 SE",
+        "Nova 8", "Nova 8i", "Nova 8 Pro", "Nova 8 SE",
+        "Nova 9", "Nova 9 Pro", "Nova 9 SE", "Nova 10", "Nova 10 Pro", "Nova 10 SE",
+        "Nova 11", "Nova 11 Pro", "Nova 12", "Nova 12 Pro",
+        "Nova Y60", "Nova Y61", "Nova Y70", "Nova Y71", "Nova Y90", "Nova Y91",
+        "P6", "P7", "P8", "P8 Lite", "P8 Max",
+        "P9", "P9 Lite", "P9 Plus",
+        "P10", "P10 Lite", "P10 Plus",
+        "P20", "P20 Lite", "P20 Pro",
+        "P30", "P30 Lite", "P30 Pro",
+        "P40", "P40 Lite", "P40 Lite 5G", "P40 Pro", "P40 Pro Plus",
+        "P50", "P50 Pro", "P60", "P60 Pro",
+        "P Smart", "P Smart 2019", "P Smart 2020", "P Smart 2021", "P Smart Plus", "P Smart Pro", "P Smart S", "P Smart Z",
+        "Y3", "Y3 II", "Y5", "Y5 II", "Y5 Lite", "Y5 Prime",
+        "Y6", "Y6 II", "Y6 Prime", "Y6 Pro", "Y6s",
+        "Y7", "Y7 Prime", "Y7 Pro",
+        "Y8p", "Y8s", "Y9", "Y9 Prime", "Y9a", "Y9s"
+      ]
+    },
+    "Realme": {
+      "raw_count": 343,
+      "models": [
+        "2", "2 Pro", "3", "3 Pro", "3i",
+        "5", "5 Pro", "5i", "5s", "6", "6 Pro", "6i", "6s",
+        "7", "7 Pro", "7i", "8", "8 Pro", "8i", "8 5G",
+        "9", "9 Pro", "9 Pro Plus", "9i", "9 5G",
+        "10", "10 Pro", "10 Pro Plus", "10 4G", "10 5G",
+        "11", "11 Pro", "11 Pro Plus", "11 4G", "11 5G",
+        "12", "12 Pro", "12 Pro Plus", "12 4G", "12 5G", "12x",
+        "13", "13 Pro", "13 Pro Plus", "13 Plus 5G", "13 5G",
+        "14", "14 Pro", "14 Pro Plus", "14 5G", "14X",
+        "C2", "C3", "C11", "C12", "C15", "C20", "C21", "C21Y", "C25", "C25s", "C25Y",
+        "C30", "C30s", "C31", "C33", "C35",
+        "C51", "C53", "C55", "C61", "C63", "C65 4G", "C65 5G", "C67 4G", "C67 5G", "C71", "C75",
+        "GT", "GT 2", "GT 2 Pro", "GT 3", "GT 5G", "GT Master Edition",
+        "GT Neo", "GT Neo 2", "GT Neo 3", "GT Neo 5", "GT Neo 6",
+        "Narzo 10", "Narzo 10A", "Narzo 20", "Narzo 20 Pro", "Narzo 30", "Narzo 30 5G", "Narzo 30A",
+        "Narzo 50", "Narzo 50 4G", "Narzo 50A", "Narzo 50i", "Narzo 60 Pro",
+        "Note 50", "Note 60", "Note 60x",
+        "Pad", "Pad 2", "Pad Mini",
+        "X", "X2", "X2 Pro", "X3 SuperZoom", "XT"
+      ]
+    },
+    "OPPO": {
+      "raw_count": 140,
+      "models": [
+        "A1k", "A3", "A3s", "A5", "A5s", "A7", "A9", "A11x", "A12", "A15", "A15s", "A16", "A16k", "A17", "A17k", "A18",
+        "A31", "A32", "A33", "A38", "A52", "A53", "A54", "A55", "A57s", "A58", "A72", "A74", "A78", "A83", "A91", "A92s", "A96", "A98",
+        "AX7",
+        "F5", "F5 Youth", "F7", "F9", "F11", "F11 Pro",
+        "Find 5", "Find 7",
+        "K3",
+        "Mirror R819", "Muse R821",
+        "R9", "R9 Plus", "R17", "R17 Pro",
+        "Reno", "Reno 2", "Reno 2F", "Reno 2Z", "Reno 3", "Reno 4 Lite", "Reno 4 SE",
+        "Reno 5", "Reno 5 Lite", "Reno 6 4G", "Reno 7 4G", "Reno 8T",
+        "Reno 10", "Reno 11F", "Reno 12F", "Reno 13", "Reno 13F",
+        "Reno Z"
+      ]
+    },
+    "Vivo": {
+      "raw_count": 141,
+      "models": [
+        "V7", "V7 Plus", "V11", "V11i", "V15", "V15 Pro", "V17", "V17 Neo",
+        "V20", "V20 SE", "V23 5G", "V25 5G", "V25 Pro", "V27 5G", "V27e", "V29", "V29e", "V30e", "V30 Lite", "V40", "V40 Lite",
+        "X50", "X80 Pro",
+        "Y02", "Y03", "Y11", "Y12", "Y15", "Y15s", "Y16", "Y17", "Y17s", "Y19", "Y19s",
+        "Y20", "Y20i", "Y20s", "Y21", "Y21s", "Y22", "Y27 4G", "Y27s", "Y28 4G",
+        "Y30", "Y31", "Y33s", "Y35", "Y36",
+        "Y50", "Y53s", "Y71", "Y75", "Y81", "Y83", "Y85",
+        "Y91", "Y91c", "Y91i", "Y93", "Y93 Lite", "Y95", "Y97",
+        "Z1 Pro"
+      ]
+    },
+    "OnePlus": {
+      "raw_count": 112,
+      "models": [
+        "One", "2", "3", "3T", "5", "5T", "6", "6T", "7", "7 Pro", "7T", "7T Pro",
+        "8", "8 Pro", "8T", "9", "9 Pro", "9R", "9RT",
+        "10 Pro", "10R", "10T", "11", "11R", "12", "12R", "13", "13R",
+        "Ace", "Ace 2", "Ace 2 Pro", "Ace 2V", "Ace 3", "Ace 3 Pro", "Ace 3V", "Ace Pro",
+        "Nord", "Nord 2", "Nord 2T", "Nord 3", "Nord 4",
+        "Nord CE", "Nord CE 2", "Nord CE 2 Lite", "Nord CE 3", "Nord CE 3 Lite", "Nord CE 4", "Nord CE 4 Lite",
+        "Nord N10", "Nord N100", "Nord N20 SE", "Nord N30 SE"
+      ]
+    },
+    "Tecno": {
+      "raw_count": 268,
+      "models": [
+        "Camon 11", "Camon 11 Pro", "Camon 12", "Camon 12 Pro", "Camon 15", "Camon 15 Pro",
+        "Camon 16", "Camon 16 Pro", "Camon 17", "Camon 17 Pro", "Camon 18", "Camon 18 Premier",
+        "Camon 19", "Camon 19 Pro", "Camon 20", "Camon 20 Pro", "Camon 30", "Camon 30 Pro",
+        "Phantom 9", "Phantom X", "Phantom X2",
+        "Pop 2", "Pop 2 Plus", "Pop 3", "Pop 3 Plus", "Pop 4", "Pop 5", "Pop 6", "Pop 7",
+        "Pova", "Pova 2", "Pova 3", "Pova 4", "Pova 5", "Pova 6",
+        "Spark 3", "Spark 4", "Spark 5", "Spark 5 Pro", "Spark 6", "Spark 6 Go",
+        "Spark 7", "Spark 7 Pro", "Spark 8", "Spark 8 Pro", "Spark 9", "Spark 9 Pro",
+        "Spark 10", "Spark 10 Pro", "Spark 20", "Spark 20 Pro", "Spark Go"
+      ]
+    },
+    "Infinix": {
+      "raw_count": 178,
+      "models": [
+        "Hot 7", "Hot 7 Pro", "Hot 8", "Hot 9", "Hot 9 Play", "Hot 10", "Hot 10 Play", "Hot 10i", "Hot 10 Lite",
+        "Hot 11", "Hot 11 Play", "Hot 11s", "Hot 12", "Hot 12 Play", "Hot 12i", "Hot 20",
+        "Hot 30", "Hot 30 Play", "Hot 30i", "Hot 40", "Hot 40 Pro",
+        "Note 7", "Note 7 Lite", "Note 8", "Note 8i", "Note 10", "Note 10 Pro", "Note 11", "Note 11 Pro",
+        "Note 12", "Note 12 Pro", "Note 30", "Note 30 Pro", "Note 40", "Note 40 Pro",
+        "Smart 3", "Smart 3 Plus", "Smart 4", "Smart 5", "Smart 5 Pro", "Smart 6", "Smart 6 Plus", "Smart 7", "Smart 8",
+        "Zero 5G", "Zero 8", "Zero X", "Zero X Pro"
+      ]
+    },
+    "Itel": {
+      "raw_count": 94,
+      "models": [
+        "A16", "A16 Plus", "A17", "A23", "A25", "A26", "A27", "A37", "A44", "A48", "A49", "A56", "A58",
+        "P33", "P36", "P37", "P55",
+        "S15", "S15 Pro", "S16", "S17", "S18",
+        "Vision 1", "Vision 1 Plus", "Vision 1 Pro", "Vision 2", "Vision 2s", "Vision 3"
+      ]
+    },
+    "Nokia": {
+      "raw_count": 837,
+      "models": [
+        "1", "1.3", "1.4", "1 Plus", "2", "2.1", "2.2", "2.3", "2.4", "2 V", "3", "3.1", "3.1 Plus", "3.2", "3.4",
+        "4.2", "5", "5.1", "5.1 Plus", "5.3", "5.4", "5.7",
+        "6", "6.1", "6.1 Plus", "6.2", "6.3", "7", "7.1", "7.2", "7 Plus", "8", "8.1", "8.3", "8 Sirocco",
+        "C1", "C1 Plus", "C2", "C3", "C5", "C6", "C7", "C10", "C12", "C20", "C20 Plus", "C21", "C21 Plus", "C22", "C30", "C31", "C32",
+        "E5", "E6", "E7", "E52", "E61", "E63", "E65", "E66", "E71", "E72", "E73", "E75",
+        "G10", "G11", "G20", "G21", "G22", "G42", "G50", "G60",
+        "Lumia 510", "Lumia 520", "Lumia 525", "Lumia 530", "Lumia 535", "Lumia 550",
+        "Lumia 610", "Lumia 620", "Lumia 625", "Lumia 630", "Lumia 635", "Lumia 636", "Lumia 638", "Lumia 640", "Lumia 640 XL", "Lumia 650",
+        "Lumia 710", "Lumia 720", "Lumia 730", "Lumia 735",
+        "Lumia 800", "Lumia 810", "Lumia 820", "Lumia 822", "Lumia 830", "Lumia 900", "Lumia 920", "Lumia 925", "Lumia 929", "Lumia 930",
+        "Lumia 950", "Lumia 950 XL", "Lumia 1020", "Lumia 1320", "Lumia 1520",
+        "N8", "N9", "N73", "N81", "N85", "N86", "N95", "N96", "N97",
+        "X", "X Plus", "X2", "X5", "X6", "X7", "X10", "X20", "X30", "XL", "XR20", "XR21"
+      ]
+    },
+    "Sony": {
+      "raw_count": 661,
+      "models": [
+        "Xperia 1", "Xperia 1 II", "Xperia 1 III", "Xperia 1 IV", "Xperia 1 V",
+        "Xperia 5", "Xperia 5 II", "Xperia 5 III", "Xperia 5 IV", "Xperia 5 V",
+        "Xperia 10", "Xperia 10 II", "Xperia 10 III", "Xperia 10 IV", "Xperia 10 V", "Xperia 10 Plus",
+        "Xperia Acro S", "Xperia Arc", "Xperia Arc S", "Xperia C", "Xperia C3", "Xperia C4", "Xperia C5 Ultra",
+        "Xperia E", "Xperia E1", "Xperia E3", "Xperia E4", "Xperia E5", "Xperia E Dual",
+        "Xperia Go", "Xperia Ion", "Xperia J", "Xperia L", "Xperia L1", "Xperia L2", "Xperia L3", "Xperia L4",
+        "Xperia M", "Xperia M2", "Xperia M4 Aqua", "Xperia M5",
+        "Xperia Miro", "Xperia Neo", "Xperia Neo L",
+        "Xperia P", "Xperia Pro", "Xperia Pro-I",
+        "Xperia S", "Xperia SL", "Xperia Sola", "Xperia SP",
+        "Xperia T", "Xperia T2 Ultra", "Xperia T3", "Xperia Tipo", "Xperia TX",
+        "Xperia U", "Xperia V",
+        "Xperia X", "Xperia X Compact", "Xperia X Performance", "Xperia XA", "Xperia XA1", "Xperia XA1 Plus", "Xperia XA1 Ultra", "Xperia XA2", "Xperia XA2 Plus", "Xperia XA2 Ultra", "Xperia XA Ultra",
+        "Xperia XZ", "Xperia XZ Premium", "Xperia XZ1", "Xperia XZ1 Compact", "Xperia XZ2", "Xperia XZ2 Compact", "Xperia XZ2 Premium", "Xperia XZ3", "Xperia XZs",
+        "Xperia Z", "Xperia Z Ultra", "Xperia Z1", "Xperia Z1 Compact", "Xperia Z2", "Xperia Z3", "Xperia Z3 Compact", "Xperia Z3 Plus", "Xperia Z4", "Xperia Z5", "Xperia Z5 Compact", "Xperia Z5 Premium", "Xperia ZL", "Xperia ZR"
+      ]
+    },
+    "LG": {
+      "raw_count": 426,
+      "models": [
+        "Aristo 2", "Aristo 5",
+        "Class", "G2", "G2 Mini", "G3", "G3 Mini", "G3s", "G4", "G4c", "G4s", "G5", "G5 SE", "G6", "G7 ThinQ", "G8 ThinQ", "G8s ThinQ", "G8X ThinQ",
+        "K3", "K4", "K4 2017", "K5", "K7", "K8", "K8 2017", "K9", "K10", "K10 2017", "K11", "K11 Plus", "K12 Plus", "K20", "K22", "K30", "K40", "K41S", "K42", "K50", "K51S", "K52", "K61", "K62",
+        "L Bello", "L Fino", "L65", "L70", "L80", "L90",
+        "Magna", "Nexus 4", "Nexus 5", "Nexus 5X", "Optimus 3D", "Optimus 4X HD", "Optimus G", "Optimus G Pro", "Optimus L3", "Optimus L4 II", "Optimus L5", "Optimus L5 II", "Optimus L7", "Optimus L7 II", "Optimus L9",
+        "Q6", "Q7", "Q7 Plus", "Q8", "Q60", "Q70", "Q Stylus", "Q Stylus Plus",
+        "Spirit", "Stylus 2", "Stylus 3",
+        "V10", "V20", "V30", "V30 Plus", "V40 ThinQ", "V50 ThinQ", "V60 ThinQ", "Velvet",
+        "Wing", "X Cam", "X Power", "X Power 2", "X Screen", "X Style", "X View"
+      ]
+    },
+    "HTC": {
+      "raw_count": 209,
+      "models": [
+        "10", "10 Evo", "10 Lifestyle",
+        "Butterfly", "Butterfly 2", "Butterfly 3", "Butterfly S",
+        "Desire 10 Lifestyle", "Desire 10 Pro", "Desire 12", "Desire 12 Plus", "Desire 12s",
+        "Desire 19 Plus", "Desire 19s", "Desire 20 Plus", "Desire 20 Pro", "Desire 21 Pro", "Desire 22 Pro",
+        "Desire 300", "Desire 310", "Desire 320", "Desire 500", "Desire 510", "Desire 516", "Desire 526", "Desire 530", "Desire 600", "Desire 610", "Desire 616", "Desire 620", "Desire 626", "Desire 628", "Desire 630", "Desire 650", "Desire 700", "Desire 728", "Desire 816", "Desire 820", "Desire 825", "Desire 826", "Desire 828", "Desire 830",
+        "Desire C", "Desire Eye", "Desire L", "Desire S", "Desire SV", "Desire V", "Desire VC", "Desire X", "Desire Z",
+        "EVO 3D",
+        "One A9", "One A9s", "One E8", "One E9", "One E9 Plus", "One M7", "One M8", "One M8s", "One M9", "One M9 Plus", "One Max", "One Mini", "One Mini 2", "One S", "One S9", "One SV", "One V", "One X", "One X Plus", "One X9", "One XL",
+        "Rhyme", "Sensation", "Sensation XE", "Sensation XL",
+        "U11", "U11 Life", "U11 Plus", "U12", "U12 Life", "U12 Plus", "U19e", "U20 5G", "U Ultra", "U Play",
+        "Wildfire", "Wildfire E", "Wildfire E1", "Wildfire E2", "Wildfire E3", "Wildfire S", "Wildfire X"
+      ]
+    },
+    "Lenovo": {
+      "raw_count": 166,
+      "models": [
+        "A1000", "A2010", "A2020", "A319", "A328", "A369", "A5", "A5000", "A516", "A526", "A536", "A6000", "A6010", "A6020", "A7000", "A7010", "A820", "A850", "A859", "A880",
+        "K10 Note", "K10 Plus", "K12", "K12 Note", "K13", "K13 Note", "K3", "K3 Note", "K5", "K5 Note", "K5 Play", "K5 Pro", "K6", "K6 Note", "K6 Power", "K8", "K8 Note", "K8 Plus", "K9",
+        "Legion Duel", "Legion Duel 2", "Legion Phone Pro", "Legion Y70",
+        "P70", "P780", "P90",
+        "S60", "S660", "S820", "S850", "S856", "S860", "S90", "S920", "S939",
+        "Tab 2 A7-10", "Tab 2 A7-30", "Tab 2 A10-70", "Tab 3 7", "Tab 3 8", "Tab 4 8", "Tab 4 10", "Tab M7", "Tab M8", "Tab M10", "Tab P10", "Tab P11",
+        "Vibe C", "Vibe C2", "Vibe K5", "Vibe K5 Note", "Vibe K5 Plus", "Vibe K6", "Vibe P1", "Vibe P1m", "Vibe P2", "Vibe S1", "Vibe S1 Lite", "Vibe Shot", "Vibe X2", "Vibe X3", "Vibe Z2", "Vibe Z2 Pro",
+        "Z5", "Z5 Pro", "Z5 Pro GT", "Z5s", "Z6", "Z6 Pro", "ZUK Z1", "ZUK Z2", "ZUK Z2 Pro"
+      ]
+    },
+    "Asus": {
+      "raw_count": 91,
+      "models": [
+        "ROG Phone", "ROG Phone 2", "ROG Phone 3", "ROG Phone 5", "ROG Phone 6", "ROG Phone 7", "ROG Phone 8",
+        "ZenFone 2", "ZenFone 2 Laser", "ZenFone 3", "ZenFone 3 Deluxe", "ZenFone 3 Laser", "ZenFone 3 Max", "ZenFone 3 Zoom",
+        "ZenFone 4", "ZenFone 4 Max", "ZenFone 4 Pro", "ZenFone 4 Selfie", "ZenFone 4 Selfie Pro",
+        "ZenFone 5", "ZenFone 5 Lite", "ZenFone 5Z", "ZenFone 6", "ZenFone 7", "ZenFone 7 Pro", "ZenFone 8", "ZenFone 8 Flip", "ZenFone 9", "ZenFone 10", "ZenFone 11",
+        "ZenFone AR", "ZenFone Go", "ZenFone Live", "ZenFone Max", "ZenFone Max M1", "ZenFone Max M2", "ZenFone Max Plus", "ZenFone Max Pro M1", "ZenFone Max Pro M2", "ZenFone Max Shot", "ZenFone Selfie",
+        "ZenFone Zoom", "ZenFone Zoom S",
+        "ZenPad 3 8.0", "ZenPad 10"
+      ]
+    },
+    "ZTE": {
+      "raw_count": 287,
+      "models": [
+        "Axon 7", "Axon 7 Mini", "Axon 9 Pro", "Axon 10 Pro", "Axon 11", "Axon 20", "Axon 30", "Axon 40",
+        "Blade A3", "Blade A3 2019", "Blade A3 2020", "Blade A5", "Blade A5 2019", "Blade A5 2020", "Blade A6", "Blade A7", "Blade A7 2020", "Blade A7s 2020",
+        "Blade L2", "Blade L3", "Blade L4", "Blade L4 Pro", "Blade L5", "Blade L5 Plus", "Blade L6", "Blade L7", "Blade L8",
+        "Blade Q Lux", "Blade S6", "Blade V6", "Blade V7", "Blade V7 Lite", "Blade V8", "Blade V8 Lite", "Blade V8 Mini", "Blade V9", "Blade V9 Vita", "Blade V10", "Blade V10 Vita", "Blade V20", "Blade V30", "Blade V40",
+        "Blade X3", "Blade X5", "Blade X7",
+        "Nubia M2", "Nubia N1", "Nubia N2", "Nubia Red Magic", "Nubia Red Magic 3", "Nubia Red Magic 5G", "Nubia Red Magic 6", "Nubia Z9", "Nubia Z11", "Nubia Z11 Mini", "Nubia Z17", "Nubia Z17 Mini"
+      ]
+    },
+    "Meizu": {
+      "raw_count": 186,
+      "models": [
+        "15", "15 Lite", "15 Plus", "16", "16 Plus", "16s", "16s Pro", "16T", "16th", "16X", "16Xs",
+        "17", "17 Pro", "18", "18 Pro", "18s", "18s Pro", "18X",
+        "20", "20 Pro", "21", "21 Pro",
+        "M1", "M1 Note", "M2", "M2 Mini", "M2 Note", "M3", "M3 Max", "M3 Mini", "M3 Note", "M3s", "M3s Mini", "M5", "M5 Note", "M5c", "M5s", "M6", "M6 Note", "M6s", "M6T", "M8",
+        "MX", "MX2", "MX3", "MX4", "MX4 Pro", "MX5", "MX6",
+        "Note 8", "Note 9",
+        "Pro 5", "Pro 6", "Pro 6 Plus", "Pro 6s", "Pro 7", "Pro 7 Plus",
+        "U10", "U20", "X8"
+      ]
+    },
+    "Fly": {
+      "raw_count": 192,
+      "models": [
+        "Cirrus 1", "Cirrus 2", "Cirrus 3", "Cirrus 4", "Cirrus 7", "Cirrus 9", "Cirrus 12", "Cirrus 13",
+        "ERA Energy 1", "ERA Energy 2", "ERA Nano 2", "ERA Nano 9", "ERA Nano 10",
+        "FS401 Stratus 1", "FS402 Stratus 2", "FS403 Cumulus 1", "FS404 Stratus 3", "FS405 Stratus 4", "FS406 Stratus 5", "FS407 Stratus 6", "FS408 Stratus 8",
+        "FS451 Nimbus 1", "FS452 Nimbus 2", "FS454 Nimbus 8", "FS455 Nimbus 11", "FS456 Nimbus 14", "FS457 Nimbus 15", "FS458 Stratus 7", "FS459 Nimbus 16",
+        "FS501 Nimbus 3", "FS502 Cirrus 1", "FS504 Cirrus 2", "FS506 Cirrus 3", "FS507 Cirrus 4", "FS508 Cirrus 6", "FS509 Nimbus 9", "FS510 Nimbus 12", "FS511 Cirrus 7", "FS512 Nimbus 10", "FS514 Cirrus 8", "FS516 Cirrus 12", "FS517 Cirrus 11", "FS518 Cirrus 13", "FS520 Selfie 1", "FS521 Power Plus 1", "FS522 Cirrus 14", "FS523 Cirrus 16", "FS524 Knockout", "FS526 Power Plus 2", "FS527 Nimbus 17", "FS528 Memory Plus", "FS529 Champ", "FS530 Power Plus XXL",
+        "IQ230 Compact", "IQ235 Uno", "IQ238 Jazz", "IQ239 Era Nano 2", "IQ245 Wizard", "IQ255 Pride", "IQ256 Vogue", "IQ280 Tech", "IQ285 Turbo", "IQ4404 Spark", "IQ4410i Phoenix 2", "IQ4411 Quad Energie 2", "IQ4412 Coral Quad", "IQ4413 Quad Evo Chic 3", "IQ4414 Quad Evo Tech 3", "IQ4415 Quad Era Style 3", "IQ4416 Era Life 5", "IQ4417 Quad Era Energy 3", "IQ4490 Era Nano 4", "IQ4490i Era Nano 10", "IQ4502 Quad Era Energy 1", "IQ4503 Quad Era Life 6", "IQ4504 Quad Evo Energy 4", "IQ4505 Quad Era Life 7", "IQ4506 Quad Era Life 6", "IQ4510 Quad EVO Tech 4", "IQ4512 Quad EVO Chic 4", "IQ4514 Quad EVO Tech 4", "IQ4516 Octa Tornado Slim",
+        "Life Compact", "Life Mega", "Life Jet", "Photo Pro", "Power Plus 1", "Power Plus 2", "Power Plus 3", "Power Plus 5000", "Power Plus XXL",
+        "Selfie 1", "View", "View Max"
+      ]
+    },
+    "BQ": {
+      "raw_count": 178,
+      "models": [
+        "4072 Strike Mini", "4526 Fox", "4583 Fox Power", "5000L Trend", "5000G Velvet Easy", "5002G Fun Key", "5016G Choice", "5020 Strike SE", "5022 Bond",
+        "5035 Velvet", "5044 Strike LTE", "5046L Choice LTE", "5047L Like", "5056 Fresh", "5057 Strike 2", "5058 Strike Power Easy", "5059 Strike Power", "5060 Slim",
+        "5206L Balance", "5211 Strike 2018", "5300G Velvet View", "5302G Velvet 2", "5340 Choice", "5500L Advance", "5508L Next LTE", "5512L Strike Forward", "5515L Fast", "5518G Jeans", "5519G Jeans",
+        "5520 Mercury LTE", "5530L Intense", "5533G Fresh", "5535L Strike Power Plus", "5540L Fast Pro", "5560L Trend", "5565L Fest", "5590 Spring", "5594 Strike Power Max",
+        "5700L Space X", "5730L Magic C", "5731L Magic S", "5740G Spring", "5745L Clever", "5750G Clever Prime", "5765L Clever Prime Max", "6030G Practic", "6035L Strike Power Max", "6040L Magic", "6042L Magic E", "6045L Nice", "6051G Soul", "6055L Slim",
+        "6061L Slim LTE", "6424L Magic O", "6630L Magic L", "6631G Surf", "6645L Element", "7040G Charm Plus",
+        "Aquaris C", "Aquaris E5", "Aquaris M5", "Aquaris U", "Aquaris U Lite", "Aquaris U Plus", "Aquaris U2", "Aquaris V", "Aquaris V Plus", "Aquaris X", "Aquaris X2", "Aquaris X2 Pro", "Aquaris X5", "Aquaris X5 Plus", "Aquaris X Pro",
+        "Aurora 2", "BQS-4001 Oxford", "BQS-4050 Grasp", "BQS-5005L Intense", "BQS-5020 Strike SE", "BQS-5025 HighWay", "BQS-5030 Fresh", "BQS-5035 Velvet", "BQS-5050 Strike Selfie",
+        "BQS-5060 Slim", "BQS-5070 Magic", "BQS-5201 Space", "BQS-5205 Celsius", "BQS-5301 Strike View", "BQS-5500 Vancouver", "BQS-5505 Amsterdam", "BQS-5510 Strike Power Max 4G", "BQS-5515 Wide", "BQS-5520 Mercury", "BQS-5525 Practic", "BQS-5590 Spring", "BQS-5594 Strike Power Max", "BQS-5707G Next Music", "BQS-6000L Aurora",
+        "Magic L", "Next L", "Strike Power", "Strike Power 4G"
+      ]
+    },
+    "Motorola": {
+      "raw_count": 221,
+      "models": [
+        "Defy", "Defy Plus", "Moto C", "Moto C Plus",
+        "Moto E", "Moto E3", "Moto E4", "Moto E4 Plus", "Moto E5", "Moto E5 Play", "Moto E5 Plus", "Moto E6", "Moto E6 Play", "Moto E6 Plus", "Moto E6s", "Moto E7", "Moto E7 Plus", "Moto E7 Power", "Moto E13", "Moto E14", "Moto E20", "Moto E22", "Moto E22i", "Moto E32", "Moto E40",
+        "Moto G", "Moto G2", "Moto G3", "Moto G4", "Moto G4 Play", "Moto G4 Plus", "Moto G5", "Moto G5 Plus", "Moto G5s", "Moto G5s Plus", "Moto G6", "Moto G6 Play", "Moto G6 Plus", "Moto G7", "Moto G7 Play", "Moto G7 Plus", "Moto G7 Power", "Moto G8", "Moto G8 Play", "Moto G8 Plus", "Moto G8 Power", "Moto G8 Power Lite", "Moto G9", "Moto G9 Play", "Moto G9 Plus", "Moto G9 Power",
+        "Moto G10", "Moto G20", "Moto G22", "Moto G30", "Moto G31", "Moto G32", "Moto G41", "Moto G42", "Moto G50", "Moto G51", "Moto G52", "Moto G53", "Moto G54", "Moto G60", "Moto G62", "Moto G71", "Moto G72", "Moto G73", "Moto G82", "Moto G84", "Moto G100",
+        "Moto X", "Moto X Play", "Moto X Style", "Moto X2", "Moto X4",
+        "Moto Z", "Moto Z Play", "Moto Z2", "Moto Z2 Play", "Moto Z3", "Moto Z3 Play", "Moto Z4",
+        "One", "One Action", "One Fusion", "One Fusion Plus", "One Hyper", "One Macro", "One Vision", "One Zoom",
+        "Edge", "Edge Plus", "Edge 20", "Edge 20 Lite", "Edge 20 Pro", "Edge 30", "Edge 30 Neo", "Edge 30 Pro", "Edge 40", "Edge 40 Neo", "Edge 40 Pro", "Edge 50", "Edge 50 Fusion", "Edge 50 Pro",
+        "Razr", "Razr 40", "Razr 40 Ultra", "Razr 50", "Razr 50 Ultra",
+        "ThinkPhone"
+      ]
+    },
+    "Google": {
+      "raw_count": 72,
+      "models": [
+        "Nexus 4", "Nexus 5", "Nexus 5X", "Nexus 6", "Nexus 6P",
+        "Pixel", "Pixel XL", "Pixel 2", "Pixel 2 XL", "Pixel 3", "Pixel 3 XL", "Pixel 3a", "Pixel 3a XL",
+        "Pixel 4", "Pixel 4 XL", "Pixel 4a", "Pixel 4a 5G",
+        "Pixel 5", "Pixel 5a",
+        "Pixel 6", "Pixel 6 Pro", "Pixel 6a",
+        "Pixel 7", "Pixel 7 Pro", "Pixel 7a",
+        "Pixel 8", "Pixel 8 Pro", "Pixel 8a",
+        "Pixel 9", "Pixel 9 Pro", "Pixel 9 Pro XL", "Pixel 9 Pro Fold",
+        "Pixel Fold"
+      ]
+    },
+    "Blackview": {
+      "raw_count": 121,
+      "models": [
+        "A7", "A7 Pro", "A20", "A20 Pro", "A30", "A53", "A53 Pro", "A55 Pro", "A60", "A60 Pro", "A70", "A70 Pro", "A80", "A80s", "A80 Plus", "A80 Pro", "A85", "A90", "A95", "A96", "A100", "A200 Pro",
+        "BL5000 5G", "BL6000 Pro 5G", "BL8000", "BL8800", "BL8800 Pro", "BL9000", "BL9000 Pro",
+        "BV4000", "BV4000 Pro", "BV4800", "BV4800 Pro", "BV4900", "BV4900 Pro",
+        "BV5100", "BV5200", "BV5200 Pro", "BV5300", "BV5300 Pro", "BV5300 Plus", "BV5500", "BV5500 Pro", "BV5500 Plus", "BV5800", "BV5800 Pro", "BV5900",
+        "BV6000", "BV6000S", "BV6200", "BV6200 Pro", "BV6200 Plus", "BV6300", "BV6300 Pro", "BV6600", "BV6600 Pro", "BV6600E", "BV6800", "BV6800 Pro",
+        "BV7000", "BV7000 Pro", "BV7100", "BV7100 Pro", "BV7200", "BV7300",
+        "BV8000 Pro", "BV8100", "BV8200", "BV8800", "BV8900", "BV8900 Pro",
+        "BV9000", "BV9000 Pro", "BV9200", "BV9300", "BV9300 Pro", "BV9500", "BV9500 Pro", "BV9700 Pro", "BV9800", "BV9800 Pro", "BV9900", "BV9900 Pro",
+        "Color 8", "S6", "S8", "A10", "P10000 Pro",
+        "Oscal C80", "Oscal Modern 8", "Oscal Pad 10", "Oscal Pad 13", "Oscal Pad 70", "Oscal Pilot 2", "Oscal S60 Pro", "Oscal S80", "Oscal Tiger 12", "Oscal Tiger 13",
+        "Shark 8", "Shark 9",
+        "Tab 11", "Tab 11 SE", "Tab 12", "Tab 12 Pro", "Tab 13", "Tab 15", "Tab 15 Pro", "Tab 16", "Tab 16 Pro", "Tab 18", "Tab 50", "Tab 60", "Tab 6 Kids", "Tab 70", "Tab 80"
+      ]
+    },
+    "Doogee": {
+      "raw_count": 69,
+      "models": [
+        "Blade 10", "Blade 10 Pro", "Blade 10 Max", "Blade 10 Ultra",
+        "N20 Pro", "N30", "N40 Pro", "N55 Pro",
+        "S35", "S35T", "S40", "S40 Lite", "S40 Pro", "S41", "S41 Pro", "S51", "S55", "S58 Pro", "S59", "S59 Pro",
+        "S60", "S60 Lite", "S61", "S61 Pro", "S68 Pro",
+        "S86", "S86 Pro", "S88", "S88 Pro", "S88 Plus", "S89", "S89 Pro",
+        "S96 GT", "S96 Pro", "S97 Pro", "S98", "S98 Pro", "S99",
+        "S100", "S100 Pro", "S110", "S118", "S200", "S200X", "S Cyber", "S Punk",
+        "T5", "T5 Lite", "T6", "T6 Pro", "T10",
+        "V10", "V30", "V30 Pro", "V30T", "V31 GT", "V40 Pro", "V Max", "V Max Plus", "V Max Pro",
+        "X5 Max", "X5 Max Pro", "X6", "X6S", "X6 Pro", "X9 Mini", "X20", "X53", "X55", "X60", "X60L", "X90", "X90L", "X95", "X95 Pro", "X96", "X96 Pro",
+        "Y6", "Y6C", "Y6 Max"
+      ]
+    },
+    "Digma": {
+      "raw_count": 67,
+      "models": [
+        "CITI 10 E402 4G", "CITI 1509 3G", "CITI 1510 4G", "CITI 1576 3G", "CITI 1577 3G", "CITI 1578 4G", "CITI 1802 3G", "CITI 1903 4G", "CITI 7507 4G", "CITI 7575 3G", "CITI 8313C", "CITI 8443E 4G", "CITI 8 E400 4G", "CITI Kids 10", "CITI Kids 81", "CITI Kids A7", "CITI Octa 10 4G", "CITI Octa 70 4G",
+        "Kids 1210B", "Kids 1247C", "Kids 8260C", "Kids A8",
+        "Optima 7 A100S 3G", "Optima 7 A101 3G", "Optima 7 X700", "Optima 8019N 4G", "Optima 10 A502 3G", "Optima 10 X702 4G", "Optima 10 Z802 4G", "Optima 1022N 3G", "Optima 1023N 3G", "Optima 1024N 4G", "Optima 1025N 4G", "Optima 1304C 4G", "Optima 1315T 4G", "Optima 1411D 4G", "Optima 1444E 4G", "Optima 7010D", "Optima 7016N 3G", "Optima 7017N 3G", "Optima 7018N 3G", "Optima 7100R", "Optima 7305S 3G", "Optima 8250C", "Optima 8258C 4G", "Optima 8305C", "Optima 8403D", "Optima 8404D", "Optima 8430E 4G", "Optima 8555M 4G", "Optima 8701 4G", "Optima 8 Z801 4G", "Optima Q8",
+        "Plane 1504B 4G", "Plane 1505 3G", "Plane 1506 4G", "Plane 1507 3G", "Plane 1512 3G", "Plane 1516S 3G", "Plane 1517S", "Plane 1526 4G", "Plane 1541E", "Plane 1559 4G", "Plane 1570N 3G", "Plane 1572N 3G", "Plane 1573N 4G", "Plane 1579M 4G", "Plane 1581 3G", "Plane 1584S 3G", "Plane 1713T 3G", "Plane 7561N 3G", "Plane 7563N 4G", "Plane 7565N 3G", "Plane 7580S 4G", "Plane 7700B 4G", "Plane 7700T 4G", "Plane 8539E 3G", "Plane 8550S 4G", "Plane 8555M 4G", "Plane 8558 4G", "Plane 9654M 3G",
+        "EVE 1801 3G", "HIT 4G", "Grace 3738 3G", "Grace 3748 3G", "Grace 3758 3G", "Grace 3768 3G", "Grace 3778 3G", "Grace 3848 4G", "Grace 3868 4G", "Grace 3878 4G"
+      ]
+    },
+    "Dexp": {
+      "raw_count": 53,
+      "models": [
+        "B140", "C28 Kids", "C37 Kids 3G", "C38 Kids", "G250", "Ixion", "Ixion W5",
+        "Ursus B11", "Ursus B18", "Ursus B31 3G", "Ursus C18", "Ursus E110 4G", "Ursus E170 4G", "Ursus E180 4G", "Ursus E210 4G",
+        "Ursus H28", "Ursus H110", "Ursus H270 3G",
+        "Ursus K11 3G", "Ursus K17 3G", "Ursus K18 3G", "Ursus K21 4G", "Ursus K28", "Ursus K31", "Ursus K41", "Ursus K48", "Ursus K51",
+        "Ursus L210", "Ursus L270 3G", "Ursus L310i", "Ursus L370i Kids 3G", "Ursus L470i Kids",
+        "Ursus M170", "Ursus M210",
+        "Ursus N169 Mix 3G", "Ursus N180i 4G", "Ursus N210 4G", "Ursus N310 4G", "Ursus N370 3G", "Ursus N410 4G", "Ursus N470 4G", "Ursus N570 4G",
+        "Ursus P11 LTE", "Ursus P210 3G", "Ursus P280", "Ursus P380i 3G", "Ursus P410 3G", "Ursus P510 4G",
+        "Ursus R180",
+        "Ursus S169 Mix 3G", "Ursus S180", "Ursus S180i Kids", "Ursus S190", "Ursus S270 3G", "Ursus S270i Kids", "Ursus S280", "Ursus S290", "Ursus S380 3G", "Ursus S670", "Ursus S770 Kids", "Ursus S770i Kids 3G",
+        "Ursus T21 LTE", "Ursus TS310", "Ursus VA210 3G"
+      ]
+    },
+    "Philips": {
+      "raw_count": 41,
+      "models": [
+        "9@9e Complete", "9@9K",
+        "D633", "E180", "E181",
+        "S307", "S308", "S309", "S337", "S388", "S396", "S398",
+        "T539", "V387", "V816",
+        "W536", "W626", "W632", "W635", "W732", "W832", "W737", "W6350", "W6500", "W6618", "W6610", "W8510", "W8555",
+        "X500", "X518", "X525", "X550", "X600", "X620", "X623", "X703", "X806", "X830", "X2560",
+        "Xenium i908", "Xenium i928", "Xenium K700", "Xenium S326", "Xenium V387", "Xenium X331"
+      ]
+    },
+    "Prestigio": {
+      "raw_count": 23,
+      "models": [
+        "Grace 3118 3G", "Grace 3157 4G", "Grace 3257 4G", "Grace 4327 3G", "Grace 4791 4G", "Grace 4891 4G", "Grace 4991 4G", "Grace Q5",
+        "Muze 3831 4G", "Muze 3861 4G", "Muze 3871 4G", "Muze 4231 4G", "Muze 4667", "Muze C3", "Muze D3",
+        "Node A8", "Node E8",
+        "Root A10",
+        "Seed A7",
+        "SmartKids", "SmartKids Max",
+        "Wize 1196 3G", "Wize 3096 3G", "Wize 3196 3G", "Wize 3761 3G", "Wize 4111 3G", "Wize 4137 4G", "Wize 4311 3G", "Wize C3", "Wize D3", "Wize E3", "Wize K3", "Wize NK3"
+      ]
+    },
+    "Umidigi": {
+      "raw_count": 7,
+      "models": [
+        "A13 Pro Max", "Bison 2", "Bison 2 Pro", "Bison G1", "Bison G1 Max", "Bison GT2", "Bison GT2 Pro", "Bison X10", "Bison X10 Pro",
+        "G5 Mecha", "Power 7 Max"
+      ]
+    },
+    "Nothing": {
+      "raw_count": 2,
+      "models": [
+        "Phone 1", "Phone 2", "Phone 2a"
+      ]
+    }
+  }
+}

@@ -20,7 +20,15 @@
       "Bash(powershell -Command \"& ''C:\\\\Windows\\\\System32\\\\OpenSSH\\\\ssh.exe'' root@185.221.214.83 ''echo OK''\")",
       "Bash(powershell -Command \"Get-Content $env:USERPROFILE\\\\.ssh\\\\id_ed25519.pub | & ''C:\\\\Windows\\\\System32\\\\OpenSSH\\\\ssh.exe'' root@185.221.214.83 ''mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys''\")",
       "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\ELOnout\\\\.ssh\\\\id_ed25519.pub'' | & ''C:\\\\Windows\\\\System32\\\\OpenSSH\\\\ssh.exe'' root@185.221.214.83 ''mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys''\")",
-      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\ELOnout\\\\.ssh\\\\id_ed25519.pub'' | & ''C:\\\\Windows\\\\System32\\\\OpenSSH\\\\ssh.exe'' root@155.212.221.189 ''mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys''\")"
+      "Bash(powershell -Command \"Get-Content ''C:\\\\Users\\\\ELOnout\\\\.ssh\\\\id_ed25519.pub'' | & ''C:\\\\Windows\\\\System32\\\\OpenSSH\\\\ssh.exe'' root@155.212.221.189 ''mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys''\")",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:xiaomiui.net)",
+      "Bash(more:*)",
+      "WebFetch(domain:taggsm.ru)",
+      "WebFetch(domain:b2b.moysklad.ru)",
+      "WebFetch(domain:05gsm.ru)",
+      "WebFetch(domain:moba.ru)"
     ]
   }
 }
